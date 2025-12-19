@@ -31,12 +31,17 @@ class IntrosectionController extends Controller
         $image2 = $request->image_2;
         $extImage2 = pathinfo($image2, PATHINFO_EXTENSION);
 
+        $introSectionBg = $request->intro_section_bg;
+        $extIntroSectionBg = pathinfo($introSectionBg, PATHINFO_EXTENSION);
+
         $rules = [
             'intro_section_title' => 'required|max:25',
             'intro_section_text' => 'required|max:80',
             'intro_section_button_text' => 'nullable|max:15',
             'intro_section_button_url' => 'nullable|max:255',
-            'intro_section_video_link' => 'nullable'
+            'intro_section_video_link' => 'nullable',
+            'intro_overlay_color' => 'required',
+            'intro_overlay_opacity' => 'required|numeric|max:1|min:0'
         ];
 
         if ($request->filled('image')) {
@@ -53,6 +58,16 @@ class IntrosectionController extends Controller
             $rules['image_2'] = [
                 function ($attribute, $value, $fail) use ($extImage2, $allowedExts) {
                     if (!in_array($extImage2, $allowedExts)) {
+                        return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        if ($request->filled('intro_section_bg')) {
+            $rules['intro_section_bg'] = [
+                function ($attribute, $value, $fail) use ($extIntroSectionBg, $allowedExts) {
+                    if (!in_array($extIntroSectionBg, $allowedExts)) {
                         return $fail("Only png, jpg, jpeg, svg image is allowed");
                     }
                 }
@@ -76,10 +91,18 @@ class IntrosectionController extends Controller
         }
         $bs->intro_section_video_link = $videoLink;
 
+        // Handle image deletion
+        if ($request->delete_image == '1') {
+            @unlink(base_path('../assets/front/img/' . $bs->intro_bg));
+            $bs->intro_bg = null;
+        }
+
         if ($request->filled('image')) {
-            @unlink('assets/front/img/' . $bs->intro_bg);
-            $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/' . $filename);
+            if ($bs->intro_bg) {
+                @unlink(base_path('../assets/front/img/' . $bs->intro_bg));
+            }
+            $filename = uniqid() . '.' . $extImage;
+            @copy(base_path('../' . $image), base_path('../assets/front/img/' . $filename));
 
             $bs->intro_bg = $filename;
         }
@@ -87,10 +110,47 @@ class IntrosectionController extends Controller
         $bs->save();
 
         $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+
+        // Save overlay color and opacity
+        $be->intro_overlay_color = $request->intro_overlay_color;
+        $be->intro_overlay_opacity = $request->intro_overlay_opacity;
+
+        // Handle intro section background image deletion
+        if ($request->delete_intro_section_bg == '1') {
+            $deleted = @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
+            $be->intro_section_bg = null;
+        }
+
+        // Handle intro section background image upload
+        if ($request->filled('intro_section_bg')) {
+
+            if ($be->intro_section_bg) {
+                @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
+            }
+
+            $filename = uniqid() . '.' . $extIntroSectionBg;
+
+            // Convert to absolute paths
+            // assets folder is one level up from core directory
+            $sourcePath = base_path('../' . $introSectionBg);
+            $destinationPath = base_path('../assets/front/img/' . $filename);
+
+            // Check if source file exists
+            $sourceExists = file_exists($sourcePath);
+
+            // Try to copy
+            $copyResult = copy($sourcePath, $destinationPath);
+            if (!$copyResult) {
+                $error = error_get_last();
+            }
+
+            $be->intro_section_bg = $filename;
+        }
+
         if ($request->filled('image_2')) {
-            @unlink('assets/front/img/' . $be->intro_bg2);
-            $filename = uniqid() .'.'. $extImage2;
-            @copy($image2, 'assets/front/img/' . $filename);
+            @unlink(base_path('../assets/front/img/' . $be->intro_bg2));
+            $filename = uniqid() . '.' . $extImage2;
+            @copy(base_path('../' . $image2), base_path('../assets/front/img/' . $filename));
 
             $be->intro_bg2 = $filename;
         }

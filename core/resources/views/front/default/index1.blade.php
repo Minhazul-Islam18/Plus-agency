@@ -23,8 +23,11 @@
 
 
     <!--    introduction area start   -->
-    <div class="intro-section" @if ($bs->feature_section == 0) style="margin-top: 0px;" @endif>
-        <div class="container">
+    <div class="intro-section" @if ($bs->feature_section == 0) style="margin-top: 0px; @if(!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif" @else style="@if(!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif" @endif>
+        @if(!empty($be->intro_section_bg))
+            <div class="intro-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->intro_overlay_color ?? '000000' }}; opacity: {{ $be->intro_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;"></div>
+        @endif
+        <div class="container" style="position: relative; z-index: 2;">
             @if ($bs->feature_section == 1)
                 <div class="hero-features">
                     <div class="row">
@@ -64,9 +67,9 @@
                     </div>
                     <div class="col-lg-6 {{ $rtl == 1 ? 'pr-lg-0' : 'pl-lg-0' }} px-md-3 px-0">
                         <div class="intro-bg"
-                            style="background-image: url('{{ asset('assets/front/img/' . $bs->intro_bg) }}'); background-size: cover;">
+                            style="@if(!empty($bs->intro_bg)) background-image: url('{{ asset('assets/front/img/' . $bs->intro_bg) }}'); @endif background-size: cover; position: relative;">
                             @if (!empty($bs->intro_section_video_link))
-                                <a id="play-video" class="video-play-button" href="{{ $bs->intro_section_video_link }}">
+                                <a id="play-video" class="video-play-button" href="{{ $bs->intro_section_video_link }}" style="position: relative; z-index: 2;">
                                     <span></span>
                                 </a>
                             @endif

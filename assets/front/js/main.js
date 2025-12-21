@@ -28,7 +28,7 @@
                 items: 5
             }
         };
-        owlCarsouelActivate('.case-carousel', true, caseResponsive, 5000, 1500, false, false, 1500, true);
+        owlCarsouelActivate('.case-carousel', true, caseResponsive, 5000, 1500, false, false, 1500, true, 0, true, true);
 
 
 
@@ -44,8 +44,9 @@
             dots: false,
             nav: pricingNav,
             navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
-            autoplay: false,
+            autoplay: true,
             autoplayTimeout: 5000,
+            autoplayHoverPause: true,
             smartSpeed: 1500,
             rtl: rtl == 1 ? true : false,
             items: 3,
@@ -80,21 +81,47 @@
                 items: 2
             },
         };
-        owlCarsouelActivate('.testimonial-carousel', false, testimonialResponsive, 5000, 1500, true, false, 1500, true, 30);
+        owlCarsouelActivate('.testimonial-carousel', false, testimonialResponsive, 5000, 1500, true, false, 1500, true, 30, true, true);
 
         // Partner carousel
-        var partnerResponsive = {
-            0: {
-                items: 2
-            },
-            576: {
-                items: 3
-            },
-            992: {
-                items: 5
-            },
-        };
-        owlCarsouelActivate('.partner-carousel', true, partnerResponsive, 3000, 500, false, false, 1500, true, 30);
+        var partnerCarousel = $('.partner-carousel');
+        if (partnerCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            partnerCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
+                }
+            });
+
+            partnerCarousel.owlCarousel({
+                loop: true,
+                autoplay: true,
+                autoplayTimeout: 3000,
+                autoplaySpeed: 800,
+                autoplayHoverPause: true,
+                smartSpeed: 800,
+                slideBy: 1,
+                dots: false,
+                nav: true,
+                navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
+                margin: 30,
+                stagePadding: 0,
+                rtl: rtl == 1 ? true : false,
+                responsive: {
+                    0: {
+                        items: 2
+                    },
+                    576: {
+                        items: 3
+                    },
+                    992: {
+                        items: 5
+                    }
+                }
+            });
+        }
 
         //owl carousel activate function
         function owlCarsouelActivate(selector, nav, responsive, autoplayTimeout, autoplaySpeed, dots, animateOut, smartSpeed, autoplayHoverPause, margin = 0, loop = false, autoplay = false) {
@@ -121,10 +148,10 @@
         // team carousel initialization
         var teamCarousel = $('.team-carousel');
         teamCarousel.owlCarousel({
-            loop: false,
+            loop: true,
             dots: false,
             margin: 30,
-            autoplay: false,
+            autoplay: true,
             smartSpeed: 1500,
             startPosition: 2,
             autoplayTimeout: 5000,
@@ -154,7 +181,7 @@
             loop: true,
             dots: false,
             margin: 22,
-            autoplay: false,
+            autoplay: true,
             smartSpeed: 1500,
             startPosition: 2,
             autoplayTimeout: 5000,

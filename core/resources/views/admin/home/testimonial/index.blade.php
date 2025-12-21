@@ -62,9 +62,58 @@
                     </div>
                 </div>
             </div>
-            <form class="" action="{{route('admin.testimonialtext.update', $lang_id)}}" method="post">
+            <form id="testimonialForm" action="{{route('admin.testimonialtext.update', $lang_id)}}" method="post">
                 @csrf
                 <div class="card-body">
+                    {{-- Testimonial Section Background Image --}}
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="">Testimonial Section Background Image (Optional)</label>
+                                <br>
+                                <div class="thumb-preview" id="thumbPreviewTestimonial"
+                                    style="position: relative; display: inline-block;">
+                                    @if (!empty($abe->testimonial_section_bg))
+                                        <img src="{{ asset('assets/front/img/' . $abe->testimonial_section_bg) }}"
+                                            alt="Background Image">
+                                    @else
+                                        <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="No Image">
+                                    @endif
+                                    <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteTestimonialSectionBgBtn"
+                                        style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <br>
+                                <br>
+
+                                <input id="fileInputTestimonial" type="hidden" name="testimonial_section_bg">
+                                <input id="deleteTestimonialSectionBg" type="hidden" name="delete_testimonial_section_bg" value="0">
+                                <button id="chooseImageTestimonial" class="choose-image btn btn-primary" type="button"
+                                    data-multiple="false" data-toggle="modal" data-target="#lfmModalTestimonial">Choose
+                                    Background Image</button>
+
+                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                    be the background for the entire testimonial section.</p>
+                                <p class="text-danger mb-0 em" id="errtestimonial_section_bg"></p>
+
+                                <!-- Testimonial Section Background LFM Modal -->
+                                <div class="modal fade lfm-modal" id="lfmModalTestimonial" tabindex="-1" role="dialog"
+                                    aria-labelledby="lfmModalTitle" aria-hidden="true">
+                                    <i class="fas fa-times-circle"></i>
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body p-0">
+                                                <iframe src="{{ url('laravel-filemanager') }}?serial=Testimonial"
+                                                    style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="form-group">
@@ -85,12 +134,32 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Testimonial Area Overlay Color Code **</label>
+                                <input class="jscolor form-control ltr" name="testimonial_overlay_color"
+                                    value="{{ $abe->testimonial_overlay_color ?? '000000' }}">
+                                <p id="errtestimonial_overlay_color" class="em text-danger mb-0"></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Testimonial Area Overlay Opacity **</label>
+                                <input type="text" class="form-control ltr" name="testimonial_overlay_opacity"
+                                    value="{{ $abe->testimonial_overlay_opacity ?? '0.6' }}">
+                                <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                                <p id="errtestimonial_overlay_opacity" class="em text-danger mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <div class="form">
                         <div class="form-group from-show-notify row">
                             <div class="col-12 text-center">
-                                <button type="submit" id="displayNotif" class="btn btn-success">Update</button>
+                                <button type="submit" id="testimonialSubmitBtn" class="btn btn-success">Update</button>
                             </div>
                         </div>
                     </div>
@@ -251,7 +320,87 @@
 @endsection
 
 
+{{-- Inline scripts for testimonial section --}}
+<script type="text/javascript">
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Attach event listener to testimonial section background delete button
+        var deleteTestimonialSectionBgBtn = document.getElementById('deleteTestimonialSectionBgBtn');
+        if (deleteTestimonialSectionBgBtn) {
+            deleteTestimonialSectionBgBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete this background image?')) {
+                    document.getElementById('deleteTestimonialSectionBg').value = '1';
+                    document.getElementById('fileInputTestimonial').value = '';
+                    // Submit the form immediately with page reload
+                    document.getElementById('testimonialForm').submit();
+                }
+            });
+        }
+
+        // Handle Update button click
+        var testimonialSubmitBtn = document.getElementById('testimonialSubmitBtn');
+        if (testimonialSubmitBtn) {
+            testimonialSubmitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Submit the form with page reload
+                document.getElementById('testimonialForm').submit();
+            });
+        }
+
+        // Show delete button on hover for testimonial section background
+        var thumbPreviewTestimonial = document.getElementById('thumbPreviewTestimonial');
+        if (thumbPreviewTestimonial) {
+            thumbPreviewTestimonial.addEventListener('mouseenter', function() {
+                var deleteBtn = this.querySelector('.delete-image');
+                if (deleteBtn) deleteBtn.style.opacity = '1';
+            });
+
+            thumbPreviewTestimonial.addEventListener('mouseleave', function() {
+                var deleteBtn = this.querySelector('.delete-image');
+                if (deleteBtn) deleteBtn.style.opacity = '0';
+            });
+        }
+    });
+</script>
+
 @section('scripts')
+    <script type="text/javascript">
+        // Laravel File Manager SetUrl handler for Testimonial section
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
+
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+                    }
+
+                    // Close the modal
+                    if (typeof window.closeLfmModal === 'function') {
+                        window.closeLfmModal(serial);
+                    }
+                }
+            }
+        };
+    </script>
+
 <script>
     $(document).ready(function() {
 

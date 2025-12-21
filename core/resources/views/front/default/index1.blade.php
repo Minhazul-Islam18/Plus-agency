@@ -23,9 +23,15 @@
 
 
     <!--    introduction area start   -->
-    <div class="intro-section" @if ($bs->feature_section == 0) style="margin-top: 0px; @if(!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif" @else style="@if(!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif" @endif>
-        @if(!empty($be->intro_section_bg))
-            <div class="intro-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->intro_overlay_color ?? '000000' }}; opacity: {{ $be->intro_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;"></div>
+    <div class="intro-section"
+        @if ($bs->feature_section == 0) style="margin-top: 0px; @if (!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif"
+    @else
+        style="@if (!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif"
+        @endif>
+        @if (!empty($be->intro_section_bg))
+            <div class="intro-overlay"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->intro_overlay_color ?? '000000' }}; opacity: {{ $be->intro_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+            </div>
         @endif
         <div class="container" style="position: relative; z-index: 2;">
             @if ($bs->feature_section == 1)
@@ -67,9 +73,10 @@
                     </div>
                     <div class="col-lg-6 {{ $rtl == 1 ? 'pr-lg-0' : 'pl-lg-0' }} px-md-3 px-0">
                         <div class="intro-bg"
-                            style="@if(!empty($bs->intro_bg)) background-image: url('{{ asset('assets/front/img/' . $bs->intro_bg) }}'); @endif background-size: cover; position: relative;">
+                            style="@if (!empty($bs->intro_bg)) background-image: url('{{ asset('assets/front/img/' . $bs->intro_bg) }}'); @endif background-size: cover; position: relative;">
                             @if (!empty($bs->intro_section_video_link))
-                                <a id="play-video" class="video-play-button" href="{{ $bs->intro_section_video_link }}" style="position: relative; z-index: 2;">
+                                <a id="play-video" class="video-play-button" href="{{ $bs->intro_section_video_link }}"
+                                    style="position: relative; z-index: 2;">
                                     <span></span>
                                 </a>
                             @endif
@@ -85,8 +92,18 @@
     @if ($bs->service_section == 1)
         @if (!serviceCategory())
             <!--   service section start   -->
-            <section class="services-area pb-130">
-                <div class="container">
+            <section class="services-area pb-130"
+                style="@if (!empty($be->service_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->service_section_bg) }}');
+                    background-size: cover;
+                    background-position: center;
+                    position: relative;
+                    overflow: hidden; @endif">
+                @if (!empty($be->service_section_bg))
+                    <div class="service-overlay"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->service_overlay_color ?? '000000' }}; opacity: {{ $be->service_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                    </div>
+                @endif
+                <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
                         <div class="col-lg-6 offset-lg-3">
                             <span class="section-title">{{ convertUtf8($bs->service_section_title) }}</span>
@@ -94,7 +111,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="container">
+                <div class="container" style="position: relative; z-index: 2;">
                     <div class="row justify-content-center">
                         @foreach ($services as $service)
                             <div class="col-lg-4 col-md-6 col-sm-8">
@@ -134,8 +151,18 @@
             <!--   service section end   -->
         @elseif (serviceCategory())
             <!--   service category section start   -->
-            <div class="service-categories">
-                <div class="container">
+            <div class="service-categories"
+                style="@if (!empty($be->service_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->service_section_bg) }}');
+                    background-size: cover;
+                    background-position: center;
+                    position: relative;
+                    overflow: hidden; @endif">
+                @if (!empty($be->service_section_bg))
+                    <div class="service-overlay"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->service_overlay_color ?? '000000' }}; opacity: {{ $be->service_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                    </div>
+                @endif
+                <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
                         <div class="col-lg-6 offset-lg-3">
                             <span class="section-title">{{ convertUtf8($bs->service_section_title) }}</span>
@@ -182,8 +209,18 @@
 
     @if ($bs->approach_section == 1)
         <!--   how we do section start   -->
-        <div class="approach-section">
-            <div class="container">
+        <div class="approach-section"
+            style="@if (!empty($be->approach_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->approach_section_bg) }}');
+                background-size: cover;
+                background-position: center;
+                position: relative;
+                overflow: hidden; @endif">
+            @if (!empty($be->approach_section_bg))
+                <div class="approach-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->approach_overlay_color ?? '000000' }}; opacity: {{ $be->approach_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="approach-summary">
@@ -226,10 +263,13 @@
     @if ($bs->statistics_section == 1)
         <!--    statistics section start    -->
         <div class="statistics-section"
-            @if ($bs->home_version != 'parallax') style="background-image: url('{{ asset('assets/front/img/' . $be->statistics_bg) }}'); background-size:cover;" @endif
+            @if ($bs->home_version != 'parallax') style="background-image: url('{{ asset('assets/front/img/' . $be->statistics_bg) }}'); background-size:cover; position: relative; overflow: hidden;" @else style="position: relative; overflow: hidden;" @endif
             id="statisticsSection"
             @if ($bs->home_version == 'parallax') data-parallax="scroll" data-speed="0.2" data-image-src="{{ asset('assets/front/img/' . $be->statistics_bg) }}" @endif>
-            <div class="statistics-container">
+            <div class="statistics-overlay"
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->statistics_overlay_color ?? '000000' }}; opacity: {{ $be->statistics_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+            </div>
+            <div class="statistics-container" style="position: relative; z-index: 2;">
                 <div class="container">
                     <div class="row no-gutters">
                         @foreach ($statistics as $key => $statistic)
@@ -254,8 +294,18 @@
 
     @if ($bs->portfolio_section == 1)
         <!--    case section start   -->
-        <div class="case-section">
-            <div class="container">
+        <div class="case-section"
+            style="@if (!empty($be->portfolio_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->portfolio_section_bg) }}');
+                background-size: cover;
+                background-position: center;
+                position: relative;
+                overflow: hidden; @endif">
+            @if (!empty($be->portfolio_section_bg))
+                <div class="portfolio-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->portfolio_overlay_color ?? '000000' }}; opacity: {{ $be->portfolio_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row text-center">
                     <div class="col-lg-6 offset-lg-3">
                         <span class="section-title">{{ convertUtf8($bs->portfolio_section_title) }}</span>
@@ -296,8 +346,18 @@
 
     @if ($bs->testimonial_section == 1)
         <!--   Testimonial section start    -->
-        <div class="testimonial-section pb-115">
-            <div class="container">
+        <div class="testimonial-section pb-115"
+            style="@if (!empty($be->testimonial_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->testimonial_section_bg) }}');
+                background-size: cover;
+                background-position: center;
+                position: relative;
+                overflow: hidden; @endif">
+            @if (!empty($be->testimonial_section_bg))
+                <div class="testimonial-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->testimonial_overlay_color ?? '000000' }}; opacity: {{ $be->testimonial_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row text-center">
                     <div class="col-lg-6 offset-lg-3">
                         <span class="section-title">{{ convertUtf8($bs->testimonial_title) }}</span>
@@ -331,9 +391,14 @@
     @if ($bs->team_section == 1)
         <!--    team section start   -->
         <div class="team-section section-padding"
-            @if ($bs->home_version != 'parallax') style="background-image: url('{{ asset('assets/front/img/' . $bs->team_bg) }}'); background-size:cover;" @endif
-            @if ($bs->home_version == 'parallax') data-parallax="scroll" data-speed="0.2" data-image-src="{{ asset('assets/front/img/' . $bs->team_bg) }}" @endif>
-            <div class="team-content">
+            @if ($bs->home_version != 'parallax') style="background-image: url('{{ asset('assets/front/img/' . $bs->team_bg) }}'); background-size:cover; position: relative; overflow: hidden;" @endif
+            @if ($bs->home_version == 'parallax') data-parallax="scroll" data-speed="0.2" data-image-src="{{ asset('assets/front/img/' . $bs->team_bg) }}" style="position: relative; overflow: hidden;" @endif>
+            @if (!empty($bs->team_bg))
+                <div class="team-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->team_overlay_color ?? '000000' }}; opacity: {{ $be->team_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="team-content" style="position: relative; z-index: 2;">
                 <div class="container">
                     <div class="row text-center">
                         <div class="col-lg-6 offset-lg-3">
@@ -390,8 +455,14 @@
 
     @if ($be->pricing_section == 1)
         <!-- pricing begin -->
-        <div class="pricing-tables">
-            <div class="container">
+        <div class="pricing-tables section-padding"
+            @if (!empty($be->pricing_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->pricing_bg) }}'); background-size:cover; background-position: center; position: relative; overflow: hidden; padding: 120px 0;" @endif>
+            @if (!empty($be->pricing_bg))
+                <div class="pricing-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->pricing_overlay_color ?? '000000' }}; opacity: {{ $be->pricing_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row text-center">
                     <div class="col-lg-6 offset-lg-3">
                         <span class="section-title">{{ convertUtf8($be->pricing_title) }}</span>
@@ -428,8 +499,14 @@
 
     @if ($bs->news_section == 1)
         <!--    blog section start   -->
-        <div class="blog-section section-padding">
-            <div class="container">
+        <div class="blog-section section-padding"
+            @if (!empty($be->blog_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->blog_bg) }}'); background-size:cover; position: relative; overflow: hidden;" @endif>
+            @if (!empty($be->blog_bg))
+                <div class="blog-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->blog_overlay_color ?? '000000' }}; opacity: {{ $be->blog_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row text-center">
                     <div class="col-lg-6 offset-lg-3">
                         <span class="section-title">{{ convertUtf8($bs->blog_section_title) }}</span>
@@ -440,7 +517,8 @@
                     @foreach ($blogs as $key => $blog)
                         <div class="single-blog">
                             <div class="blog-img-wrapper">
-                                <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}"
+                                <img class="lazy"
+                                    data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}"
                                     alt="">
                             </div>
                             <div class="blog-txt">
@@ -480,8 +558,13 @@
     @if ($bs->call_to_action_section == 1)
         <!--    call to action section start    -->
         <div class="cta-section"
-            style="background-image: url('{{ asset('assets/front/img/' . $bs->cta_bg) }}');background-size:cover;">
-            <div class="container">
+            style="background-image: url('{{ asset('assets/front/img/' . $bs->cta_bg) }}'); background-size: cover; position: relative; overflow: hidden;">
+            @if (!empty($bs->cta_bg))
+                <div class="cta-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->cta_overlay_color ?? '000000' }}; opacity: {{ $be->cta_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="cta-content">
                     <div class="row">
                         <div class="col-md-9 col-lg-7">
@@ -501,8 +584,14 @@
 
     @if ($bs->partner_section == 1)
         <!--   partner section start    -->
-        <div class="partner-section">
-            <div class="container {{ $be->theme_version != 'dark' ? 'top-border' : '' }}">
+        <div class="partner-section"
+            @if (!empty($be->partner_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->partner_bg) }}'); background-size:cover; background-position: center; position: relative; overflow: hidden; padding: 60px 0;" @endif>
+            @if (!empty($be->partner_bg))
+                <div class="partner-overlay"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->partner_overlay_color ?? '000000' }}; opacity: {{ $be->partner_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
+                </div>
+            @endif
+            <div class="container" style="position: relative; z-index: 2;">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="partner-carousel owl-carousel owl-theme common-carousel">

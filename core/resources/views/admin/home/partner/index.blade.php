@@ -48,6 +48,85 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
         <div class="card">
             <div class="card-header">
+                <div class="card-title">Partner Section Settings</div>
+            </div>
+            <div class="card-body">
+                <form id="partnerSectionForm" action="{{route('admin.partner.section.update', $lang_id)}}" method="POST">
+                    @csrf
+                    <div class="row">
+                        <div class="col-lg-8 offset-lg-2">
+                            {{-- Background Image Part --}}
+                            <div class="form-group">
+                                <label for="">Background Image (Optional)</label>
+                                <br>
+                                <div class="thumb-preview" id="thumbPreview2" style="position: relative; display: inline-block;">
+                                    @if (!empty($abe->partner_bg))
+                                        <img src="{{asset('assets/front/img/'.$abe->partner_bg)}}" alt="Background Image">
+                                    @else
+                                        <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="No Image">
+                                    @endif
+                                    <button type="button" class="btn btn-danger btn-sm delete-image" id="deletePartnerBgBtn"
+                                        style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <br>
+                                <br>
+
+                                <input id="fileInput2" type="hidden" name="background">
+                                <input id="deleteBackground" type="hidden" name="delete_background" value="0">
+                                <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Background Image</button>
+
+                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                @if ($errors->has('background'))
+                                <p class="text-danger mb-0">{{$errors->first('background')}}</p>
+                                @endif
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Partner Area Overlay Color Code **</label>
+                                        <input class="jscolor form-control ltr" name="partner_overlay_color" value="{{$abs->partner_overlay_color ?? '000000'}}">
+                                        @if ($errors->has('partner_overlay_color'))
+                                        <p class="mb-0 text-danger">{{$errors->first('partner_overlay_color')}}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Partner Area Overlay Opacity **</label>
+                                        <input type="text" class="form-control ltr" name="partner_overlay_opacity" value="{{$abs->partner_overlay_opacity ?? '0.6'}}">
+                                        <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                                        @if ($errors->has('partner_overlay_opacity'))
+                                        <p class="mb-0 text-danger">{{$errors->first('partner_overlay_opacity')}}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <button form="partnerSectionForm" class="btn btn-success" type="submit">Update Settings</button>
+            </div>
+        </div>
+
+        <!-- Background Image LFM Modal -->
+        <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+            <i class="fas fa-times-circle"></i>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <iframe src="{{url('laravel-filemanager')}}?serial=2" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="card-title d-inline-block">Partners</div>
@@ -189,7 +268,62 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
 @section('scripts')
 <script>
+    // Laravel File Manager SetUrl handler
+    window.SetUrl = function(items) {
+        // Get the active modal's serial number
+        var activeModal = $('.lfm-modal.show');
+        var modalId = activeModal.attr('id');
+        var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+        if (items && items.length > 0) {
+            var fileUrl = items[0].url;
+
+            // Set value to corresponding fileInput
+            if (serial) {
+                var fileInput = document.getElementById('fileInput' + serial);
+                var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                if (fileInput) {
+                    fileInput.value = fileUrl;
+                }
+
+                if (thumbPreview) {
+                    var img = thumbPreview.querySelector('img');
+                    if (img) {
+                        img.src = fileUrl;
+                    }
+                }
+
+                // Close the modal
+                if (typeof window.closeLfmModal === 'function') {
+                    window.closeLfmModal(serial);
+                }
+            }
+        }
+    };
+
     $(document).ready(function() {
+
+        // Show delete button on hover for partner background
+        $('#thumbPreview2').hover(
+            function() {
+                $(this).find('.delete-image').css('opacity', '1');
+            },
+            function() {
+                $(this).find('.delete-image').css('opacity', '0');
+            }
+        );
+
+        // Handle partner background delete button
+        $('#deletePartnerBgBtn').on('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this background image?')) {
+                $('#deleteBackground').val('1');
+                $('#fileInput2').val('');
+                // Submit the form
+                $('#partnerSectionForm').submit();
+            }
+        });
 
         // make input fields RTL
         $("select[name='language_id']").on('change', function() {

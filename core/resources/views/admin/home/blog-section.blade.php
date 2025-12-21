@@ -64,8 +64,47 @@
           <div class="row">
             <div class="col-lg-6 offset-lg-3">
 
-              <form id="ajaxForm" action="{{route('admin.blogsection.update', $lang_id)}}" method="post">
+              <form id="blogForm" action="{{route('admin.blogsection.update', $lang_id)}}" method="post">
                 @csrf
+
+                {{-- Background Part --}}
+                <div class="form-group">
+                    <label for="">Background (Optional)</label>
+                    <br>
+                    <div class="thumb-preview" id="thumbPreview1" style="position: relative; display: inline-block;">
+                        @if (!empty($abe->blog_bg))
+                            <img src="{{asset('assets/front/img/'.$abe->blog_bg)}}" alt="Background">
+                        @else
+                            <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="No Image">
+                        @endif
+                        <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteBlogBgBtn"
+                            style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <br>
+                    <br>
+
+                    <input id="fileInput1" type="hidden" name="background">
+                    <input id="deleteBackground" type="hidden" name="delete_background" value="0">
+                    <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
+
+                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                    <p id="errbackground" class="em text-danger mb-0"></p>
+
+                    <!-- Background LFM Modal -->
+                    <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+                        <i class="fas fa-times-circle"></i>
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body p-0">
+                                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                   <label for="">Title **</label>
                   <input name="blog_section_title" class="form-control" value="{{$abs->blog_section_title}}">
@@ -75,6 +114,18 @@
                   <label for="">Text **</label>
                   <input name="blog_section_subtitle" class="form-control" value="{{$abs->blog_section_subtitle}}">
                   <p id="errblog_section_subtitle" class="em text-danger mb-0"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Blog Area Overlay Color Code **</label>
+                    <input class="jscolor form-control ltr" name="blog_overlay_color" value="{{$abe->blog_overlay_color ?? '000000'}}">
+                    <p id="errblog_overlay_color" class="em text-danger mb-0"></p>
+                </div>
+                <div class="form-group">
+                    <label>Blog Area Overlay Opacity **</label>
+                    <input type="text" class="form-control ltr" name="blog_overlay_opacity" value="{{$abe->blog_overlay_opacity ?? '0.6'}}">
+                    <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                    <p id="errblog_overlay_opacity" class="em text-danger mb-0"></p>
                 </div>
               </form>
 
@@ -86,7 +137,7 @@
           <div class="form">
             <div class="form-group from-show-notify row">
               <div class="col-12 text-center">
-                <button type="submit" id="submitBtn" class="btn btn-success">Update</button>
+                <button type="submit" id="blogSubmitBtn" class="btn btn-success">Update</button>
               </div>
             </div>
           </div>
@@ -95,4 +146,83 @@
     </div>
   </div>
 
+@endsection
+
+@section('scripts')
+    <script type="text/javascript">
+        // Laravel File Manager SetUrl handler
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
+
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+                    }
+
+                    // Close the modal
+                    if (typeof window.closeLfmModal === 'function') {
+                        window.closeLfmModal(serial);
+                    }
+                }
+            }
+        };
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach event listener to blog background delete button
+            var deleteBlogBgBtn = document.getElementById('deleteBlogBgBtn');
+            if (deleteBlogBgBtn) {
+                deleteBlogBgBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete this background image?')) {
+                        document.getElementById('deleteBackground').value = '1';
+                        document.getElementById('fileInput1').value = '';
+                        // Submit the form immediately with page reload
+                        document.getElementById('blogForm').submit();
+                    }
+                });
+            }
+
+            // Handle Update button click
+            var blogSubmitBtn = document.getElementById('blogSubmitBtn');
+            if (blogSubmitBtn) {
+                blogSubmitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Submit the form with page reload
+                    document.getElementById('blogForm').submit();
+                });
+            }
+
+            // Show delete button on hover for blog background
+            var thumbPreview1 = document.getElementById('thumbPreview1');
+            if (thumbPreview1) {
+                thumbPreview1.addEventListener('mouseenter', function() {
+                    var deleteBtn = this.querySelector('.delete-image');
+                    if (deleteBtn) deleteBtn.style.opacity = '1';
+                });
+
+                thumbPreview1.addEventListener('mouseleave', function() {
+                    var deleteBtn = this.querySelector('.delete-image');
+                    if (deleteBtn) deleteBtn.style.opacity = '0';
+                });
+            }
+        });
+    </script>
 @endsection

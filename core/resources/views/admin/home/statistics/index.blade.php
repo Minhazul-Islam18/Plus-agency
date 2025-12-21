@@ -90,6 +90,31 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Overlay Settings --}}
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Statistics Overlay Color Code **</label>
+                                        <input class="jscolor form-control ltr" name="statistics_overlay_color"
+                                            value="{{ $abe->statistics_overlay_color ?? '000000' }}">
+                                        @if ($errors->has('statistics_overlay_color'))
+                                            <p class="mb-0 text-danger">{{$errors->first('statistics_overlay_color')}}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Statistics Overlay Opacity **</label>
+                                        <input type="text" class="form-control ltr" name="statistics_overlay_opacity"
+                                            value="{{ $abe->statistics_overlay_opacity ?? '0.6' }}">
+                                        <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                                        @if ($errors->has('statistics_overlay_opacity'))
+                                            <p class="mb-0 text-danger">{{$errors->first('statistics_overlay_opacity')}}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -175,6 +200,40 @@
 
 @section('scripts')
   <script>
+    // Laravel File Manager SetUrl handler
+    window.SetUrl = function(items) {
+        // Get the active modal's serial number
+        var activeModal = $('.lfm-modal.show');
+        var modalId = activeModal.attr('id');
+        var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+        if (items && items.length > 0) {
+            var fileUrl = items[0].url;
+
+            // Set value to corresponding fileInput
+            if (serial) {
+                var fileInput = document.getElementById('fileInput' + serial);
+                var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                if (fileInput) {
+                    fileInput.value = fileUrl;
+                }
+
+                if (thumbPreview) {
+                    var img = thumbPreview.querySelector('img');
+                    if (img) {
+                        img.src = fileUrl;
+                    }
+                }
+
+                // Close the modal
+                if (typeof window.closeLfmModal === 'function') {
+                    window.closeLfmModal(serial);
+                }
+            }
+        }
+    };
+
     $(document).ready(function() {
         $('.icp').on('iconpickerSelected', function(event){
             $("#inputIcon").val($(".iconpicker-component").find('i').attr('class'));

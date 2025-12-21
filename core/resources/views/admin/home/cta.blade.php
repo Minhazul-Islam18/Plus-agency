@@ -72,14 +72,24 @@
                 <div class="form-group">
                     <label for="">Background ** </label>
                     <br>
-                    <div class="thumb-preview" id="thumbPreview1">
-                        <img src="{{asset('assets/front/img/' . $abs->cta_bg)}}" alt="Background">
+                    <div class="thumb-preview" id="thumbPreview1"
+                        style="position: relative; display: inline-block;">
+                        @if (!empty($abs->cta_bg))
+                            <img src="{{asset('assets/front/img/' . $abs->cta_bg)}}" alt="Background">
+                        @else
+                            <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="No Image">
+                        @endif
+                        <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteCtaBgBtn"
+                            style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     <br>
                     <br>
 
 
                     <input id="fileInput1" type="hidden" name="background">
+                    <input id="deleteCtaBg" type="hidden" name="delete_cta_bg" value="0">
                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
@@ -117,6 +127,26 @@
                   <input type="text" class="form-control ltr" name="cta_section_button_url" value="{{$abs->cta_section_button_url}}">
                   <p id="errcta_section_button_url" class="em text-danger mb-0"></p>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>CTA Area Overlay Color Code **</label>
+                            <input class="jscolor form-control ltr" name="cta_overlay_color"
+                                value="{{ $abe->cta_overlay_color ?? '000000' }}">
+                            <p id="errcta_overlay_color" class="em text-danger mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>CTA Area Overlay Opacity **</label>
+                            <input type="text" class="form-control ltr" name="cta_overlay_opacity"
+                                value="{{ $abe->cta_overlay_opacity ?? '0.6' }}">
+                            <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                            <p id="errcta_overlay_opacity" class="em text-danger mb-0"></p>
+                        </div>
+                    </div>
+                </div>
               </form>
 
             </div>
@@ -135,5 +165,39 @@
       </div>
     </div>
   </div>
+
+  {{-- Inline scripts for CTA section --}}
+  <script type="text/javascript">
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+          // Attach event listener to CTA background delete button
+          var deleteCtaBgBtn = document.getElementById('deleteCtaBgBtn');
+          if (deleteCtaBgBtn) {
+              deleteCtaBgBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  if (confirm('Are you sure you want to delete this background image?')) {
+                      document.getElementById('deleteCtaBg').value = '1';
+                      document.getElementById('fileInput1').value = '';
+                      // Submit the form immediately with page reload
+                      document.getElementById('ctaForm').submit();
+                  }
+              });
+          }
+
+          // Show delete button on hover for CTA background
+          var thumbPreview1 = document.getElementById('thumbPreview1');
+          if (thumbPreview1) {
+              thumbPreview1.addEventListener('mouseenter', function() {
+                  var deleteBtn = this.querySelector('.delete-image');
+                  if (deleteBtn) deleteBtn.style.opacity = '1';
+              });
+
+              thumbPreview1.addEventListener('mouseleave', function() {
+                  var deleteBtn = this.querySelector('.delete-image');
+                  if (deleteBtn) deleteBtn.style.opacity = '0';
+              });
+          }
+      });
+  </script>
 
 @endsection

@@ -68,7 +68,7 @@
                     <div class="row">
                         <div class="col-lg-8 offset-lg-2">
 
-                            <form id="ajaxForm" action="{{ route('admin.introsection.update', $lang_id) }}" method="post">
+                            <form id="introForm" action="{{ route('admin.introsection.update', $lang_id) }}" method="post">
                                 @csrf
 
                                 {{-- Intro Section Background Image --}}
@@ -77,15 +77,16 @@
                                         <div class="form-group">
                                             <label for="">Intro Section Background Image (Optional)</label>
                                             <br>
-                                            <div class="thumb-preview" id="thumbPreview3" style="position: relative; display: inline-block;">
-                                                @if(!empty($abe->intro_section_bg))
-                                                    <img src="{{ asset('assets/front/img/' . $abe->intro_section_bg) }}" alt="Background Image">
+                                            <div class="thumb-preview" id="thumbPreview3"
+                                                style="position: relative; display: inline-block;">
+                                                @if (!empty($abe->intro_section_bg))
+                                                    <img src="{{ asset('assets/front/img/' . $abe->intro_section_bg) }}"
+                                                        alt="Background Image">
                                                 @else
                                                     <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="No Image">
                                                 @endif
-                                                <button type="button" class="btn btn-danger btn-sm delete-image"
-                                                    style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;"
-                                                    onclick="deleteIntroSectionBg()">
+                                                <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteIntroSectionBgBtn"
+                                                    style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
                                                     <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
@@ -93,11 +94,14 @@
                                             <br>
 
                                             <input id="fileInput3" type="hidden" name="intro_section_bg">
-                                            <input id="deleteIntroSectionBg" type="hidden" name="delete_intro_section_bg" value="0">
+                                            <input id="deleteIntroSectionBg" type="hidden" name="delete_intro_section_bg"
+                                                value="0">
                                             <button id="chooseImage3" class="choose-image btn btn-primary" type="button"
-                                                data-multiple="false" data-toggle="modal" data-target="#lfmModal3">Choose Background Image</button>
+                                                data-multiple="false" data-toggle="modal" data-target="#lfmModal3">Choose
+                                                Background Image</button>
 
-                                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will be the background for the entire intro section.</p>
+                                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                                be the background for the entire intro section.</p>
                                             <p class="text-danger mb-0 em" id="errintro_section_bg"></p>
 
                                             <!-- Intro Section Background LFM Modal -->
@@ -127,7 +131,8 @@
                                             <br>
                                             <div class="thumb-preview" id="thumbPreview1"
                                                 style="position: relative; display: inline-block;">
-                                                <img src="{{ asset('assets/front/img/' . $abs->intro_bg) }}" alt="Image">
+                                                <img src="{{ asset('assets/front/img/' . $abs->intro_bg) }}"
+                                                    alt="Image">
                                                 <button type="button" class="btn btn-danger btn-sm delete-image"
                                                     style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;"
                                                     onclick="deleteIntroImage()">
@@ -148,8 +153,8 @@
                                             <p class="text-danger mb-0 em" id="errimage"></p>
 
                                             <!-- Image LFM Modal -->
-                                            <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog"
-                                                aria-labelledby="lfmModalTitle" aria-hidden="true">
+                                            <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1"
+                                                role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
                                                 <i class="fas fa-times-circle"></i>
                                                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                                     <div class="modal-content">
@@ -287,7 +292,7 @@
                     <div class="form">
                         <div class="form-group from-show-notify row">
                             <div class="col-12 text-center">
-                                <button type="submit" id="submitBtn" class="btn btn-success">Update</button>
+                                <button type="submit" id="introSubmitBtn" class="btn btn-success">Update</button>
                             </div>
                         </div>
                     </div>
@@ -298,29 +303,42 @@
 
     {{-- Inline scripts for delete functions --}}
     <script type="text/javascript">
-        // Attach delete functions to window object for global access
-        window.deleteIntroSectionBg = function() {
-            if (confirm('Are you sure you want to delete this background image?')) {
-                document.getElementById('deleteIntroSectionBg').value = '1';
-                document.getElementById('fileInput3').value = '';
-                document.querySelector('#thumbPreview3 img').src = '{{ asset('assets/admin/img/noimage.jpg') }}';
-                var deleteBtn = document.querySelector('#thumbPreview3 .delete-image');
-                if (deleteBtn) deleteBtn.style.display = 'none';
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attach event listener to intro section background delete button
+            var deleteIntroSectionBgBtn = document.getElementById('deleteIntroSectionBgBtn');
+            if (deleteIntroSectionBgBtn) {
+                deleteIntroSectionBgBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete this background image?')) {
+                        document.getElementById('deleteIntroSectionBg').value = '1';
+                        document.getElementById('fileInput3').value = '';
+                        // Submit the form immediately with page reload
+                        document.getElementById('introForm').submit();
+                    }
+                });
             }
-        };
 
+            // Handle Update button click
+            var introSubmitBtn = document.getElementById('introSubmitBtn');
+            if (introSubmitBtn) {
+                introSubmitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Submit the form with page reload
+                    document.getElementById('introForm').submit();
+                });
+            }
+        });
+
+        // Keep the deleteIntroImage function for the other delete button
         window.deleteIntroImage = function() {
             if (confirm('Are you sure you want to delete this image?')) {
                 document.getElementById('deleteImage1').value = '1';
                 document.getElementById('fileInput1').value = '';
-                document.querySelector('#thumbPreview1 img').src = '{{ asset('assets/admin/img/noimage.jpg') }}';
-                var deleteBtn = document.querySelector('#thumbPreview1 .delete-image');
-                if (deleteBtn) deleteBtn.style.display = 'none';
+                // Submit the form immediately with page reload
+                document.getElementById('introForm').submit();
             }
         };
-
-        // Log to confirm functions are loaded
-        console.log('Delete functions loaded:', typeof window.deleteIntroSectionBg, typeof window.deleteIntroImage);
     </script>
 
 @endsection

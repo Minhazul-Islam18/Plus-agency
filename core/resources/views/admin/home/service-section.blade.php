@@ -62,10 +62,61 @@
         </div>
         <div class="card-body pt-5 pb-4">
           <div class="row">
-            <div class="col-lg-6 offset-lg-3">
+            <div class="col-lg-8 offset-lg-2">
 
-              <form id="ajaxForm" action="{{route('admin.servicesection.update', $lang_id)}}" method="post">
+              <form id="serviceForm" action="{{route('admin.servicesection.update', $lang_id)}}" method="post">
                 @csrf
+
+                {{-- Service Section Background Image --}}
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label for="">Service Section Background Image (Optional)</label>
+                            <br>
+                            <div class="thumb-preview" id="thumbPreviewService"
+                                style="position: relative; display: inline-block;">
+                                @if (!empty($abe->service_section_bg))
+                                    <img src="{{ asset('assets/front/img/' . $abe->service_section_bg) }}"
+                                        alt="Background Image">
+                                @else
+                                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="No Image">
+                                @endif
+                                <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteServiceSectionBgBtn"
+                                    style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <br>
+                            <br>
+
+                            <input id="fileInputService" type="hidden" name="service_section_bg">
+                            <input id="deleteServiceSectionBg" type="hidden" name="delete_service_section_bg"
+                                value="0">
+                            <button id="chooseImageService" class="choose-image btn btn-primary" type="button"
+                                data-multiple="false" data-toggle="modal" data-target="#lfmModalService">Choose
+                                Background Image</button>
+
+                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                be the background for the entire service section.</p>
+                            <p class="text-danger mb-0 em" id="errservice_section_bg"></p>
+
+                            <!-- Service Section Background LFM Modal -->
+                            <div class="modal fade lfm-modal" id="lfmModalService" tabindex="-1" role="dialog"
+                                aria-labelledby="lfmModalTitle" aria-hidden="true">
+                                <i class="fas fa-times-circle"></i>
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-body p-0">
+                                            <iframe src="{{ url('laravel-filemanager') }}?serial=Service"
+                                                style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                   <label for="">Title **</label>
                   <input name="service_section_title" class="form-control" value="{{$abs->service_section_title}}">
@@ -75,6 +126,26 @@
                   <label for="">Subtitle **</label>
                   <input name="service_section_subtitle" class="form-control" value="{{$abs->service_section_subtitle}}">
                   <p id="errservice_section_subtitle" class="em text-danger mb-0"></p>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Service Area Overlay Color Code **</label>
+                            <input class="jscolor form-control ltr" name="service_overlay_color"
+                                value="{{ $abe->service_overlay_color ?? '000000' }}">
+                            <p id="errservice_overlay_color" class="em text-danger mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Service Area Overlay Opacity **</label>
+                            <input type="text" class="form-control ltr" name="service_overlay_opacity"
+                                value="{{ $abe->service_overlay_opacity ?? '0.6' }}">
+                            <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                            <p id="errservice_overlay_opacity" class="em text-danger mb-0"></p>
+                        </div>
+                    </div>
                 </div>
               </form>
 
@@ -86,7 +157,7 @@
           <div class="form">
             <div class="form-group from-show-notify row">
               <div class="col-12 text-center">
-                <button type="submit" id="submitBtn" class="btn btn-success">Update</button>
+                <button type="submit" id="serviceSubmitBtn" class="btn btn-success">Update</button>
               </div>
             </div>
           </div>
@@ -95,4 +166,86 @@
     </div>
   </div>
 
+  {{-- Inline scripts for service section --}}
+  <script type="text/javascript">
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', function() {
+          // Attach event listener to service section background delete button
+          var deleteServiceSectionBgBtn = document.getElementById('deleteServiceSectionBgBtn');
+          if (deleteServiceSectionBgBtn) {
+              deleteServiceSectionBgBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  if (confirm('Are you sure you want to delete this background image?')) {
+                      document.getElementById('deleteServiceSectionBg').value = '1';
+                      document.getElementById('fileInputService').value = '';
+                      // Submit the form immediately with page reload
+                      document.getElementById('serviceForm').submit();
+                  }
+              });
+          }
+
+          // Handle Update button click
+          var serviceSubmitBtn = document.getElementById('serviceSubmitBtn');
+          if (serviceSubmitBtn) {
+              serviceSubmitBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  // Submit the form with page reload
+                  document.getElementById('serviceForm').submit();
+              });
+          }
+
+          // Show delete button on hover for service section background
+          var thumbPreviewService = document.getElementById('thumbPreviewService');
+          if (thumbPreviewService) {
+              thumbPreviewService.addEventListener('mouseenter', function() {
+                  var deleteBtn = this.querySelector('.delete-image');
+                  if (deleteBtn) deleteBtn.style.opacity = '1';
+              });
+
+              thumbPreviewService.addEventListener('mouseleave', function() {
+                  var deleteBtn = this.querySelector('.delete-image');
+                  if (deleteBtn) deleteBtn.style.opacity = '0';
+              });
+          }
+      });
+  </script>
+
+@endsection
+
+@section('scripts')
+    <script type="text/javascript">
+        // Laravel File Manager SetUrl handler for Service section
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
+
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+                    }
+
+                    // Close the modal
+                    if (typeof window.closeLfmModal === 'function') {
+                        window.closeLfmModal(serial);
+                    }
+                }
+            }
+        };
+    </script>
 @endsection

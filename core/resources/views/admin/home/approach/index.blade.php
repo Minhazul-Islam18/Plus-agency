@@ -62,9 +62,86 @@
                     </div>
                 </div>
             </div>
-            <form class="" action="{{route('admin.approach.update', $lang_id)}}" method="post">
+            <form id="approachForm" action="{{route('admin.approach.update', $lang_id)}}" method="post">
                 @csrf
                 <div class="card-body">
+                    {{-- Approach Section Background Image --}}
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="">Approach Section Background Image (Optional)</label>
+                                <br>
+                                <div class="thumb-preview" id="thumbPreviewApproach"
+                                    style="position: relative; display: inline-block;">
+                                    @if (!empty($abe->approach_section_bg))
+                                        <img src="{{ asset('assets/front/img/' . $abe->approach_section_bg) }}"
+                                            alt="Background Image">
+                                    @else
+                                        <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="No Image">
+                                    @endif
+                                    <button type="button" class="btn btn-danger btn-sm delete-image" id="deleteApproachSectionBgBtn"
+                                        style="position: absolute; top: 10px; right: 10px; opacity: 0; transition: opacity 0.3s;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <br>
+                                <br>
+
+                                <input id="fileInputApproach" type="hidden" name="approach_section_bg">
+                                <input id="deleteApproachSectionBg" type="hidden" name="delete_approach_section_bg" value="0">
+                                <button id="chooseImageApproach" class="choose-image btn btn-primary" type="button"
+                                    data-multiple="false" data-toggle="modal" data-target="#lfmModalApproach">Choose
+                                    Background Image</button>
+
+                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                    be the background for the entire approach section.</p>
+                                <p class="text-danger mb-0 em">
+                                    @if ($errors->has('approach_section_bg'))
+                                        {{$errors->first('approach_section_bg')}}
+                                    @endif
+                                </p>
+
+                                <!-- Approach Section Background LFM Modal -->
+                                <div class="modal fade lfm-modal" id="lfmModalApproach" tabindex="-1" role="dialog"
+                                    aria-labelledby="lfmModalTitle" aria-hidden="true">
+                                    <i class="fas fa-times-circle"></i>
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body p-0">
+                                                <iframe src="{{ url('laravel-filemanager') }}?serial=Approach"
+                                                    style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Approach Area Overlay Color Code **</label>
+                                <input class="jscolor form-control ltr" name="approach_overlay_color"
+                                    value="{{ $abe->approach_overlay_color ?? '000000' }}">
+                                @if ($errors->has('approach_overlay_color'))
+                                    <p class="mb-0 text-danger">{{$errors->first('approach_overlay_color')}}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Approach Area Overlay Opacity **</label>
+                                <input type="text" class="form-control ltr" name="approach_overlay_opacity"
+                                    value="{{ $abe->approach_overlay_opacity ?? '0.6' }}">
+                                <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
+                                @if ($errors->has('approach_overlay_opacity'))
+                                    <p class="mb-0 text-danger">{{$errors->first('approach_overlay_opacity')}}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-lg-3">
                             <div class="form-group">
@@ -223,5 +300,70 @@
             })
         });
     });
+
+    // Approach section background image functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Attach event listener to approach section background delete button
+        var deleteApproachSectionBgBtn = document.getElementById('deleteApproachSectionBgBtn');
+        if (deleteApproachSectionBgBtn) {
+            deleteApproachSectionBgBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete this background image?')) {
+                    document.getElementById('deleteApproachSectionBg').value = '1';
+                    document.getElementById('fileInputApproach').value = '';
+                    // Submit the form immediately with page reload
+                    document.getElementById('approachForm').submit();
+                }
+            });
+        }
+
+        // Show delete button on hover for approach section background
+        var thumbPreviewApproach = document.getElementById('thumbPreviewApproach');
+        if (thumbPreviewApproach) {
+            thumbPreviewApproach.addEventListener('mouseenter', function() {
+                var deleteBtn = this.querySelector('.delete-image');
+                if (deleteBtn) deleteBtn.style.opacity = '1';
+            });
+
+            thumbPreviewApproach.addEventListener('mouseleave', function() {
+                var deleteBtn = this.querySelector('.delete-image');
+                if (deleteBtn) deleteBtn.style.opacity = '0';
+            });
+        }
+    });
+
+    // Laravel File Manager SetUrl handler for Approach section
+    window.SetUrl = function(items) {
+        // Get the active modal's serial number
+        var activeModal = $('.lfm-modal.show');
+        var modalId = activeModal.attr('id');
+        var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+        if (items && items.length > 0) {
+            var fileUrl = items[0].url;
+
+            // Set value to corresponding fileInput
+            if (serial) {
+                var fileInput = document.getElementById('fileInput' + serial);
+                var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                if (fileInput) {
+                    fileInput.value = fileUrl;
+                }
+
+                if (thumbPreview) {
+                    var img = thumbPreview.querySelector('img');
+                    if (img) {
+                        img.src = fileUrl;
+                    }
+                }
+
+                // Close the modal
+                if (typeof window.closeLfmModal === 'function') {
+                    window.closeLfmModal(serial);
+                }
+            }
+        }
+    };
 </script>
 @endsection

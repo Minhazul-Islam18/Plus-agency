@@ -635,6 +635,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/partner/{id}/edit', 'Admin\PartnerController@edit')->name('admin.partner.edit');
         Route::post('/partner/update', 'Admin\PartnerController@update')->name('admin.partner.update');
         Route::post('/partner/delete', 'Admin\PartnerController@delete')->name('admin.partner.delete');
+        Route::post('/partner/{langid}/section-update', 'Admin\PartnerController@sectionUpdate')->name('admin.partner.section.update');
 
         // Admin Member Routes
         Route::get('/members', 'Admin\MemberController@index')->name('admin.member.index');

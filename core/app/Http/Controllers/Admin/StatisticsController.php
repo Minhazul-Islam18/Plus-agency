@@ -101,7 +101,10 @@ class StatisticsController extends Controller
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
-        $rules = [];
+        $rules = [
+            'statistics_overlay_color' => 'required',
+            'statistics_overlay_opacity' => 'required|numeric|max:1|min:0'
+        ];
 
         if ($request->filled('background_image')) {
             $rules['background_image'] = [
@@ -115,20 +118,23 @@ class StatisticsController extends Controller
 
         $request->validate($rules);
 
+        $be = BasicExtended::where('language_id', $langid)->first();
+
+        // Save overlay color and opacity
+        $be->statistics_overlay_color = $request->statistics_overlay_color;
+        $be->statistics_overlay_opacity = $request->statistics_overlay_opacity;
+
         if ($request->filled('background_image')) {
-
-            $be = BasicExtended::where('language_id', $langid)->first();
-
             @unlink('assets/front/img/' . $be->statistics_bg);
             $filename = uniqid() .'.'. $extImage;
             @copy($image, 'assets/front/img/' . $filename);
 
             $be->statistics_bg = $filename;
-            $be->save();
-
         }
 
-        $request->session()->flash('success', 'Statistics section background image');
+        $be->save();
+
+        $request->session()->flash('success', 'Statistics section updated successfully!');
         return back();
     }
 

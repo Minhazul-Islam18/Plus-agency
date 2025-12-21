@@ -115,15 +115,9 @@ class IntrosectionController extends Controller
         $be->intro_overlay_color = $request->intro_overlay_color;
         $be->intro_overlay_opacity = $request->intro_overlay_opacity;
 
-        // Handle intro section background image deletion
-        if ($request->delete_intro_section_bg == '1') {
-            $deleted = @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
-            $be->intro_section_bg = null;
-        }
-
         // Handle intro section background image upload
         if ($request->filled('intro_section_bg')) {
-
+            // Delete old image if exists
             if ($be->intro_section_bg) {
                 @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
             }
@@ -135,16 +129,20 @@ class IntrosectionController extends Controller
             $sourcePath = base_path('../' . $introSectionBg);
             $destinationPath = base_path('../assets/front/img/' . $filename);
 
-            // Check if source file exists
-            $sourceExists = file_exists($sourcePath);
-
-            // Try to copy
+            // Copy the file
             $copyResult = copy($sourcePath, $destinationPath);
             if (!$copyResult) {
                 $error = error_get_last();
             }
 
             $be->intro_section_bg = $filename;
+        }
+        // Handle intro section background image deletion (only if not uploading new one)
+        elseif ($request->delete_intro_section_bg == '1') {
+            if ($be->intro_section_bg) {
+                @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
+                $be->intro_section_bg = null;
+            }
         }
 
         if ($request->filled('image_2')) {
@@ -157,6 +155,6 @@ class IntrosectionController extends Controller
         $be->save();
 
         Session::flash('success', 'Informations updated successfully!');
-        return "success";
+        return redirect()->back();
     }
 }

@@ -644,6 +644,7 @@ class PackageController extends Controller
     $lang = Language::where('code', $request->language)->firstOrFail();
     $data['lang_id'] = $lang->id;
     $data['abe'] = $lang->basic_extended;
+    $data['langs'] = Language::all();
 
     return view('admin.home.package-background', $data);
   }
@@ -654,7 +655,12 @@ class PackageController extends Controller
     $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
     $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
-    $rules = [];
+    $rules = [
+      'pricing_title' => 'required|max:25',
+      'pricing_subtitle' => 'required|max:80',
+      'pricing_overlay_color' => 'required',
+      'pricing_overlay_opacity' => 'required|numeric|max:1|min:0'
+    ];
 
     if ($request->filled('background_image')) {
       $rules['background_image'] = [
@@ -668,19 +674,39 @@ class PackageController extends Controller
 
     $request->validate($rules);
 
-    if ($request->filled('background_image')) {
+    $be = BasicExtended::where('language_id', $langid)->firstOrFail();
 
-      $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+    // Update title and subtitle
+    $be->pricing_title = $request->pricing_title;
+    $be->pricing_subtitle = $request->pricing_subtitle;
 
-      @unlink('assets/front/img/' . $be->package_background);
-      $filename = uniqid() . '.' . $extImage;
-      @copy($image, 'assets/front/img/' . $filename);
+    // Update overlay color and opacity
+    $be->pricing_overlay_color = $request->pricing_overlay_color;
+    $be->pricing_overlay_opacity = $request->pricing_overlay_opacity;
 
-      $be->package_background = $filename;
-      $be->save();
+    // Handle background image deletion
+    if ($request->delete_background == '1') {
+      @unlink(base_path('../assets/front/img/' . $be->pricing_bg));
+      $be->pricing_bg = null;
     }
 
-    $request->session()->flash('success', 'Package section background');
+    // Handle background image upload
+    if ($request->filled('background_image')) {
+      if ($be->pricing_bg) {
+        @unlink(base_path('../assets/front/img/' . $be->pricing_bg));
+      }
+      $filename = uniqid() . '.' . $extImage;
+      @copy(base_path('../' . $image), base_path('../assets/front/img/' . $filename));
+      $be->pricing_bg = $filename;
+
+      // Also update package_background for backwards compatibility
+      @unlink(base_path('../assets/front/img/' . $be->package_background));
+      $be->package_background = $filename;
+    }
+
+    $be->save();
+
+    $request->session()->flash('success', 'Pricing section updated successfully!');
     return back();
   }
 

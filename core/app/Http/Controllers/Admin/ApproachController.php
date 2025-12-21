@@ -18,6 +18,7 @@ class ApproachController extends Controller
         $lang = Language::where('code', $request->language)->firstOrFail();
         $data['lang_id'] = $lang->id;
         $data['abs'] = $lang->basic_setting;
+        $data['abe'] = $lang->basic_extended;
         $data['points'] = Point::where('language_id', $data['lang_id'])->orderBy('id', 'DESC')->get();
 
         return view('admin.home.approach.index', $data);
@@ -72,12 +73,30 @@ class ApproachController extends Controller
 
     public function update(Request $request, $langid)
     {
-        $request->validate([
+        $approachSectionBg = $request->approach_section_bg;
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $extApproachSectionBg = pathinfo($approachSectionBg, PATHINFO_EXTENSION);
+
+        $rules = [
             'approach_section_title' => 'required|max:25',
             'approach_section_subtitle' => 'required|max:80',
             'approach_section_button_text' => 'nullable|max:15',
             'approach_section_button_url' => 'nullable|max:255',
-        ]);
+            'approach_overlay_color' => 'required',
+            'approach_overlay_opacity' => 'required|numeric|max:1|min:0'
+        ];
+
+        if ($request->filled('approach_section_bg')) {
+            $rules['approach_section_bg'] = [
+                function ($attribute, $value, $fail) use ($extApproachSectionBg, $allowedExts) {
+                    if (!in_array($extApproachSectionBg, $allowedExts)) {
+                        return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        $request->validate($rules);
 
         $bs = BS::where('language_id', $langid)->firstOrFail();
         $bs->approach_title = $request->approach_section_title;
@@ -86,7 +105,42 @@ class ApproachController extends Controller
         $bs->approach_button_url = $request->approach_section_button_url;
         $bs->save();
 
-        Session::flash('success', 'Text updated successfully!');
+        $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+
+        // Save overlay color and opacity
+        $be->approach_overlay_color = $request->approach_overlay_color;
+        $be->approach_overlay_opacity = $request->approach_overlay_opacity;
+
+        // Handle approach section background image upload
+        if ($request->filled('approach_section_bg')) {
+            // Delete old image if exists
+            if ($be->approach_section_bg) {
+                @unlink(base_path('../assets/front/img/' . $be->approach_section_bg));
+            }
+
+            $filename = uniqid() . '.' . $extApproachSectionBg;
+
+            // Convert to absolute paths
+            // assets folder is one level up from core directory
+            $sourcePath = base_path('../' . $approachSectionBg);
+            $destinationPath = base_path('../assets/front/img/' . $filename);
+
+            // Copy the file
+            copy($sourcePath, $destinationPath);
+
+            $be->approach_section_bg = $filename;
+        }
+        // Handle approach section background image deletion (only if not uploading new one)
+        elseif ($request->delete_approach_section_bg == '1') {
+            if ($be->approach_section_bg) {
+                @unlink(base_path('../assets/front/img/' . $be->approach_section_bg));
+                $be->approach_section_bg = null;
+            }
+        }
+
+        $be->save();
+
+        Session::flash('success', 'Informations updated successfully!');
         return back();
     }
 

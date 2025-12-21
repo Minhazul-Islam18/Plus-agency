@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\BasicSetting as BS;
+use App\BasicExtended;
 use App\Language;
 use Validator;
 use Session;
@@ -31,6 +32,8 @@ class CtaController extends Controller
             'cta_section_text' => 'required|max:80',
             'cta_section_button_text' => 'required|max:15',
             'cta_section_button_url' => 'required|max:255',
+            'cta_overlay_color' => 'required',
+            'cta_overlay_opacity' => 'required|numeric|max:1|min:0'
         ];
 
         if ($request->filled('background')) {
@@ -56,8 +59,23 @@ class CtaController extends Controller
             @copy($background, 'assets/front/img/' . $filename);
             $bs->cta_bg = $filename;
         }
+        // Handle CTA background image deletion (only if not uploading new one)
+        elseif ($request->delete_cta_bg == '1') {
+            if ($bs->cta_bg) {
+                @unlink(base_path('../assets/front/img/' . $bs->cta_bg));
+                $bs->cta_bg = null;
+            }
+        }
 
         $bs->save();
+
+        $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+
+        // Save overlay color and opacity
+        $be->cta_overlay_color = $request->cta_overlay_color;
+        $be->cta_overlay_opacity = $request->cta_overlay_opacity;
+
+        $be->save();
 
         Session::flash('success', 'Texts updated successfully!');
         return back();

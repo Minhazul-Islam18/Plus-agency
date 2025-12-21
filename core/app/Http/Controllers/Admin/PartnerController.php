@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Partner;
+use App\BasicExtended;
 use App\Language;
 use Validator;
 use Session;
@@ -17,8 +18,11 @@ class PartnerController extends Controller
 
         $lang_id = $lang->id;
         $data['partners'] = Partner::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
-
+        $data['abs'] = $lang->basic_setting;
+        $data['abe'] = $lang->basic_extended;
+        $data['langs'] = Language::all();
         $data['lang_id'] = $lang_id;
+
         return view('admin.home.partner.index', $data);
     }
 
@@ -131,6 +135,57 @@ class PartnerController extends Controller
         $partner->delete();
 
         Session::flash('success', 'Partner deleted successfully!');
+        return back();
+    }
+
+    public function sectionUpdate(Request $request, $langid)
+    {
+        $image = $request->background;
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $extImage = pathinfo($image, PATHINFO_EXTENSION);
+
+        $rules = [
+            'partner_overlay_color' => 'required',
+            'partner_overlay_opacity' => 'required|numeric|max:1|min:0'
+        ];
+
+        if ($request->filled('background')) {
+            $rules['background'] = [
+                function ($attribute, $value, $fail) use ($extImage, $allowedExts) {
+                    if (!in_array($extImage, $allowedExts)) {
+                        return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        $request->validate($rules);
+
+        $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+
+        // Update overlay color and opacity
+        $be->partner_overlay_color = $request->partner_overlay_color;
+        $be->partner_overlay_opacity = $request->partner_overlay_opacity;
+
+        // Handle background image deletion
+        if ($request->delete_background == '1') {
+            @unlink(base_path('../assets/front/img/' . $be->partner_bg));
+            $be->partner_bg = null;
+        }
+
+        // Handle background image upload
+        if ($request->filled('background')) {
+            if ($be->partner_bg) {
+                @unlink(base_path('../assets/front/img/' . $be->partner_bg));
+            }
+            $filename = uniqid() . '.' . $extImage;
+            @copy(base_path('../' . $image), base_path('../assets/front/img/' . $filename));
+            $be->partner_bg = $filename;
+        }
+
+        $be->save();
+
+        Session::flash('success', 'Partner section updated successfully!');
         return back();
     }
 }

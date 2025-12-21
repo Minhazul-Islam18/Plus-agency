@@ -18,6 +18,10 @@ class MemberController extends Controller
         $lang = Language::where('code', $request->language)->firstOrFail();
         $data['lang_id'] = $lang->id;
         $data['abs'] = $lang->basic_setting;
+        $data['abe'] = $lang->basic_extended;
+        $data['be'] = BS::first();
+        $data['bex'] = BasicExtended::first();
+        $data['langs'] = Language::all();
         $data['members'] = Member::where('language_id', $data['lang_id'])->get();
 
         return view('admin.home.member.index', $data);
@@ -146,8 +150,8 @@ class MemberController extends Controller
 
     public function textupdate(Request $request, $langid)
     {
-        $be = BasicExtended::firstOrFail();
-        $version = $be->theme_version;
+        $bex = BasicExtended::firstOrFail();
+        $version = $bex->theme_version;
 
         if ($version == 'default' || $version == 'dark') {
             $background = $request->background;
@@ -158,6 +162,8 @@ class MemberController extends Controller
         $rules = [
             'team_section_title' => 'required|max:25',
             'team_section_subtitle' => 'required|max:80',
+            'team_overlay_color' => 'required',
+            'team_overlay_opacity' => 'required|numeric|max:1|min:0'
         ];
 
         if (($version == 'default' || $version == 'dark') && $request->filled('background')) {
@@ -176,14 +182,30 @@ class MemberController extends Controller
         $bs->team_section_title = $request->team_section_title;
         $bs->team_section_subtitle = $request->team_section_subtitle;
 
+        // Handle background image deletion
+        if ($request->delete_background == '1') {
+            @unlink(base_path('../assets/front/img/' . $bs->team_bg));
+            $bs->team_bg = null;
+        }
+
         if (($version == 'default' || $version == 'dark') && $request->filled('background')) {
-            @unlink('assets/front/img/'.$bs->team_bg);
+            if ($bs->team_bg) {
+                @unlink(base_path('../assets/front/img/' . $bs->team_bg));
+            }
             $filename = uniqid() .'.'. $extBackground;
-            @copy($background, 'assets/front/img/' . $filename);
+            @copy(base_path('../' . $background), base_path('../assets/front/img/' . $filename));
             $bs->team_bg = $filename;
         }
 
         $bs->save();
+
+        $be = BasicExtended::where('language_id', $langid)->firstOrFail();
+
+        // Save overlay color and opacity
+        $be->team_overlay_color = $request->team_overlay_color;
+        $be->team_overlay_opacity = $request->team_overlay_opacity;
+
+        $be->save();
 
         Session::flash('success', 'Text & Background updated successfully!');
         return back();

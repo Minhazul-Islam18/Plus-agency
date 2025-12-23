@@ -506,13 +506,13 @@ ul.language-dropdown li:last-child a {
 }
 .logo-wrapper img {
   max-width: 150px;
-  max-height: 60px;
+  max-height: 95px;
 }
 #mobileMenu {
   display: none;
 }
 .header-navbar {
-  padding: 29px 0 28px 0;
+  padding: 23px 0 12px 0;
   border-bottom: 1px solid #94a7b2;
   position: relative;
 }

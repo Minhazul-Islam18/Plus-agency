@@ -1,5 +1,64 @@
 @extends('admin.layout')
 
+@section('styles')
+<style>
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #1572E8;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #1572E8;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  .slider.round {
+    border-radius: 24px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+</style>
+@endsection
+
 @section('content')
   <div class="page-header">
     <h4 class="page-title">Social Links</h4>
@@ -101,6 +160,7 @@
                             <th scope="col">Icon</th>
                             <th scope="col">URL</th>
                             <th scope="col">Serial Number</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -111,6 +171,12 @@
                             <td><i class="{{ $social->icon }}"></i></td>
                             <td>{{$social->url}}</td>
                             <td>{{$social->serial_number}}</td>
+                            <td>
+                              <label class="switch">
+                                <input type="checkbox" class="status-toggle" data-id="{{$social->id}}" {{$social->status == 1 ? 'checked' : ''}}>
+                                <span class="slider round"></span>
+                              </label>
+                            </td>
                             <td>
                             <a class="btn btn-secondary btn-sm" href="{{route('admin.social.edit', $social->id)}}">
                                 <span class="btn-label">
@@ -152,5 +218,30 @@
       $("#inputIcon").val($(".iconpicker-component").find('i').attr('class'));
       document.getElementById('socialForm').submit();
     }
+
+    $(document).ready(function() {
+      $('.status-toggle').on('change', function() {
+        let status = $(this).is(':checked') ? 1 : 0;
+        let id = $(this).data('id');
+
+        $.ajax({
+          url: '{{route("admin.social.status")}}',
+          method: 'POST',
+          data: {
+            _token: '{{csrf_token()}}',
+            id: id,
+            status: status
+          },
+          success: function(response) {
+            if (response.success) {
+              alert('Status updated successfully!');
+            }
+          },
+          error: function(xhr) {
+            alert('Error updating status!');
+          }
+        });
+      });
+    });
   </script>
 @endsection

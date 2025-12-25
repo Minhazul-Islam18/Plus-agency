@@ -17,12 +17,19 @@ class BackupController extends Controller
 
     public function store() {
       $filename = uniqid() . '.sql';
-      $process = new Process(sprintf(
+      $backupPath = storage_path('app/public/' . $filename);
+
+      // Ensure directory exists
+      if (!file_exists(storage_path('app/public'))) {
+          mkdir(storage_path('app/public'), 0775, true);
+      }
+
+      $process = Process::fromShellCommandline(sprintf(
           'mysqldump -u%s -p%s %s > %s',
           config('database.connections.mysql.username'),
           config('database.connections.mysql.password'),
           config('database.connections.mysql.database'),
-          'core/storage/app/public/' . $filename
+          $backupPath
       ));
       $process->mustRun();
 
@@ -35,12 +42,12 @@ class BackupController extends Controller
     }
 
     public function download(Request $request) {
-      return response()->download('core/storage/app/public/'.$request->filename, 'backup.sql');
+      return response()->download(storage_path('app/public/'.$request->filename), 'backup.sql');
     }
 
     public function delete($id) {
       $backup = Backup::find($id);
-      @unlink('core/storage/app/public/'.$backup->filename);
+      @unlink(storage_path('app/public/'.$backup->filename));
       $backup->delete();
 
       Session::flash('success', 'Database sql file deleted successfully!');

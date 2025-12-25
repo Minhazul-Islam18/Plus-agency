@@ -15,8 +15,11 @@
 
 
 <!--    contact form and map start   -->
-<div class="contact-form-section">
-    <div class="container">
+<div class="contact-form-section" @if(!empty($bs->contact_bg)) style="background-image: url('{{asset('assets/front/img/'.$bs->contact_bg)}}'); background-size: cover; background-position: center; position: relative;" @endif>
+    @if(!empty($bs->contact_bg) && !empty($bs->contact_overlay_color))
+    <div class="contact-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #{{$bs->contact_overlay_color}}; opacity: {{$bs->contact_overlay_opacity ?? 0.5}};"></div>
+    @endif
+    <div class="container" style="position: relative; z-index: 1;">
         <div class="contact-infos mb-5">
             <div class="row no-gutters">
                 <div class="col-lg-4 single-info-col">

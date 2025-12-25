@@ -32,11 +32,29 @@ class ContactController extends Controller
             'latitude' => 'nullable|max:255',
             'longitude' => 'nullable|max:255',
             'map_zoom' => 'nullable|max:255',
+            'contact_overlay_color' => 'nullable|max:20',
+            'contact_overlay_opacity' => 'nullable|numeric|min:0|max:1',
         ]);
 
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
         $bs->contact_form_title = $request->contact_form_title;
         $bs->contact_form_subtitle = $request->contact_form_subtitle;
+        $bs->contact_overlay_color = $request->contact_overlay_color;
+        $bs->contact_overlay_opacity = $request->contact_overlay_opacity;
+
+        // Handle contact background image upload
+        if ($request->filled('contact_bg')) {
+            $allowedExts = array('jpg', 'png', 'jpeg');
+            $extBg = pathinfo($request->contact_bg, PATHINFO_EXTENSION);
+
+            if (in_array($extBg, $allowedExts)) {
+                @unlink('assets/front/img/' . $bs->contact_bg);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->contact_bg, 'assets/front/img/' . $filename);
+                $bs->contact_bg = $filename;
+            }
+        }
+
         $bs->save();
 
         $bex = BasicExtra::where('language_id', $langid)->firstOrFail();
@@ -50,5 +68,15 @@ class ContactController extends Controller
 
         Session::flash('success', 'Contact page updated successfully!');
         return back();
+    }
+
+    public function deleteContactBg($langid)
+    {
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        @unlink('assets/front/img/' . $bs->contact_bg);
+        $bs->contact_bg = NULL;
+        $bs->save();
+
+        return response()->json(['success' => true]);
     }
 }

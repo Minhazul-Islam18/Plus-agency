@@ -62,6 +62,47 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
             <div class="row">
               <div class="col-lg-6 offset-lg-3">
                 @csrf
+
+                <div class="form-group">
+                  <label for="">Contact Page Background Image **</label>
+                  <br>
+                  <div class="thumb-preview" id="thumbPreview1">
+                    @if (!empty($abs->contact_bg))
+                      <img src="{{asset('assets/front/img/'.$abs->contact_bg)}}" alt="Contact Background" class="uploaded-img">
+                      <button type="button" class="btn btn-danger btn-sm remove-img-btn" data-lang-id="{{$lang_id}}">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    @else
+                      <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="..." class="uploaded-img">
+                    @endif
+                  </div>
+                  <br>
+                  <br>
+                  <input id="fileInput1" type="hidden" name="contact_bg" value="">
+                  <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
+                  <p class="text-warning mb-0">JPG, PNG, JPEG images are allowed</p>
+                  @if ($errors->has('contact_bg'))
+                    <p class="text-danger mb-0">{{$errors->first('contact_bg')}}</p>
+                  @endif
+                </div>
+
+                <div class="form-group">
+                  <label>Contact Area Overlay Color Code</label>
+                  <input class="form-control jscolor ltr" name="contact_overlay_color" value="{{$abs->contact_overlay_color}}" placeholder="Enter Color Code">
+                  @if ($errors->has('contact_overlay_color'))
+                    <p class="mb-0 text-danger">{{$errors->first('contact_overlay_color')}}</p>
+                  @endif
+                </div>
+
+                <div class="form-group">
+                  <label>Contact Area Overlay Opacity</label>
+                  <input type="number" class="form-control" name="contact_overlay_opacity" value="{{$abs->contact_overlay_opacity}}" step="0.01" min="0" max="1" placeholder="Enter opacity (0 to 1)">
+                  <p class="text-warning mb-0">Value must be between 0 to 1 (e.g. 0.5 for 50% opacity)</p>
+                  @if ($errors->has('contact_overlay_opacity'))
+                    <p class="mb-0 text-danger">{{$errors->first('contact_overlay_opacity')}}</p>
+                  @endif
+                </div>
+
                 <div class="form-group">
                   <label>Form Title **</label>
                   <input class="form-control" name="contact_form_title" value="{{$abs->contact_form_title}}" placeholder="Enter Titlte">
@@ -148,9 +189,118 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 @endsection
 
 @section('scripts')
+    <!-- LFM Modal -->
+    <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+        <i class="fas fa-times-circle"></i>
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Laravel File Manager SetUrl handler
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
+
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+
+                        // Add delete button if not exists
+                        if (thumbPreview.querySelector('.remove-img-btn') === null) {
+                            var deleteBtn = document.createElement('button');
+                            deleteBtn.type = 'button';
+                            deleteBtn.className = 'btn btn-danger btn-sm remove-img-btn';
+                            deleteBtn.setAttribute('data-lang-id', '{{$lang_id}}');
+                            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            thumbPreview.appendChild(deleteBtn);
+                        }
+                    }
+
+                    // Close the modal
+                    activeModal.modal('hide');
+                }
+            }
+        };
+
         $(document).ready(function() {
             $("input[name='contact_addresses']").tagsinput({ delimiter: '|' });
+
+            // Delete contact background image
+            $(document).on('click', '.remove-img-btn', function(e) {
+                e.preventDefault();
+                var langId = $(this).data('lang-id');
+
+                if (confirm('Are you sure you want to delete this background image?')) {
+                    $.ajax({
+                        url: '{{route("admin.contact.deletebg", ":langid")}}'.replace(':langid', langId),
+                        type: 'POST',
+                        data: {
+                            _token: '{{csrf_token()}}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $('#thumbPreview1 img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                                $('#thumbPreview1 .remove-img-btn').remove();
+                                $('#fileInput1').val('');
+                                alert('Background image deleted successfully!');
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Error deleting background image!');
+                        }
+                    });
+                }
+            });
         });
     </script>
+
+    <style>
+        .thumb-preview {
+            position: relative;
+            display: inline-block;
+        }
+
+        .thumb-preview .uploaded-img,
+        .thumb-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .thumb-preview .remove-img-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .thumb-preview:hover .remove-img-btn {
+            opacity: 1;
+        }
+    </style>
 @endsection

@@ -1,0 +1,9 @@
+# Ignore uploaded images
+/assets/front/img/*.jpg
+/assets/front/img/*.jpeg
+/assets/front/img/*.png
+/assets/front/img/*.gif
+/assets/front/img/*.webp
+
+# Ignore file manager uploads
+/assets/lfm/files/

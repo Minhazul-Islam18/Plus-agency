@@ -398,7 +398,7 @@
 
     {{-- Cookie alert dialog start --}}
     @if ($be->cookie_alert_status == 1)
-        @include('cookieConsent::index')
+        @include('cookie-consent::index')
     @endif
     {{-- Cookie alert dialog end --}}
 

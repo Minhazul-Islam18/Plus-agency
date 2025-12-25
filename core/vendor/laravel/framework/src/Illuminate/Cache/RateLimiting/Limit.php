@@ -26,6 +26,13 @@ class Limit
     public $decaySeconds;
 
     /**
+     * The after callback used to determine if the limiter should be hit.
+     *
+     * @var ?callable
+     */
+    public $afterCallback = null;
+
+    /**
      * The response generator callback.
      *
      * @var callable
@@ -38,7 +45,6 @@ class Limit
      * @param  mixed  $key
      * @param  int  $maxAttempts
      * @param  int  $decaySeconds
-     * @return void
      */
     public function __construct($key = '', int $maxAttempts = 60, int $decaySeconds = 60)
     {
@@ -51,22 +57,24 @@ class Limit
      * Create a new rate limit.
      *
      * @param  int  $maxAttempts
+     * @param  int  $decaySeconds
      * @return static
      */
-    public static function perSecond($maxAttempts)
+    public static function perSecond($maxAttempts, $decaySeconds = 1)
     {
-        return new static('', $maxAttempts, 1);
+        return new static('', $maxAttempts, $decaySeconds);
     }
 
     /**
      * Create a new rate limit.
      *
      * @param  int  $maxAttempts
+     * @param  int  $decayMinutes
      * @return static
      */
-    public static function perMinute($maxAttempts)
+    public static function perMinute($maxAttempts, $decayMinutes = 1)
     {
-        return new static('', $maxAttempts, 60);
+        return new static('', $maxAttempts, 60 * $decayMinutes);
     }
 
     /**
@@ -129,6 +137,19 @@ class Limit
     }
 
     /**
+     * Set the callback to determine if the limiter should be hit.
+     *
+     * @param  callable  $callback
+     * @return $this
+     */
+    public function after($callback)
+    {
+        $this->afterCallback = $callback;
+
+        return $this;
+    }
+
+    /**
      * Set the callback that should generate the response when the limit is exceeded.
      *
      * @param  callable  $callback
@@ -139,5 +160,17 @@ class Limit
         $this->responseCallback = $callback;
 
         return $this;
+    }
+
+    /**
+     * Get a potential fallback key for the limit.
+     *
+     * @return string
+     */
+    public function fallbackKey()
+    {
+        $prefix = $this->key ? "{$this->key}:" : '';
+
+        return "{$prefix}attempts:{$this->maxAttempts}:decay:{$this->decaySeconds}";
     }
 }

@@ -24,7 +24,6 @@ class Response extends SymfonyResponse
      * @param  mixed  $content
      * @param  int  $status
      * @param  array  $headers
-     * @return void
      *
      * @throws \InvalidArgumentException
      */
@@ -35,6 +34,15 @@ class Response extends SymfonyResponse
         $this->setContent($content);
         $this->setStatusCode($status);
         $this->setProtocolVersion('1.0');
+    }
+
+    /**
+     * Get the response content.
+     */
+    #[\Override]
+    public function getContent(): string|false
+    {
+        return transform(parent::getContent(), fn ($content) => $content, '');
     }
 
     /**
@@ -94,7 +102,7 @@ class Response extends SymfonyResponse
      * Morph the given content into JSON.
      *
      * @param  mixed  $content
-     * @return string
+     * @return string|false
      */
     protected function morphToJson($content)
     {

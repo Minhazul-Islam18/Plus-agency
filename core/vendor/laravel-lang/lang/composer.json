@@ -19,17 +19,18 @@
         "source": "https://github.com/Laravel-Lang/lang"
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-json": "*",
-        "laravel-lang/publisher": "^14.0 || ^15.0 || ^16.0"
+        "laravel-lang/publisher": "^16.0"
     },
     "require-dev": {
-        "laravel-lang/status-generator": "^1.19 || ^2.0",
-        "phpunit/phpunit": "^10.0",
-        "symfony/var-dumper": "^6.0 || ^7.0"
+        "dragon-code/codestyler": "^6.0",
+        "laravel-lang/status-generator": "^2.11",
+        "phpunit/phpunit": "^11.0 || ^12.0",
+        "symfony/var-dumper": "^7.0"
     },
     "conflict": {
-        "laravel/framework": "<10 || >=11.0.7"
+        "laravel/framework": "<11.0.7"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -46,8 +47,8 @@
     "config": {
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
-            "dragon-code/codestyler": true,
             "ergebnis/composer-normalize": true,
+            "laravel/pint": true,
             "php-http/discovery": true,
             "symfony/thanks": true
         },
@@ -60,5 +61,19 @@
                 "LaravelLang\\Lang\\ServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "codestyle pint 8.2",
+            "codestyle editorconfig",
+            "codestyle npm",
+            "composer normalize"
+        ],
+        "format": [
+            "vendor/bin/lang sync",
+            "@style"
+        ],
+        "style": "vendor/bin/pint --parallel",
+        "test": "vendor/bin/phpunit --colors=always"
     }
 }

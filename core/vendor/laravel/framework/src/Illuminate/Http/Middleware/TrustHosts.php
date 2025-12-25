@@ -17,15 +17,21 @@ class TrustHosts
     /**
      * The trusted hosts that have been configured to always be trusted.
      *
-     * @var array<int, string>|null
+     * @var array<int, string>|(callable(): array<int, string>)|null
      */
     protected static $alwaysTrust;
+
+    /**
+     * Indicates whether subdomains of the application URL should be trusted.
+     *
+     * @var bool|null
+     */
+    protected static $subdomains;
 
     /**
      * Create a new middleware instance.
      *
      * @param  \Illuminate\Contracts\Foundation\Application  $app
-     * @return void
      */
     public function __construct(Application $app)
     {
@@ -39,9 +45,21 @@ class TrustHosts
      */
     public function hosts()
     {
-        return is_array(static::$alwaysTrust)
-            ? static::$alwaysTrust
-            : [$this->allSubdomainsOfApplicationUrl()];
+        if (is_null(static::$alwaysTrust)) {
+            return [$this->allSubdomainsOfApplicationUrl()];
+        }
+
+        $hosts = match (true) {
+            is_array(static::$alwaysTrust) => static::$alwaysTrust,
+            is_callable(static::$alwaysTrust) => call_user_func(static::$alwaysTrust),
+            default => [],
+        };
+
+        if (static::$subdomains) {
+            $hosts[] = $this->allSubdomainsOfApplicationUrl();
+        }
+
+        return $hosts;
     }
 
     /**
@@ -63,19 +81,14 @@ class TrustHosts
     /**
      * Specify the hosts that should always be trusted.
      *
-     * @param  array<int, string>  $hosts
+     * @param  array<int, string>|(callable(): array<int, string>)  $hosts
      * @param  bool  $subdomains
      * @return void
      */
-    public static function at(array $hosts, bool $subdomains = true)
+    public static function at(array|callable $hosts, bool $subdomains = true)
     {
-        if ($subdomains) {
-            if ($host = parse_url(config('app.url'), PHP_URL_HOST)) {
-                $hosts[] = '^(.+\.)?'.preg_quote($host).'$';
-            }
-        }
-
         static::$alwaysTrust = $hosts;
+        static::$subdomains = $subdomains;
     }
 
     /**
@@ -109,5 +122,6 @@ class TrustHosts
     public static function flushState()
     {
         static::$alwaysTrust = null;
+        static::$subdomains = null;
     }
 }

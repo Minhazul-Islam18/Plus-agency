@@ -35,6 +35,13 @@ class VerifyCsrfToken
     protected $encrypter;
 
     /**
+     * The URIs that should be excluded.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [];
+
+    /**
      * The globally ignored URIs that should be excluded from CSRF verification.
      *
      * @var array
@@ -53,7 +60,6 @@ class VerifyCsrfToken
      *
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @param  \Illuminate\Contracts\Encryption\Encrypter  $encrypter
-     * @return void
      */
     public function __construct(Application $app, Encrypter $encrypter)
     {

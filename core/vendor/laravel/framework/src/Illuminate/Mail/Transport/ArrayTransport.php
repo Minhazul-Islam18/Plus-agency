@@ -20,8 +20,6 @@ class ArrayTransport implements Stringable, TransportInterface
 
     /**
      * Create a new array transport instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -31,7 +29,7 @@ class ArrayTransport implements Stringable, TransportInterface
     /**
      * {@inheritdoc}
      */
-    public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
+    public function send(RawMessage $message, ?Envelope $envelope = null): ?SentMessage
     {
         return $this->messages[] = new SentMessage($message, $envelope ?? Envelope::create($message));
     }

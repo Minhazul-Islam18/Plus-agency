@@ -2,17 +2,30 @@
 
 All Notable changes to `laravel-notification-channels/webpush` will be documented in this file
 
+## 10.2.0 - 2025-03-03
+- Remove Google Cloud Messaging (GCM) configuration. This service does not exist anymore and web-push-php doesn't have support for it's successor (Firebase Cloud Messaging) either, so this isn't a breaking change.
+
+## 10.1.0 - 2025-02-27
+- Allow to set WebPush automatic padding in config [#176](https://github.com/laravel-notification-channels/webpush/pull/176)
+
+## 10.0.0 - 2025-02-26
+- Adds support for Laravel 12, drops support for Laravel 9 and 10, drops support for PHP 8.1 [#208](https://github.com/laravel-notification-channels/webpush/pull/208)
+- Adds native types [#209](https://github.com/laravel-notification-channels/webpush/pull/209) - if you override functions or implement interfaces of this package, please note that you might need to change method signatures
+
+## 9.0.0 - 2024-07-10
+- Update web-push library to v9
+
 ## 8.0.0 - 2024-03-16
 
 - Added support for Laravel 11.
-  
+
 ## 7.1.0 - 2023-03-14
 
 - Added support for Laravel 10.
 
 ## 7.0.0 - 2022-03-29
 
-- Upgrade web-push dependency [#172](https://github.com/laravel-notification-channels/webpush/pull/172). 
+- Upgrade web-push dependency [#172](https://github.com/laravel-notification-channels/webpush/pull/172).
 
 ## 6.0.0 - 2022-01-26
 
@@ -28,15 +41,15 @@ All Notable changes to `laravel-notification-channels/webpush` will be documente
 - Added PHP 8.0 support [#150](https://github.com/laravel-notification-channels/webpush/pull/150).
 - Added `NotificationSent` and `NotificationFailed` [events](/src/Events).
 - Removed `Log::warning` from `ReportHandler`.
-- Switched to GitHub actions. 
+- Switched to GitHub actions.
 
 ## 5.0.3 - 2020-08-19
 
-- Laravel 8.0 compatibility 
+- Laravel 8.0 compatibility
 
 ## 5.0.2 - 2020-03-05
 
-- Laravel 7.0 compatibility 
+- Laravel 7.0 compatibility
 
 ## 5.0.1 - 2020-01-24
 

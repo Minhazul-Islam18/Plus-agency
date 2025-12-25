@@ -16,17 +16,7 @@ You can install the package via composer:
 composer require laravel-notification-channels/webpush
 ```
 
-First you must install the service provider (skip for Laravel>=5.5):
-
-``` php
-// config/app.php
-'providers' => [
-    ...
-    NotificationChannels\WebPush\WebPushServiceProvider::class,
-],
-```
-
-Add the `NotificationChannels\WebPush\HasPushSubscriptions` trait to your `User` model:
+First add the `NotificationChannels\WebPush\HasPushSubscriptions` trait to your `User` model:
 
 ``` php
 use NotificationChannels\WebPush\HasPushSubscriptions;
@@ -65,7 +55,7 @@ This command will set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`in your `.env` f
 
 __These keys must be safely stored and should not change.__
 
-If you still want support [Google Cloud Messaging](https://console.cloud.google.com) set the `GCM_KEY` and `GCM_SENDER_ID` in your `.env` file.
+If you still want support for [Google Cloud Messaging](https://console.cloud.google.com), set the `GCM_KEY` and `GCM_SENDER_ID` in your `.env` file.
 
 ## Usage
 
@@ -127,10 +117,6 @@ $user = \App\User::find(1);
 
 $user->deletePushSubscription($endpoint);
 ```
-
-## Demo
-
-For a complete implementation with a Service Worker check this [demo](https://github.com/cretueusebiu/laravel-web-push-demo).
 
 ## Browser Compatibility
 

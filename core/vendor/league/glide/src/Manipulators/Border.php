@@ -3,18 +3,20 @@
 namespace League\Glide\Manipulators;
 
 use Intervention\Image\Image;
-use League\Glide\Helpers\Color;
-use League\Glide\Helpers\Dimension;
+use League\Glide\Manipulators\Helpers\Color;
+use League\Glide\Manipulators\Helpers\Dimension;
 
 /**
  * @property string $border
  * @property string $dpr
  */
-class Border extends Manipulator
+class Border extends BaseManipulator
 {
     /**
      * Perform border image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
@@ -22,15 +24,15 @@ class Border extends Manipulator
         if ($border = $this->getBorder($image)) {
             list($width, $color, $method) = $border;
 
-            if ($method === 'overlay') {
+            if ('overlay' === $method) {
                 return $this->runOverlay($image, $width, $color);
             }
 
-            if ($method === 'shrink') {
+            if ('shrink' === $method) {
                 return $this->runShrink($image, $width, $color);
             }
 
-            if ($method === 'expand') {
+            if ('expand' === $method) {
                 return $this->runExpand($image, $width, $color);
             }
         }
@@ -40,8 +42,12 @@ class Border extends Manipulator
 
     /**
      * Resolve border amount.
-     * @param  Image  $image The source image.
-     * @return string The resolved border amount.
+     *
+     * @param Image $image The source image.
+     *
+     * @return (float|string)[]|null The resolved border amount.
+     *
+     * @psalm-return array{0: float, 1: string, 2: string}|null
      */
     public function getBorder(Image $image)
     {
@@ -62,10 +68,12 @@ class Border extends Manipulator
 
     /**
      * Get border width.
-     * @param  Image  $image The source image.
-     * @param  double $dpr   The device pixel ratio.
-     * @param  string $width The border width.
-     * @return double The resolved border width.
+     *
+     * @param Image  $image The source image.
+     * @param float  $dpr   The device pixel ratio.
+     * @param string $width The border width.
+     *
+     * @return float|null The resolved border width.
      */
     public function getWidth(Image $image, $dpr, $width)
     {
@@ -74,7 +82,9 @@ class Border extends Manipulator
 
     /**
      * Get formatted color.
-     * @param  string $color The color.
+     *
+     * @param string $color The color.
+     *
      * @return string The formatted color.
      */
     public function getColor($color)
@@ -84,7 +94,9 @@ class Border extends Manipulator
 
     /**
      * Resolve the border method.
-     * @param  string $method The raw border method.
+     *
+     * @param string $method The raw border method.
+     *
      * @return string The resolved border method.
      */
     public function getMethod($method)
@@ -98,7 +110,8 @@ class Border extends Manipulator
 
     /**
      * Resolve the device pixel ratio.
-     * @return double The device pixel ratio.
+     *
+     * @return float The device pixel ratio.
      */
     public function getDpr()
     {
@@ -110,23 +123,25 @@ class Border extends Manipulator
             return 1.0;
         }
 
-        return (double) $this->dpr;
+        return (float) $this->dpr;
     }
 
     /**
      * Run the overlay border method.
-     * @param  Image  $image The source image.
-     * @param  double $width The border width.
-     * @param  string $color The border color.
-     * @return Image  The manipulated image.
+     *
+     * @param Image  $image The source image.
+     * @param float  $width The border width.
+     * @param string $color The border color.
+     *
+     * @return Image The manipulated image.
      */
     public function runOverlay(Image $image, $width, $color)
     {
         return $image->rectangle(
-            $width / 2,
-            $width / 2,
-            $image->width() - ($width / 2),
-            $image->height() - ($width / 2),
+            (int) round($width / 2),
+            (int) round($width / 2),
+            (int) round($image->width() - ($width / 2)),
+            (int) round($image->height() - ($width / 2)),
             function ($draw) use ($width, $color) {
                 $draw->border($width, $color);
             }
@@ -135,21 +150,23 @@ class Border extends Manipulator
 
     /**
      * Run the shrink border method.
-     * @param  Image  $image The source image.
-     * @param  double $width The border width.
-     * @param  string $color The border color.
-     * @return Image  The manipulated image.
+     *
+     * @param Image  $image The source image.
+     * @param float  $width The border width.
+     * @param string $color The border color.
+     *
+     * @return Image The manipulated image.
      */
     public function runShrink(Image $image, $width, $color)
     {
         return $image
             ->resize(
-                $image->width() - ($width * 2),
-                $image->height() - ($width * 2)
+                (int) round($image->width() - ($width * 2)),
+                (int) round($image->height() - ($width * 2))
             )
             ->resizeCanvas(
-                $width * 2,
-                $width * 2,
+                (int) round($width * 2),
+                (int) round($width * 2),
                 'center',
                 true,
                 $color
@@ -158,16 +175,18 @@ class Border extends Manipulator
 
     /**
      * Run the expand border method.
-     * @param  Image  $image The source image.
-     * @param  double $width The border width.
-     * @param  string $color The border color.
-     * @return Image  The manipulated image.
+     *
+     * @param Image  $image The source image.
+     * @param float  $width The border width.
+     * @param string $color The border color.
+     *
+     * @return Image The manipulated image.
      */
     public function runExpand(Image $image, $width, $color)
     {
         return $image->resizeCanvas(
-            $width * 2,
-            $width * 2,
+            (int) round($width * 2),
+            (int) round($width * 2),
             'center',
             true,
             $color

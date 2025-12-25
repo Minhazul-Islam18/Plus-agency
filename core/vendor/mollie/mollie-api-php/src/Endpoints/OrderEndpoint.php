@@ -3,6 +3,7 @@
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Resources\LazyCollection;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderCollection;
 
@@ -13,7 +14,7 @@ class OrderEndpoint extends CollectionEndpointAbstract
     /**
      * @var string
      */
-    const RESOURCE_ID_PREFIX = 'ord_';
+    public const RESOURCE_ID_PREFIX = 'ord_';
 
     /**
      * Get the object that is used by this API endpoint. Every API endpoint uses one
@@ -68,7 +69,7 @@ class OrderEndpoint extends CollectionEndpointAbstract
     public function update($orderId, array $data = [])
     {
         if (empty($orderId) || strpos($orderId, self::RESOURCE_ID_PREFIX) !== 0) {
-            throw new ApiException("Invalid order ID: '{$orderId}'. An order ID should start with '".self::RESOURCE_ID_PREFIX."'.");
+            throw new ApiException("Invalid order ID: '{$orderId}'. An order ID should start with '" . self::RESOURCE_ID_PREFIX . "'.");
         }
 
         return parent::rest_update($orderId, $data);
@@ -80,7 +81,6 @@ class OrderEndpoint extends CollectionEndpointAbstract
      * Will throw a ApiException if the order id is invalid or the resource cannot
      * be found.
      *
-     * @param string $paymentId
      * @param array $parameters
      * @return Order
      * @throws ApiException
@@ -88,7 +88,7 @@ class OrderEndpoint extends CollectionEndpointAbstract
     public function get($orderId, array $parameters = [])
     {
         if (empty($orderId) || strpos($orderId, self::RESOURCE_ID_PREFIX) !== 0) {
-            throw new ApiException("Invalid order ID: '{$orderId}'. An order ID should start with '".self::RESOURCE_ID_PREFIX."'.");
+            throw new ApiException("Invalid order ID: '{$orderId}'. An order ID should start with '" . self::RESOURCE_ID_PREFIX . "'.");
         }
 
         return parent::rest_read($orderId, $parameters);
@@ -124,8 +124,23 @@ class OrderEndpoint extends CollectionEndpointAbstract
      * @return OrderCollection
      * @throws ApiException
      */
-    public function page($from = null, $limit = null, array $parameters = [])
+    public function page(?string $from = null, ?int $limit = null, array $parameters = [])
     {
         return $this->rest_list($from, $limit, $parameters);
+    }
+
+    /**
+     * Create an iterator for iterating over orders retrieved from Mollie.
+     *
+     * @param string $from The first order ID you want to include in your list.
+     * @param int $limit
+     * @param array $parameters
+     * @param bool $iterateBackwards Set to true for reverse order iteration (default is false).
+     *
+     * @return LazyCollection
+     */
+    public function iterator(?string $from = null, ?int $limit = null, array $parameters = [], bool $iterateBackwards = false): LazyCollection
+    {
+        return $this->rest_iterator($from, $limit, $parameters, $iterateBackwards);
     }
 }

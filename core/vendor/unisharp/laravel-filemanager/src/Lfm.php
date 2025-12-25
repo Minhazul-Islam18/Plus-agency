@@ -163,6 +163,21 @@ class Lfm
         return $this->config->get('lfm.folder_categories.' . $this->currentLfmType() . '.valid_mime');
     }
 
+    public function shouldCreateCategoryThumb()
+    {
+        return $this->config->get('lfm.folder_categories.' . $this->currentLfmType() . '.thumb');
+    }
+
+    public function categoryThumbWidth()
+    {
+        return $this->config->get('lfm.folder_categories.' . $this->currentLfmType() . '.thumb_width');
+    }
+
+    public function categoryThumbHeight()
+    {
+        return $this->config->get('lfm.folder_categories.' . $this->currentLfmType() . '.thumb_height');
+    }
+
     public function maxUploadSize()
     {
         return $this->config->get('lfm.folder_categories.' . $this->currentLfmType() . '.max_size');
@@ -180,6 +195,12 @@ class Lfm
      */
     public function allowMultiUser()
     {
+        $type_key = $this->currentLfmType();
+
+        if ($this->config->has('lfm.folder_categories.' . $type_key . '.allow_private_folder')) {
+            return $this->config->get('lfm.folder_categories.' . $type_key . '.allow_private_folder') === true;
+        }
+
         return $this->config->get('lfm.allow_private_folder') === true;
     }
 
@@ -195,6 +216,12 @@ class Lfm
             return true;
         }
 
+        $type_key = $this->currentLfmType();
+
+        if ($this->config->has('lfm.folder_categories.' . $type_key . '.allow_shared_folder')) {
+            return $this->config->get('lfm.folder_categories.' . $type_key . '.allow_shared_folder') === true;
+        }
+
         return $this->config->get('lfm.allow_shared_folder') === true;
     }
 
@@ -204,40 +231,13 @@ class Lfm
      * @param  string  $input  Any string.
      * @return string
      */
-    // public function translateFromUtf8($input)
-    // {
-    //     if ($this->isRunningOnWindows()) {
-    //         $input = iconv('UTF-8', mb_detect_encoding($input), $input);
-    //     }
-
-    //     return $input;
-    // }
-    /**
-     * Translate file name to make it compatible on Windows.
-     *
-     * @param  string  $input  Any string.
-     * @return string
-     */
     public function translateFromUtf8($input)
     {
-        $rInput = [];
-
         if ($this->isRunningOnWindows()) {
-        // $input = iconv('UTF-8', mb_detect_encoding($input), $input);
-            
-            if (is_array($input)) {
-                foreach ($input as $k => $i) {
-                    $rInput[] = iconv('UTF-8', mb_detect_encoding($i), $i);
-                }
-            } else {
-                $rInput = $input;
-            }
-        } else {
-            $rInput = $input;
+            $input = iconv('UTF-8', mb_detect_encoding($input), $input);
         }
 
-        return $rInput;
-        // return $input;
+        return $input;
     }
 
     /**
@@ -289,7 +289,6 @@ class Lfm
         $namespace = '\\UniSharp\\LaravelFilemanager\\Controllers\\';
 
         Route::group(compact('middleware', 'as', 'namespace'), function () {
-
             // display main layout
             Route::get('/', [
                 'uses' => 'LfmController@show',
@@ -320,8 +319,8 @@ class Lfm
             ]);
 
             Route::get('/domove', [
-                'uses' => 'ItemsController@domove',
-                'as' => 'domove'
+                'uses' => 'ItemsController@doMove',
+                'as' => 'doMove'
             ]);
 
             // folders
@@ -342,12 +341,12 @@ class Lfm
                 'as' => 'getCrop',
             ]);
             Route::get('/cropimage', [
-                'uses' => 'CropController@getCropimage',
-                'as' => 'getCropimage',
+                'uses' => 'CropController@getCropImage',
+                'as' => 'getCropImage',
             ]);
             Route::get('/cropnewimage', [
-                'uses' => 'CropController@getNewCropimage',
-                'as' => 'getCropnewimage',
+                'uses' => 'CropController@getNewCropImage',
+                'as' => 'getNewCropImage',
             ]);
 
             // rename
@@ -365,7 +364,10 @@ class Lfm
                 'uses' => 'ResizeController@performResize',
                 'as' => 'performResize',
             ]);
-
+            Route::get('/doresizenew', [
+                'uses' => 'ResizeController@performResizeNew',
+                'as' => 'performResizeNew',
+            ]);
             // download
             Route::get('/download', [
                 'uses' => 'DownloadController@getDownload',

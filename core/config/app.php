@@ -180,9 +180,7 @@ return [
     // App\Providers\BroadcastServiceProvider::class,
     App\Providers\EventServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
-    MasterRO\LaravelXSSFilter\XSSFilterServiceProvider::class,
     willvincent\Feeds\FeedsServiceProvider::class,
-    Anand\LaravelPaytmWallet\PaytmWalletServiceProvider::class,
 
   ],
 
@@ -234,8 +232,6 @@ return [
     'URL' => Illuminate\Support\Facades\URL::class,
     'Validator' => Illuminate\Support\Facades\Validator::class,
     'View' => Illuminate\Support\Facades\View::class,
-    'XSSCleaner' => MasterRO\LaravelXSSFilter\XSSCleanerFacade::class,
-    'Feeds'    => willvincent\Feeds\Facades\FeedsFacade::class,
-    'PaytmWallet' => Anand\LaravelPaytmWallet\Facades\PaytmWallet::class
+    'Feeds'    => willvincent\Feeds\Facades\FeedsFacade::class
   ]
 ];

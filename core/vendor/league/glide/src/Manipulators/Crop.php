@@ -5,13 +5,15 @@ namespace League\Glide\Manipulators;
 use Intervention\Image\Image;
 
 /**
- * @property string $crop
+ * @property string|null $crop
  */
-class Crop extends Manipulator
+class Crop extends BaseManipulator
 {
     /**
      * Perform crop image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
@@ -34,14 +36,22 @@ class Crop extends Manipulator
 
     /**
      * Resolve coordinates.
-     * @param  Image $image The source image.
-     * @return int[] The resolved coordinates.
+     *
+     * @param Image $image The source image.
+     *
+     * @return int[]|null The resolved coordinates.
+     *
+     * @psalm-return array{0: int, 1: int, 2: int, 3: int}|null
      */
     public function getCoordinates(Image $image)
     {
+        if (null === $this->crop) {
+            return;
+        }
+
         $coordinates = explode(',', $this->crop);
 
-        if (count($coordinates) !== 4 or
+        if (4 !== count($coordinates) or
             (!is_numeric($coordinates[0])) or
             (!is_numeric($coordinates[1])) or
             (!is_numeric($coordinates[2])) or
@@ -65,8 +75,10 @@ class Crop extends Manipulator
 
     /**
      * Limit coordinates to image boundaries.
-     * @param  Image $image       The source image.
-     * @param  int[] $coordinates The coordinates.
+     *
+     * @param Image $image       The source image.
+     * @param int[] $coordinates The coordinates.
+     *
      * @return int[] The limited coordinates.
      */
     public function limitToImageBoundaries(Image $image, array $coordinates)

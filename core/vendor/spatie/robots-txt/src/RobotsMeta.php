@@ -3,10 +3,11 @@
 namespace Spatie\Robots;
 
 use InvalidArgumentException;
+use JetBrains\PhpStorm\ArrayShape;
 
 class RobotsMeta
 {
-    protected $robotsMetaTagProperties = [];
+    protected array $robotsMetaTagProperties = [];
 
     public static function readFrom(string $source): self
     {
@@ -49,6 +50,7 @@ class RobotsMeta
         return $this->robotsMetaTagProperties['nofollow'] ?? false;
     }
 
+    #[ArrayShape(['noindex' => 'bool', 'nofollow' => 'bool'])]
     protected function findRobotsMetaTagProperties(string $html): array
     {
         $metaTagLine = $this->findRobotsMetaTagLine($html);
@@ -66,7 +68,7 @@ class RobotsMeta
 
     protected function findRobotsMetaTagLine(string $html): ?string
     {
-        if (preg_match('/\<meta name="robots".*?\>/mis', $html, $matches)) {
+        if (preg_match('/\<meta name=("|\')robots("|\').*?\>/mis', $html, $matches)) {
             return $matches[0];
         }
 

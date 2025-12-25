@@ -8,26 +8,21 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^7.3|^8.0|^8.1",
         "ext-curl": "*",
         "ext-json": "*",
-        "anandsiddharth/laravel-paytm-wallet": "^1.0",
         "anhskohbo/no-captcha": "^3.1",
-        "barryvdh/laravel-dompdf": "^0.8.6",
-        "cartalyst/stripe-laravel": "13.*",
-        "doctrine/dbal": "^2.10",
-        "fideloper/proxy": "^4.0",
-        "fruitcake/laravel-cors": "^2.0",
+        "barryvdh/laravel-dompdf": "^1.0",
+        "cartalyst/stripe-laravel": "14.*",
+        "doctrine/dbal": "^2.10|^3.0",
         "guzzlehttp/guzzle": "^7.0.1",
-        "instamojo/instamojo-php": "^0.4.0",
-        "laravel-lang/lang": "~8.0",
-        "laravel-notification-channels/webpush": "^5.1",
-        "laravel/framework": "^8.65",
-        "laravel/sanctum": "^2.11",
+        "laravel-lang/lang": "~9.0",
+        "laravel-notification-channels/webpush": "^6.0",
+        "laravel/framework": "^9.0",
+        "laravel/sanctum": "^2.11|^3.0",
         "laravel/socialite": "^5.2",
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
-        "masterro/laravel-xss-filter": "^1.0",
         "mews/purifier": "^3.3",
         "mollie/laravel-mollie": "^2.11",
         "paypal/rest-api-sdk-php": "^1.14",
@@ -35,19 +30,17 @@
         "rachidlaasri/laravel-installer": "^4.1",
         "razorpay/razorpay": "2.*",
         "simplesoftwareio/simple-qrcode": "~4",
-        "softon/indipay": "^1.2",
-        "spatie/laravel-cookie-consent": "^2.10",
-        "spatie/laravel-sitemap": "^5.7",
-        "unicodeveloper/laravel-paystack": "^1.0",
+        "spatie/laravel-cookie-consent": "^2.10|^3.0",
+        "spatie/laravel-sitemap": "^6.0",
         "unisharp/laravel-filemanager": "^2.2",
         "willvincent/feeds": "^2.1"
     },
     "require-dev": {
-        "facade/ignition": "^2.5",
+        "spatie/laravel-ignition": "^1.0",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^5.10",
+        "nunomaduro/collision": "^6.0",
         "phpunit/phpunit": "^9.5.10"
     },
     "config": {
@@ -62,12 +55,10 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "app/"
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
         },
-        "classmap": [
-            "database/seeds",
-            "database/factories"
-        ],
         "files": ["app/Http/Helpers/Helper.php", "app/Http/Helpers/Sections.php"]
     },
     "autoload-dev": {

@@ -1,10 +1,9 @@
 # Parse `robots.txt`, `robots` meta and headers
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/robots-txt.svg?style=flat-square)](https://packagist.org/packages/spatie/robots-txt)
-![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/spatie/robots-txt/run-tests?label=tests)
+[![Tests](https://github.com/spatie/robots-txt/actions/workflows/run-tests.yml/badge.svg)](https://github.com/spatie/robots-txt/actions/workflows/run-tests.yml)
 [![Quality Score](https://img.shields.io/scrutinizer/g/spatie/robots-txt.svg?style=flat-square)](https://scrutinizer-ci.com/g/spatie/robots-txt)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/robots-txt.svg?style=flat-square)](https://packagist.org/packages/spatie/robots-txt)
-[![StyleCI](https://styleci.io/repos/122979707/shield?branch=master)](https://styleci.io/repos/122979707)
 
 Determine if a page may be crawled from robots.txt, robots meta tags and robot headers.
 
@@ -27,27 +26,36 @@ composer require spatie/robots-txt
 ## Usage
 
 ``` php
-$robots = Robots::create();
+$robots = Spatie\Robots\Robots::create();
 
 $robots->mayIndex('https://www.spatie.be/nl/admin');
 
 $robots->mayFollowOn('https://www.spatie.be/nl/admin');
+
+$robotsTxt = new RobotsTxt('
+  User-agent: *
+  Disallow: /admin
+  Crawl-delay: 1.5
+');
+$robotsTxt->allows('/admin', 'google'); // false
+$robotsTxt->whyDisallows('/admin', 'google')[0]->userAgent; // '*'
+$robotsTxt->crawlDelay('/admin', '*'); // '1.5'
 ```
 
 You can also specify a user agent:
 
 ``` php
-$robots = Robots::create('UserAgent007');
+$robots = Spatie\Robots\Robots::create('UserAgent007');
 ```
 
 By default, `Robots` will look for a `robots.txt` file on `https://host.com/robots.txt`.
 Another location can be specified like so:
 
 ``` php
-$robots = Robots::create()
+$robots = Spatie\Robots\Robots::create()
     ->withTxt('https://www.spatie.be/robots-custom.txt');
 
-$robots = Robots::create()
+$robots = Spatie\Robots\Robots::create()
     ->withTxt(__DIR__ . '/public/robots.txt');
 ```
 
@@ -63,11 +71,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
-### Security
+## Security Vulnerabilities
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
 ## Postcardware
 

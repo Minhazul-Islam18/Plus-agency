@@ -7,20 +7,22 @@ use Intervention\Image\Image;
 /**
  * @property string $filt
  */
-class Filter extends Manipulator
+class Filter extends BaseManipulator
 {
     /**
      * Perform filter image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
     {
-        if ($this->filt === 'greyscale') {
+        if ('greyscale' === $this->filt) {
             return $this->runGreyscaleFilter($image);
         }
 
-        if ($this->filt === 'sepia') {
+        if ('sepia' === $this->filt) {
             return $this->runSepiaFilter($image);
         }
 
@@ -29,7 +31,9 @@ class Filter extends Manipulator
 
     /**
      * Perform greyscale manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function runGreyscaleFilter(Image $image)
@@ -39,7 +43,9 @@ class Filter extends Manipulator
 
     /**
      * Perform sepia manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function runSepiaFilter(Image $image)

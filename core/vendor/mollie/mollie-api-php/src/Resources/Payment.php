@@ -9,10 +9,7 @@ use Mollie\Api\Types\SequenceType;
 
 class Payment extends BaseResource
 {
-    /**
-     * @var string
-     */
-    public $resource;
+    use HasPresetOptions;
 
     /**
      * Id of the payment (on the Mollie platform).
@@ -39,7 +36,7 @@ class Payment extends BaseResource
     /**
      * The amount that has been settled containing the value and currency
      *
-     * @var \stdClass
+     * @var \stdClass|null
      */
     public $settlementAmount;
 
@@ -149,6 +146,7 @@ class Payment extends BaseResource
      *
      * @example "user@mollie.com"
      * @var string|null
+     * @deprecated 2024-06-01 The billingEmail field is deprecated. Use the "billingAddress" field instead.
      */
     public $billingEmail;
 
@@ -173,6 +171,13 @@ class Payment extends BaseResource
      * @var string
      */
     public $redirectUrl;
+
+    /**
+     * Cancel URL set on this payment
+     *
+     * @var string
+     */
+    public $cancelUrl;
 
     /**
      * Webhook URL set on this payment
@@ -204,6 +209,27 @@ class Payment extends BaseResource
      * @var string|null
      */
     public $orderId;
+
+    /**
+     * The lines contain the actual items the customer bought.
+     *
+     * @var array|object[]|null
+     */
+    public $lines;
+
+    /**
+     * The person and the address the order is billed to.
+     *
+     * @var \stdClass|null
+     */
+    public $billingAddress;
+
+    /**
+     * The person and the address the order is shipped to.
+     *
+     * @var \stdClass|null
+     */
+    public $shippingAddress;
 
     /**
      * The settlement ID this payment belongs to.
@@ -269,6 +295,36 @@ class Payment extends BaseResource
     public $amountCaptured;
 
     /**
+     * Indicates whether the capture will be scheduled automatically or not. Set
+     * to manual to capture the payment manually using the Create capture endpoint.
+     *
+     * Possible values: "automatic", "manual"
+     *
+     * @var string|null
+     */
+    public $captureMode;
+
+    /**
+     * Indicates the interval to wait before the payment is
+     * captured, for example `8 hours` or `2 days. The capture delay
+     * will be added to the date and time the payment became authorized.
+     *
+     * Possible values: ... hours ... days
+     * @example 8 hours
+     * @var string|null
+     */
+    public $captureDelay;
+
+    /**
+     * UTC datetime on which the merchant has to have captured the payment in
+     * ISO-8601 format. This parameter is omitted if the payment is not authorized (yet).
+     *
+     * @example "2013-12-25T10:30:54+00:00"
+     * @var string|null
+     */
+    public $captureBefore;
+
+    /**
      * The application fee, if the payment was created with one. Contains amount
      * (the value and currency) and description.
      *
@@ -282,7 +338,7 @@ class Payment extends BaseResource
      * schedule (parts of) the payment to become available on the connected account on a
      * future date.
      *
-     * @var \array|null
+     * @var array|null
      */
     public $routing;
 
@@ -448,6 +504,20 @@ class Payment extends BaseResource
         }
 
         return $this->_links->checkout->href;
+    }
+
+    /**
+     * Get the mobile checkout URL where the customer can complete the payment.
+     *
+     * @return string|null
+     */
+    public function getMobileAppCheckoutUrl()
+    {
+        if (empty($this->_links->mobileAppCheckout)) {
+            return null;
+        }
+
+        return $this->_links->mobileAppCheckout->href;
     }
 
     /**
@@ -658,39 +728,23 @@ class Payment extends BaseResource
      *
      * @param array $data
      *
-     * @return BaseResource
+     * @return \Mollie\Api\Resources\Refund
      * @throws ApiException
      */
     public function refund($data)
     {
-        $resource = "payments/" . urlencode($this->id) . "/refunds";
-
-        $data = $this->withPresetOptions($data);
-        $body = null;
-        if (count($data) > 0) {
-            $body = json_encode($data);
-        }
-
-        $result = $this->client->performHttpCall(
-            MollieApiClient::HTTP_POST,
-            $resource,
-            $body
-        );
-
-        return ResourceFactory::createFromApiResult(
-            $result,
-            new Refund($this->client)
-        );
+        return $this->client->paymentRefunds->createFor($this, $data);
     }
 
     /**
-     * @return \Mollie\Api\Resources\BaseResource
+     * @return \Mollie\Api\Resources\Payment
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function update()
     {
         $body = [
             "description" => $this->description,
+            "cancelUrl" => $this->cancelUrl,
             "redirectUrl" => $this->redirectUrl,
             "webhookUrl" => $this->webhookUrl,
             "metadata" => $this->metadata,
@@ -699,35 +753,12 @@ class Payment extends BaseResource
             "dueDate" => $this->dueDate,
         ];
 
-        $result = $this->client->payments->update($this->id, $body);
+        $result = $this->client->payments->update(
+            $this->id,
+            $this->withPresetOptions($body)
+        );
 
         return ResourceFactory::createFromApiResult($result, new Payment($this->client));
-    }
-
-    /**
-     * When accessed by oAuth we want to pass the testmode by default
-     *
-     * @return array
-     */
-    private function getPresetOptions()
-    {
-        $options = [];
-        if ($this->client->usesOAuth()) {
-            $options["testmode"] = $this->mode === "test" ? true : false;
-        }
-
-        return $options;
-    }
-
-    /**
-     * Apply the preset options.
-     *
-     * @param array $options
-     * @return array
-     */
-    private function withPresetOptions(array $options)
-    {
-        return array_merge($this->getPresetOptions(), $options);
     }
 
     /**

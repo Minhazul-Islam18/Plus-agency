@@ -1,3 +1,6 @@
+
+[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/support-ukraine.svg?t=1" />](https://supportukrainenow.org)
+
 # Make your Laravel app comply with the crazy EU cookie law
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/laravel-cookie-consent.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-cookie-consent)
@@ -32,7 +35,7 @@ The package will automatically register itself.
 Optionally you can publish the config-file:
 
 ```bash
-php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="config"
+php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="cookie-consent-config"
 ```
 
 This is the contents of the published config-file:
@@ -58,20 +61,22 @@ return [
 ];
 ```
 
+The cookie domain is set by the 'domain' key in config/session.php, make sure you add a value in your .env for SESSION_DOMAIN. If you are using a domain with a port in the url such as 'localhost:3000', this package will not work until you do so.
+
 ## Usage
 
 To display the dialog all you have to do is include this view in your template:
 
 ```blade
 //in your blade template
-@include('cookieConsent::index')
+@include('cookie-consent::index')
 ```
 
 This will render the following dialog that, when styled, will look very much like this one.
 
 ![dialog](https://spatie.github.io/laravel-cookie-consent/images/dialog.png)
- 
-Please be aware that the package does not provide any styling, this is something you'll need to do yourself.
+
+The default styling provided by this package uses TailwindCSS v2 to provide a floating banner at the bottom of the page.
 
 When the user clicks "Allow cookies" a `laravel_cookie_consent` cookie will be set and the dialog will be removed from the DOM. On the next request, Laravel will notice that the `laravel_cookie_consent` has been set and will not display the dialog again
 
@@ -80,10 +85,10 @@ When the user clicks "Allow cookies" a `laravel_cookie_consent` cookie will be s
 If you want to modify the text shown in the dialog you can publish the lang-files with this command:
 
 ```bash
-php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="lang"
+php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="cookie-consent-translations"
 ```
 
-This will publish this file to `resources/lang/vendor/cookieConsent/en/texts.php`.
+This will publish this file to `resources/lang/vendor/cookie-consent/en/texts.php`.
 
  ```php
  
@@ -93,21 +98,21 @@ This will publish this file to `resources/lang/vendor/cookieConsent/en/texts.php
  ];
  ```
  
- If you want to translate the values to, for example, French, just copy that file over to `resources/lang/vendor/cookieConsent/fr/texts.php` and fill in the French translations.
+ If you want to translate the values to, for example, French, just copy that file over to `resources/lang/vendor/cookie-consent/fr/texts.php` and fill in the French translations.
  
 ### Customising the dialog contents
 
 If you need full control over the contents of the dialog. You can publish the views of the package:
 
 ```bash
-php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="views"
+php artisan vendor:publish --provider="Spatie\CookieConsent\CookieConsentServiceProvider" --tag="cookie-consent-views"
 ```
 
-This will copy the `index` and `dialogContents` view files over to `resources/views/vendor/cookieConsent`. You probably only want to modify the `dialogContents` view. If you need to modify the JavaScript code of this package you can do so in the `index` view file.
+This will copy the `index` and `dialogContents` view files over to `resources/views/vendor/cookie-consent`. You probably only want to modify the `dialogContents` view. If you need to modify the JavaScript code of this package you can do so in the `index` view file.
 
 ## Using the middleware
 
-Instead of including `cookieConsent::index` in your view you could opt to add the `Spatie\CookieConsent\CookieConsentMiddleware` to your kernel:
+Instead of including `cookie-consent::index` in your view you could opt to add the `Spatie\CookieConsent\CookieConsentMiddleware` to your kernel:
 
 ```php
 // app/Http/Kernel.php
@@ -123,7 +128,7 @@ class Kernel extends HttpKernel
 }
 ```
 
-This will automatically add `cookieConsent::index` to the content of your response right before the closing body tag.
+This will automatically add `cookie-consent::index` to the content of your response right before the closing body tag.
 
 ## Notice
 The legislation is pretty very vague on how to display the warning, which texts are necessary, and what options you need to provide. This package will go a long way towards compliance, but if you want to be 100% sure that your website is ok, you should consult a legal expert.
@@ -140,7 +145,7 @@ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security
 

@@ -10,24 +10,19 @@ use Spatie\Crawler\CrawlUrl;
 
 class CrawlObserverCollection implements ArrayAccess, Iterator
 {
-    /** @var \Spatie\Crawler\CrawlObservers\CrawlObserver[] */
-    protected array $observers;
-
     protected int $position;
 
-    public function __construct(array $observers = [])
+    public function __construct(protected array $observers = [])
     {
-        $this->observers = $observers;
-
         $this->position = 0;
     }
 
-    public function addObserver(CrawlObserver $observer)
+    public function addObserver(CrawlObserver $observer): void
     {
         $this->observers[] = $observer;
     }
 
-    public function crawled(CrawlUrl $crawlUrl, ResponseInterface $response)
+    public function crawled(CrawlUrl $crawlUrl, ResponseInterface $response): void
     {
         foreach ($this->observers as $crawlObserver) {
             $crawlObserver->crawled(
@@ -38,7 +33,7 @@ class CrawlObserverCollection implements ArrayAccess, Iterator
         }
     }
 
-    public function crawlFailed(CrawlUrl $crawlUrl, RequestException $exception)
+    public function crawlFailed(CrawlUrl $crawlUrl, RequestException $exception): void
     {
         foreach ($this->observers as $crawlObserver) {
             $crawlObserver->crawlFailed(
@@ -49,17 +44,17 @@ class CrawlObserverCollection implements ArrayAccess, Iterator
         }
     }
 
-    public function current()
+    public function current(): mixed
     {
         return $this->observers[$this->position];
     }
 
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
-        return isset($this->observers[$offset]) ? $this->observers[$offset] : null;
+        return $this->observers[$offset] ?? null;
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if (is_null($offset)) {
             $this->observers[] = $value;
@@ -68,32 +63,32 @@ class CrawlObserverCollection implements ArrayAccess, Iterator
         }
     }
 
-    public function offsetExists($offset)
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->observers[$offset]);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->observers[$offset]);
     }
 
-    public function next()
+    public function next(): void
     {
         $this->position++;
     }
 
-    public function key()
+    public function key(): mixed
     {
         return $this->position;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->observers[$this->position]);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }

@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/image.svg?style=flat-square)](https://packagist.org/packages/spatie/image)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/spatie/image/run-tests?label=tests)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/spatie/image/run-tests.yml?label=tests)](https://github.com/spatie/image/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/image.svg?style=flat-square)](https://packagist.org/packages/spatie/image)
 
 Image manipulation doesn't have to be hard. Here are a few examples on how this package makes it very easy to manipulate images.
@@ -58,7 +58,7 @@ Please note that since version 1.5.3 this package requires exif extension to be 
 
 ## Usage
 
-Head over to [the full documentation](https://docs.spatie.be/image).
+Head over to [the full documentation](https://spatie.be/docs/image).
 
 ## Changelog
 
@@ -72,11 +72,11 @@ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
 
 ## Postcardware
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2016, Mollie B.V.
  * All rights reserved.
@@ -27,8 +28,10 @@
  * @license     Berkeley Software Distribution License (BSD-License 2) http://www.opensource.org/licenses/bsd-license.php
  * @author      Mollie B.V. <info@mollie.com>
  * @copyright   Mollie B.V.
+ *
  * @link        https://www.mollie.com
  */
+
 namespace Mollie\Laravel\Wrappers;
 
 use Illuminate\Contracts\Config\Repository;
@@ -53,22 +56,24 @@ class MollieApiWrapper
     /**
      * MollieApiWrapper constructor.
      *
-     * @param Repository $config
-     * @param MollieApiClient $client
+     * @return void
      *
      * @throws \Mollie\Api\Exceptions\ApiException
-     * @return void
      */
     public function __construct(Repository $config, MollieApiClient $client)
     {
         $this->config = $config;
         $this->client = $client;
 
-        $this->setApiKey($this->config->get('mollie.key'));
+        $key = $this->config->get('mollie.key');
+
+        if (! empty($key)) {
+            $this->setApiKey($key);
+        }
     }
 
     /**
-     * @param string $url
+     * @param  string  $url
      */
     public function setApiEndpoint($url)
     {
@@ -84,7 +89,8 @@ class MollieApiWrapper
     }
 
     /**
-     * @param string $api_key The Mollie API key, starting with 'test_' or 'live_'
+     * @param  string  $api_key The Mollie API key, starting with 'test_' or 'live_'
+     *
      * @throws ApiException
      */
     public function setApiKey($api_key)
@@ -93,7 +99,8 @@ class MollieApiWrapper
     }
 
     /**
-     * @param string $access_token OAuth access token, starting with 'access_'
+     * @param  string  $access_token OAuth access token, starting with 'access_'
+     *
      * @throws ApiException
      */
     public function setAccessToken($access_token)
@@ -110,7 +117,6 @@ class MollieApiWrapper
     }
 
     /**
-     * @param $version_string
      * @return \Mollie\Laravel\Wrappers\MollieApiWrapper
      */
     public function addVersionString($version_string)
@@ -137,11 +143,35 @@ class MollieApiWrapper
     }
 
     /**
+     * @return \Mollie\Api\Endpoints\PaymentRouteEndpoint
+     */
+    public function paymentRoutes()
+    {
+        return $this->client->paymentRoutes;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\PaymentCaptureEndpoint
+     */
+    public function paymentCaptures()
+    {
+        return $this->client->paymentCaptures;
+    }
+
+    /**
      * @return \Mollie\Api\Endpoints\PaymentLinkEndpoint
      */
     public function paymentLinks()
     {
         return $this->client->paymentLinks;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\TerminalEndpoint
+     */
+    public function terminals()
+    {
+        return $this->client->terminals;
     }
 
     /**
@@ -169,11 +199,43 @@ class MollieApiWrapper
     }
 
     /**
+     * @return \Mollie\Api\Endpoints\BalanceEndpoint
+     */
+    public function balances()
+    {
+        return $this->client->balances;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\BalanceTransactionEndpoint
+     */
+    public function balanceTransactions()
+    {
+        return $this->client->balanceTransactions;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\BalanceReportEndpoint
+     */
+    public function balanceReports()
+    {
+        return $this->client->balanceReports;
+    }
+
+    /**
      * @return \Mollie\Api\Endpoints\SettlementsEndpoint
      */
     public function settlements()
     {
         return $this->client->settlements;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\SettlementPaymentEndpoint
+     */
+    public function settlementPayments()
+    {
+        return $this->client->settlementPayments;
     }
 
     /**
@@ -233,6 +295,14 @@ class MollieApiWrapper
     }
 
     /**
+     * @return \Mollie\Api\Endpoints\ShipmentEndpoint
+     */
+    public function shipments()
+    {
+        return $this->client->shipments;
+    }
+
+    /**
      * @return \Mollie\Api\Endpoints\RefundEndpoint
      */
     public function refunds()
@@ -249,11 +319,43 @@ class MollieApiWrapper
     }
 
     /**
+     * @return \Mollie\Api\Endpoints\PaymentChargebackEndpoint
+     */
+    public function paymentChargebacks()
+    {
+        return $this->client->paymentChargebacks;
+    }
+
+    /**
      * @return \Mollie\Api\Endpoints\OrderEndpoint
      */
     public function orders()
     {
         return $this->client->orders;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrderLineEndpoint
+     */
+    public function orderLines()
+    {
+        return $this->client->orderLines;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrderPaymentEndpoint
+     */
+    public function orderPayments()
+    {
+        return $this->client->orderPayments;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrderRefundEndpoint
+     */
+    public function orderRefunds()
+    {
+        return $this->client->orderRefunds;
     }
 
     /**
@@ -273,9 +375,73 @@ class MollieApiWrapper
     }
 
     /**
+     * @return \Mollie\Api\Endpoints\ClientEndpoint
+     */
+    public function clients()
+    {
+        return $this->client->clients;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\ClientLinkEndpoint
+     */
+    public function clientLinks()
+    {
+        return $this->client->clientLinks;
+    }
+
+    /**
+     * @return \Mollie\Api\Endpoints\OrganizationPartnerEndpoint
+     */
+    public function organizationPartners()
+    {
+        return $this->client->organizationPartners;
+    }
+
+    /**
+     * @return void
+     *
+     * @throws \Mollie\Api\Exceptions\HttpAdapterDoesNotSupportDebuggingException
+     */
+    public function enableDebugging()
+    {
+        $this->client->enableDebugging();
+    }
+
+    /**
+     * @return void
+     *
+     * @throws \Mollie\Api\Exceptions\HttpAdapterDoesNotSupportDebuggingException
+     */
+    public function disableDebugging()
+    {
+        $this->client->disableDebugging();
+    }
+
+    public function setIdempotencyKey(string $key)
+    {
+        return $this->client->setIdempotencyKey($key);
+    }
+
+    public function resetIdempotencyKey()
+    {
+        return $this->client->resetIdempotencyKey();
+    }
+
+    public function setIdempotencyKeyGenerator($generator)
+    {
+        return $this->client->setIdempotencyKeyGenerator($generator);
+    }
+
+    public function clearIdempotencyKeyGenerator()
+    {
+        return $this->client->clearIdempotencyKeyGenerator();
+    }
+
+    /**
      * Handle dynamic property calls.
      *
-     * @param  string $property
+     * @param  string  $property
      * @return mixed
      */
     public function __get($property)

@@ -40,14 +40,13 @@ class OnboardingEndpoint extends EndpointAbstract
     }
 
     /**
+     * @deprecated 2023-05-01 For an alternative, see https://docs.mollie.com/reference/create-client-link .
      * Submit data that will be prefilled in the merchant’s onboarding.
      * Please note that the data you submit will only be processed when the onboarding status is needs-data.
      *
      * Information that the merchant has entered in their dashboard will not be overwritten.
      *
-     * Will throw a ApiException if the resource cannot be found.
-     *
-     * @return void
+     * Will throw an ApiException if the resource cannot be found.
      * @throws ApiException
      */
     public function submit(array $parameters = [])
@@ -59,7 +58,7 @@ class OnboardingEndpoint extends EndpointAbstract
      * @param string $id
      * @param array $filters
      *
-     * @return \Mollie\Api\Resources\BaseResource
+     * @return mixed
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     protected function rest_read($id, array $filters)
@@ -76,7 +75,7 @@ class OnboardingEndpoint extends EndpointAbstract
      * @param array $body
      * @param array $filters
      *
-     * @return \Mollie\Api\Resources\BaseResource|void
+     * @return mixed
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     protected function rest_create(array $body, array $filters)

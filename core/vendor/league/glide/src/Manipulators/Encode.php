@@ -8,11 +8,13 @@ use Intervention\Image\Image;
  * @property string $fm
  * @property string $q
  */
-class Encode extends Manipulator
+class Encode extends BaseManipulator
 {
     /**
      * Perform output image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
@@ -26,7 +28,7 @@ class Encode extends Manipulator
                            ->insert($image, 'top-left', 0, 0);
         }
 
-        if ($format === 'pjpg') {
+        if ('pjpg' === $format) {
             $image->interlace();
             $format = 'jpg';
         }
@@ -36,32 +38,42 @@ class Encode extends Manipulator
 
     /**
      * Resolve format.
-     * @param  Image  $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return string The resolved format.
      */
     public function getFormat(Image $image)
     {
-        $allowed = [
+        if (array_key_exists($this->fm, static::supportedFormats())) {
+            return $this->fm;
+        }
+
+        return array_search($image->mime(), static::supportedFormats(), true) ?: 'jpg';
+    }
+
+    /**
+     * Get a list of supported image formats and MIME types.
+     *
+     * @return array<string,string>
+     */
+    public static function supportedFormats()
+    {
+        return [
+            'avif' => 'image/avif',
             'gif' => 'image/gif',
             'jpg' => 'image/jpeg',
             'pjpg' => 'image/jpeg',
             'png' => 'image/png',
+            'webp' => 'image/webp',
+            'tiff' => 'image/tiff',
         ];
-
-        if (array_key_exists($this->fm, $allowed)) {
-            return $this->fm;
-        }
-
-        if ($format = array_search($image->mime(), $allowed, true)) {
-            return $format;
-        }
-
-        return 'jpg';
     }
 
     /**
      * Resolve quality.
-     * @return string The resolved quality.
+     *
+     * @return int The resolved quality.
      */
     public function getQuality()
     {

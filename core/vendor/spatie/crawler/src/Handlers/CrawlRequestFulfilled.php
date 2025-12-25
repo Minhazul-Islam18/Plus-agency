@@ -3,8 +3,8 @@
 namespace Spatie\Crawler\Handlers;
 
 use Exception;
-use function GuzzleHttp\Psr7\stream_for;
 use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RedirectMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -18,14 +18,10 @@ use Spatie\Crawler\ResponseWithCachedBody;
 
 class CrawlRequestFulfilled
 {
-    protected Crawler $crawler;
-
     protected LinkAdder $linkAdder;
 
-    public function __construct(Crawler $crawler)
+    public function __construct(protected Crawler $crawler)
     {
-        $this->crawler = $crawler;
-
         $this->linkAdder = new LinkAdder($this->crawler);
     }
 
@@ -44,7 +40,7 @@ class CrawlRequestFulfilled
         if ($this->crawler->mayExecuteJavaScript()) {
             $body = $this->getBodyAfterExecutingJavaScript($crawlUrl->url);
 
-            $response = $response->withBody(stream_for($body));
+            $response = $response->withBody(Utils::streamFor($body));
         }
 
         $responseWithCachedBody = ResponseWithCachedBody::fromGuzzlePsr7Response($response);
@@ -71,7 +67,7 @@ class CrawlRequestFulfilled
         usleep($this->crawler->getDelayBetweenRequests());
     }
 
-    protected function getBaseUrl(ResponseInterface $response, CrawlUrl $crawlUrl)
+    protected function getBaseUrl(ResponseInterface $response, CrawlUrl $crawlUrl): Uri
     {
         $redirectHistory = $response->getHeader(RedirectMiddleware::HISTORY_HEADER);
 
@@ -82,7 +78,7 @@ class CrawlRequestFulfilled
         return new Uri(end($redirectHistory));
     }
 
-    protected function handleCrawled(ResponseInterface $response, CrawlUrl $crawlUrl)
+    protected function handleCrawled(ResponseInterface $response, CrawlUrl $crawlUrl): void
     {
         $this->crawler->getCrawlObservers()->crawled($crawlUrl, $response);
     }

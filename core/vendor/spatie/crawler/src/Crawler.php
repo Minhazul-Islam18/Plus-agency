@@ -26,15 +26,11 @@ class Crawler
 {
     public const DEFAULT_USER_AGENT = '*';
 
-    protected Client $client;
-
     protected UriInterface $baseUrl;
 
     protected CrawlObserverCollection $crawlObservers;
 
     protected CrawlProfile $crawlProfile;
-
-    protected int $concurrency;
 
     protected CrawlQueue $crawlQueue;
 
@@ -70,6 +66,8 @@ class Crawler
 
     protected array $allowedMimeTypes = [];
 
+    protected string $defaultScheme = 'http';
+
     protected static array $defaultClientOptions = [
         RequestOptions::COOKIES => true,
         RequestOptions::CONNECT_TIMEOUT => 10,
@@ -80,7 +78,7 @@ class Crawler
         ],
     ];
 
-    public static function create(array $clientOptions = []): Crawler
+    public static function create(array $clientOptions = []): static
     {
         $clientOptions = (count($clientOptions))
             ? $clientOptions
@@ -91,12 +89,10 @@ class Crawler
         return new static($client);
     }
 
-    public function __construct(Client $client, int $concurrency = 10)
-    {
-        $this->client = $client;
-
-        $this->concurrency = $concurrency;
-
+    public function __construct(
+        protected Client $client,
+        protected int $concurrency = 10,
+    ) {
         $this->crawlProfile = new CrawlAllUrls();
 
         $this->crawlQueue = new ArrayCrawlQueue();
@@ -106,6 +102,18 @@ class Crawler
         $this->crawlRequestFulfilledClass = CrawlRequestFulfilled::class;
 
         $this->crawlRequestFailedClass = CrawlRequestFailed::class;
+    }
+
+    public function getDefaultScheme(): string
+    {
+        return $this->defaultScheme;
+    }
+
+    public function setDefaultScheme(string $defaultScheme): self
+    {
+        $this->defaultScheme = $defaultScheme;
+
+        return $this;
     }
 
     public function setConcurrency(int $concurrency): self
@@ -173,9 +181,9 @@ class Crawler
         return $this->maximumDepth;
     }
 
-    public function setDelayBetweenRequests(int $delay): self
+    public function setDelayBetweenRequests(int $delayInMilliseconds): self
     {
-        $this->delayBetweenRequests = ($delay * 1000);
+        $this->delayBetweenRequests = ($delayInMilliseconds * 1000);
 
         return $this;
     }
@@ -271,12 +279,7 @@ class Crawler
         return $this->executeJavaScript;
     }
 
-    /**
-     * @param \Spatie\Crawler\CrawlObservers\CrawlObserver|array[\Spatie\Crawler\CrawlObserver] $crawlObservers
-     *
-     * @return $this
-     */
-    public function setCrawlObserver($crawlObservers): self
+    public function setCrawlObserver(CrawlObserver | array $crawlObservers): self
     {
         if (! is_array($crawlObservers)) {
             $crawlObservers = [$crawlObservers];
@@ -390,17 +393,14 @@ class Crawler
         return $this->baseUrl;
     }
 
-    /**
-     * @param \Psr\Http\Message\UriInterface|string $baseUrl
-     */
-    public function startCrawling($baseUrl)
+    public function startCrawling(UriInterface | string $baseUrl)
     {
         if (! $baseUrl instanceof UriInterface) {
             $baseUrl = new Uri($baseUrl);
         }
 
         if ($baseUrl->getScheme() === '') {
-            $baseUrl = $baseUrl->withScheme('http');
+            $baseUrl = $baseUrl->withScheme($this->defaultScheme);
         }
 
         if ($baseUrl->getPath() === '') {

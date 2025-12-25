@@ -7,18 +7,20 @@ use Intervention\Image\Image;
 /**
  * @property string $sharp
  */
-class Sharpen extends Manipulator
+class Sharpen extends BaseManipulator
 {
     /**
      * Perform sharpen image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
     {
         $sharpen = $this->getSharpen();
 
-        if ($sharpen !== null) {
+        if (null !== $sharpen) {
             $image->sharpen($sharpen);
         }
 
@@ -27,7 +29,8 @@ class Sharpen extends Manipulator
 
     /**
      * Resolve sharpen amount.
-     * @return string The resolved sharpen amount.
+     *
+     * @return int|null The resolved sharpen amount.
      */
     public function getSharpen()
     {

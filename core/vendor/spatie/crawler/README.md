@@ -41,7 +41,7 @@ Crawler::create()
 The argument passed to `setCrawlObserver` must be an object that extends the `\Spatie\Crawler\CrawlObservers\CrawlObserver` abstract class:
 
 ```php
-namespace Spatie\Crawler;
+namespace Spatie\Crawler\CrawlObservers;
 
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
@@ -54,9 +54,8 @@ abstract class CrawlObserver
      *
      * @param \Psr\Http\Message\UriInterface $url
      */
-    public function willCrawl(UriInterface $url)
+    public function willCrawl(UriInterface $url): void
     {
-
     }
 
     /**
@@ -70,7 +69,7 @@ abstract class CrawlObserver
         UriInterface $url,
         ResponseInterface $response,
         ?UriInterface $foundOnUrl = null
-    );
+    ): void;
 
     /**
      * Called when the crawler had a problem crawling the given url.
@@ -83,14 +82,13 @@ abstract class CrawlObserver
         UriInterface $url,
         RequestException $requestException,
         ?UriInterface $foundOnUrl = null
-    );
+    ): void;
 
     /**
      * Called when the crawl has ended.
      */
-    public function finishedCrawling()
+    public function finishedCrawling(): void
     {
-
     }
 }
 ```
@@ -131,7 +129,7 @@ Crawler::create()
 
 In order to make it possible to get the body html after the javascript has been executed, this package depends on
 our [Browsershot](https://github.com/spatie/browsershot) package.
-This package uses [Puppeteer](https://github.com/puppeteer/puppeteer) under the hood. Here are some pointers on [how to install it on your system](https://github.com/spatie/browsershot#requirements).
+This package uses [Puppeteer](https://github.com/puppeteer/puppeteer) under the hood. Here are some pointers on [how to install it on your system](https://spatie.be/docs/browsershot/v2/requirements).
 
 Browsershot will make an educated guess as to where its dependencies are installed on your system.
 By default, the Crawler will instantiate a new Browsershot instance. You may find the need to set a custom created instance using the `setBrowsershot(Browsershot $browsershot)` method.
@@ -398,6 +396,16 @@ Here
 - [ArrayCrawlQueue](https://github.com/spatie/crawler/blob/master/src/CrawlQueues/ArrayCrawlQueue.php)
 - [RedisCrawlQueue (third-party package)](https://github.com/repat/spatie-crawler-redis)
 - [CacheCrawlQueue for Laravel (third-party package)](https://github.com/spekulatius/spatie-crawler-toolkit-for-laravel)
+- [Laravel Model as Queue (third-party example app)](https://github.com/insign/spatie-crawler-queue-with-laravel-model)
+
+## Change the default base url scheme
+
+By default, the crawler will set the base url scheme to `http` if none. You have the ability to change that with `setDefaultScheme`.
+
+```php
+Crawler::create()
+    ->setDefaultScheme('https')
+```
 
 ## Changelog
 
@@ -405,7 +413,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Testing
 
@@ -425,12 +433,12 @@ node server.js
 
 With the server running, you can start testing.
 ```bash
-composer tests
+composer test
 ```
 
 ## Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
 
 ## Postcardware
 

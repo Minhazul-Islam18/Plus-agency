@@ -3,12 +3,10 @@
 namespace League\Glide\Manipulators;
 
 use Intervention\Image\Image;
-use InvalidArgumentException;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemInterface;
-use League\Glide\Exceptions\FilesystemException;
-use League\Glide\Helpers\Dimension;
+use League\Flysystem\FilesystemException as FilesystemV2Exception;
+use League\Flysystem\FilesystemOperator;
+use League\Glide\Filesystem\FilesystemException;
+use League\Glide\Manipulators\Helpers\Dimension;
 
 /**
  * @property string $dpr
@@ -22,25 +20,28 @@ use League\Glide\Helpers\Dimension;
  * @property string $marky
  * @property string $markalpha
  */
-class Watermark extends Manipulator
+class Watermark extends BaseManipulator
 {
     /**
      * The watermarks file system.
-     * @var FilesystemInterface|null
+     *
+     * @var FilesystemOperator|null
      */
     protected $watermarks;
 
     /**
      * The watermarks path prefix.
+     *
      * @var string
      */
     protected $watermarksPathPrefix;
 
     /**
      * Create Watermark instance.
-     * @param FilesystemInterface|string $watermarks The watermarks file system.
+     *
+     * @param FilesystemOperator $watermarks The watermarks file system.
      */
-    public function __construct($watermarks = null, $watermarksPathPrefix = '')
+    public function __construct(?FilesystemOperator $watermarks = null, $watermarksPathPrefix = '')
     {
         $this->setWatermarks($watermarks);
         $this->setWatermarksPathPrefix($watermarksPathPrefix);
@@ -48,26 +49,20 @@ class Watermark extends Manipulator
 
     /**
      * Set the watermarks file system.
-     * @param FilesystemInterface|string $watermarks The watermarks file system.
+     *
+     * @param FilesystemOperator $watermarks The watermarks file system.
+     *
+     * @return void
      */
-    public function setWatermarks($watermarks = null)
+    public function setWatermarks(?FilesystemOperator $watermarks = null)
     {
-        if (is_string($watermarks)) {
-            $watermarks = new Filesystem(
-                new Local($watermarks)
-            );
-        }
-
-        if (!is_null($watermarks) and !is_a($watermarks, FilesystemInterface::class)) {
-            throw new InvalidArgumentException('Not a valid "watermarks" file system.');
-        }
-
         $this->watermarks = $watermarks;
     }
 
     /**
      * Get the watermarks file system.
-     * @return FilesystemInterface The watermarks file system.
+     *
+     * @return FilesystemOperator|null The watermarks file system.
      */
     public function getWatermarks()
     {
@@ -76,7 +71,10 @@ class Watermark extends Manipulator
 
     /**
      * Set the watermarks path prefix.
+     *
      * @param string $watermarksPathPrefix The watermarks path prefix.
+     *
+     * @return void
      */
     public function setWatermarksPathPrefix($watermarksPathPrefix = '')
     {
@@ -85,6 +83,7 @@ class Watermark extends Manipulator
 
     /**
      * Get the watermarks path prefix.
+     *
      * @return string The watermarks path prefix.
      */
     public function getWatermarksPathPrefix()
@@ -94,7 +93,9 @@ class Watermark extends Manipulator
 
     /**
      * Perform watermark image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
@@ -133,7 +134,9 @@ class Watermark extends Manipulator
 
     /**
      * Get the watermark image.
-     * @param  Image      $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image|null The watermark image.
      */
     public function getImage(Image $image)
@@ -146,7 +149,7 @@ class Watermark extends Manipulator
             return;
         }
 
-        if ($this->mark === '') {
+        if ('' === $this->mark) {
             return;
         }
 
@@ -156,24 +159,24 @@ class Watermark extends Manipulator
             $path = $this->watermarksPathPrefix.'/'.$path;
         }
 
-        if ($this->watermarks->has($path)) {
-            $source = $this->watermarks->read($path);
+        try {
+            if ($this->watermarks->fileExists($path)) {
+                $source = $this->watermarks->read($path);
 
-            if ($source === false) {
-                throw new FilesystemException(
-                    'Could not read the image `'.$path.'`.'
-                );
+                return $image->getDriver()->init($source);
             }
-
-            return $image->getDriver()->init($source);
+        } catch (FilesystemV2Exception $exception) {
+            throw new FilesystemException('Could not read the image `'.$path.'`.');
         }
     }
 
     /**
      * Get a dimension.
-     * @param  Image       $image The source image.
-     * @param  string      $field The requested field.
-     * @return double|null The dimension.
+     *
+     * @param Image  $image The source image.
+     * @param string $field The requested field.
+     *
+     * @return float|null The dimension.
      */
     public function getDimension(Image $image, $field)
     {
@@ -184,7 +187,8 @@ class Watermark extends Manipulator
 
     /**
      * Resolve the device pixel ratio.
-     * @return double The device pixel ratio.
+     *
+     * @return float The device pixel ratio.
      */
     public function getDpr()
     {
@@ -196,12 +200,13 @@ class Watermark extends Manipulator
             return 1.0;
         }
 
-        return (double) $this->dpr;
+        return (float) $this->dpr;
     }
 
     /**
      * Get the fit.
-     * @return string The fit.
+     *
+     * @return string|null The fit.
      */
     public function getFit()
     {
@@ -228,6 +233,7 @@ class Watermark extends Manipulator
 
     /**
      * Get the position.
+     *
      * @return string The position.
      */
     public function getPosition()
@@ -253,6 +259,7 @@ class Watermark extends Manipulator
 
     /**
      * Get the alpha channel.
+     *
      * @return int The alpha.
      */
     public function getAlpha()

@@ -7,26 +7,29 @@ use Intervention\Image\Image;
 /**
  * @property string $or
  */
-class Orientation extends Manipulator
+class Orientation extends BaseManipulator
 {
     /**
      * Perform orientation image manipulation.
-     * @param  Image $image The source image.
+     *
+     * @param Image $image The source image.
+     *
      * @return Image The manipulated image.
      */
     public function run(Image $image)
     {
         $orientation = $this->getOrientation();
 
-        if ($orientation === 'auto') {
+        if ('auto' === $orientation) {
             return $image->orientate();
         }
 
-        return $image->rotate($orientation);
+        return $image->rotate((float) $orientation);
     }
 
     /**
      * Resolve orientation.
+     *
      * @return string The resolved orientation.
      */
     public function getOrientation()

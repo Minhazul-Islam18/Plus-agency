@@ -2,8 +2,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/laravel-sitemap.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-sitemap)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-![Test Status](https://img.shields.io/github/workflow/status/spatie/laravel-sitemap/run-tests?label=tests)
-![Code Style Status](https://img.shields.io/github/workflow/status/spatie/laravel-sitemap/Check%20&%20fix%20styling?label=code%20style)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/spatie/laravel-sitemap/run-tests.yml?label=tests)](https://github.com/spatie/laravel-sitemap/actions/workflows/run-tests.yml)
+[![Code Style Status](https://img.shields.io/github/actions/workflow/status/spatie/laravel-sitemap/php-cs-fixer.yml?label=code%20style)](https://github.com/spatie/laravel-sitemap/actions/workflows/php-cs-fixer.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-sitemap.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-sitemap)
 
 This package can generate a sitemap without you having to add urls to it manually. This works by crawling your entire site.
@@ -64,6 +64,36 @@ You can also use one of your available filesystem disks to write the sitemap to.
 SitemapGenerator::create('https://example.com')->getSitemap()->writeToDisk('public', 'sitemap.xml');
 ```
 
+You can also add your models directly by implementing the `\Spatie\Sitemap\Contracts\Sitemapable` interface.
+
+```php
+use Spatie\Sitemap\Contracts\Sitemapable;
+use Spatie\Sitemap\Tags\Url;
+
+class Post extends Model implements Sitemapable
+{
+    public function toSitemapTag(): Url | string | array
+    {
+        return route('blog.post.show', $this);
+        return Url::create(route('blog.post.show', $this))
+            ->setLastModificationDate(Carbon::create($this->updated_at))
+            ->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY)
+            ->setPriority(0.1);
+    }
+}
+```
+
+Now you can add a single post model to the sitemap or even a whole collection.
+```php
+use Spatie\Sitemap\Sitemap;
+
+Sitemap::create()
+    ->add($post)
+    ->add(Post::all());
+```
+
+This way you can add all your pages super fast without the need to crawl them all.
+
 ## Support us
 
 [<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-sitemap.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-sitemap)
@@ -89,7 +119,7 @@ If you want to update your sitemap automatically and frequently you need to perf
 You can override the default options for the crawler. First publish the configuration:
 
 ```bash
-php artisan vendor:publish --provider="Spatie\Sitemap\SitemapServiceProvider" --tag=config
+php artisan vendor:publish --provider="Spatie\Sitemap\SitemapServiceProvider" --tag=sitemap-config
 ```
 
 This will copy the default config to `config/sitemap.php` where you can edit it.
@@ -189,10 +219,10 @@ The generated sitemap will look similar to this:
 
 #### Define a custom Crawl Profile
 
-You can create a custom crawl profile by implementing the `Spatie\Crawler\CrawlProfile` interface and by customizing the `shouldCrawl()` method for full control over what url/domain/sub-domain should be crawled:
+You can create a custom crawl profile by implementing the `Spatie\Crawler\CrawlProfiles\CrawlProfile` interface and by customizing the `shouldCrawl()` method for full control over what url/domain/sub-domain should be crawled:
 
 ```php
-use Spatie\Crawler\CrawlProfile;
+use Spatie\Crawler\CrawlProfiles\CrawlProfile;
 use Psr\Http\Message\UriInterface;
 
 class CustomCrawlProfile extends CrawlProfile
@@ -349,6 +379,58 @@ SitemapGenerator::create('https://example.com')
 
 Note the ```addAlternate``` function which takes an alternate URL and the locale it belongs to.
 
+#### Adding images to links
+
+Urls can also have images. See also https://developers.google.com/search/docs/advanced/sitemaps/image-sitemaps
+
+```php
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
+
+Sitemap::create()
+    // here we add an image to a URL
+    ->add(Url::create('https://example.com')->addImage('https://example.com/images/home.jpg', 'Home page image'))
+    ->writeToFile($sitemapPath);
+```
+
+#### Adding videos to links
+
+As well as images, videos can be wrapped by URL tags. See https://developers.google.com/search/docs/crawling-indexing/sitemaps/video-sitemaps
+
+You can set required attributes like so:
+
+```php
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
+
+Sitemap::create()
+    ->add(
+        Url::create('https://example.com')
+            ->addVideo('https://example.com/images/thumbnail.jpg', 'Video title', 'Video Description', 'https://example.com/videos/source.mp4', 'https://example.com/video/123')
+    )
+    ->writeToFile($sitemapPath);
+```
+
+If you want to pass the optional parameters like `family_friendly`, `live`, or `platform`:
+
+```php
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
+use Spatie\Sitemap\Tags\Video;
+
+
+$options = ['family_friendly' => Video::OPTION_YES, 'live' => Video::OPTION_NO];
+$allowOptions = ['platform' => Video::OPTION_PLATFORM_MOBILE];
+$denyOptions = ['restriction' => 'CA'];
+
+Sitemap::create()
+    ->add(
+        Url::create('https://example.com')
+            ->addVideo('https://example.com/images/thumbnail.jpg', 'Video title', 'Video Description', 'https://example.com/videos/source.mp4', 'https://example.com/video/123', $options, $allowOptions, $denyOptions)
+    )
+    ->writeToFile($sitemapPath);
+```
+
 ### Manually creating a sitemap
 
 You can also create a sitemap fully manual:
@@ -492,11 +574,11 @@ $ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
 
 ## Credits
 

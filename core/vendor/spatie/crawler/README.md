@@ -1,10 +1,19 @@
-# 🕸 Crawl the web using PHP 🕷
+<div align="left">
+    <a href="https://spatie.be/open-source?utm_source=github&utm_medium=banner&utm_campaign=crawler">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://spatie.be/packages/header/crawler/html/dark.webp?">
+        <img alt="Logo for crawler" src="https://spatie.be/packages/header/crawler/html/light.webp">
+      </picture>
+    </a>
+
+<h1>🕸 Crawl the web using PHP 🕷</h1>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/crawler.svg?style=flat-square)](https://packagist.org/packages/spatie/crawler)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 ![Tests](https://github.com/spatie/crawler/workflows/Tests/badge.svg)
-![Check & fix styling](https://github.com/spatie/crawler/workflows/Code%20style/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/crawler.svg?style=flat-square)](https://packagist.org/packages/spatie/crawler)
+    
+</div>
 
 This package provides a class to crawl links on a website. Under the hood Guzzle promises are used to [crawl multiple urls concurrently](http://docs.guzzlephp.org/en/latest/quickstart.html?highlight=pool#concurrent-requests).
 
@@ -49,39 +58,31 @@ use Psr\Http\Message\UriInterface;
 
 abstract class CrawlObserver
 {
-    /**
+    /*
      * Called when the crawler will crawl the url.
-     *
-     * @param \Psr\Http\Message\UriInterface $url
      */
-    public function willCrawl(UriInterface $url): void
+    public function willCrawl(UriInterface $url, ?string $linkText): void
     {
     }
 
-    /**
+    /*
      * Called when the crawler has crawled the given url successfully.
-     *
-     * @param \Psr\Http\Message\UriInterface $url
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @param \Psr\Http\Message\UriInterface|null $foundOnUrl
      */
     abstract public function crawled(
         UriInterface $url,
         ResponseInterface $response,
-        ?UriInterface $foundOnUrl = null
+        ?UriInterface $foundOnUrl = null,
+        ?string $linkText,
     ): void;
 
-    /**
+    /*
      * Called when the crawler had a problem crawling the given url.
-     *
-     * @param \Psr\Http\Message\UriInterface $url
-     * @param \GuzzleHttp\Exception\RequestException $requestException
-     * @param \Psr\Http\Message\UriInterface|null $foundOnUrl
      */
     abstract public function crawlFailed(
         UriInterface $url,
         RequestException $requestException,
-        ?UriInterface $foundOnUrl = null
+        ?UriInterface $foundOnUrl = null,
+        ?string $linkText = null,
     ): void;
 
     /**
@@ -162,6 +163,26 @@ This package comes with three `CrawlProfiles` out of the box:
 - `CrawlInternalUrls`: this profile will only crawl the internal urls on the pages of a host.
 - `CrawlSubdomains`: this profile will only crawl the internal urls and its subdomains on the pages of a host.
 
+### Custom link extraction
+
+You can customize how links are extracted from a page by passing a custom `UrlParser` to the crawler.
+
+```php
+Crawler::create()
+    ->setUrlParserClass(<class that implements \Spatie\Crawler\UrlParsers\UrlParser>::class)
+    ...
+```
+
+By default, the `LinkUrlParser` is used. This parser will extract all links from the `href` attribute of `a` tags.
+
+There is also a built-in `SitemapUrlParser` that will extract & crawl all links from a sitemap. It does support sitemap index files.
+
+```php
+Crawler::create()
+    ->setUrlParserClass(SitemapUrlParser::class)
+    ...
+```
+
 ### Ignoring robots.txt and robots meta
 
 By default, the crawler will respect robots data. It is possible to disable these checks like so:
@@ -213,7 +234,7 @@ Crawler::create()
     ->setConcurrency(1) // now all urls will be crawled one by one
 ```
 
-## Defining Crawl Limits
+## Defining Crawl and Time Limits
 
 By default, the crawler continues until it has crawled every page it can find. This behavior might cause issues if you are working in an environment with limitations such as a serverless environment.
 
@@ -221,12 +242,15 @@ The crawl behavior can be controlled with the following two options:
 
  - **Total Crawl Limit** (`setTotalCrawlLimit`): This limit defines the maximal count of URLs to crawl.
  - **Current Crawl Limit** (`setCurrentCrawlLimit`): This defines how many URLs are processed during the current crawl.
+ - **Total Execution Time Limit** (`setTotalExecutionTimeLimit`): This limit defines the maximal execution time of the crawl.
+ - **Current Execution Time Limit** (`setCurrentExecutionTimeLimit`): This limits the execution time of the current crawl.
 
-Let's take a look at some examples to clarify the difference between these two methods.
+Let's take a look at some examples to clarify the difference between `setTotalCrawlLimit` and `setCurrentCrawlLimit`.
+The difference between `setTotalExecutionTimeLimit` and `setCurrentExecutionTimeLimit` will be the same.
 
 ### Example 1: Using the total crawl limit
 
-The `setTotalCrawlLimit` method allows to limit the total number of URLs to crawl, no matter often you call the crawler.
+The `setTotalCrawlLimit` method allows you to limit the total number of URLs to crawl, no matter how often you call the crawler.
 
 ```php
 $queue = <your selection/implementation of a queue>;

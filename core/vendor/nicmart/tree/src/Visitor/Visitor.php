@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -20,10 +20,5 @@ use Tree\Node\NodeInterface;
  */
 interface Visitor
 {
-    /**
-     * @param NodeInterface $node
-     *
-     * @return mixed
-     */
-    public function visit(NodeInterface $node);
+    public function visit(NodeInterface $node): mixed;
 }

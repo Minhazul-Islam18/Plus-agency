@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -15,14 +15,17 @@ use Tree\Node\NodeInterface;
 
 class PostOrderVisitor implements Visitor
 {
-    public function visit(NodeInterface $node)
+    /**
+     * @return array<int, NodeInterface> $node
+     */
+    public function visit(NodeInterface $node): array
     {
         $nodes = [];
 
         foreach ($node->getChildren() as $child) {
             $nodes = \array_merge(
                 $nodes,
-                $child->accept($this)
+                $child->accept($this),
             );
         }
 

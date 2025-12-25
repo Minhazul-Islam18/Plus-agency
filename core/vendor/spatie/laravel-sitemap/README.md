@@ -1,10 +1,20 @@
-# Generate sitemaps with ease
+<div align="left">
+    <a href="https://spatie.be/open-source?utm_source=github&utm_medium=banner&utm_campaign=laravel-sitemap">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://spatie.be/packages/header/laravel-sitemap/html/dark.webp">
+        <img alt="Logo for laravel-sitemap" src="https://spatie.be/packages/header/laravel-sitemap/html/light.webp">
+      </picture>
+    </a>
+
+<h1>Generate sitemaps with ease</h1>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/laravel-sitemap.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-sitemap)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Test Status](https://img.shields.io/github/actions/workflow/status/spatie/laravel-sitemap/run-tests.yml?label=tests)](https://github.com/spatie/laravel-sitemap/actions/workflows/run-tests.yml)
 [![Code Style Status](https://img.shields.io/github/actions/workflow/status/spatie/laravel-sitemap/php-cs-fixer.yml?label=code%20style)](https://github.com/spatie/laravel-sitemap/actions/workflows/php-cs-fixer.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-sitemap.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-sitemap)
+
+</div>
 
 This package can generate a sitemap without you having to add urls to it manually. This works by crawling your entire site.
 
@@ -22,29 +32,20 @@ use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
 Sitemap::create()
-
     ->add(Url::create('/home')
-        ->setLastModificationDate(Carbon::yesterday())
-        ->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY)
-        ->setPriority(0.1))
-
-   ->add(...)
-
-   ->writeToFile($path);
+        ->setLastModificationDate(Carbon::yesterday()))
+    ->add(...)
+    ->writeToFile($path);
 ```
 
 Or you can have the best of both worlds by generating a sitemap and then adding more links to it:
 
 ```php
 SitemapGenerator::create('https://example.com')
-   ->getSitemap()
-   ->add(Url::create('/extra-page')
-        ->setLastModificationDate(Carbon::yesterday())
-        ->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY)
-        ->setPriority(0.1))
-
+    ->getSitemap()
+    ->add(Url::create('/extra-page')
+        ->setLastModificationDate(Carbon::yesterday()))
     ->add(...)
-
     ->writeToFile($path);
 ```
 
@@ -64,6 +65,11 @@ You can also use one of your available filesystem disks to write the sitemap to.
 SitemapGenerator::create('https://example.com')->getSitemap()->writeToDisk('public', 'sitemap.xml');
 ```
 
+You may need to set the file visibility on one of your sitemaps. For example, if you are writing a sitemap to S3 that you want to be publicly available. You can set the third parameter to `true` to make it public. Note: This can only be used on the `->writeToDisk()` method.
+```php
+SitemapGenerator::create('https://example.com')->getSitemap()->writeToDisk('public', 'sitemap.xml', true);
+```
+
 You can also add your models directly by implementing the `\Spatie\Sitemap\Contracts\Sitemapable` interface.
 
 ```php
@@ -74,11 +80,12 @@ class Post extends Model implements Sitemapable
 {
     public function toSitemapTag(): Url | string | array
     {
+        // Simple return:
         return route('blog.post.show', $this);
+
+        // Return with fine-grained control:
         return Url::create(route('blog.post.show', $this))
-            ->setLastModificationDate(Carbon::create($this->updated_at))
-            ->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY)
-            ->setPriority(0.1);
+            ->setLastModificationDate(Carbon::create($this->updated_at));
     }
 }
 ```
@@ -201,14 +208,10 @@ The generated sitemap will look similar to this:
     <url>
         <loc>https://example.com</loc>
         <lastmod>2016-01-01T00:00:00+00:00</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
     </url>
     <url>
         <loc>https://example.com/page</loc>
         <lastmod>2016-01-01T00:00:00+00:00</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
     </url>
 
     ...
@@ -252,26 +255,6 @@ return [
 ];
 ```
 
-#### Changing properties
-
-To change the `lastmod`, `changefreq` and `priority` of the contact page:
-
-```php
-use Carbon\Carbon;
-use Spatie\Sitemap\SitemapGenerator;
-use Spatie\Sitemap\Tags\Url;
-
-SitemapGenerator::create('https://example.com')
-   ->hasCrawled(function (Url $url) {
-       if ($url->segment(1) === 'contact') {
-           $url->setPriority(0.9)
-               ->setLastModificationDate(Carbon::create('2016', '1', '1'));
-       }
-
-       return $url;
-   })
-   ->writeToFile($sitemapPath);
-```
 
 #### Leaving out some links
 
@@ -282,14 +265,14 @@ use Spatie\Sitemap\SitemapGenerator;
 use Spatie\Sitemap\Tags\Url;
 
 SitemapGenerator::create('https://example.com')
-   ->hasCrawled(function (Url $url) {
-       if ($url->segment(1) === 'contact') {
-           return;
-       }
+    ->hasCrawled(function (Url $url) {
+        if ($url->segment(1) === 'contact') {
+            return;
+        }
 
-       return $url;
-   })
-   ->writeToFile($sitemapPath);
+        return $url;
+    })
+    ->writeToFile($sitemapPath);
 ```
 
 #### Preventing the crawler from crawling some pages
@@ -302,14 +285,14 @@ use Spatie\Sitemap\SitemapGenerator;
 use Psr\Http\Message\UriInterface;
 
 SitemapGenerator::create('https://example.com')
-   ->shouldCrawl(function (UriInterface $url) {
-       // All pages will be crawled, except the contact page.
-       // Links present on the contact page won't be added to the
-       // sitemap unless they are present on a crawlable page.
+    ->shouldCrawl(function (UriInterface $url) {
+        // All pages will be crawled, except the contact page.
+        // Links present on the contact page won't be added to the
+        // sitemap unless they are present on a crawlable page.
        
-       return strpos($url->getPath(), '/contact') === false;
-   })
-   ->writeToFile($sitemapPath);
+        return strpos($url->getPath(), '/contact') === false;
+    })
+    ->writeToFile($sitemapPath);
 ```
 
 #### Configuring the crawler
@@ -343,7 +326,7 @@ SitemapGenerator::create('https://example.com')
    
 The sitemap generator can execute JavaScript on each page so it will discover links that are generated by your JS scripts. You can enable this feature by setting `execute_javascript` in the config file to `true`.
 
-Under the hood, [headless Chrome](https://github.com/spatie/browsershot) is used to execute JavaScript. Here are some pointers on [how to install it on your system](https://github.com/spatie/browsershot#requirements).
+Under the hood, [headless Chrome](https://github.com/spatie/browsershot) is used to execute JavaScript. Here are some pointers on [how to install it on your system](https://spatie.be/docs/browsershot/v4/requirements).
 
 The package will make an educated guess as to where Chrome is installed on your system. You can also manually pass the location of the Chrome binary to  `executeJavaScript()`.
 
@@ -358,7 +341,6 @@ use Spatie\Sitemap\Tags\Url;
 SitemapGenerator::create('https://example.com')
     ->getSitemap()
     // here we add one extra link, but you can add as many as you'd like
-    ->add(Url::create('/extra-page')->setPriority(0.5))
     ->writeToFile($sitemapPath);
 ```
 
@@ -373,7 +355,6 @@ use Spatie\Sitemap\Tags\Url;
 SitemapGenerator::create('https://example.com')
     ->getSitemap()
     // here we add one extra link, but you can add as many as you'd like
-    ->add(Url::create('/extra-page')->setPriority(0.5)->addAlternate('/extra-pagina', 'nl'))
     ->writeToFile($sitemapPath);
 ```
 
@@ -439,10 +420,10 @@ You can also create a sitemap fully manual:
 use Carbon\Carbon;
 
 Sitemap::create()
-   ->add('/page1')
-   ->add('/page2')
-   ->add(Url::create('/page3')->setLastModificationDate(Carbon::create('2016', '1', '1')))
-   ->writeToFile($sitemapPath);
+    ->add('/page1')
+    ->add('/page2')
+    ->add(Url::create('/page3')->setLastModificationDate(Carbon::create('2016', '1', '1')))
+    ->writeToFile($sitemapPath);
 ```
 
 ### Creating a sitemap index
@@ -474,14 +455,14 @@ the generated sitemap index will look similar to this:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <sitemap>
-      <loc>http://www.example.com/pages_sitemap.xml</loc>
-      <lastmod>2016-01-01T00:00:00+00:00</lastmod>
-   </sitemap>
-   <sitemap>
-      <loc>http://www.example.com/posts_sitemap.xml</loc>
-      <lastmod>2015-12-31T00:00:00+00:00</lastmod>
-   </sitemap>
+    <sitemap>
+        <loc>http://www.example.com/pages_sitemap.xml</loc>
+        <lastmod>2016-01-01T00:00:00+00:00</lastmod>
+    </sitemap>
+    <sitemap>
+        <loc>http://www.example.com/posts_sitemap.xml</loc>
+        <lastmod>2015-12-31T00:00:00+00:00</lastmod>
+    </sitemap>
 </sitemapindex>
 ```
 
@@ -551,6 +532,7 @@ protected function schedule(Schedule $schedule)
     $schedule->command('sitemap:generate')->daily();
     ...
 }
+
 ```
 
 ## Changelog

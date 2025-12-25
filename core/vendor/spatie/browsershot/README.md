@@ -1,13 +1,21 @@
-<p align="center"><img src="/art/socialcard.png" alt="Social Card of Spatie's Browsershot"></p>
+<div align="left">
+    <a href="https://spatie.be/open-source?utm_source=github&utm_medium=banner&utm_campaign=browsershot">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://spatie.be/packages/header/browsershot/html/dark.webp">
+        <img alt="Logo for Browsershot" src="https://spatie.be/packages/header/browsershot/html/light.webp">
+      </picture>
+    </a>
 
-# Convert a webpage to an image or pdf using headless Chrome
-
+<h1>Render web pages to an image or PDF with Puppeteer</h1>
+    
 [![Latest Version](https://img.shields.io/github/release/spatie/browsershot.svg?style=flat-square)](https://github.com/spatie/browsershot/releases)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![run-tests](https://img.shields.io/github/actions/workflow/status/spatie/browsershot/run-tests.yml?label=tests&style=flat-square)](https://github.com/spatie/browsershot/actions)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/browsershot.svg?style=flat-square)](https://packagist.org/packages/spatie/browsershot)
+    
+</div>
 
-The package can convert a webpage to an image or pdf. The conversion is done behind the scenes by [Puppeteer](https://github.com/GoogleChrome/puppeteer) which controls a headless version of Google Chrome.
+The package can convert a web page to an image or PDF. The conversion is done behind the scenes by [Puppeteer](https://github.com/GoogleChrome/puppeteer) which runs a headless version of Google Chrome.
 
 Here's a quick example:
 
@@ -18,7 +26,7 @@ use Spatie\Browsershot\Browsershot;
 Browsershot::url('https://example.com')->save($pathToImage);
 ```
 
-It will save a pdf if the path passed to the `save` method has a `pdf` extension.
+It will save a PDF if the path passed to the `save` method has a `pdf` extension.
 
 ```php
 // a pdf will be saved
@@ -74,6 +82,18 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 
 All documentation is available [on our documentation site](https://spatie.be/docs/browsershot).
 
+## Testing
+
+For running the testsuite, you'll need to have Puppeteer installed. Pleaser refer to the Browsershot requirements [here](https://spatie.be/docs/browsershot/v4/requirements). Usually `npm -g i puppeteer` will do the trick.
+
+Additionally, you'll need the `pdftotext` CLI which is part of the poppler-utils package. More info can be found in in the [spatie/pdf-to-text readme](https://github.com/spatie/pdf-to-text?tab=readme-ov-file#requirements). Usually `brew install poppler-utils` will suffice.
+
+Finally run the tests with:
+
+```bash
+composer test
+```
+
 ## Contributing
 
 Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
@@ -92,8 +112,6 @@ If using headless Chrome does not work for you take a look at at `v1` of this pa
 
 - [Freek Van der Herten](https://github.com/freekmurze)
 - [All Contributors](../../contributors)
-
-And a special thanks to [Caneco](https://twitter.com/caneco) for the logo ✨
 
 ## License
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -20,16 +20,16 @@ use Tree\Node\NodeInterface;
 class NodeBuilder implements NodeBuilderInterface
 {
     /**
-     * @var NodeInterface[]
+     * @var array<int, NodeInterface>
      */
-    private $nodeStack = [];
+    private array $nodeStack = [];
 
     public function __construct(?NodeInterface $node = null)
     {
         $this->setNode($node ?: $this->nodeInstanceByValue());
     }
 
-    public function setNode(NodeInterface $node)
+    public function setNode(NodeInterface $node): static
     {
         $this
             ->emptyStack()
@@ -38,30 +38,36 @@ class NodeBuilder implements NodeBuilderInterface
         return $this;
     }
 
-    public function getNode()
+    public function getNode(): NodeInterface
     {
-        return $this->nodeStack[\count($this->nodeStack) - 1];
+        $count = \count($this->nodeStack);
+
+        if (0 === $count) {
+            throw new \LogicException('The node builder currently does not manage any nodes.');
+        }
+
+        return $this->nodeStack[$count - 1];
     }
 
-    public function leaf($value = null)
+    public function leaf(mixed $value = null): static
     {
         $this->getNode()->addChild(
-            $this->nodeInstanceByValue($value)
+            $this->nodeInstanceByValue($value),
         );
 
         return $this;
     }
 
-    public function leafs($value1 /*,  $value2, ... */)
+    public function leafs(mixed ...$values): static
     {
-        foreach (\func_get_args() as $value) {
+        foreach ($values as $value) {
             $this->leaf($value);
         }
 
         return $this;
     }
 
-    public function tree($value = null)
+    public function tree(mixed $value = null): static
     {
         $node = $this->nodeInstanceByValue($value);
         $this->getNode()->addChild($node);
@@ -70,41 +76,41 @@ class NodeBuilder implements NodeBuilderInterface
         return $this;
     }
 
-    public function end()
+    public function end(): ?static
     {
         $this->popNode();
 
         return $this;
     }
 
-    public function nodeInstanceByValue($value = null)
+    public function nodeInstanceByValue(mixed $value = null): NodeInterface
     {
         return new Node($value);
     }
 
-    public function value($value)
+    public function value(mixed $value): static
     {
         $this->getNode()->setValue($value);
 
         return $this;
     }
 
-    private function emptyStack()
+    private function emptyStack(): static
     {
         $this->nodeStack = [];
 
         return $this;
     }
 
-    private function pushNode(NodeInterface $node)
+    private function pushNode(NodeInterface $node): static
     {
-        \array_push($this->nodeStack, $node);
+        $this->nodeStack[] = $node;
 
         return $this;
     }
 
-    private function popNode()
+    private function popNode(): void
     {
-        return \array_pop($this->nodeStack);
+        \array_pop($this->nodeStack);
     }
 }

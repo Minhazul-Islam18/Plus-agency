@@ -3,6 +3,8 @@
 namespace Spatie\Crawler\Handlers;
 
 use Exception;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RedirectMiddleware;
@@ -13,21 +15,28 @@ use Spatie\Crawler\Crawler;
 use Spatie\Crawler\CrawlerRobots;
 use Spatie\Crawler\CrawlProfiles\CrawlSubdomains;
 use Spatie\Crawler\CrawlUrl;
-use Spatie\Crawler\LinkAdder;
 use Spatie\Crawler\ResponseWithCachedBody;
+use Spatie\Crawler\UrlParsers\UrlParser;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class CrawlRequestFulfilled
 {
-    protected LinkAdder $linkAdder;
+    protected UrlParser $urlParser;
 
     public function __construct(protected Crawler $crawler)
     {
-        $this->linkAdder = new LinkAdder($this->crawler);
+        $urlParserClass = $this->crawler->getUrlParserClass();
+        $this->urlParser = new $urlParserClass($this->crawler);
     }
 
     public function __invoke(ResponseInterface $response, $index)
     {
         $body = $this->getBody($response);
+        if (empty($body)) {
+            usleep($this->crawler->getDelayBetweenRequests());
+
+            return;
+        }
 
         $robots = new CrawlerRobots(
             $response->getHeaders(),
@@ -38,7 +47,19 @@ class CrawlRequestFulfilled
         $crawlUrl = $this->crawler->getCrawlQueue()->getUrlById($index);
 
         if ($this->crawler->mayExecuteJavaScript()) {
-            $body = $this->getBodyAfterExecutingJavaScript($crawlUrl->url);
+            try {
+                $body = $this->getBodyAfterExecutingJavaScript($crawlUrl->url);
+            } catch (ProcessFailedException $exception) {
+                $request = new Request('GET', $crawlUrl->url);
+                $exception = new RequestException($exception->getMessage(), $request);
+                $crawlUrl = $this->crawler->getCrawlQueue()->getUrlById($index);
+
+                $this->crawler->getCrawlObservers()->crawlFailed($crawlUrl, $exception);
+
+                usleep($this->crawler->getDelayBetweenRequests());
+
+                return;
+            }
 
             $response = $response->withBody(Utils::streamFor($body));
         }
@@ -61,13 +82,14 @@ class CrawlRequestFulfilled
         }
 
         $baseUrl = $this->getBaseUrl($response, $crawlUrl);
+        $originalUrl = $crawlUrl->url;
 
-        $this->linkAdder->addFromHtml($body, $baseUrl);
+        $this->urlParser->addFromHtml($body, $baseUrl, $originalUrl);
 
         usleep($this->crawler->getDelayBetweenRequests());
     }
 
-    protected function getBaseUrl(ResponseInterface $response, CrawlUrl $crawlUrl): Uri
+    protected function getBaseUrl(ResponseInterface $response, CrawlUrl $crawlUrl): UriInterface
     {
         $redirectHistory = $response->getHeader(RedirectMiddleware::HISTORY_HEADER);
 

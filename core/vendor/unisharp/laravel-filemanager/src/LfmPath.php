@@ -3,9 +3,10 @@
 namespace UniSharp\LaravelFilemanager;
 
 use Illuminate\Container\Container;
-use Intervention\Image\Facades\Image as InterventionImageV2;
-use Intervention\Image\Laravel\Facades\Image as InterventionImageV3;
+use Illuminate\Support\Str;
+use Intervention\Image\Facades\Image;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use UniSharp\LaravelFilemanager\Services\ImageService;
 use UniSharp\LaravelFilemanager\Events\FileIsUploading;
 use UniSharp\LaravelFilemanager\Events\FileWasUploaded;
 use UniSharp\LaravelFilemanager\Events\ImageIsUploading;
@@ -20,9 +21,12 @@ class LfmPath
 
     private $helper;
 
-    public function __construct(Lfm $lfm)
+    private ImageService $imageService;
+
+    public function __construct(Lfm $lfm, ImageService $imageService)
     {
         $this->helper = $lfm;
+        $this->imageService = $imageService;
     }
 
     public function __get($var_name)
@@ -211,6 +215,10 @@ class LfmPath
             return strcasecmp($a->{$key_to_sort}, $b->{$key_to_sort});
         });
 
+        if (config('lfm.is_reverse_view', false)) {
+            return array_reverse($arr_items);
+        }
+
         return $arr_items;
     }
 
@@ -281,7 +289,7 @@ class LfmPath
         if (config('lfm.rename_file') === true) {
             $new_file_name = uniqid();
         } elseif (config('lfm.alphanumeric_filename') === true) {
-            $new_file_name = preg_replace('/[^A-Za-z0-9\-\']/', '_', $new_file_name);
+            $new_file_name = Str::slug($new_file_name);
         }
 
         if ($extension) {
@@ -325,18 +333,10 @@ class LfmPath
         $thumbWidth = $this->helper->shouldCreateCategoryThumb() && $this->helper->categoryThumbWidth() ? $this->helper->categoryThumbWidth() : config('lfm.thumb_img_width', 200);
         $thumbHeight = $this->helper->shouldCreateCategoryThumb() && $this->helper->categoryThumbHeight() ? $this->helper->categoryThumbHeight() : config('lfm.thumb_img_height', 200);
 
-        if (class_exists(InterventionImageV2::class)) {
-            $encoded_image = InterventionImageV2::make($original_image->get())
-                ->fit($thumbWidth, $thumbHeight)
-                ->stream()
-                ->detach();
-        } else {
-            $encoded_image = InterventionImageV3::read($original_image->get())
-                ->cover($thumbWidth, $thumbHeight)
-                ->encodeByMediaType();
-        }
-
-
+        $encoded_image = $this->imageService->read($original_image->get())
+            ->cover($thumbWidth, $thumbHeight)
+            ->encodeByMediaType();
+        
         $this->storage->put($encoded_image, 'public');
     }
 }

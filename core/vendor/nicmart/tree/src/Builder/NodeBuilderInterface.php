@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -22,70 +22,44 @@ interface NodeBuilderInterface
 {
     /**
      * Set the node the builder will manage.
-     *
-     * @param NodeInterface $node
-     *
-     * @return NodeBuilderInterface The current instance
      */
-    public function setNode(NodeInterface $node);
+    public function setNode(NodeInterface $node): static;
 
     /**
      * Get the node the builder manages.
      *
-     * @return NodeInterface
+     * @throws \LogicException
      */
-    public function getNode();
+    public function getNode(): NodeInterface;
 
     /**
      * Set the value of the underlaying node.
-     *
-     * @param mixed $value
-     *
-     * @return NodebuilderInterface The current instance
      */
-    public function value($value);
+    public function value(mixed $value): static;
 
     /**
      * Add a leaf to the node.
-     *
-     * @param mixed $value The value of the leaf node
-     *
-     * @return NodeBuilderInterface The current instance
      */
-    public function leaf($value = null);
+    public function leaf(mixed $value = null): static;
 
     /**
      * Add several leafs to the node.
-     *
-     * @param $value, ... An arbitrary long list of values
-     *
-     * @return NodeBuilderInterface The current instance
      */
-    public function leafs($value);
+    public function leafs(mixed ...$values): static;
 
     /**
      * Add a child to the node enter in its scope.
-     *
-     * @param null $value
-     *
-     * @return NodeBuilderInterface A NodeBuilderInterface instance linked to the child node
      */
-    public function tree($value = null);
+    public function tree(mixed $value = null): static;
 
     /**
      * Goes up to the parent node context.
-     *
-     * @return null|NodeBuilderInterface A NodeBuilderInterface instanced linked to the parent node
      */
-    public function end();
+    public function end(): ?static;
 
     /**
      * Return a node instance set with the given value. Implementation can follow their own logic
      * in choosing the NodeInterface implmentation taking into account the value.
-     *
-     * @param mixed $value
-     *
-     * @return NodeInterface
      */
-    public function nodeInstanceByValue($value = null);
+    public function nodeInstanceByValue(mixed $value = null): NodeInterface;
 }

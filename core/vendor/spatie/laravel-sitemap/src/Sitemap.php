@@ -34,6 +34,10 @@ class Sitemap implements Responsable, Renderable
             return $this;
         }
 
+        if (is_string($tag) && trim($tag) === '') {
+            return $this;
+        }
+
         if (is_string($tag)) {
             $tag = Url::create($tag);
         }
@@ -78,9 +82,11 @@ class Sitemap implements Responsable, Renderable
         return $this;
     }
 
-    public function writeToDisk(string $disk, string $path): static
+    public function writeToDisk(string $disk, string $path, bool $public = false): static
     {
-        Storage::disk($disk)->put($path, $this->render());
+        $visibility = ($public) ? 'public' : 'private';
+
+        Storage::disk($disk)->put($path, $this->render(), $visibility);
 
         return $this;
     }

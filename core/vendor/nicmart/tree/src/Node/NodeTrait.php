@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -13,38 +13,41 @@ namespace Tree\Node;
 
 use Tree\Visitor\Visitor;
 
+/**
+ * @template TValue
+ */
 trait NodeTrait
 {
     /**
-     * @var mixed
+     * @var TValue
      */
     private $value;
+    private ?NodeInterface $parent = null;
 
     /**
-     * parent.
-     *
-     * @var NodeInterface
+     * @var array<int, NodeInterface>
      */
-    private $parent;
+    private array $children = [];
 
     /**
-     * @var NodeInterface[]
+     * @param TValue $value
      */
-    private $children = [];
-
-    public function setValue($value)
+    public function setValue($value): static
     {
         $this->value = $value;
 
         return $this;
     }
 
+    /**
+     * @return TValue
+     */
     public function getValue()
     {
         return $this->value;
     }
 
-    public function addChild(NodeInterface $child)
+    public function addChild(NodeInterface $child): static
     {
         $child->setParent($this);
         $this->children[] = $child;
@@ -52,7 +55,7 @@ trait NodeTrait
         return $this;
     }
 
-    public function removeChild(NodeInterface $child)
+    public function removeChild(NodeInterface $child): static
     {
         foreach ($this->children as $key => $myChild) {
             if ($child === $myChild) {
@@ -67,21 +70,24 @@ trait NodeTrait
         return $this;
     }
 
-    public function removeAllChildren()
+    public function removeAllChildren(): static
     {
         $this->setChildren([]);
 
         return $this;
     }
 
-    public function getChildren()
+    public function getChildren(): array
     {
         return $this->children;
     }
 
-    public function setChildren(array $children)
+    public function setChildren(array $children): static
     {
-        $this->removeParentFromChildren();
+        foreach ($this->getChildren() as $child) {
+            $child->setParent(null);
+        }
+
         $this->children = [];
 
         foreach ($children as $child) {
@@ -91,22 +97,22 @@ trait NodeTrait
         return $this;
     }
 
-    public function setParent(?NodeInterface $parent = null)
+    public function setParent(?NodeInterface $parent = null): void
     {
         $this->parent = $parent;
     }
 
-    public function getParent()
+    public function getParent(): ?NodeInterface
     {
         return $this->parent;
     }
 
-    public function getAncestors()
+    public function getAncestors(): array
     {
         $parents = [];
         $node = $this;
 
-        while ($parent = $node->getParent()) {
+        while (($parent = $node->getParent()) instanceof NodeInterface) {
             \array_unshift($parents, $parent);
             $node = $parent;
         }
@@ -114,59 +120,56 @@ trait NodeTrait
         return $parents;
     }
 
-    public function getAncestorsAndSelf()
+    public function getAncestorsAndSelf(): array
     {
         return \array_merge($this->getAncestors(), [$this]);
     }
 
-    public function getNeighbors()
+    public function getNeighbors(): array
     {
-        $neighbors = $this->getParent()->getChildren();
-        $current = $this;
+        if (null === $this->parent) {
+            return [];
+        }
 
-        return \array_values(
-            \array_filter(
-                $neighbors,
-                static function ($item) use ($current) {
-                    return $item !== $current;
-                }
-            )
-        );
+        $neighbors = $this->parent->getChildren();
+        $that = $this;
+
+        return \array_values(\array_filter($neighbors, static function (NodeInterface $node) use ($that): bool {
+            return $node !== $that;
+        }));
     }
 
-    public function getNeighborsAndSelf()
+    public function getNeighborsAndSelf(): array
     {
-        return $this->getParent()->getChildren();
+        if (null === $this->parent) {
+            return [
+                $this,
+            ];
+        }
+
+        return $this->parent->getChildren();
     }
 
-    public function isLeaf()
+    public function isRoot(): bool
     {
-        return 0 === \count($this->children);
+        return null === $this->parent;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRoot()
+    public function isChild(): bool
     {
-        return null === $this->getParent();
+        return null !== $this->parent;
     }
 
-    public function isChild()
+    public function isLeaf(): bool
     {
-        return null !== $this->getParent();
+        return [] === $this->children;
     }
 
-    /**
-     * Find the root of the node.
-     *
-     * @return NodeInterface
-     */
-    public function root()
+    public function root(): NodeInterface
     {
         $node = $this;
 
-        while ($parent = $node->getParent()) {
+        while (($parent = $node->getParent()) instanceof NodeInterface) {
             $node = $parent;
         }
 
@@ -177,10 +180,8 @@ trait NodeTrait
      * Return the distance from the current node to the root.
      *
      * Warning, can be expensive, since each descendant is visited
-     *
-     * @return int
      */
-    public function getDepth()
+    public function getDepth(): int
     {
         if ($this->isRoot()) {
             return 0;
@@ -191,10 +192,8 @@ trait NodeTrait
 
     /**
      * Return the height of the tree whose root is this node.
-     *
-     * @return int
      */
-    public function getHeight()
+    public function getHeight(): int
     {
         if ($this->isLeaf()) {
             return 0;
@@ -209,12 +208,7 @@ trait NodeTrait
         return \max($heights) + 1;
     }
 
-    /**
-     * Return the number of nodes in a tree.
-     *
-     * @return int
-     */
-    public function getSize()
+    public function getSize(): int
     {
         $size = 1;
 
@@ -225,15 +219,8 @@ trait NodeTrait
         return $size;
     }
 
-    public function accept(Visitor $visitor)
+    public function accept(Visitor $visitor): mixed
     {
         return $visitor->visit($this);
-    }
-
-    private function removeParentFromChildren()
-    {
-        foreach ($this->getChildren() as $child) {
-            $child->setParent(null);
-        }
     }
 }

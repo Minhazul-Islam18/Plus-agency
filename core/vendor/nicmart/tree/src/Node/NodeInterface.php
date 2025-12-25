@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) 2013-2020 Nicolò Martini
+ * Copyright (c) 2013-2025 Nicolò Martini
  *
  * For the full copyright and license information, please view
  * the LICENSE.md file that was distributed with this source code.
@@ -17,147 +17,125 @@ use Tree\Visitor\Visitor;
  * Interface for tree nodes.
  *
  * @author Nicolò Martini <nicmartnic@gmail.com>
+ *
+ * @template TValue
  */
 interface NodeInterface
 {
     /**
      * Set the value of the current node.
      *
-     * @param mixed $value
-     *
-     * @return NodeInterface the current instance
+     * @param TValue $value
      */
-    public function setValue($value);
+    public function setValue($value): static;
 
     /**
      * Get the current node value.
      *
-     * @return mixed
+     * @return TValue
      */
     public function getValue();
 
     /**
      * Add a child.
-     *
-     * @param NodeInterface $child
-     *
-     * @return mixed
      */
-    public function addChild(self $child);
+    public function addChild(self $child): static;
 
     /**
      * Remove a node from children.
-     *
-     * @param NodeInterface $child
-     *
-     * @return NodeInterface the current instance
      */
-    public function removeChild(self $child);
+    public function removeChild(self $child): static;
 
     /**
      * Remove all children.
-     *
-     * @return NodeInterface The current instance
      */
-    public function removeAllChildren();
+    public function removeAllChildren(): static;
 
     /**
      * Return the array of children.
      *
-     * @return NodeInterface[]
+     * @return array<int, NodeInterface>
      */
-    public function getChildren();
+    public function getChildren(): array;
 
     /**
      * Replace the children set with the given one.
      *
-     * @param NodeInterface[] $children
-     *
-     * @return mixed
+     * @param array<int, NodeInterface> $children
      */
-    public function setChildren(array $children);
+    public function setChildren(array $children): static;
 
     /**
      * Set the parent node.
-     *
-     * @param NodeInterface $parent
      */
-    public function setParent(?self $parent = null);
+    public function setParent(?self $parent = null): void;
 
     /**
      * Return the parent node.
-     *
-     * @return NodeInterface
      */
-    public function getParent();
+    public function getParent(): ?self;
 
     /**
      * Retrieves all ancestors of node excluding current node.
-     *
-     * @return array
      */
-    public function getAncestors();
+    public function getAncestors(): array;
 
     /**
      * Retrieves all ancestors of node as well as the node itself.
      *
-     * @return Node[]
+     * @return array<int, Node>
      */
-    public function getAncestorsAndSelf();
+    public function getAncestorsAndSelf(): array;
 
     /**
      * Retrieves all neighboring nodes, excluding the current node.
-     *
-     * @return array
      */
-    public function getNeighbors();
+    public function getNeighbors(): array;
 
     /**
      * Returns all neighboring nodes, including the current node.
      *
-     * @return Node[]
+     * @return array<int, NodeInterface>
      */
-    public function getNeighborsAndSelf();
+    public function getNeighborsAndSelf(): array;
 
     /**
      * Return true if the node is the root, false otherwise.
-     *
-     * @return bool
      */
-    public function isRoot();
+    public function isRoot(): bool;
 
     /**
      * Return true if the node is a child, false otherwise.
-     *
-     * @return bool
      */
-    public function isChild();
+    public function isChild(): bool;
 
     /**
      * Return true if the node has no children, false otherwise.
-     *
-     * @return bool
      */
-    public function isLeaf();
+    public function isLeaf(): bool;
+
+    /**
+     * Find the root of the node.
+     */
+    public function root(): self;
 
     /**
      * Return the distance from the current node to the root.
-     *
-     * @return int
      */
-    public function getDepth();
+    public function getDepth(): int;
 
     /**
      * Return the height of the tree whose root is this node.
-     *
-     * @return int
      */
-    public function getHeight();
+    public function getHeight(): int;
+
+    /**
+     * Return the number of nodes in a tree.
+     */
+    public function getSize(): int;
 
     /**
      * Accept method for the visitor pattern (see http://en.wikipedia.org/wiki/Visitor_pattern).
-     *
-     * @param Visitor $visitor
      */
-    public function accept(Visitor $visitor);
+    public function accept(Visitor $visitor): mixed;
 }

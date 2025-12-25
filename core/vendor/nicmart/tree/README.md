@@ -2,9 +2,13 @@
 
 [![Integrate](https://github.com/nicmart/Tree/workflows/Integrate/badge.svg?branch=master)](https://github.com/nicmart/Tree/actions)
 [![Release](https://github.com/nicmart/Tree/workflows/Release/badge.svg?branch=master)](https://github.com/nicmart/Tree/actions)
+
+[![Code Coverage](https://codecov.io/gh/nicmart/tree/branch/master/graph/badge.svg)](https://codecov.io/gh/nicmart/tree)
+[![Type Coverage](https://shepherd.dev/github/nicmart/tree/coverage.svg)](https://shepherd.dev/github/nicmart/tree)
+
 [![Latest Stable Version](https://poser.pugx.org/nicmart/tree/v/stable)](https://packagist.org/packages/nicmart/tree)
 [![Total Downloads](https://poser.pugx.org/nicmart/tree/downloads)](https://packagist.org/packages/nicmart/tree)
-[![License](https://poser.pugx.org/nicmart/tree/license)](https://packagist.org/packages/nicmart/tree)
+[![Monthly Downloads](http://poser.pugx.org/nicmart/tree/d/monthly)](https://packagist.org/packages/nicmart/tree)
 
 In Tree you can find a basic but flexible tree data structure for php together with and an handful Builder class, that enables you to build tree in a fluent way.
 
@@ -255,30 +259,10 @@ $yield = $node->accept($visitor);
 
 ## Install
 
-The best way to install Tree is [through composer](http://getcomposer.org).
+Run
 
-Just create a composer.json file for your project:
-
-```JSON
-{
-    "require": {
-        "nicmart/tree": "~0.2"
-    }
-}
 ```
-
-Then you can run these two commands to install it:
-
-    $ curl -s http://getcomposer.org/installer | php
-    $ php composer.phar install
-
-or simply run `composer install` if you have have already [installed the composer globally](http://getcomposer.org/doc/00-intro.md#globally).
-
-Then you can include the autoloader, and you will have access to the library classes:
-
-```php
-<?php
-require 'vendor/autoload.php';
+$ composer require nicmart/tree
 ```
 
 # Tests

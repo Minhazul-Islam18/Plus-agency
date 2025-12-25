@@ -64,11 +64,11 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 @csrf
 
                 <div class="form-group">
-                  <label for="">Contact Page Background Image **</label>
+                  <label for="">Contact Breadcrumb Background Image **</label>
                   <br>
                   <div class="thumb-preview" id="thumbPreview1">
-                    @if (!empty($abs->contact_bg))
-                      <img src="{{asset('assets/front/img/'.$abs->contact_bg)}}" alt="Contact Background" class="uploaded-img">
+                    @if (!empty($abs->contact_breadcrumb_bg))
+                      <img src="{{asset('assets/front/img/'.$abs->contact_breadcrumb_bg)}}" alt="Breadcrumb Background" class="uploaded-img">
                       <button type="button" class="btn btn-danger btn-sm remove-img-btn" data-lang-id="{{$lang_id}}">
                         <i class="fas fa-times"></i>
                       </button>
@@ -78,28 +78,28 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                   </div>
                   <br>
                   <br>
-                  <input id="fileInput1" type="hidden" name="contact_bg" value="">
+                  <input id="fileInput1" type="hidden" name="contact_breadcrumb_bg" value="">
                   <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
                   <p class="text-warning mb-0">JPG, PNG, JPEG images are allowed</p>
-                  @if ($errors->has('contact_bg'))
-                    <p class="text-danger mb-0">{{$errors->first('contact_bg')}}</p>
+                  @if ($errors->has('contact_breadcrumb_bg'))
+                    <p class="text-danger mb-0">{{$errors->first('contact_breadcrumb_bg')}}</p>
                   @endif
                 </div>
 
                 <div class="form-group">
-                  <label>Contact Area Overlay Color Code</label>
-                  <input class="form-control jscolor ltr" name="contact_overlay_color" value="{{$abs->contact_overlay_color}}" placeholder="Enter Color Code">
-                  @if ($errors->has('contact_overlay_color'))
-                    <p class="mb-0 text-danger">{{$errors->first('contact_overlay_color')}}</p>
+                  <label>Breadcrumb Overlay Color Code</label>
+                  <input class="form-control jscolor ltr" name="contact_breadcrumb_overlay_color" value="{{$abs->contact_breadcrumb_overlay_color}}" placeholder="Enter Color Code">
+                  @if ($errors->has('contact_breadcrumb_overlay_color'))
+                    <p class="mb-0 text-danger">{{$errors->first('contact_breadcrumb_overlay_color')}}</p>
                   @endif
                 </div>
 
                 <div class="form-group">
-                  <label>Contact Area Overlay Opacity</label>
-                  <input type="number" class="form-control" name="contact_overlay_opacity" value="{{$abs->contact_overlay_opacity}}" step="0.01" min="0" max="1" placeholder="Enter opacity (0 to 1)">
+                  <label>Breadcrumb Overlay Opacity</label>
+                  <input type="number" class="form-control" name="contact_breadcrumb_overlay_opacity" value="{{$abs->contact_breadcrumb_overlay_opacity}}" step="0.01" min="0" max="1" placeholder="Enter opacity (0 to 1)">
                   <p class="text-warning mb-0">Value must be between 0 to 1 (e.g. 0.5 for 50% opacity)</p>
-                  @if ($errors->has('contact_overlay_opacity'))
-                    <p class="mb-0 text-danger">{{$errors->first('contact_overlay_opacity')}}</p>
+                  @if ($errors->has('contact_breadcrumb_overlay_opacity'))
+                    <p class="mb-0 text-danger">{{$errors->first('contact_breadcrumb_overlay_opacity')}}</p>
                   @endif
                 </div>
 

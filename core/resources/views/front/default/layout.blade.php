@@ -225,8 +225,8 @@
 
     @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation'))
         <!--   breadcrumb area start   -->
-        <div class="breadcrumb-area cases lazy" data-bg="{{ asset('assets/front/img/' . $bs->breadcrumb) }}"
-            style="background-size:cover;">
+        <div class="breadcrumb-area cases lazy" data-bg="@yield('breadcrumb-bg', asset('assets/front/img/' . $bs->breadcrumb))"
+            style="background-size:cover; background-position: center center;">
             <div class="container">
                 <div class="breadcrumb-txt">
                     <div class="row">
@@ -242,7 +242,7 @@
                 </div>
             </div>
             <div class="breadcrumb-area-overlay"
-                style="background-color: #{{ $be->breadcrumb_overlay_color }};opacity: {{ $be->breadcrumb_overlay_opacity }};">
+                style="background-color: #@yield('breadcrumb-overlay-color', $be->breadcrumb_overlay_color);opacity: @yield('breadcrumb-overlay-opacity', $be->breadcrumb_overlay_opacity);">
             </div>
         </div>
         <!--   breadcrumb area end    -->

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Validator;
+use App\Feature;
+use App\Language;
 use App\BasicExtended;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Language;
-use App\Feature;
-use Validator;
-use Session;
+use Illuminate\Support\Facades\Session;
 
 class FeatureController extends Controller
 {
@@ -114,5 +114,14 @@ class FeatureController extends Controller
 
         Session::flash('success', 'Feature deleted successfully!');
         return back();
+    }
+
+    public function status(Request $request)
+    {
+        $feature = Feature::findOrFail($request->id);
+        $feature->status = $request->status;
+        $feature->save();
+
+        return response()->json(['success' => true]);
     }
 }

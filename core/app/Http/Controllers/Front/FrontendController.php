@@ -89,7 +89,7 @@ class FrontendController extends Controller
         $lang_id = $currentLang->id;
 
         $data['sliders'] = Slider::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
-        $data['features'] = Feature::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
+        $data['features'] = Feature::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
         $version = $be->theme_version;
 
         // if home page page builder is disabled

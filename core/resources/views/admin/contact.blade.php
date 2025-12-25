@@ -81,6 +81,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                   <input id="fileInput1" type="hidden" name="contact_breadcrumb_bg" value="">
                   <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
                   <p class="text-warning mb-0">JPG, PNG, JPEG images are allowed</p>
+                  <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px × 350px (Width × Height)</small></p>
                   @if ($errors->has('contact_breadcrumb_bg'))
                     <p class="text-danger mb-0">{{$errors->first('contact_breadcrumb_bg')}}</p>
                   @endif

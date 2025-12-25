@@ -26,9 +26,6 @@ class Encryption
     public const MAX_COMPATIBILITY_PAYLOAD_LENGTH = 3052;
 
     /**
-     * @param string $payload
-     * @param int $maxLengthToPad
-     * @param string $contentEncoding
      * @return string padded payload (plaintext)
      * @throws \ErrorException
      */
@@ -50,8 +47,6 @@ class Encryption
      * @param string $payload With padding
      * @param string $userPublicKey Base 64 encoded (MIME or URL-safe)
      * @param string $userAuthToken Base 64 encoded (MIME or URL-safe)
-     * @param string $contentEncoding
-     * @return array
      *
      * @throws \ErrorException
      */
@@ -68,14 +63,6 @@ class Encryption
     }
 
     /**
-     * @param string $payload
-     * @param string $userPublicKey
-     * @param string $userAuthToken
-     * @param string $contentEncoding
-     * @param array $localKeyObject
-     * @param string $salt
-     * @return array
-     *
      * @throws \ErrorException
      */
     public static function deterministicEncrypt(string $payload, string $userPublicKey, string $userAuthToken, string $contentEncoding, array $localKeyObject, string $salt): array
@@ -90,7 +77,7 @@ class Encryption
             $localPublicKey = hex2bin(Utils::serializePublicKeyFromJWK($localJwk));
         } else {
             /** @var PrivateKey $localPrivateKeyObject */
-            list($localPublicKeyObject, $localPrivateKeyObject) = $localKeyObject;
+            [$localPublicKeyObject, $localPrivateKeyObject] = $localKeyObject;
             $localPublicKey = hex2bin(Utils::serializePublicKey($localPublicKeyObject));
             $localJwk = new JWK([
                 'kty' => 'EC',
@@ -118,9 +105,6 @@ class Encryption
         $sharedSecret = self::calculateAgreementKey($localJwk, $userJwk);
 
         $sharedSecret = str_pad($sharedSecret, 32, chr(0), STR_PAD_LEFT);
-        if (!$sharedSecret) {
-            throw new \ErrorException('Failed to convert shared secret from hexadecimal to binary');
-        }
 
         // section 4.3
         $ikm = self::getIKM($userAuthToken, $userPublicKey, $localPublicKey, $sharedSecret, $contentEncoding);
@@ -178,8 +162,6 @@ class Encryption
      * @param string $ikm    Input keying material
      * @param string $info   Application-specific context
      * @param int    $length The length (in bytes) of the required output key
-     *
-     * @return string
      */
     private static function hkdf(string $salt, string $ikm, string $info, int $length): string
     {
@@ -198,8 +180,6 @@ class Encryption
      *
      * @param string $clientPublicKey The client's public key
      * @param string $serverPublicKey Our public key
-     *
-     * @return null|string
      *
      * @throws \ErrorException
      */
@@ -230,8 +210,6 @@ class Encryption
      *
      * @param string $type The type of the info record
      * @param string|null $context The context for the record
-     * @param string $contentEncoding
-     * @return string
      *
      * @throws \ErrorException
      */
@@ -254,9 +232,6 @@ class Encryption
         throw new \ErrorException('This content encoding is not supported.');
     }
 
-    /**
-     * @return array
-     */
     private static function createLocalKeyObject(): array
     {
         try {
@@ -266,9 +241,6 @@ class Encryption
         }
     }
 
-    /**
-     * @return array
-     */
     private static function createLocalKeyObjectUsingPurePhpMethod(): array
     {
         $curve = NistCurve::curve256();
@@ -298,9 +270,6 @@ class Encryption
         ];
     }
 
-    /**
-     * @return array
-     */
     private static function createLocalKeyObjectUsingOpenSSL(): array
     {
         $keyResource = openssl_pkey_new([
@@ -333,12 +302,6 @@ class Encryption
     }
 
     /**
-     * @param string $userAuthToken
-     * @param string $userPublicKey
-     * @param string $localPublicKey
-     * @param string $sharedSecret
-     * @param string $contentEncoding
-     * @return string
      * @throws \ErrorException
      */
     private static function getIKM(string $userAuthToken, string $userPublicKey, string $localPublicKey, string $sharedSecret, string $contentEncoding): string
@@ -397,23 +360,29 @@ class Encryption
     }
 
     /**
-     * @param string $value
-     * @return BigInteger
+     * @throws \ErrorException
      */
     private static function convertBase64ToBigInteger(string $value): BigInteger
     {
         $value = unpack('H*', Base64Url::decode($value));
 
+        if ($value === false) {
+            throw new \ErrorException('Unable to unpack hex value from string');
+        }
+
         return BigInteger::fromBase($value[1], 16);
     }
 
     /**
-     * @param string $value
-     * @return \GMP
+     * @throws \ErrorException
      */
     private static function convertBase64ToGMP(string $value): \GMP
     {
         $value = unpack('H*', Base64Url::decode($value));
+
+        if ($value === false) {
+            throw new \ErrorException('Unable to unpack hex value from string');
+        }
 
         return gmp_init($value[1], 16);
     }

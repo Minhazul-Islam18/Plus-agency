@@ -1,29 +1,40 @@
 # Laravel Lang
 
-In this repository, you can find the lang files for the [Laravel Framework 4/5/6/7/8](https://laravel.com), [Laravel Jetstream](https://jetstream.laravel.com) , [Laravel Fortify](https://github.com/laravel/fortify), [Laravel Cashier](https://laravel.com/docs/8.x/billing), [Laravel Nova](https://nova.laravel.com) and [Laravel Spark](https://spark.laravel.com).
+![laravel lang localizations](https://preview.dragon-code.pro/laravel-lang/localizations.svg?brand=laravel&mode=dark)
 
-<p align="center">
-    [
-        <a href="https://laravel-lang.github.io/lang">Documentation</a> |
-        <a href="https://laravel-lang.github.io/lang/status.html">Completion Status</a>
-    ]
-</p>
+[![Stable Version][badge_stable]][link_packagist]
+[![Unstable Version][badge_unstable]][link_packagist]
+[![Total Downloads][badge_downloads]][link_packagist]
+[![Github Workflow Status][badge_build]][link_build]
+[![License][badge_license]][link_license]
 
-## News
+In this repository, you can find the lang files for the [Laravel Framework](https://laravel.com), [Laravel Jetstream](https://jetstream.laravel.com), [Laravel Fortify](https://github.com/laravel/fortify), [Laravel Cashier](https://laravel.com/docs/billing), [Laravel Breeze](https://github.com/laravel/breeze), [Laravel Nova](https://nova.laravel.com), [Laravel Spark](https://spark.laravel.com) and [Laravel UI](https://github.com/laravel/ui).
 
-* in version 6.1, we propose a new file by language: `validation-inline.php` ( see [#1268](https://github.com/Laravel-Lang/lang/issues/1268) )
-* in version 7, we propose new directory names to follow ISO-15897 ( see [#1269](https://github.com/Laravel-Lang/lang/issues/1269) )
-* in version 8, we propose new directory names to follow Php Intl ( see [#1453](https://github.com/Laravel-Lang/lang/pull/1453) )
-* in version 9, we propose new structure of files ( see [#1606](https://github.com/Laravel-Lang/lang/discussions/1606), [#1607](https://github.com/Laravel-Lang/lang/pull/1607) )
-* in version 9.1, we include machine translations, with review by humans for some languages ( see [Discussions](https://github.com/Laravel-Lang/lang/discussions/1692) )
+## Documentation
 
-## Translation managers
+See the [documentation](https://laravel-lang.com) for detailed installation and [usage](https://laravel-lang.com/usage/general-principles.html) instructions.
 
-* [LaravelLang](https://github.com/ARCANEDEV/LaravelLang) by [*@arcanedev-maroc*](https://github.com/ARCANEDEV) - Translations manager and checker for Laravel.
-* [Laravel-lang](https://github.com/overtrue/laravel-lang) by [*@overtrue*](https://github.com/overtrue) - Command to add languages in your project.
-* [Lang Publisher](https://github.com/andrey-helldar/laravel-lang-publisher) by [*@andrey-helldar*](https://github.com/andrey-helldar) - Easy installation and update of translation files for your project.
+## Contributing
 
-## Credits
+Please see [CONTRIBUTING](https://laravel-lang.com/contributing.html) for details.
 
-- [Referents by language](https://laravel-lang.github.io/lang/referents.html)
-- [All Contributors](https://github.com/Laravel-Lang/lang/graphs/contributors)
+## License
+
+This package is licensed under the [MIT License][link_license].
+
+
+[badge_build]:          https://img.shields.io/github/actions/workflow/status/laravel-lang/lang/phpunit.yml?branch=main&style=flat-square
+
+[badge_downloads]:      https://img.shields.io/packagist/dt/laravel-lang/lang.svg?style=flat-square
+
+[badge_license]:        https://img.shields.io/packagist/l/laravel-lang/lang.svg?style=flat-square
+
+[badge_stable]:         https://img.shields.io/github/v/release/laravel-lang/lang?label=stable&style=flat-square
+
+[badge_unstable]:       https://img.shields.io/badge/unstable-dev--main-orange?style=flat-square
+
+[link_build]:           https://github.com/laravel-lang/lang/actions
+
+[link_license]:         LICENSE.md
+
+[link_packagist]:       https://packagist.org/packages/laravel-lang/lang

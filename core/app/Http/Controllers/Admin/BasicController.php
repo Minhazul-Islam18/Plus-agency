@@ -18,7 +18,8 @@ use Validator;
 
 class BasicController extends Controller
 {
-    public function fileManager() {
+    public function fileManager()
+    {
         return view('admin.basic.file-manager');
     }
 
@@ -81,13 +82,12 @@ class BasicController extends Controller
 
             foreach ($bss as $key => $bs) {
                 @unlink('assets/front/img/' . $bs->logo);
-                $filename = uniqid() .'.'. $extLogo;
+                $filename = uniqid() . '.' . $extLogo;
                 @copy($logo, 'assets/front/img/' . $filename);
 
                 $bs->logo = $filename;
                 $bs->save();
             }
-
         }
 
         if ($request->filled('favicon')) {
@@ -97,13 +97,12 @@ class BasicController extends Controller
 
             foreach ($bss as $key => $bs) {
                 @unlink('assets/front/img/' . $bs->favicon);
-                $filename = uniqid() .'.'. $extFav;
+                $filename = uniqid() . '.' . $extFav;
                 @copy($favicon, 'assets/front/img/' . $filename);
 
                 $bs->favicon = $filename;
                 $bs->save();
             }
-
         }
 
         if ($request->filled('breadcrumb')) {
@@ -113,13 +112,12 @@ class BasicController extends Controller
 
             foreach ($bss as $key => $bs) {
                 @unlink('assets/front/img/' . $bs->breadcrumb);
-                $filename = uniqid() .'.'. $extBread;
+                $filename = uniqid() . '.' . $extBread;
                 @copy($breadcrumb, 'assets/front/img/' . $filename);
 
                 $bs->breadcrumb = $filename;
                 $bs->save();
             }
-
         }
 
         $request->session()->flash('success', 'Images updated successfully!');
@@ -225,7 +223,7 @@ class BasicController extends Controller
 
 
         if ($request->filled('preloader')) {
-            $filename = uniqid() .'.'. $extPreloader;
+            $filename = uniqid() . '.' . $extPreloader;
             @copy($preloader, 'assets/front/img/' . $filename);
         }
 
@@ -408,7 +406,7 @@ class BasicController extends Controller
     {
         $request->validate([
             'support_email' => 'required|email|max:100',
-            'support_phone' => 'required|max:30',
+            'support_phone' => 'required|max:70',
         ]);
 
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
@@ -434,48 +432,48 @@ class BasicController extends Controller
     public function updateheading(Request $request, $langid)
     {
         $request->validate([
-            'service_title' => 'nullable|max:30',
-            'service_subtitle' => 'nullable|max:40',
-            'career_title' => 'nullable|max:30',
-            'career_subtitle' => 'nullable|max:40',
-            'event_calendar_title' => 'nullable|max:30',
-            'event_calendar_subtitle' => 'nullable|max:40',
-            'service_details_title' => 'nullable|max:30',
-            'portfolio_title' => 'nullable|max:30',
-            'portfolio_subtitle' => 'nullable|max:40',
-            'portfolio_details_title' => 'nullable|max:40',
-            'blog_details_title' => 'nullable|max:30',
-            'rss_details_title' => 'nullable|max:30',
-            'contact_title' => 'nullable|max:30',
-            'contact_subtitle' => 'nullable|max:40',
-            'gallery_title' => 'nullable|max:30',
-            'gallery_subtitle' => 'nullable|max:40',
-            'team_title' => 'nullable|max:30',
-            'team_subtitle' => 'nullable|max:40',
-            'faq_title' => 'nullable|max:30',
-            'faq_subtitle' => 'nullable|max:40',
-            'pricing_title' => 'nullable|max:30',
-            'pricing_subtitle' => 'nullable|max:40',
-            'blog_title' => 'nullable|max:30',
-            'blog_subtitle' => 'nullable|max:40',
-            'rss_title' => 'nullable|max:30',
-            'rss_subtitle' => 'nullable|max:40',
-            'quote_title' => 'nullable|max:30',
-            'quote_subtitle' => 'nullable|max:40',
-            'error_title' => 'nullable|max:30',
-            'error_subtitle' => 'nullable|max:40',
-            'product_title' => 'nullable|max:30',
-            'product_subtitle' => 'nullable|max:40',
-            'product_details_title' => 'nullable|max:30',
-            // 'product_details_subtitle' => 'nullable|max:40',
-            'cart_title' => 'nullable|max:30',
-            'cart_subtitle' => 'nullable|max:40',
-            'checkout_title' => 'nullable|max:30',
-            'checkout_subtitle' => 'nullable|max:40',
-            'event_title' => 'nullable|max:30',
-            'event_subtitle' => 'nullable|max:40',
-            'cause_title' => 'nullable|max:30',
-            'cause_subtitle' => 'nullable|max:40',
+            'service_title' => 'nullable|max:70',
+            'service_subtitle' => 'nullable|max:80',
+            'career_title' => 'nullable|max:70',
+            'career_subtitle' => 'nullable|max:80',
+            'event_calendar_title' => 'nullable|max:70',
+            'event_calendar_subtitle' => 'nullable|max:80',
+            'service_details_title' => 'nullable|max:70',
+            'portfolio_title' => 'nullable|max:70',
+            'portfolio_subtitle' => 'nullable|max:80',
+            'portfolio_details_title' => 'nullable|max:80',
+            'blog_details_title' => 'nullable|max:70',
+            'rss_details_title' => 'nullable|max:70',
+            'contact_title' => 'nullable|max:70',
+            'contact_subtitle' => 'nullable|max:80',
+            'gallery_title' => 'nullable|max:70',
+            'gallery_subtitle' => 'nullable|max:80',
+            'team_title' => 'nullable|max:70',
+            'team_subtitle' => 'nullable|max:80',
+            'faq_title' => 'nullable|max:70',
+            'faq_subtitle' => 'nullable|max:80',
+            'pricing_title' => 'nullable|max:70',
+            'pricing_subtitle' => 'nullable|max:80',
+            'blog_title' => 'nullable|max:70',
+            'blog_subtitle' => 'nullable|max:80',
+            'rss_title' => 'nullable|max:70',
+            'rss_subtitle' => 'nullable|max:80',
+            'quote_title' => 'nullable|max:70',
+            'quote_subtitle' => 'nullable|max:80',
+            'error_title' => 'nullable|max:70',
+            'error_subtitle' => 'nullable|max:80',
+            'product_title' => 'nullable|max:70',
+            'product_subtitle' => 'nullable|max:80',
+            'product_details_title' => 'nullable|max:70',
+            // 'product_details_subtitle' => 'nullable|max:80',
+            'cart_title' => 'nullable|max:70',
+            'cart_subtitle' => 'nullable|max:80',
+            'checkout_title' => 'nullable|max:70',
+            'checkout_subtitle' => 'nullable|max:80',
+            'event_title' => 'nullable|max:70',
+            'event_subtitle' => 'nullable|max:80',
+            'cause_title' => 'nullable|max:70',
+            'cause_subtitle' => 'nullable|max:80',
             'knowledgebase_title' => 'nullable|max:70',
             'knowledgebase_subtitle' => 'nullable|max:70',
             'knowledgebase_details_title' => 'nullable|max:70',
@@ -607,12 +605,24 @@ class BasicController extends Controller
         return back();
     }
 
-    public function maintainance()
+    public function maintainance(Request $request)
     {
-        return view('admin.basic.maintainance');
+        if ($request->has('language')) {
+            $lang = Language::where('code', $request->language)->first();
+            if (!$lang) {
+                $lang = Language::where('is_default', 1)->first();
+            }
+        } else {
+            $lang = Language::where('is_default', 1)->first();
+        }
+
+        $data['lang_id'] = $lang->id;
+        $data['abs'] = $lang->basic_setting;
+
+        return view('admin.basic.maintainance', $data);
     }
 
-    public function updatemaintainance(Request $request)
+    public function updatemaintainance(Request $request, $langid)
     {
         $maintenance = $request->maintenance;
         $allowedExts = array('jpg', 'png', 'jpeg');
@@ -637,13 +647,18 @@ class BasicController extends Controller
             @copy($maintenance, 'assets/front/img/maintainance.png');
         }
 
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->maintainance_text = $request->maintainance_text;
+
+        // Update mode and secret path for ALL languages
         $bss = BasicSetting::all();
-        foreach ($bss as $bs) {
-            $bs->maintainance_text = $request->maintainance_text;
-            $bs->maintainance_mode = $request->maintainance_mode;
-            $bs->secret_path = $request->secret_path;
-            $bs->save();
+        foreach ($bss as $b) {
+            $b->maintainance_mode = $request->maintainance_mode;
+            $b->secret_path = $request->secret_path;
+            $b->save();
         }
+
+        $bs->save();
 
 
         $down = "down";
@@ -700,7 +715,7 @@ class BasicController extends Controller
             $bs->copyright_section = $request->copyright_section;
             $bs->save();
         }
-        
+
         $bes = BasicExtended::all();
         foreach ($bes as $key => $be) {
             if ($be->theme_version != 'ecommerce') {
@@ -713,7 +728,7 @@ class BasicController extends Controller
             }
             $be->save();
         }
-        
+
         Session::flash('success', 'Sections customized successfully!');
         return back();
     }

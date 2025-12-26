@@ -7,3 +7,30 @@
 
 # Ignore file manager uploads
 /assets/lfm/files/
+
+# Ignore vendor directory
+/core/vendor/
+
+# Ignore node modules
+/core/node_modules/
+
+# Ignore Laravel storage and cache
+/core/storage/*.key
+/core/storage/logs/*.log
+/core/bootstrap/cache/*.php
+!/.gitkeep
+
+# Ignore environment file
+/core/.env
+/core/.env.backup
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

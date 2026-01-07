@@ -11,6 +11,17 @@
         owlCarsouelActivate('.hero2-carousel', false, hero2Responsive, 8000, 1000, true, 'fadeOut', 1000, false, 0, true, true);
 
         // case carousel
+        var caseCarousel = $('.case-carousel');
+        if (caseCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            caseCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
+                }
+            });
+        }
         var caseResponsive = {
             0: {
                 items: 1
@@ -28,7 +39,7 @@
                 items: 5
             }
         };
-        owlCarsouelActivate('.case-carousel', true, caseResponsive, 5000, 1500, false, false, 1500, true, 0, true, true);
+        owlCarsouelActivate('.case-carousel', true, caseResponsive, 5000, 1000, false, false, 1000, true, 0, true, true);
 
 
 
@@ -39,40 +50,63 @@
           var pricingNav = false;
         }
         var pricingCarousel = $('.pricing-carousel');
-        pricingCarousel.owlCarousel({
-            loop: true,
-            dots: false,
-            nav: pricingNav,
-            navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
-            autoplay: true,
-            autoplayTimeout: 5000,
-            autoplayHoverPause: true,
-            smartSpeed: 1500,
-            rtl: rtl == 1 ? true : false,
-            items: 3,
-            responsive : {
-                // breakpoint from 0 up
-                0 : {
-                    items : 1,
-                    nav: true
-                },
-                // breakpoint from 480 up
-                768 : {
-                    items : 2,
-                    nav: true
-                },
-                // breakpoint from 768 up
-                992 : {
-                    items : 3
+        if (pricingCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            pricingCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
                 }
-            }
-        });
+            });
+
+            pricingCarousel.owlCarousel({
+                loop: true,
+                dots: false,
+                nav: pricingNav,
+                navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
+                autoplay: true,
+                autoplayTimeout: 5000,
+                autoplayHoverPause: true,
+                smartSpeed: 1000,
+                slideBy: 1,
+                rtl: rtl == 1 ? true : false,
+                items: 3,
+                responsive : {
+                    // breakpoint from 0 up
+                    0 : {
+                        items : 1,
+                        nav: true
+                    },
+                    // breakpoint from 480 up
+                    768 : {
+                        items : 2,
+                        nav: true
+                    },
+                    // breakpoint from 768 up
+                    992 : {
+                        items : 3
+                    }
+                }
+            });
+        }
 
 
 
 
 
         // testimonial carousel
+        var testimonialCarousel = $('.testimonial-carousel');
+        if (testimonialCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            testimonialCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
+                }
+            });
+        }
         var testimonialResponsive = {
             0: {
                 items: 1
@@ -81,7 +115,7 @@
                 items: 2
             },
         };
-        owlCarsouelActivate('.testimonial-carousel', false, testimonialResponsive, 5000, 1500, true, false, 1500, true, 30, true, true);
+        owlCarsouelActivate('.testimonial-carousel', false, testimonialResponsive, 5000, 1000, true, false, 1000, true, 30, true, true);
 
         // Partner carousel
         var partnerCarousel = $('.partner-carousel');
@@ -99,9 +133,9 @@
                 loop: true,
                 autoplay: true,
                 autoplayTimeout: 3000,
-                autoplaySpeed: 800,
+                autoplaySpeed: 1000,
                 autoplayHoverPause: true,
-                smartSpeed: 800,
+                smartSpeed: 1000,
                 slideBy: 1,
                 dots: false,
                 nav: true,
@@ -127,6 +161,15 @@
         function owlCarsouelActivate(selector, nav, responsive, autoplayTimeout, autoplaySpeed, dots, animateOut, smartSpeed, autoplayHoverPause, margin = 0, loop = false, autoplay = false) {
             var $selector = $(selector);
             if ($selector.length > 0) {
+                // Disable lazy loading for carousel items to prevent cloning issues
+                $selector.find('img.lazy').each(function() {
+                    var dataSrc = $(this).attr('data-src');
+                    if (dataSrc) {
+                        $(this).attr('src', dataSrc);
+                        $(this).removeClass('lazy');
+                    }
+                });
+
                 $selector.owlCarousel({
                     loop: loop,
                     autoplay: autoplay,
@@ -136,6 +179,7 @@
                     nav: nav,
                     navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
                     smartSpeed: smartSpeed,
+                    slideBy: 1,
                     autoplayHoverPause: autoplayHoverPause,
                     animateOut: animateOut,
                     margin: margin,
@@ -147,63 +191,87 @@
 
         // team carousel initialization
         var teamCarousel = $('.team-carousel');
-        teamCarousel.owlCarousel({
-            loop: true,
-            dots: false,
-            margin: 30,
-            autoplay: true,
-            smartSpeed: 1500,
-            startPosition: 2,
-            autoplayTimeout: 5000,
-            autoplayHoverPause: true,
-            rtl: rtl == 1 ? true : false,
-            nav: true,
-            navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
-            responsive: {
-                0: {
-                    items: 1
-                },
-                576: {
-                    items: 2
-                },
-                992: {
-                    items: 3
-                },
-                1200: {
-                    items: 4
+        if (teamCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            teamCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
                 }
-            }
-        });
+            });
+
+            teamCarousel.owlCarousel({
+                loop: true,
+                dots: false,
+                margin: 30,
+                autoplay: true,
+                smartSpeed: 1000,
+                slideBy: 1,
+                startPosition: 0,
+                autoplayTimeout: 5000,
+                autoplayHoverPause: true,
+                rtl: rtl == 1 ? true : false,
+                nav: true,
+                navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    576: {
+                        items: 2
+                    },
+                    992: {
+                        items: 3
+                    },
+                    1200: {
+                        items: 4
+                    }
+                }
+            });
+        }
 
         // blog carousel initialization
         var blogCarousel = $('.blog-carousel');
-        blogCarousel.owlCarousel({
-            loop: true,
-            dots: false,
-            margin: 22,
-            autoplay: true,
-            smartSpeed: 1500,
-            startPosition: 2,
-            autoplayTimeout: 5000,
-            autoplayHoverPause: true,
-            nav: true,
-            rtl: rtl == 1 ? true : false,
-            navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
-            responsive: {
-                0: {
-                    items: 1
-                },
-                768: {
-                    items: 2
-                },
-                992: {
-                    items: 2
-                },
-                1200: {
-                    items: 3
+        if (blogCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            blogCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
                 }
-            }
-        });
+            });
+
+            blogCarousel.owlCarousel({
+                loop: true,
+                dots: false,
+                margin: 22,
+                autoplay: true,
+                smartSpeed: 1000,
+                slideBy: 1,
+                startPosition: 0,
+                autoplayTimeout: 5000,
+                autoplayHoverPause: true,
+                nav: true,
+                rtl: rtl == 1 ? true : false,
+                navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    768: {
+                        items: 2
+                    },
+                    992: {
+                        items: 2
+                    },
+                    1200: {
+                        items: 3
+                    }
+                }
+            });
+        }
 
         // language dropdown toggle on clicking button
         $('.language-btn').on('click', function(event) {

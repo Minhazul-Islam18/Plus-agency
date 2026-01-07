@@ -47,7 +47,7 @@ class ProductController extends Controller
         $be = $currentLang->basic_extended;
         $lang_id = $currentLang->id;
 
-        $data['categories'] = Pcategory::where('status', 1)->where('language_id',$currentLang->id)->get();
+        $data['categories'] = Pcategory::where('status', 1)->where('language_id', $currentLang->id)->get();
 
         $search = $request->search;
         $minprice = $request->minprice;
@@ -55,9 +55,9 @@ class ProductController extends Controller
         $category = $request->category_id;
         $tag = $request->tag;
 
-        if($request->type){
+        if ($request->type) {
             $type = $request->type;
-        }else{
+        } else {
             $type = 'new';
         }
         $tag = $request->tag;
@@ -99,16 +99,15 @@ class ProductController extends Controller
 
             ->where('status', 1)->paginate(9);
 
-            $version = $be->theme_version;
+        $version = $be->theme_version;
 
-            if ($version == 'dark') {
-                $version = 'default';
-            }
+        if ($version == 'dark') {
+            $version = 'default';
+        }
 
-            $data['version'] = $version;
+        $data['version'] = $version;
 
-            return view('front.product.product', $data);
-
+        return view('front.product.product', $data);
     }
 
     public function productDetails($slug)
@@ -125,10 +124,10 @@ class ProductController extends Controller
         }
 
         Session::put('link', url()->current());
-        $data['product'] = Product::where('slug', $slug)->where('language_id',$currentLang->id)->first();
-        $data['categories'] = Pcategory::where('status', 1)->where('language_id',$currentLang->id)->get();
+        $data['product'] = Product::where('slug', $slug)->where('language_id', $currentLang->id)->first();
+        $data['categories'] = Pcategory::where('status', 1)->where('language_id', $currentLang->id)->get();
 
-        $data['related_product'] = Product::where('category_id', $data['product']->category_id)->where('language_id',$currentLang->id)->where('id', '!=', $data['product']->id)->get();
+        $data['related_product'] = Product::where('category_id', $data['product']?->category_id)->where('language_id', $currentLang?->id)->where('id', '!=', $data['product']?->id)->get();
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
@@ -185,12 +184,12 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
 
             if ($product->type != 'digital') {
-                if(!empty($cart) && array_key_exists($id, $cart)){
-                    if($product->stock < $cart[$id]['qty'] + $qty){
+                if (!empty($cart) && array_key_exists($id, $cart)) {
+                    if ($product->stock < $cart[$id]['qty'] + $qty) {
                         return response()->json(['error' => 'Out of Stock']);
                     }
-                }else{
-                    if($product->stock < $qty){
+                } else {
+                    if ($product->stock < $qty) {
                         return response()->json(['error' => 'Out of Stock']);
                     }
                 }
@@ -242,12 +241,12 @@ class ProductController extends Controller
             }
 
             if ($product->type != 'digital') {
-                if(!empty($cart) && array_key_exists($id, $cart)){
-                    if($product->stock < $cart[$id]['qty'] + 1){
+                if (!empty($cart) && array_key_exists($id, $cart)) {
+                    if ($product->stock < $cart[$id]['qty'] + 1) {
                         return response()->json(['error' => 'Out of Stock']);
                     }
-                }else{
-                    if($product->stock < 1){
+                } else {
+                    if ($product->stock < 1) {
                         return response()->json(['error' => 'Out of Stock']);
                     }
                 }
@@ -309,8 +308,8 @@ class ProductController extends Controller
             foreach ($request->product_id as $key => $id) {
                 $product = Product::findOrFail($id);
                 if ($product->type != 'digital') {
-                    if($product->stock < $request->qty[$key]){
-                        return response()->json(['error' => $product->title .' stock not available']);
+                    if ($product->stock < $request->qty[$key]) {
+                        return response()->json(['error' => $product->title . ' stock not available']);
                     }
                 }
                 if (isset($cart[$id])) {
@@ -362,9 +361,9 @@ class ProductController extends Controller
         }
         $data['bex'] = $bex;
 
-        if(!Auth::check()) {
+        if (!Auth::check()) {
             if ($bex->product_guest_checkout == 1) {
-                if($request->type != 'guest') {
+                if ($request->type != 'guest') {
                     Session::put('link', route('front.checkout'));
                     return redirect(route('user.login', ['redirected' => 'checkout']));
                 } elseif (containsDigitalItemsInCart()) {
@@ -394,19 +393,11 @@ class ProductController extends Controller
         } else {
             $data['cart'] = null;
         }
-        $data['shippings'] = ShippingCharge::where('language_id',$currentLang->id)->get();
+        $data['shippings'] = ShippingCharge::where('language_id', $currentLang->id)->get();
         $data['ogateways'] = $currentLang->offline_gateways()->where('product_checkout_status', 1)->orderBy('serial_number')->get();
         $data['stripe'] = PaymentGateway::find(14);
-        $data['paypal'] = PaymentGateway::find(15);
-        $data['paystackData'] = PaymentGateway::whereKeyword('paystack')->first();
-        $data['paystack'] = $data['paystackData']->convertAutoData();
-        $data['flutterwave'] = PaymentGateway::find(6);
         $data['razorpay'] = PaymentGateway::find(9);
-        $data['instamojo'] = PaymentGateway::find(13);
-        $data['paytm'] = PaymentGateway::find(11);
-        $data['mollie'] = PaymentGateway::find(17);
-        $data['mercadopago'] = PaymentGateway::find(19);
-        $data['payumoney'] = PaymentGateway::find(18);
+        $data['moneroo'] = PaymentGateway::find(20);
         $data['discount'] = session()->has('coupon') && !empty(session()->get('coupon')) ? session()->get('coupon') : 0;
 
         // determining the theme version selected
@@ -420,8 +411,6 @@ class ProductController extends Controller
         $data['version'] = $version;
 
         return view('front.product.checkout', $data);
-
-
     }
 
 
@@ -444,8 +433,8 @@ class ProductController extends Controller
         $id = $product->id;
         // if cart is empty then this the first product
         if (!($cart)) {
-            if($product->type != 'digital' && $product->stock <  $qty){
-                Session::flash('error','Out of stock');
+            if ($product->type != 'digital' && $product->stock <  $qty) {
+                Session::flash('error', 'Out of stock');
                 return back();
             }
 
@@ -471,23 +460,23 @@ class ProductController extends Controller
         // if cart not empty then check if this product exist then increment quantity
         if (isset($cart[$id])) {
 
-            if($product->type != 'digital' && $product->stock < $cart[$id]['qty'] + $qty){
-                Session::flash('error','Out of stock');
+            if ($product->type != 'digital' && $product->stock < $cart[$id]['qty'] + $qty) {
+                Session::flash('error', 'Out of stock');
                 return back();
             }
             $qt = $cart[$id]['qty'];
             $cart[$id]['qty'] = $qt + $qty;
 
             Session::put('cart', $cart);
-                if (!Auth::user()) {
+            if (!Auth::user()) {
                 Session::put('link', url()->current());
                 return redirect(route('user.login'));
             }
             return redirect(route('front.checkout'));
         }
 
-        if($product->type != 'digital' && $product->stock <  $qty){
-            Session::flash('error','Out of stock');
+        if ($product->type != 'digital' && $product->stock <  $qty) {
+            Session::flash('error', 'Out of stock');
             return back();
         }
 
@@ -510,7 +499,8 @@ class ProductController extends Controller
         return redirect(route('front.checkout'));
     }
 
-    public function coupon(Request $request) {
+    public function coupon(Request $request)
+    {
         $coupon = Coupon::where('code', $request->coupon);
         $bex = BasicExtra::first();
 

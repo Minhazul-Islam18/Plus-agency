@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@if(!empty($abs->language) && $abs->language->rtl == 1)
+@if(!empty($abs) && !empty($abs->language) && $abs->language->rtl == 1)
 @section('styles')
 <style>
     form input,
@@ -116,7 +116,7 @@
                 </div>
                 <div class="form-group">
                   <label>Maintenance Text</label>
-                  <textarea class="form-control" name="maintainance_text" rows="3" cols="80">{!! ($abs->maintainance_text) !!}</textarea>
+                  <textarea class="form-control" name="maintainance_text" rows="3" cols="80">{{ $abs->maintainance_text ?? '' }}</textarea>
                   @if ($errors->has('maintainance_text'))
                     <p class="mb-0 text-danger">{{$errors->first('maintainance_text')}}</p>
                   @endif
@@ -124,7 +124,7 @@
 
                 <div class="form-group">
                   <label>Secret Path</label>
-                  <input name="secret_path" type="text" class="form-control" value="{{$abs->secret_path}}">
+                  <input name="secret_path" type="text" class="form-control" value="{{ $abs->secret_path ?? '' }}">
                   <p class="text-warning">After activating maintenance mode, You can access the website via <strong class="text-danger">{{url('{secret_path}')}}</strong></p>
                   <p class="text-warning">Try to avoid using special characters in {secret path}</p>
                 </div>

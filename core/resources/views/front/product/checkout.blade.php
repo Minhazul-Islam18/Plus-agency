@@ -16,7 +16,7 @@
 
     <!--====== CHECKOUT PART START ======-->
     <section class="checkout-area">
-        <form action="{{route('product.paypal.submit')}}" method="POST" id="payment" enctype="multipart/form-data">
+        <form action="{{route('product.stripe.submit')}}" method="POST" id="payment" enctype="multipart/form-data">
             @csrf
             @if(Session::has('stock_error'))
             <p class="text-danger text-center my-3">{{Session::get('stock_error')}}</p>
@@ -505,7 +505,6 @@
 
 @section('scripts')
 <script src="https://js.stripe.com/v2/"></script>
-<script src="https://js.paystack.co/v1/inline.js"></script>
 @if (session()->has('unsuccess'))
 <script>
    toastr["error"]("{{__(session('unsuccess'))}}");
@@ -594,10 +593,6 @@
             $("#tab-"+tabid).addClass("d-flex");
         }
 
-        if(tabid == 'paystack'){
-            $('#payment').prop('id','paystack');
-        }
-
     }
 
     // on gateway change...
@@ -607,37 +602,6 @@
         // show relevant form (if any)
         showDetails($(this).data('tabid'));
     });
-
-    // after paystack form is submitted
-    $(document).on('submit','#paystack',function(){
-        var val = $('#sub').val();
-        if(val == 0){
-            var total = $(".grandTotal").text();
-            var curr =  "{{$bex->base_currency_text}}";
-            total = Math.round(total);
-            var handler = PaystackPop.setup({
-            key: "{{ $paystack['key']}}",
-            email: "{{ $paystack['email']}}",
-            amount: total * 100,
-            currency: curr,
-            ref: ''+Math.floor((Math.random() * 1000000000) + 1),
-                callback: function(response){
-                    $('#ref_id').val(response.reference);
-                    $('#sub').val('1');
-                    $('#paystack button[type="submit"]').click();
-                },
-                onClose: function(){
-                    window.location.reload();
-                }
-            });
-            handler.openIframe();
-            return false;
-
-        } else {
-            return true;
-        }
-    });
-
 
     var cnstatus = false;
     var dateStatus = false;

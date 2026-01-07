@@ -33,9 +33,15 @@ class AppServiceProvider extends ServiceProvider
     $langs = Language::all();
 
     view()->composer('*', function ($view) {
-      if (session()->has('lang')) {
-        $currentLang = Language::where('code', session()->get('lang'))->first();
-      } else {
+      // Get current locale (set by SetLangMiddleware or manual selection)
+      $currentLocale = app()->getLocale();
+
+      if ($currentLocale) {
+        $currentLang = Language::where('code', $currentLocale)->first();
+      }
+
+      // Fallback to default if not found
+      if (empty($currentLang)) {
         $currentLang = Language::where('is_default', 1)->first();
       }
 

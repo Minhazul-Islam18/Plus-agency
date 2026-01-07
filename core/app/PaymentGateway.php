@@ -50,6 +50,8 @@ class PaymentGateway extends Model
       $link = route('front.mercadopago.submit');
     } else if ($data == 'payumoney') {
       $link = route('front.payumoney.submit');
+    } else if ($data == 'moneroo') {
+      $link = route('front.moneroo.submit');
     }
     return $link;
   }
@@ -58,7 +60,7 @@ class PaymentGateway extends Model
   {
     $show = '';
     $data = $this->keyword == null ? 'other' : $this->keyword;
-    $values = ['paypal'];
+    $values = ['paypal', 'moneroo'];
     if (in_array($data, $values)) {
       $show = 'no';
     } else {

@@ -1651,7 +1651,7 @@ a.contact-btn:hover::after {
   opacity: 1;
 }
 .testimonial-section {
-  padding-bottom: 116px;
+  padding: 116px 0 75px;
 }
 .testimonial-section .section-title {
   color: #afb2be;

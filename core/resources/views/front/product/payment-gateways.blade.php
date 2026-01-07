@@ -1,19 +1,3 @@
-{{-- Start: Paypal Area --}}
-@if ($paypal->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="paypal" data-tabid="paypal" data-action="{{route('product.paypal.submit')}}">
-                <span>{{__('Paypal')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-@endif
-{{-- End: Paypal Area --}}
-
-
 {{-- Start: Stripe Area --}}
 @if ($stripe->status == 1)
 <div class="option-block">
@@ -71,52 +55,6 @@
 {{-- End: Stripe Area --}}
 
 
-
-{{-- Start: Paystack Area --}}
-@if ($paystackData->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="paystack" data-tabid="paystack" data-action="{{route('product.paystack.submit')}}">
-                <span>{{__('Paystack')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-
-<div class="row gateway-details" id="tab-paystack">
-    <input type="hidden" name="txnid" id="ref_id" value="">
-    <input type="hidden" name="sub" id="sub" value="0">
-    <input type="hidden" name="method" value="Paystack">
-</div>
-@endif
-{{-- End: Paystack Area --}}
-
-
-
-
-{{-- Start: Flutterwave Area --}}
-@if ($flutterwave->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="flutterwave" data-tabid="flutterwave" data-action="{{route('product.flutterwave.submit')}}">
-                <span>{{__('Flutterwave')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-
-<div class="row gateway-details" id="tab-flutterwave">
-    <input type="hidden" name="method" value="Flutterwave">
-</div>
-@endif
-{{-- End: Flutterwave Area --}}
-
-
-
 {{-- Start: Razorpay Area --}}
 @if ($razorpay->status == 1)
 <div class="option-block">
@@ -137,127 +75,24 @@
 {{-- End: Razorpay Area --}}
 
 
-
-{{-- Start: Instamojo Area --}}
-@if ($instamojo->status == 1)
+{{-- Start: Moneroo Area --}}
+@if ($moneroo->status == 1)
 <div class="option-block">
     <div class="radio-block">
         <div class="checkbox">
             <label>
-                <input name="method" type="radio" class="input-check" value="instamojo" data-tabid="instamojo" data-action="{{route('product.instamojo.submit')}}">
-                <span>{{__('Instamojo')}}</span>
+                <input name="method" type="radio" class="input-check" value="moneroo" data-tabid="moneroo" data-action="{{route('product.moneroo.submit')}}">
+                <span>{{__('Moneroo')}}</span>
             </label>
         </div>
     </div>
 </div>
 
-<div class="row gateway-details" id="tab-instamojo">
-    <input type="hidden" name="method" value="Instamojo">
+<div class="row gateway-details" id="tab-moneroo">
+    <input type="hidden" name="method" value="Moneroo">
 </div>
 @endif
-{{-- End: Instamojo Area --}}
-
-
-
-{{-- Start: Paytm Area --}}
-@if ($paytm->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="paytm" data-tabid="paytm" data-action="{{route('product.paytm.submit')}}">
-                <span>{{__('Paytm')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-@endif
-{{-- End: Paytm Area --}}
-
-
-
-{{-- Start: PayUmoney Area --}}
-@if ($payumoney->status == 1)
-<div class="option-block">
-    <div class="checkbox">
-        <label>
-            <input name="method" class="input-check" type="radio" value="payumoney" data-tabid="payumoney" data-action="{{route('product.payumoney.submit')}}">
-            <span>{{__('PayUmoney')}}</span>
-        </label>
-    </div>
-</div>
-
-
-<div class="row gateway-details" id="tab-payumoney">
-
-    <div class="col-lg-6 mb-4">
-        <div class="form-element">
-            <input class="input-field" name="payumoney_first_name" type="text" placeholder="{{ __('First Name') }}" />
-        </div>
-        @if ($errors->has('payumoney_first_name'))
-            <p class="text-danger mb-0">{{$errors->first('payumoney_first_name')}}</p>
-        @endif
-    </div>
-
-    <div class="col-lg-6 mb-4">
-        <div class="form-element">
-            <input class="input-field" name="payumoney_last_name" type="text" placeholder="{{ __('Last Name') }}" />
-        </div>
-        @if ($errors->has('payumoney_last_name'))
-            <p class="text-danger mb-0">{{$errors->first('payumoney_last_name')}}</p>
-        @endif
-    </div>
-
-    <div class="col-lg-6 mb-4">
-        <div class="form-element">
-            <input class="input-field" name="payumoney_phone" type="text" placeholder="{{ __('Phone') }}"  />
-        </div>
-        @if ($errors->has('payumoney_phone'))
-            <p class="text-danger mb-0">{{$errors->first('payumoney_phone')}}</p>
-        @endif
-    </div>
-</div>
-@endif
-{{-- End: PayUmoney Area --}}
-
-
-
-
-
-{{-- Start: Mollie Payment Area --}}
-@if ($mollie->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="mollie" data-tabid="mollie" data-action="{{route('product.mollie.submit')}}">
-                <span>{{__('Mollie Payment')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-@endif
-{{-- End: Mollie Payment Area --}}
-
-
-
-
-{{-- Start:Mercadopago Area --}}
-@if ($mercadopago->status == 1)
-<div class="option-block">
-    <div class="radio-block">
-        <div class="checkbox">
-            <label>
-                <input name="method" type="radio" class="input-check" value="mercadopago" data-tabid="mercadopago" data-action="{{route('product.mercadopago.submit')}}">
-                <span>{{__('Mercadopago')}}</span>
-            </label>
-        </div>
-    </div>
-</div>
-@endif
-{{-- End:Mercadopago Area --}}
-
-
+{{-- End: Moneroo Area --}}
 
 
 {{-- Start: Offline Gateways Area --}}

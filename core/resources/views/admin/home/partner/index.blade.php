@@ -87,7 +87,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label>Partner Area Overlay Color Code **</label>
-                                        <input class="jscolor form-control ltr" name="partner_overlay_color" value="{{$abs->partner_overlay_color ?? '000000'}}">
+                                        <input class="jscolor form-control ltr" name="partner_overlay_color" value="{{$abe->partner_overlay_color ?? '000000'}}">
                                         @if ($errors->has('partner_overlay_color'))
                                         <p class="mb-0 text-danger">{{$errors->first('partner_overlay_color')}}</p>
                                         @endif
@@ -96,7 +96,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label>Partner Area Overlay Opacity **</label>
-                                        <input type="text" class="form-control ltr" name="partner_overlay_opacity" value="{{$abs->partner_overlay_opacity ?? '0.6'}}">
+                                        <input type="text" class="form-control ltr" name="partner_overlay_opacity" value="{{$abe->partner_overlay_opacity ?? '0.6'}}">
                                         <p class="text-warning mb-0">Opacity can be between 0 to 1.</p>
                                         @if ($errors->has('partner_overlay_opacity'))
                                         <p class="mb-0 text-danger">{{$errors->first('partner_overlay_opacity')}}</p>

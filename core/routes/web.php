@@ -118,6 +118,9 @@ Route::group(['middleware' => 'setlang'], function () {
     // Payu
     Route::post('/payumoney/submit', 'Payment\PayumoneyController@store')->name('front.payumoney.submit');
     Route::post('/payumoney/notify', 'Payment\PayumoneyController@notify')->name('front.payumoney.notify');
+    // Moneroo Routes
+    Route::post('/moneroo/submit', 'Payment\MonerooController@store')->name('front.moneroo.submit');
+    Route::get('/moneroo/notify', 'Payment\MonerooController@notify')->name('front.moneroo.notify');
     //Offline Routes
     Route::post('/offline/{oid}/submit', 'Payment\OfflineController@store')->name('front.offline.submit');
 
@@ -175,6 +178,9 @@ Route::group(['middleware' => 'setlang'], function () {
     // PayUmoney
     Route::post('/product/payumoney/submit', 'Payment\product\PayumoneyController@store')->name('product.payumoney.submit');
     Route::post('/product/payumoney/notify', 'Payment\product\PayumoneyController@notify')->name('product.payumoney.notify');
+    // Moneroo Routes
+    Route::post('/product/moneroo/submit', 'Payment\product\MonerooController@store')->name('product.moneroo.submit');
+    Route::get('/product/moneroo/notify', 'Payment\product\MonerooController@notify')->name('product.moneroo.notify');
     // CHECKOUT SECTION ENDS
 
     // client feedback route
@@ -300,6 +306,16 @@ Route::get('/course/payment/mercadopago/complete', 'Payment\Course\MercadoPagoGa
 
 Route::get('/course/payment/mercadopago/cancel', 'Payment\Course\MercadoPagoGatewayController@cancel')->name('course.mercadopago.cancel');
 /** End Of Route For MercadoPago Payment To Sell The Courses **/
+
+/** Route For Moneroo Payment To Sell The Courses **/
+Route::post('/course/payment/moneroo', 'Payment\Course\MonerooGatewayController@redirectToMoneroo')->name('course.payment.moneroo');
+
+Route::get('/course/payment/moneroo/notify', 'Payment\Course\MonerooGatewayController@notify')->name('course.moneroo.notify');
+
+Route::get('/course/payment/moneroo/complete', 'Payment\Course\MonerooGatewayController@complete')->name('course.moneroo.complete');
+
+Route::get('/course/payment/moneroo/cancel', 'Payment\Course\MonerooGatewayController@cancel')->name('course.moneroo.cancel');
+/** End Of Route For Moneroo Payment To Sell The Courses **/
 
 /** Route For Paystack Payment To Sell The Courses **/
 Route::post('/course/payment/paystack', 'Payment\Course\PaystackGatewayController@redirectToPaystack')->name('course.payment.paystack');
@@ -512,6 +528,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/razorpay/update', 'Admin\GatewayController@razorpayUpdate')->name('admin.razorpay.update');
         Route::post('/mercadopago/update', 'Admin\GatewayController@mercadopagoUpdate')->name('admin.mercadopago.update');
         Route::post('/payumoney/update', 'Admin\GatewayController@payumoneyUpdate')->name('admin.payumoney.update');
+        Route::post('/moneroo/update', 'Admin\GatewayController@monerooUpdate')->name('admin.moneroo.update');
         Route::get('/offline/gateways', 'Admin\GatewayController@offline')->name('admin.gateway.offline');
         Route::post('/offline/gateway/store', 'Admin\GatewayController@store')->name('admin.gateway.offline.store');
         Route::post('/offline/gateway/update', 'Admin\GatewayController@update')->name('admin.gateway.offline.update');

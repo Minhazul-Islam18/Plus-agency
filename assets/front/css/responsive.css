@@ -1607,3 +1607,140 @@
     padding: 30px 25px;
   }
 }
+
+/* Responsive Section Padding - Default desktop values */
+.responsive-section-padding {
+  padding: 60px 0 !important;
+}
+
+.responsive-section-padding-large {
+  padding: 120px 0 !important;
+}
+
+/* Tablet - reduce padding slightly */
+@media only screen and (max-width: 991px) {
+  .responsive-section-padding {
+    padding: 50px 0 !important;
+  }
+
+  .responsive-section-padding-large {
+    padding: 80px 0 !important;
+  }
+
+  /* Make all major sections responsive on tablets */
+  .approach-section {
+    padding: 60px 0 80px 0 !important;
+  }
+
+  .statistics-section {
+    padding: 70px 0 60px !important;
+  }
+
+  .team-section {
+    padding: 80px 0 85px !important;
+  }
+
+  .blog-section {
+    padding: 80px 0 85px !important;
+  }
+
+  .cta-section {
+    padding: 40px 0 !important;
+  }
+}
+
+/* Mobile - reduce padding more */
+@media only screen and (max-width: 767px) {
+  .responsive-section-padding {
+    padding: 40px 0 !important;
+  }
+
+  .responsive-section-padding-large {
+    padding: 60px 0 !important;
+  }
+
+  /* Make all major sections responsive on mobile */
+  .approach-section {
+    padding: 50px 0 60px 0 !important;
+  }
+
+  .statistics-section {
+    padding: 60px 0 50px !important;
+  }
+
+  .team-section {
+    padding: 60px 0 65px !important;
+  }
+
+  .blog-section {
+    padding: 60px 0 65px !important;
+  }
+
+  .cta-section {
+    padding: 35px 0 !important;
+  }
+}
+
+/* Small Mobile - minimal padding */
+@media only screen and (max-width: 575px) {
+  .responsive-section-padding {
+    padding: 30px 0 !important;
+  }
+
+  .responsive-section-padding-large {
+    padding: 50px 0 !important;
+  }
+
+  /* Make all major sections responsive on small mobile */
+  .approach-section {
+    padding: 40px 0 50px 0 !important;
+  }
+
+  .statistics-section {
+    padding: 50px 0 40px !important;
+  }
+
+  .team-section {
+    padding: 50px 0 55px !important;
+  }
+
+  .blog-section {
+    padding: 50px 0 55px !important;
+  }
+
+  .cta-section {
+    padding: 30px 0 !important;
+  }
+}
+
+/* Extra Small Mobile - very minimal padding */
+@media only screen and (max-width: 400px) {
+  .responsive-section-padding {
+    padding: 25px 0 !important;
+  }
+
+  .responsive-section-padding-large {
+    padding: 40px 0 !important;
+  }
+
+  /* Make all major sections responsive on extra small mobile */
+  .approach-section {
+    padding: 35px 0 40px 0 !important;
+  }
+
+  .statistics-section {
+    padding: 40px 0 35px !important;
+  }
+
+  .team-section {
+    padding: 40px 0 45px !important;
+  }
+
+  .blog-section {
+    padding: 40px 0 45px !important;
+  }
+
+  .cta-section {
+    padding: 25px 0 !important;
+  }
+}

@@ -23,6 +23,7 @@ class GatewayController extends Controller
         $data['razorpay'] = PaymentGateway::find(9);
         $data['mercadopago'] = PaymentGateway::find(19);
         $data['payumoney'] = PaymentGateway::find(18);
+        $data['moneroo'] = PaymentGateway::find(20);
 
         return view('admin.gateways.index', $data);
     }
@@ -313,6 +314,51 @@ class GatewayController extends Controller
 
         Session::flash('success', 'Gateway deleted successfully!');
         return back();
+    }
+
+    public function monerooUpdate(Request $request)
+    {
+        $moneroo = PaymentGateway::find(20);
+        $moneroo->status = $request->status;
+
+        $information = [];
+        $information['public_key'] = $request->public_key;
+        $information['secret_key'] = $request->secret_key;
+        $information['text'] = "Pay via Moneroo - Multiple payment options across Africa.";
+
+        $moneroo->information = json_encode($information);
+        $moneroo->save();
+
+        // Update .env file
+        $this->updateEnvVariables($request->public_key, $request->secret_key);
+
+        $request->session()->flash('success', "Moneroo information updated successfully!");
+        return back();
+    }
+
+    private function updateEnvVariables($publicKey, $secretKey)
+    {
+        $envPath = base_path('.env');
+
+        if (file_exists($envPath)) {
+            $envContent = file_get_contents($envPath);
+
+            // Update or add MONEROO_PUBLIC_KEY
+            if (preg_match('/^MONEROO_PUBLIC_KEY=.*/m', $envContent)) {
+                $envContent = preg_replace('/^MONEROO_PUBLIC_KEY=.*/m', 'MONEROO_PUBLIC_KEY=' . $publicKey, $envContent);
+            } else {
+                $envContent .= "\nMONEROO_PUBLIC_KEY=" . $publicKey;
+            }
+
+            // Update or add MONEROO_SECRET_KEY
+            if (preg_match('/^MONEROO_SECRET_KEY=.*/m', $envContent)) {
+                $envContent = preg_replace('/^MONEROO_SECRET_KEY=.*/m', 'MONEROO_SECRET_KEY=' . $secretKey, $envContent);
+            } else {
+                $envContent .= "\nMONEROO_SECRET_KEY=" . $secretKey;
+            }
+
+            file_put_contents($envPath, $envContent);
+        }
     }
 
 }

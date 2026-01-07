@@ -148,6 +148,70 @@
             </form>
         </div>
     </div>
+
+    <div class="col-lg-4">
+      <div class="card">
+        <form action="{{route('admin.moneroo.update')}}" method="post">
+          @csrf
+          <div class="card-header">
+              <div class="row">
+                  <div class="col-lg-12">
+                      <div class="card-title">Moneroo</div>
+                  </div>
+              </div>
+          </div>
+          <div class="card-body pt-5 pb-5">
+            <div class="row">
+              <div class="col-lg-12">
+                @php
+                    $monerooInfo = $moneroo->convertAutoData();
+                @endphp
+                <div class="form-group">
+                    <label>Moneroo</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="status" value="1" class="selectgroup-input" {{$moneroo->status == 1 ? 'checked' : ''}}>
+                        <span class="selectgroup-button">Active</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="radio" name="status" value="0" class="selectgroup-input" {{$moneroo->status == 0 ? 'checked' : ''}}>
+                        <span class="selectgroup-button">Deactive</span>
+                      </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Moneroo Public Key</label>
+                    <input class="form-control" name="public_key" value="{{$monerooInfo['public_key'] ?? ''}}">
+                    @if ($errors->has('public_key'))
+                        <p class="mb-0 text-danger">{{$errors->first('public_key')}}</p>
+                    @endif
+                </div>
+
+                <div class="form-group">
+                    <label>Moneroo Secret Key</label>
+                    <input class="form-control" name="secret_key" value="{{$monerooInfo['secret_key'] ?? ''}}">
+                    @if ($errors->has('secret_key'))
+                        <p class="mb-0 text-danger">{{$errors->first('secret_key')}}</p>
+                    @endif
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="form">
+              <div class="form-group from-show-notify row">
+                <div class="col-12 text-center">
+                  <button type="submit" class="btn btn-success">Update</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
 @endsection

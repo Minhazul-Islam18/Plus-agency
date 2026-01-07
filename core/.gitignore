@@ -11,3 +11,4 @@ yarn-error.log
 /vendor
 **/.keep
 /assets/front/img
+.env

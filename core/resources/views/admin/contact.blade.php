@@ -253,26 +253,54 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 e.preventDefault();
                 var langId = $(this).data('lang-id');
 
-                if (confirm('Are you sure you want to delete this background image?')) {
-                    $.ajax({
-                        url: '{{route("admin.contact.deletebg", ":langid")}}'.replace(':langid', langId),
-                        type: 'POST',
-                        data: {
-                            _token: '{{csrf_token()}}'
+                swal({
+                    title: 'Are you sure?',
+                    text: "You want to delete this background image?",
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: "Cancel",
+                            visible: true,
+                            closeModal: true,
                         },
-                        success: function(response) {
-                            if (response.success) {
-                                $('#thumbPreview1 img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
-                                $('#thumbPreview1 .remove-img-btn').remove();
-                                $('#fileInput1').val('');
-                                alert('Background image deleted successfully!');
-                            }
-                        },
-                        error: function(xhr) {
-                            alert('Error deleting background image!');
+                        confirm: {
+                            text: "Yes, delete it!",
+                            closeModal: false,
                         }
-                    });
-                }
+                    },
+                    dangerMode: true,
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            url: '{{route("admin.contact.deletebg", ":langid")}}'.replace(':langid', langId),
+                            type: 'POST',
+                            data: {
+                                _token: '{{csrf_token()}}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    $('#thumbPreview1 img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                                    $('#thumbPreview1 .remove-img-btn').remove();
+                                    $('#fileInput1').val('');
+                                    swal({
+                                        title: 'Deleted!',
+                                        text: 'Background image has been deleted.',
+                                        icon: 'success',
+                                        button: 'OK'
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                swal({
+                                    title: 'Error!',
+                                    text: 'Failed to delete background image.',
+                                    icon: 'error',
+                                    button: 'OK'
+                                });
+                            }
+                        });
+                    }
+                });
             });
         });
     </script>

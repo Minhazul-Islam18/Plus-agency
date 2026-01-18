@@ -31,7 +31,7 @@
          <div class="card-body pt-5 pb-4">
             <div class="row">
                <div class="col-lg-10 offset-lg-1">
-                  <form id="ajaxForm" action="{{route('admin.page.store')}}" method="post">
+                  <form id="ajaxForm" action="{{route('admin.page.store')}}" method="post" enctype="multipart/form-data">
                      @csrf
                     <div class="form-group">
                         <label for="">Language **</label>
@@ -89,6 +89,38 @@
                         </div>
                     </div>
 
+                    {{-- Breadcrumb Section --}}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">Breadcrumb Settings</h5>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label for="">Breadcrumb Image</label>
+                                <br>
+                                <div class="thumb-preview">
+                                    <img src="" alt="Breadcrumb" id="breadcrumb_preview" style="max-width: 200px; max-height: 100px; margin-bottom: 10px; display: none;">
+                                </div>
+                                <input type="file" name="breadcrumb_image" class="form-control ltr" accept="image/*" onchange="previewBreadcrumbImage(this)">
+                                <p class="text-warning mb-0"><small>Leave empty to use default breadcrumb image.</small></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label for="">Overlay Color</label>
+                                <input type="text" name="breadcrumb_overlay_color" class="form-control ltr jscolor" value="" placeholder="e.g. 000000">
+                                <p class="text-warning mb-0"><small>Leave empty to use default overlay color.</small></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label for="">Overlay Opacity</label>
+                                <input type="number" step="0.01" min="0" max="1" name="breadcrumb_overlay_opacity" class="form-control ltr" value="" placeholder="e.g. 0.5">
+                                <p class="text-warning mb-0"><small>Value between 0 and 1. Leave empty for default.</small></p>
+                            </div>
+                        </div>
+                    </div>
+
                     @if ($bex->custom_page_pagebuilder == 0)
                         <div class="row">
                             <div class="col-12">
@@ -128,6 +160,18 @@
 @endsection
 @section('scripts')
 <script>
+   function previewBreadcrumbImage(input) {
+       var preview = document.getElementById('breadcrumb_preview');
+       if (input.files && input.files[0]) {
+           var reader = new FileReader();
+           reader.onload = function(e) {
+               preview.src = e.target.result;
+               preview.style.display = 'block';
+           }
+           reader.readAsDataURL(input.files[0]);
+       }
+   }
+
    $(document).ready(function() {
 
        // make input fields RTL

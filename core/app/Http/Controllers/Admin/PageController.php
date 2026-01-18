@@ -91,6 +91,21 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+
+        // Handle breadcrumb image upload
+        if ($request->hasFile('breadcrumb_image')) {
+            $file = $request->file('breadcrumb_image');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $directory = 'assets/front/img/pages/';
+            @mkdir($directory, 0775, true);
+            $file->move($directory, $filename);
+            $page->breadcrumb_image = $filename;
+        }
+
+        // Handle breadcrumb overlay settings
+        $page->breadcrumb_overlay_color = $request->breadcrumb_overlay_color;
+        $page->breadcrumb_overlay_opacity = $request->breadcrumb_overlay_opacity;
+
         if ($bex->custom_page_pagebuilder == 0) {
             $page->body = $request->body;
         }
@@ -145,6 +160,31 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+
+        // Handle breadcrumb image upload
+        if ($request->hasFile('breadcrumb_image')) {
+            // Delete old image if exists
+            if ($page->breadcrumb_image) {
+                @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            }
+            $file = $request->file('breadcrumb_image');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $directory = 'assets/front/img/pages/';
+            @mkdir($directory, 0775, true);
+            $file->move($directory, $filename);
+            $page->breadcrumb_image = $filename;
+        }
+
+        // Handle removing breadcrumb image if requested
+        if ($request->remove_breadcrumb_image == 1 && $page->breadcrumb_image) {
+            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            $page->breadcrumb_image = null;
+        }
+
+        // Handle breadcrumb overlay settings
+        $page->breadcrumb_overlay_color = $request->breadcrumb_overlay_color;
+        $page->breadcrumb_overlay_opacity = $request->breadcrumb_overlay_opacity;
+
         if ($bex->custom_page_pagebuilder == 0) {
             $page->body = $request->body;
         }
@@ -158,6 +198,10 @@ class PageController extends Controller
     {
         $pageID = $request->pageid;
         $page = Page::findOrFail($pageID);
+        // Delete breadcrumb image if exists
+        if ($page->breadcrumb_image) {
+            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+        }
         $page->delete();
         Session::flash('success', 'Page deleted successfully!');
         return redirect()->back();
@@ -169,6 +213,10 @@ class PageController extends Controller
 
         foreach ($ids as $id) {
             $page = Page::findOrFail($id);
+            // Delete breadcrumb image if exists
+            if ($page->breadcrumb_image) {
+                @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            }
             $page->delete();
         }
 

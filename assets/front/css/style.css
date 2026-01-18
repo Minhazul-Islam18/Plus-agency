@@ -1983,7 +1983,8 @@ a.readmore-btn:hover::after {
 .footer-logo-wrapper {
   text-align: left;
   max-width: 150px;
-  max-height: 60px;
+  max-height: 90px;
+  margin: 0 auto;
 }
 .footer-logo-wrapper a {
   display: inline-block;

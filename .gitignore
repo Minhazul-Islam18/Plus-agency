@@ -8,6 +8,9 @@
 # Ignore file manager uploads
 /assets/lfm/files/
 
+# Ignore page breadcrumb images
+/assets/front/img/pages/
+
 # Ignore vendor directory
 /core/vendor/
 

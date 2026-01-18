@@ -234,11 +234,31 @@
           },
           success: function(response) {
             if (response.success) {
-              alert('Status updated successfully!');
+              $.notify({
+                title: 'Success',
+                message: 'Status updated successfully!',
+                icon: 'fa fa-check'
+              }, {
+                type: 'success',
+                placement: { from: 'top', align: 'right' },
+                showProgressbar: true,
+                time: 1000,
+                delay: 3000
+              });
             }
           },
           error: function(xhr) {
-            alert('Error updating status!');
+            $.notify({
+              title: 'Error',
+              message: 'Error updating status!',
+              icon: 'fa fa-times'
+            }, {
+              type: 'danger',
+              placement: { from: 'top', align: 'right' },
+              showProgressbar: true,
+              time: 1000,
+              delay: 3000
+            });
           }
         });
       });

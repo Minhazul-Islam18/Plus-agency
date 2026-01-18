@@ -17,6 +17,9 @@
 # Ignore node modules
 /core/node_modules/
 
+# Ignore core/public (auto-generated)
+/core/public/
+
 # Ignore Laravel storage and cache
 /core/storage/*.key
 /core/storage/logs/*.log

@@ -98,11 +98,15 @@
                             <div class="form-group">
                                 <label for="">Breadcrumb Image</label>
                                 <br>
-                                <div class="thumb-preview">
-                                    <img src="" alt="Breadcrumb" id="breadcrumb_preview" style="max-width: 200px; max-height: 100px; margin-bottom: 10px; display: none;">
+                                <div class="thumb-preview" id="thumbPreview1">
+                                    <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="Breadcrumb" class="uploaded-img">
                                 </div>
-                                <input type="file" name="breadcrumb_image" class="form-control ltr" accept="image/*" onchange="previewBreadcrumbImage(this)">
+                                <br>
+                                <br>
+                                <input id="fileInput1" type="hidden" name="breadcrumb_image" value="">
+                                <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
                                 <p class="text-warning mb-0"><small>Leave empty to use default breadcrumb image.</small></p>
+                                <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px × 350px (Width × Height)</small></p>
                             </div>
                         </div>
                         <div class="col-lg-3">
@@ -159,54 +163,133 @@
 </div>
 @endsection
 @section('scripts')
-<script>
-   function previewBreadcrumbImage(input) {
-       var preview = document.getElementById('breadcrumb_preview');
-       if (input.files && input.files[0]) {
-           var reader = new FileReader();
-           reader.onload = function(e) {
-               preview.src = e.target.result;
-               preview.style.display = 'block';
-           }
-           reader.readAsDataURL(input.files[0]);
-       }
-   }
+    <!-- LFM Modal -->
+    <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+        <i class="fas fa-times-circle"></i>
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 
-   $(document).ready(function() {
+    <script>
+        // Laravel File Manager SetUrl handler
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
 
-       // make input fields RTL
-       $("select[name='language_id']").on('change', function() {
-           $(".request-loader").addClass("show");
-           let url = "{{url('/')}}/admin/rtlcheck/" + $(this).val();
-           console.log(url);
-           $.get(url, function(data) {
-               $(".request-loader").removeClass("show");
-               if (data == 1) {
-                   $("form input").each(function() {
-                       if (!$(this).hasClass('ltr')) {
-                           $(this).addClass('rtl');
-                       }
-                   });
-                   $("form select").each(function() {
-                       if (!$(this).hasClass('ltr')) {
-                           $(this).addClass('rtl');
-                       }
-                   });
-                   $("form textarea").each(function() {
-                       if (!$(this).hasClass('ltr')) {
-                           $(this).addClass('rtl');
-                       }
-                   });
-                   $("form .summernote").each(function() {
-                       $(this).siblings('.note-editor').find('.note-editable').addClass('rtl text-right');
-                   });
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
 
-               } else {
-                   $("form input, form select, form textarea").removeClass('rtl');
-                   $("form .summernote").siblings('.note-editor').find('.note-editable').removeClass('rtl text-right');
-               }
-           })
-       });
-   });
-</script>
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+
+                        // Add delete button if not exists
+                        if (thumbPreview.querySelector('.remove-img-btn') === null) {
+                            var deleteBtn = document.createElement('button');
+                            deleteBtn.type = 'button';
+                            deleteBtn.className = 'btn btn-danger btn-sm remove-img-btn';
+                            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            thumbPreview.appendChild(deleteBtn);
+                        }
+                    }
+
+                    // Close the modal
+                    activeModal.modal('hide');
+                }
+            }
+        };
+
+        $(document).ready(function() {
+            // Remove image button click handler (for newly selected images)
+            $(document).on('click', '.remove-img-btn', function(e) {
+                e.preventDefault();
+                var thumbPreview = $(this).closest('.thumb-preview');
+                var serial = thumbPreview.attr('id').replace('thumbPreview', '');
+
+                thumbPreview.find('img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                $('#fileInput' + serial).val('');
+                $(this).remove();
+            });
+
+            // make input fields RTL
+            $("select[name='language_id']").on('change', function() {
+                $(".request-loader").addClass("show");
+                let url = "{{url('/')}}/admin/rtlcheck/" + $(this).val();
+                console.log(url);
+                $.get(url, function(data) {
+                    $(".request-loader").removeClass("show");
+                    if (data == 1) {
+                        $("form input").each(function() {
+                            if (!$(this).hasClass('ltr')) {
+                                $(this).addClass('rtl');
+                            }
+                        });
+                        $("form select").each(function() {
+                            if (!$(this).hasClass('ltr')) {
+                                $(this).addClass('rtl');
+                            }
+                        });
+                        $("form textarea").each(function() {
+                            if (!$(this).hasClass('ltr')) {
+                                $(this).addClass('rtl');
+                            }
+                        });
+                        $("form .summernote").each(function() {
+                            $(this).siblings('.note-editor').find('.note-editable').addClass('rtl text-right');
+                        });
+
+                    } else {
+                        $("form input, form select, form textarea").removeClass('rtl');
+                        $("form .summernote").siblings('.note-editor').find('.note-editable').removeClass('rtl text-right');
+                    }
+                })
+            });
+        });
+    </script>
+
+    <style>
+        .thumb-preview {
+            position: relative;
+            display: inline-block;
+        }
+
+        .thumb-preview .uploaded-img,
+        .thumb-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .thumb-preview .remove-img-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .thumb-preview:hover .remove-img-btn {
+            opacity: 1;
+        }
+    </style>
 @endsection

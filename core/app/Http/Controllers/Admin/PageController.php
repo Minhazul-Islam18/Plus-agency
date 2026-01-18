@@ -92,14 +92,18 @@ class PageController extends Controller
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
 
-        // Handle breadcrumb image upload
-        if ($request->hasFile('breadcrumb_image')) {
-            $file = $request->file('breadcrumb_image');
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $directory = 'assets/front/img/pages/';
-            @mkdir($directory, 0775, true);
-            $file->move($directory, $filename);
-            $page->breadcrumb_image = $filename;
+        // Handle breadcrumb image from file manager
+        if ($request->filled('breadcrumb_image')) {
+            $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
+            $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
+
+            if (in_array(strtolower($extBg), $allowedExts)) {
+                $directory = 'assets/front/img/pages/';
+                @mkdir($directory, 0775, true);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->breadcrumb_image, $directory . $filename);
+                $page->breadcrumb_image = $filename;
+            }
         }
 
         // Handle breadcrumb overlay settings
@@ -161,24 +165,23 @@ class PageController extends Controller
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
 
-        // Handle breadcrumb image upload
-        if ($request->hasFile('breadcrumb_image')) {
-            // Delete old image if exists
-            if ($page->breadcrumb_image) {
-                @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
-            }
-            $file = $request->file('breadcrumb_image');
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $directory = 'assets/front/img/pages/';
-            @mkdir($directory, 0775, true);
-            $file->move($directory, $filename);
-            $page->breadcrumb_image = $filename;
-        }
+        // Handle breadcrumb image from file manager
+        if ($request->filled('breadcrumb_image')) {
+            $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
+            $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
 
-        // Handle removing breadcrumb image if requested
-        if ($request->remove_breadcrumb_image == 1 && $page->breadcrumb_image) {
-            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
-            $page->breadcrumb_image = null;
+            if (in_array(strtolower($extBg), $allowedExts)) {
+                // Delete old image if exists
+                if ($page->breadcrumb_image) {
+                    @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+                }
+
+                $directory = 'assets/front/img/pages/';
+                @mkdir($directory, 0775, true);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->breadcrumb_image, $directory . $filename);
+                $page->breadcrumb_image = $filename;
+            }
         }
 
         // Handle breadcrumb overlay settings
@@ -222,6 +225,21 @@ class PageController extends Controller
 
         Session::flash('success', 'Pages deleted successfully!');
         return "success";
+    }
+
+    public function deleteBreadcrumbImage($id)
+    {
+        $page = Page::findOrFail($id);
+
+        if ($page->breadcrumb_image) {
+            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            $page->breadcrumb_image = null;
+            $page->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No image to delete']);
     }
 
     public function uploadPbImage(Request $request)

@@ -867,6 +867,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/page/update', 'Admin\PageController@update')->name('admin.page.update');
         Route::post('/page/delete', 'Admin\PageController@delete')->name('admin.page.delete');
         Route::post('/page/bulk-delete', 'Admin\PageController@bulkDelete')->name('admin.page.bulk.delete');
+        Route::post('/page/{id}/delete-breadcrumb', 'Admin\PageController@deleteBreadcrumbImage')->name('admin.page.deleteBreadcrumb');
         Route::post('/upload/pagebuilder', 'Admin\PageController@uploadPbImage')->name('admin.pb.upload');
         Route::post('/remove/img/pagebuilder', 'Admin\PageController@removePbImage')->name('admin.pb.remove');
         Route::post('/upload/tui/pagebuilder', 'Admin\PageController@uploadPbTui')->name('admin.pb.tui.upload');

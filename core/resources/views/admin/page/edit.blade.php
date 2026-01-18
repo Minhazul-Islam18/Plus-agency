@@ -108,22 +108,22 @@
                         <div class="form-group">
                             <label for="">Breadcrumb Image</label>
                             <br>
-                            <div class="thumb-preview">
+                            <div class="thumb-preview" id="thumbPreview1">
                                 @if($page->breadcrumb_image)
-                                    <img src="{{ asset('assets/front/img/pages/' . $page->breadcrumb_image) }}" alt="Breadcrumb" id="breadcrumb_preview" style="max-width: 200px; max-height: 100px; margin-bottom: 10px; display: block;">
+                                    <img src="{{ asset('assets/front/img/pages/' . $page->breadcrumb_image) }}" alt="Breadcrumb" class="uploaded-img">
+                                    <button type="button" class="btn btn-danger btn-sm remove-img-btn" data-page-id="{{$page->id}}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 @else
-                                    <img src="" alt="Breadcrumb" id="breadcrumb_preview" style="max-width: 200px; max-height: 100px; margin-bottom: 10px; display: none;">
+                                    <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="Breadcrumb" class="uploaded-img">
                                 @endif
                             </div>
-                            <input type="file" name="breadcrumb_image" class="form-control ltr" accept="image/*" onchange="previewBreadcrumbImage(this)">
-                            <p class="text-warning mb-0"><small>Leave empty to use default breadcrumb image.</small></p>
-                            @if($page->breadcrumb_image)
-                                <div class="mt-2">
-                                    <label class="d-inline-flex align-items-center">
-                                        <input type="checkbox" name="remove_breadcrumb_image" value="1" class="mr-1"> Remove current image (use default)
-                                    </label>
-                                </div>
-                            @endif
+                            <br>
+                            <br>
+                            <input id="fileInput1" type="hidden" name="breadcrumb_image" value="">
+                            <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
+                            <p class="text-warning mb-0"><small>Leave empty to keep current image or use default.</small></p>
+                            <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px × 350px (Width × Height)</small></p>
                         </div>
                     </div>
                     <div class="col-lg-3">
@@ -183,17 +183,157 @@
 @endsection
 
 @section('scripts')
-<script>
-    function previewBreadcrumbImage(input) {
-        var preview = document.getElementById('breadcrumb_preview');
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
+    <!-- LFM Modal -->
+    <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+        <i class="fas fa-times-circle"></i>
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Laravel File Manager SetUrl handler
+        window.SetUrl = function(items) {
+            // Get the active modal's serial number
+            var activeModal = $('.lfm-modal.show');
+            var modalId = activeModal.attr('id');
+            var serial = modalId ? modalId.replace('lfmModal', '') : '';
+
+            if (items && items.length > 0) {
+                var fileUrl = items[0].url;
+
+                // Set value to corresponding fileInput
+                if (serial) {
+                    var fileInput = document.getElementById('fileInput' + serial);
+                    var thumbPreview = document.getElementById('thumbPreview' + serial);
+
+                    if (fileInput) {
+                        fileInput.value = fileUrl;
+                    }
+
+                    if (thumbPreview) {
+                        var img = thumbPreview.querySelector('img');
+                        if (img) {
+                            img.src = fileUrl;
+                        }
+
+                        // Add delete button if not exists
+                        if (thumbPreview.querySelector('.remove-img-btn') === null) {
+                            var deleteBtn = document.createElement('button');
+                            deleteBtn.type = 'button';
+                            deleteBtn.className = 'btn btn-danger btn-sm remove-img-btn';
+                            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            thumbPreview.appendChild(deleteBtn);
+                        } else {
+                            // Remove data-page-id for newly selected images (not saved yet)
+                            thumbPreview.querySelector('.remove-img-btn').removeAttribute('data-page-id');
+                        }
+                    }
+
+                    // Close the modal
+                    activeModal.modal('hide');
+                }
             }
-            reader.readAsDataURL(input.files[0]);
+        };
+
+        $(document).ready(function() {
+            // Delete breadcrumb image
+            $(document).on('click', '.remove-img-btn', function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var pageId = btn.data('page-id');
+                var thumbPreview = btn.closest('.thumb-preview');
+                var serial = thumbPreview.attr('id').replace('thumbPreview', '');
+
+                if (pageId) {
+                    // Existing image - delete via AJAX with SweetAlert confirmation
+                    swal({
+                        title: 'Are you sure?',
+                        text: "You want to delete this breadcrumb image?",
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: "Cancel",
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: "Yes, delete it!",
+                                closeModal: false,
+                            }
+                        },
+                        dangerMode: true,
+                    }).then((willDelete) => {
+                        if (willDelete) {
+                            $.ajax({
+                                url: '{{route("admin.page.deleteBreadcrumb", ":id")}}'.replace(':id', pageId),
+                                type: 'POST',
+                                data: {
+                                    _token: '{{csrf_token()}}'
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        thumbPreview.find('img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                                        btn.remove();
+                                        $('#fileInput' + serial).val('');
+                                        swal({
+                                            title: 'Deleted!',
+                                            text: 'Breadcrumb image has been deleted.',
+                                            icon: 'success',
+                                            button: 'OK'
+                                        });
+                                    }
+                                },
+                                error: function(xhr) {
+                                    swal({
+                                        title: 'Error!',
+                                        text: 'Failed to delete breadcrumb image.',
+                                        icon: 'error',
+                                        button: 'OK'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // Newly selected image - just remove from preview
+                    thumbPreview.find('img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                    $('#fileInput' + serial).val('');
+                    btn.remove();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .thumb-preview {
+            position: relative;
+            display: inline-block;
         }
-    }
-</script>
+
+        .thumb-preview .uploaded-img,
+        .thumb-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .thumb-preview .remove-img-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .thumb-preview:hover .remove-img-btn {
+            opacity: 1;
+        }
+    </style>
 @endsection

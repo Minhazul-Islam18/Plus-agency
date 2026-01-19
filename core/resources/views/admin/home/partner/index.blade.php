@@ -317,12 +317,22 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
         // Handle partner background delete button
         $('#deletePartnerBgBtn').on('click', function(e) {
             e.preventDefault();
-            if (confirm('Are you sure you want to delete this background image?')) {
-                $('#deleteBackground').val('1');
-                $('#fileInput2').val('');
-                // Submit the form
-                $('#partnerSectionForm').submit();
-            }
+            swal({
+                title: 'Are you sure?',
+                text: 'You want to delete this background image?',
+                icon: 'warning',
+                buttons: {
+                    cancel: { text: "Cancel", visible: true, closeModal: true },
+                    confirm: { text: "Yes, delete it!", closeModal: true }
+                },
+                dangerMode: true,
+            }).then(function(willDelete) {
+                if (willDelete) {
+                    $('#deleteBackground').val('1');
+                    $('#fileInput2').val('');
+                    $('#partnerSectionForm').submit();
+                }
+            });
         });
 
         // make input fields RTL

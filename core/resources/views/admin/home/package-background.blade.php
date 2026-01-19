@@ -226,12 +226,22 @@
             if (deletePricingBgBtn) {
                 deletePricingBgBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    if (confirm('Are you sure you want to delete this background image?')) {
-                        document.getElementById('deleteBackground').value = '1';
-                        document.getElementById('fileInput1').value = '';
-                        // Submit the form immediately
-                        document.getElementById('backgroundForm').submit();
-                    }
+                    swal({
+                        title: 'Are you sure?',
+                        text: 'You want to delete this background image?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: { text: "Cancel", visible: true, closeModal: true },
+                            confirm: { text: "Yes, delete it!", closeModal: true }
+                        },
+                        dangerMode: true,
+                    }).then(function(willDelete) {
+                        if (willDelete) {
+                            document.getElementById('deleteBackground').value = '1';
+                            document.getElementById('fileInput1').value = '';
+                            document.getElementById('backgroundForm').submit();
+                        }
+                    });
                 });
             }
         });

@@ -329,12 +329,22 @@
         if (deleteTestimonialSectionBgBtn) {
             deleteTestimonialSectionBgBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                if (confirm('Are you sure you want to delete this background image?')) {
-                    document.getElementById('deleteTestimonialSectionBg').value = '1';
-                    document.getElementById('fileInputTestimonial').value = '';
-                    // Submit the form immediately with page reload
-                    document.getElementById('testimonialForm').submit();
-                }
+                swal({
+                    title: 'Are you sure?',
+                    text: 'You want to delete this background image?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: { text: "Cancel", visible: true, closeModal: true },
+                        confirm: { text: "Yes, delete it!", closeModal: true }
+                    },
+                    dangerMode: true,
+                }).then(function(willDelete) {
+                    if (willDelete) {
+                        document.getElementById('deleteTestimonialSectionBg').value = '1';
+                        document.getElementById('fileInputTestimonial').value = '';
+                        document.getElementById('testimonialForm').submit();
+                    }
+                });
             });
         }
 

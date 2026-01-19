@@ -310,12 +310,22 @@
             if (deleteIntroSectionBgBtn) {
                 deleteIntroSectionBgBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    if (confirm('Are you sure you want to delete this background image?')) {
-                        document.getElementById('deleteIntroSectionBg').value = '1';
-                        document.getElementById('fileInput3').value = '';
-                        // Submit the form immediately with page reload
-                        document.getElementById('introForm').submit();
-                    }
+                    swal({
+                        title: 'Are you sure?',
+                        text: 'You want to delete this background image?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: { text: "Cancel", visible: true, closeModal: true },
+                            confirm: { text: "Yes, delete it!", closeModal: true }
+                        },
+                        dangerMode: true,
+                    }).then(function(willDelete) {
+                        if (willDelete) {
+                            document.getElementById('deleteIntroSectionBg').value = '1';
+                            document.getElementById('fileInput3').value = '';
+                            document.getElementById('introForm').submit();
+                        }
+                    });
                 });
             }
 
@@ -332,12 +342,22 @@
 
         // Keep the deleteIntroImage function for the other delete button
         window.deleteIntroImage = function() {
-            if (confirm('Are you sure you want to delete this image?')) {
-                document.getElementById('deleteImage1').value = '1';
-                document.getElementById('fileInput1').value = '';
-                // Submit the form immediately with page reload
-                document.getElementById('introForm').submit();
-            }
+            swal({
+                title: 'Are you sure?',
+                text: 'You want to delete this image?',
+                icon: 'warning',
+                buttons: {
+                    cancel: { text: "Cancel", visible: true, closeModal: true },
+                    confirm: { text: "Yes, delete it!", closeModal: true }
+                },
+                dangerMode: true,
+            }).then(function(willDelete) {
+                if (willDelete) {
+                    document.getElementById('deleteImage1').value = '1';
+                    document.getElementById('fileInput1').value = '';
+                    document.getElementById('introForm').submit();
+                }
+            });
         };
     </script>
 

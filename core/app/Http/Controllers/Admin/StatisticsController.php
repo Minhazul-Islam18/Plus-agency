@@ -147,4 +147,19 @@ class StatisticsController extends Controller
         Session::flash('success', 'Statistic deleted successfully!');
         return back();
     }
+
+    public function deletebg($langid)
+    {
+        $be = BasicExtended::where('language_id', $langid)->first();
+
+        if ($be && $be->statistics_bg) {
+            @unlink('assets/front/img/' . $be->statistics_bg);
+            $be->statistics_bg = null;
+            $be->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
 }

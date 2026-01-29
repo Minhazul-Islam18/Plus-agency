@@ -547,6 +547,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/language/{id}/delete', 'Admin\LanguageController@delete')->name('admin.language.delete');
         Route::post('/language/update', 'Admin\LanguageController@update')->name('admin.language.update');
         Route::post('/language/{id}/update/keyword', 'Admin\LanguageController@updateKeyword')->name('admin.language.updateKeyword');
+        Route::post('/language/status', 'Admin\LanguageController@status')->name('admin.language.status');
 
 
         // Admin Sitemap Routes
@@ -624,6 +625,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/statistics/{id}/edit', 'Admin\StatisticsController@edit')->name('admin.statistics.edit');
         Route::post('/statistics/update', 'Admin\StatisticsController@update')->name('admin.statistics.update');
         Route::post('/statistics/delete', 'Admin\StatisticsController@delete')->name('admin.statistics.delete');
+        Route::post('/statistics/{langid}/deletebg', 'Admin\StatisticsController@deletebg')->name('admin.statistics.deletebg');
 
 
         // Admin Call to Action Section Routes

@@ -63,7 +63,14 @@
                             {{-- Image Part --}}
                             <div class="form-group">
                                 <div class="thumb-preview" id="thumbPreview1">
-                                    <img src="{{asset('assets/front/img/' . $abe->statistics_bg)}}" alt="Image">
+                                    @if (!empty($abe->statistics_bg))
+                                        <img src="{{asset('assets/front/img/' . $abe->statistics_bg)}}" alt="Image">
+                                        <button type="button" class="btn btn-danger btn-sm remove-img-btn" data-lang-id="{{$lang_id}}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    @else
+                                        <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="No Image">
+                                    @endif
                                 </div>
                                 <br>
                                 <br>
@@ -199,6 +206,33 @@
 
 
 @section('scripts')
+  <style>
+    .thumb-preview {
+        position: relative;
+        display: inline-block;
+    }
+
+    .thumb-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .thumb-preview .remove-img-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 10;
+    }
+
+    .thumb-preview:hover .remove-img-btn {
+        opacity: 1;
+    }
+  </style>
+
   <script>
     // Laravel File Manager SetUrl handler
     window.SetUrl = function(items) {
@@ -223,6 +257,16 @@
                     var img = thumbPreview.querySelector('img');
                     if (img) {
                         img.src = fileUrl;
+                    }
+
+                    // Add delete button if not exists
+                    if (thumbPreview.querySelector('.remove-img-btn') === null) {
+                        var deleteBtn = document.createElement('button');
+                        deleteBtn.type = 'button';
+                        deleteBtn.className = 'btn btn-danger btn-sm remove-img-btn';
+                        deleteBtn.setAttribute('data-lang-id', '{{$lang_id}}');
+                        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        thumbPreview.appendChild(deleteBtn);
                     }
                 }
 
@@ -276,6 +320,73 @@
                     $("form .nicEdit-main").removeClass('rtl text-right');
                 }
             })
+        });
+
+        // Delete statistics background image
+        $(document).on('click', '.remove-img-btn', function(e) {
+            e.preventDefault();
+            var langId = $(this).data('lang-id');
+
+            swal({
+                title: 'Are you sure?',
+                text: "You want to delete this background image?",
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: "Cancel",
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Yes, delete it!",
+                        closeModal: false,
+                    }
+                },
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    $.ajax({
+                        url: '{{route("admin.statistics.deletebg", ":langid")}}'.replace(':langid', langId),
+                        type: 'POST',
+                        data: {
+                            _token: '{{csrf_token()}}'
+                        },
+                        success: function(response) {
+                            swal.close();
+                            if (response.success) {
+                                $('#thumbPreview1 img').attr('src', '{{asset("assets/admin/img/noimage.jpg")}}');
+                                $('#thumbPreview1 .remove-img-btn').remove();
+                                $('#fileInput1').val('');
+                                $.notify({
+                                    message: 'Background image has been deleted.',
+                                    title: 'Success!',
+                                    icon: 'fa fa-check'
+                                }, {
+                                    type: 'success',
+                                    placement: { from: 'top', align: 'right' },
+                                    showProgressbar: true,
+                                    time: 1000,
+                                    delay: 3000
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            swal.close();
+                            $.notify({
+                                message: 'Failed to delete background image.',
+                                title: 'Error!',
+                                icon: 'fa fa-times'
+                            }, {
+                                type: 'danger',
+                                placement: { from: 'top', align: 'right' },
+                                showProgressbar: true,
+                                time: 1000,
+                                delay: 3000
+                            });
+                        }
+                    });
+                }
+            });
         });
     });
   </script>

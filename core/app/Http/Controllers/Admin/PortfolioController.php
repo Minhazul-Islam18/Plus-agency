@@ -74,7 +74,7 @@ class PortfolioController extends Controller
           }
         }
       ],
-      'client_name' => 'required|max:255',
+      'client_name' => 'required|max:1000',
       'service_id' => 'required',
       'tags' => 'required',
       'content' => 'required',
@@ -183,7 +183,7 @@ class PortfolioController extends Controller
           }
         }
       ],
-      'client_name' => 'required|max:255',
+      'client_name' => 'required|max:1000',
       'service_id' => 'required',
       'tags' => 'required',
       'content' => 'required',

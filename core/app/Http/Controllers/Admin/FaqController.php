@@ -149,4 +149,13 @@ class FaqController extends Controller
     Session::flash('success', 'FAQs deleted successfully!');
     return "success";
   }
+
+  public function status(Request $request)
+  {
+    $faq = Faq::findOrFail($request->id);
+    $faq->status = $request->status;
+    $faq->save();
+
+    return response()->json(['success' => true]);
+  }
 }

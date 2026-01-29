@@ -11,6 +11,18 @@
 @section('breadcrumb-subtitle', $bs->team_subtitle)
 @section('breadcrumb-link', __('Team Members'))
 
+@if(!empty($bs->team_bg))
+@section('breadcrumb-bg', asset('assets/front/img/'.$bs->team_bg))
+@endif
+
+@if(!empty($be->team_overlay_color))
+@section('breadcrumb-overlay-color', $be->team_overlay_color)
+@endif
+
+@if(!empty($be->team_overlay_opacity))
+@section('breadcrumb-overlay-opacity', $be->team_overlay_opacity)
+@endif
+
 @section('content')
 
   <!--   team page start   -->

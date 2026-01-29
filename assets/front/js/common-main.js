@@ -270,7 +270,7 @@ function storePushSubscription(pushSubscription) {
         dots: true,
         nav: true,
         navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
-        autoplay: false,
+        autoplay: true,
         autoplayTimeout: 5000,
         smartSpeed: 1500,
         rtl: rtl == 1 ? true : false,

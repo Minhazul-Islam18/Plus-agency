@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\BasicExtra;
+use App\BasicSetting;
 use App\FAQCategory;
 use App\Http\Controllers\Controller;
 use App\Language;
@@ -15,23 +16,62 @@ class FAQCategoryController extends Controller
   public function settings()
   {
     $data['abex'] = BasicExtra::first();
+    $data['bs'] = BasicSetting::first();
 
     return view('admin.home.faq.settings', $data);
   }
 
   public function updateSettings(Request $request)
   {
-    $bexs = BasicExtra::all();
+    $request->validate([
+      'faq_breadcrumb_overlay_color' => 'nullable|max:20',
+      'faq_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+    ]);
 
+    // Update BasicExtra for faq_category_status
+    $bexs = BasicExtra::all();
     foreach ($bexs as $bex) {
       $bex->update([
         'faq_category_status' => $request->faq_category_status
       ]);
     }
 
+    // Update BasicSetting for breadcrumb fields
+    $bs = BasicSetting::first();
+    $bs->faq_breadcrumb_overlay_color = $request->faq_breadcrumb_overlay_color;
+    $bs->faq_breadcrumb_overlay_opacity = $request->faq_breadcrumb_overlay_opacity;
+
+    if ($request->filled('faq_breadcrumb_bg')) {
+      $allowedExts = ['jpg', 'jpeg', 'png'];
+      $extBg = pathinfo($request->faq_breadcrumb_bg, PATHINFO_EXTENSION);
+      if (in_array($extBg, $allowedExts)) {
+        @unlink('assets/front/img/' . $bs->faq_breadcrumb_bg);
+        $filename = uniqid() . '.' . $extBg;
+        @copy($request->faq_breadcrumb_bg, 'assets/front/img/' . $filename);
+        $bs->faq_breadcrumb_bg = $filename;
+      }
+    }
+
+    $bs->save();
+
     Session::flash('success', 'Settings updated successfully.');
 
     return redirect()->back();
+  }
+
+  public function deleteBreadcrumbBg()
+  {
+    $bs = BasicSetting::first();
+
+    if ($bs && $bs->faq_breadcrumb_bg) {
+      @unlink('assets/front/img/' . $bs->faq_breadcrumb_bg);
+      $bs->faq_breadcrumb_bg = null;
+      $bs->save();
+
+      return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false], 404);
   }
 
 

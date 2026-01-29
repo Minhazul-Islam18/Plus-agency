@@ -779,6 +779,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         // Admin FAQ Settings Routes
         Route::get('/faq/settings', 'Admin\FAQCategoryController@settings')->name('admin.faq.settings');
         Route::post('/faq/update_settings', 'Admin\FAQCategoryController@updateSettings')->name('admin.faq.update_settings');
+        Route::post('/faq/delete_breadcrumb_bg', 'Admin\FAQCategoryController@deleteBreadcrumbBg')->name('admin.faq.delete_breadcrumb_bg');
 
         // Admin FAQ Category Routes
         Route::get('/faq/categories', 'Admin\FAQCategoryController@index')->name('admin.faq.categories');
@@ -796,6 +797,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/faq/update', 'Admin\FaqController@update')->name('admin.faq.update');
         Route::post('/faq/delete', 'Admin\FaqController@delete')->name('admin.faq.delete');
         Route::post('/faq/bulk-delete', 'Admin\FaqController@bulkDelete')->name('admin.faq.bulk.delete');
+        Route::post('/faq/status', 'Admin\FaqController@status')->name('admin.faq.status');
 
         // Admin Job Category Routes
         Route::get('/jcategorys', 'Admin\JcategoryController@index')->name('admin.jcategory.index');

@@ -198,4 +198,13 @@ class GalleryController extends Controller
     Session::flash('success', 'Image deleted successfully!');
     return "success";
   }
+
+  public function status(Request $request)
+  {
+    $gallery = Gallery::findOrFail($request->id);
+    $gallery->status = $request->status;
+    $gallery->save();
+
+    return response()->json(['success' => true]);
+  }
 }

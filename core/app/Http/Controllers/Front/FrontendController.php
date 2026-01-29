@@ -1121,7 +1121,7 @@ class FrontendController extends Controller
         $data['categories'] = FAQCategory::where('language_id', $lang_id)->where('status', 1)
             ->orderBy('serial_number', 'ASC')->get();
 
-        $data['faqs'] = Faq::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
+        $data['faqs'] = Faq::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;

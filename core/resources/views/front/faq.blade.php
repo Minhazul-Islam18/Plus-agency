@@ -7,11 +7,21 @@
 @section('meta-keywords', "$be->faq_meta_keywords")
 @section('meta-description', "$be->faq_meta_description")
 
-
 @section('breadcrumb-title', convertUtf8($bs->faq_title))
 @section('breadcrumb-subtitle', convertUtf8($bs->faq_subtitle))
 @section('breadcrumb-link', __('FAQS'))
 
+@if(!empty($bs->faq_breadcrumb_bg))
+@section('breadcrumb-bg', asset('assets/front/img/'.$bs->faq_breadcrumb_bg))
+@endif
+
+@if(!empty($bs->faq_breadcrumb_overlay_color))
+@section('breadcrumb-overlay-color', $bs->faq_breadcrumb_overlay_color)
+@endif
+
+@if(!empty($bs->faq_breadcrumb_overlay_opacity))
+@section('breadcrumb-overlay-opacity', $bs->faq_breadcrumb_overlay_opacity)
+@endif
 
 @section('content')
   <!--   FAQ section start   -->
@@ -44,7 +54,7 @@
                         <div class="tab-pane {{ $loop->iteration == 1 ? 'show active' : '' }} fade" id="{{ 'category' . $category->id }}">
                             <div class="accordion" id="{{ 'accordion' . $category->id }}">
                             @php
-                                $qas = \App\Faq::where('category_id', $category->id)->orderBy('serial_number', 'ASC')->get();
+                                $qas = \App\Faq::where('category_id', $category->id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
                             @endphp
 
                             @foreach ($qas as $qa)

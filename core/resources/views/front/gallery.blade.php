@@ -11,6 +11,18 @@
 @section('breadcrumb-subtitle', $bs->gallery_subtitle)
 @section('breadcrumb-link', __('GALLERY'))
 
+@if(!empty($bs->gallery_breadcrumb_bg))
+@section('breadcrumb-bg', asset('assets/front/img/'.$bs->gallery_breadcrumb_bg))
+@endif
+
+@if(!empty($bs->gallery_breadcrumb_overlay_color))
+@section('breadcrumb-overlay-color', $bs->gallery_breadcrumb_overlay_color)
+@endif
+
+@if(!empty($bs->gallery_breadcrumb_overlay_opacity))
+@section('breadcrumb-overlay-opacity', $bs->gallery_breadcrumb_overlay_opacity)
+@endif
+
 @section('content')
 <!--    Gallery section start   -->
 <section class="gallery-area-v1" id="masonry-gallery">

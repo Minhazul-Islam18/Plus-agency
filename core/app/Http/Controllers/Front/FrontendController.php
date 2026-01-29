@@ -1094,7 +1094,7 @@ class FrontendController extends Controller
             ->orderBy('serial_number', 'ASC')->get();
 
         $data['galleries'] = Gallery::with('galleryImgCategory')->where('language_id', $lang_id)
-            ->orderBy('serial_number', 'ASC')->get();
+            ->where('status', 1)->orderBy('serial_number', 'ASC')->get();
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;

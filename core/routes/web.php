@@ -758,6 +758,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         // Admin Gallery Settings Routes
         Route::get('/gallery/settings', 'Admin\GalleryCategoryController@settings')->name('admin.gallery.settings');
         Route::post('/gallery/update_settings', 'Admin\GalleryCategoryController@updateSettings')->name('admin.gallery.update_settings');
+        Route::post('/gallery/delete_breadcrumb_bg', 'Admin\GalleryCategoryController@deleteBreadcrumbBg')->name('admin.gallery.delete_breadcrumb_bg');
 
         // Admin Gallery Category Routes
         Route::get('/gallery/categories', 'Admin\GalleryCategoryController@index')->name('admin.gallery.categories');
@@ -774,6 +775,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/gallery/update', 'Admin\GalleryController@update')->name('admin.gallery.update');
         Route::post('/gallery/delete', 'Admin\GalleryController@delete')->name('admin.gallery.delete');
         Route::post('/gallery/bulk-delete', 'Admin\GalleryController@bulkDelete')->name('admin.gallery.bulk.delete');
+        Route::post('/gallery/status', 'Admin\GalleryController@status')->name('admin.gallery.status');
 
 
         // Admin FAQ Settings Routes

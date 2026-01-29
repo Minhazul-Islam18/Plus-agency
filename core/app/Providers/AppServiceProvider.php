@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
   {
     Paginator::useBootstrap();
     $socials = Social::orderBy('serial_number', 'ASC')->get();
-    $langs = Language::all();
+    $langs = Language::where('status', 1)->get();
 
     view()->composer('*', function ($view) {
       // Get current locale (set by SetLangMiddleware or manual selection)

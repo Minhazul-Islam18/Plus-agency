@@ -840,6 +840,21 @@ class LanguageController extends Controller
         return back()->with('success', $lang->name . ' laguage is set as defualt.');
     }
 
+    public function status(Request $request)
+    {
+        $language = Language::findOrFail($request->id);
+
+        // Prevent disabling default language
+        if ($language->is_default == 1 && $request->status == 0) {
+            return response()->json(['success' => false, 'message' => 'Default language cannot be deactivated!'], 400);
+        }
+
+        $language->status = $request->status;
+        $language->save();
+
+        return response()->json(['success' => true]);
+    }
+
     public function rtlcheck($langid)
     {
         if ($langid > 0) {

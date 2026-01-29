@@ -75,7 +75,7 @@
                                     <div class="col-lg-6 offset-lg-3">
                                         {{-- Background Part --}}
                                         <div class="form-group">
-                                            <label for="">Background ** </label>
+                                            <label for="">Section & Breadcrumb background** </label>
                                             <br>
                                             <div class="thumb-preview" id="thumbPreview1"
                                                 style="position: relative; display: inline-block;">
@@ -334,8 +334,15 @@
                         text: 'You want to delete this background image?',
                         icon: 'warning',
                         buttons: {
-                            cancel: { text: "Cancel", visible: true, closeModal: true },
-                            confirm: { text: "Yes, delete it!", closeModal: true }
+                            cancel: {
+                                text: "Cancel",
+                                visible: true,
+                                closeModal: true
+                            },
+                            confirm: {
+                                text: "Yes, delete it!",
+                                closeModal: true
+                            }
                         },
                         dangerMode: true,
                     }).then(function(willDelete) {

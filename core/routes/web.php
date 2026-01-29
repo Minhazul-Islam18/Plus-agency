@@ -737,6 +737,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/bcategory/bulk-delete', 'Admin\BcategoryController@bulkDelete')->name('admin.bcategory.bulk.delete');
 
 
+        // Admin Blog Settings Routes
+        Route::get('/blog/settings', 'Admin\BlogSettingsController@settings')->name('admin.blog.settings');
+        Route::post('/blog/update_settings', 'Admin\BlogSettingsController@updateSettings')->name('admin.blog.update_settings');
+        Route::post('/blog/delete_breadcrumb_bg', 'Admin\BlogSettingsController@deleteBreadcrumbBg')->name('admin.blog.delete_breadcrumb_bg');
+
         // Admin Blog Routes
         Route::get('/blogs', 'Admin\BlogController@index')->name('admin.blog.index');
         Route::post('/blog/store', 'Admin\BlogController@store')->name('admin.blog.store');

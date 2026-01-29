@@ -17,6 +17,18 @@
 @section('breadcrumb-subtitle', convertUtf8($bs->blog_subtitle))
 @section('breadcrumb-link', __('Latest Blogs'))
 
+@if(!empty($bs->blog_breadcrumb_bg))
+@section('breadcrumb-bg', asset('assets/front/img/'.$bs->blog_breadcrumb_bg))
+@endif
+
+@if(!empty($bs->blog_breadcrumb_overlay_color))
+@section('breadcrumb-overlay-color', $bs->blog_breadcrumb_overlay_color)
+@endif
+
+@if(!empty($bs->blog_breadcrumb_overlay_opacity))
+@section('breadcrumb-overlay-opacity', $bs->blog_breadcrumb_overlay_opacity)
+@endif
+
 @section('content')
 
 

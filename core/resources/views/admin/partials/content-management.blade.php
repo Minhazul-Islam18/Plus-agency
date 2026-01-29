@@ -38,6 +38,7 @@
 @elseif(request()->path() == 'admin/portfolio/create') active
 @elseif(request()->is('admin/portfolio/*/edit')) active
 
+@elseif(request()->path() == 'admin/blog/settings') active
 @elseif(request()->path() == 'admin/bcategorys') active
 @elseif(request()->path() == 'admin/blogs') active
 @elseif(request()->path() == 'admin/archives') active
@@ -107,6 +108,7 @@
     @elseif(request()->path() == 'admin/portfolio/create') show
     @elseif(request()->is('admin/portfolio/*/edit')) show
 
+    @elseif(request()->path() == 'admin/blog/settings') show
     @elseif(request()->path() == 'admin/bcategorys') show
     @elseif(request()->path() == 'admin/blogs') show
     @elseif(request()->path() == 'admin/archives') show
@@ -466,7 +468,8 @@
             {{-- Blogs Management --}}
             <li
                 class="
-            @if (request()->path() == 'admin/bcategorys') selected
+            @if (request()->path() == 'admin/blog/settings') selected
+            @elseif(request()->path() == 'admin/bcategorys') selected
             @elseif(request()->path() == 'admin/blogs') selected
             @elseif(request()->path() == 'admin/archives') selected
             @elseif(request()->is('admin/blog/*/edit')) selected @endif">
@@ -475,12 +478,18 @@
                     <span class="caret"></span>
                 </a>
                 <div class="collapse
-                @if (request()->path() == 'admin/bcategorys') show
+                @if (request()->path() == 'admin/blog/settings') show
+                @elseif(request()->path() == 'admin/bcategorys') show
                 @elseif(request()->path() == 'admin/blogs') show
                 @elseif(request()->path() == 'admin/archives') show
                 @elseif(request()->is('admin/blog/*/edit')) show @endif"
                     id="blogs">
                     <ul class="nav nav-collapse subnav">
+                        <li class="@if (request()->path() == 'admin/blog/settings') active @endif">
+                            <a href="{{ route('admin.blog.settings') }}">
+                                <span class="sub-item">Settings</span>
+                            </a>
+                        </li>
                         <li class="@if (request()->path() == 'admin/bcategorys') active @endif">
                             <a href="{{ route('admin.bcategory.index') . '?language=' . $default->code }}">
                                 <span class="sub-item">Category</span>

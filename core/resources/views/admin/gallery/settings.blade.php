@@ -57,7 +57,24 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title d-inline-block">Settings</div>
+                    <div class="row">
+                        <div class="col-lg-10">
+                            <div class="card-title d-inline-block">Settings</div>
+                        </div>
+                        <div class="col-lg-2">
+                            @if (!empty($langs))
+                                <select name="language" class="form-control"
+                                    onchange="window.location='{{ url()->current() . '?language=' }}'+this.value">
+                                    <option value="" selected disabled>Select a Language</option>
+                                    @foreach ($langs as $lang)
+                                        <option value="{{ $lang->code }}"
+                                            {{ $lang->code == request()->input('language') ? 'selected' : '' }}>
+                                            {{ $lang->name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body pt-5 pb-5">
@@ -236,7 +253,8 @@
                                 swal.close();
                                 if (response.success) {
                                     $('#thumbPreview1 img').attr('src',
-                                        '{{ asset('assets/admin/img/noimage.jpg') }}');
+                                        '{{ asset('assets/admin/img/noimage.jpg') }}'
+                                        );
                                     $('#thumbPreview1 .remove-img-btn').remove();
                                     $('#fileInput1').val('');
                                     $.notify({

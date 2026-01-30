@@ -404,7 +404,7 @@
                     <ul class="nav nav-collapse subnav">
                         <li class="
                             @if (request()->path() == 'admin/service/settings') active @endif">
-                            <a href="{{ route('admin.service.settings') }}">
+                            <a href="{{ route('admin.service.settings') . '?language=' . $default->code }}">
                                 <span class="sub-item">Settings</span>
                             </a>
                         </li>
@@ -486,7 +486,7 @@
                     id="blogs">
                     <ul class="nav nav-collapse subnav">
                         <li class="@if (request()->path() == 'admin/blog/settings') active @endif">
-                            <a href="{{ route('admin.blog.settings') }}">
+                            <a href="{{ route('admin.blog.settings') . '?language=' . $default->code }}">
                                 <span class="sub-item">Settings</span>
                             </a>
                         </li>
@@ -534,7 +534,7 @@
                     id="gallery">
                     <ul class="nav nav-collapse subnav">
                         <li class="@if (request()->path() == 'admin/gallery/settings') active @endif">
-                            <a href="{{ route('admin.gallery.settings') }}">
+                            <a href="{{ route('admin.gallery.settings') . '?language=' . $default->code }}">
                                 <span class="sub-item">Settings</span>
                             </a>
                         </li>
@@ -575,7 +575,7 @@
                     id="faq">
                     <ul class="nav nav-collapse subnav">
                         <li class="@if (request()->path() == 'admin/faq/settings') active @endif">
-                            <a href="{{ route('admin.faq.settings') }}">
+                            <a href="{{ route('admin.faq.settings') . '?language=' . $default->code }}">
                                 <span class="sub-item">Settings</span>
                             </a>
                         </li>

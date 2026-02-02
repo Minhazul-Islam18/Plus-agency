@@ -93,7 +93,7 @@ class FrontendController extends Controller
         $version = $be->theme_version;
 
         // if home page page builder is disabled
-        if ($bex->home_page_pagebuilder == 0) {
+        if ($bex?->home_page_pagebuilder == 0) {
             $data['portfolios'] = Portfolio::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->limit(10)->get();
             $data['points'] = Point::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
             $data['statistics'] = Statistic::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
@@ -160,7 +160,7 @@ class FrontendController extends Controller
                 return view('front.ecommerce.index1', $data);
             }
         } elseif ($version == 'default' || $version == 'dark') {
-            if ($bex->home_page_pagebuilder == 1) {
+            if ($bex?->home_page_pagebuilder == 1) {
                 return view('front.default.index', $data);
             } else {
                 return view('front.default.index1', $data);

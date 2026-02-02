@@ -1,15 +1,22 @@
-# Ignore uploaded images
-/assets/front/img/*.jpg
-/assets/front/img/*.jpeg
-/assets/front/img/*.png
-/assets/front/img/*.gif
-/assets/front/img/*.webp
+# Ignore all common image formats in assets/
+/assets/**/*.jpg
+/assets/**/*.jpeg
+/assets/**/*.png
+/assets/**/*.gif
+/assets/**/*.svg
+/assets/**/*.ico
+/assets/**/*.webp
 
-# Ignore file manager uploads
+# Ignore font files in assets/ and installer/
+/assets/**/*.svg
+/installer/**/*.svg
+
+# Ignore specific image directories
 /assets/lfm/files/
-
-# Ignore page breadcrumb images
-/assets/front/img/pages/
+/assets/front/receipt/
+/assets/admin/img/
+/assets/user/img/
+/installer/img/
 
 # Ignore vendor directory
 /core/vendor/

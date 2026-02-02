@@ -4,59 +4,64 @@ namespace App\Http\Controllers\Admin;
 
 use App\BasicSetting;
 use App\Http\Controllers\Controller;
+use App\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 class BlogSettingsController extends Controller
 {
-  public function settings()
-  {
-    $data['bs'] = BasicSetting::first();
+    public function settings(Request $request)
+    {
+        $lang = Language::where('code', $request->language)->firstOrFail();
+        $data['lang_id'] = $lang->id;
+        $data['bsData'] = BasicSetting::where('language_id', $lang->id)->first();
 
-    return view('admin.blog.settings', $data);
-  }
-
-  public function updateSettings(Request $request)
-  {
-    $request->validate([
-      'blog_breadcrumb_overlay_color' => 'nullable|max:20',
-      'blog_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
-    ]);
-
-    $bs = BasicSetting::first();
-    $bs->blog_breadcrumb_overlay_color = $request->blog_breadcrumb_overlay_color;
-    $bs->blog_breadcrumb_overlay_opacity = $request->blog_breadcrumb_overlay_opacity;
-
-    if ($request->filled('blog_breadcrumb_bg')) {
-      $allowedExts = ['jpg', 'jpeg', 'png'];
-      $extBg = pathinfo($request->blog_breadcrumb_bg, PATHINFO_EXTENSION);
-      if (in_array($extBg, $allowedExts)) {
-        @unlink('assets/front/img/' . $bs->blog_breadcrumb_bg);
-        $filename = uniqid() . '.' . $extBg;
-        @copy($request->blog_breadcrumb_bg, 'assets/front/img/' . $filename);
-        $bs->blog_breadcrumb_bg = $filename;
-      }
+        return view('admin.blog.settings', $data);
     }
 
-    $bs->save();
+    public function updateSettings(Request $request, $langid)
+    {
+        $request->validate([
+            'blog_breadcrumb_overlay_color' => 'nullable|max:20',
+            'blog_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+        ]);
 
-    Session::flash('success', 'Settings updated successfully.');
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->blog_breadcrumb_overlay_color = $request->blog_breadcrumb_overlay_color;
+        $bs->blog_breadcrumb_overlay_opacity = $request->blog_breadcrumb_overlay_opacity;
 
-    return redirect()->back();
-  }
+        if ($request->filled('blog_breadcrumb_bg')) {
+            $allowedExts = ['jpg', 'jpeg', 'png'];
+            $extBg = pathinfo($request->blog_breadcrumb_bg, PATHINFO_EXTENSION);
+            if (in_array($extBg, $allowedExts)) {
+                @unlink('assets/front/img/' . $bs->blog_breadcrumb_bg);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->blog_breadcrumb_bg, 'assets/front/img/' . $filename);
+                $bs->blog_breadcrumb_bg = $filename;
+            }
+        }
 
-  public function deleteBreadcrumbBg()
-  {
-    $bs = BasicSetting::first();
+        $bs->save();
 
-    if ($bs && $bs->blog_breadcrumb_bg) {
-      @unlink('assets/front/img/' . $bs->blog_breadcrumb_bg);
-      $bs->blog_breadcrumb_bg = null;
-      $bs->save();
+        $lang = Language::find($langid);
 
-      return response()->json(['success' => true]);
+        Session::flash('success', 'Settings updated successfully.');
+
+        return redirect()->route('admin.blog.settings', ['language' => $lang->code]);
     }
 
-    return response()->json(['success' => false], 404);
-  }
+    public function deleteBreadcrumbBg($langid)
+    {
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+
+        if ($bs && $bs->blog_breadcrumb_bg) {
+            @unlink('assets/front/img/' . $bs->blog_breadcrumb_bg);
+            $bs->blog_breadcrumb_bg = null;
+            $bs->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
 }

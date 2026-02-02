@@ -248,7 +248,7 @@
                             </a>
                         </li>
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/introsection') active @endif">
                                 <a href="{{ route('admin.introsection.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Intro Section</span>
@@ -256,7 +256,7 @@
                             </li>
                         @endif
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/servicesection') active @endif">
                                 <a href="{{ route('admin.servicesection.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Service Section</span>
@@ -281,7 +281,7 @@
                             </a>
                         </li>
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/cta') active @endif">
                                 <a href="{{ route('admin.cta.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Call to Action Section</span>
@@ -289,7 +289,7 @@
                             </li>
                         @endif
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/portfoliosection') active @endif">
                                 <a href="{{ route('admin.portfoliosection.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Portfolio Section</span>
@@ -314,7 +314,7 @@
                             </a>
                         </li>
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="
                     @if (request()->path() == 'admin/package/background') active @endif">
                                 <a href="{{ route('admin.package.background') . '?language=' . $default->code }}">
@@ -323,7 +323,7 @@
                             </li>
                         @endif
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/blogsection') active @endif">
                                 <a href="{{ route('admin.blogsection.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Blog Section</span>
@@ -340,7 +340,7 @@
                             </a>
                         </li>
 
-                        @if ($bex->home_page_pagebuilder == 0)
+                        @if ($bex?->home_page_pagebuilder == 0)
                             <li class="
                     @if (request()->path() == 'admin/sections') active @endif">
                                 <a href="{{ route('admin.sections.index') . '?language=' . $default->code }}">
@@ -434,37 +434,36 @@
             {{-- Portfolio Management --}}
             <li
                 class="
-            @if (request()->path() == 'admin/portfolios') selected
-            @elseif(request()->path() == 'admin/portfolio/create') selected
-            @elseif(request()->is('admin/portfolio/*/edit')) selected @endif">
-                <a data-toggle="collapse" href="#portfolio">
-                    <span class="sub-item">Portfolios</span>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse
-                @if (request()->path() == 'admin/portfolios') show
-                @elseif(request()->path() == 'admin/portfolio/create') show
-                @elseif(request()->is('admin/portfolio/*/edit')) show @endif"
-                    id="portfolio">
-                    <ul class="nav nav-collapse subnav">
-                        <li class="
-                        @if (request()->path() == 'admin/portfolio/create') active @endif">
-                            <a href="{{ route('admin.portfolio.create') }}">
-                                <span class="sub-item">Add Portfolio</span>
-                            </a>
-                        </li>
-                        <li
-                            class="
-                        @if (request()->path() == 'admin/portfolios') active
-                        @elseif(request()->is('admin/portfolio/*/edit')) active @endif">
-                            <a href="{{ route('admin.portfolio.index') . '?language=' . $default->code }}">
-                                <span class="sub-item">Portfolios</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
+                                                        @if (request()->path() == 'admin/portfolios') selected
+                                                        @elseif(request()->path() == 'admin/portfolio/create') selected
+                                                        @elseif(request()->is('admin/portfolio/*/edit')) selected @endif">
+                                                            <a data-toggle="collapse" href="#portfolio">
+                                                                <span class="sub-item">Portfolios</span>
+                                                                <span class="caret"></span>
+                                                            </a>
+                                                            <div class="collapse
+                                               @if (request()->path() == 'admin/portfolios') show
+                                            @elseif(request()->path() == 'admin/portfolio/create') show
+                                            @elseif(request()->is('admin/portfolio/*/edit')) show @endif"
+                                                                id="portfolio">
+                                                                <ul class="nav nav-collapse subnav">
+                                                                    <li class="
+                                                    @if (request()->path() == 'admin/portfolio/create') active @endif">
+                                                                        <a href="{{ route('admin.portfolio.create') }}">
+                                                                            <span class="sub-item">Add Portfolio</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li
+                                                                        class="
+                                                    @if (request()->path() == 'admin/portfolios') active
+                                                    @elseif(request()->is('admin/portfolio/*/edit')) active @endif">
+                                                                        <a href="{{ route('admin.portfolio.index') . '?language=' . $default->code }}">
+                                                                            <span class="sub-item">Portfolios</span>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </li>
             {{-- Blogs Management --}}
             <li
                 class="

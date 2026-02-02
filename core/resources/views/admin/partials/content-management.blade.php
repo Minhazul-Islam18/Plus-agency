@@ -432,81 +432,90 @@
 
 
             {{-- Portfolio Management --}}
-            <li
-                class="
-                                                        @if (request()->path() == 'admin/portfolios') selected
-                                                        @elseif(request()->path() == 'admin/portfolio/create') selected
-                                                        @elseif(request()->is('admin/portfolio/*/edit')) selected @endif">
-                                                            <a data-toggle="collapse" href="#portfolio">
-                                                                <span class="sub-item">Portfolios</span>
-                                                                <span class="caret"></span>
-                                                            </a>
-                                                            <div class="collapse
-                                               @if (request()->path() == 'admin/portfolios') show
-                                            @elseif(request()->path() == 'admin/portfolio/create') show
-                                            @elseif(request()->is('admin/portfolio/*/edit')) show @endif"
-                                                                id="portfolio">
-                                                                <ul class="nav nav-collapse subnav">
-                                                                    <li class="
-                                                    @if (request()->path() == 'admin/portfolio/create') active @endif">
-                                                                        <a href="{{ route('admin.portfolio.create') }}">
-                                                                            <span class="sub-item">Add Portfolio</span>
-                                                                        </a>
-                                                                    </li>
-                                                                    <li
-                                                                        class="
-                                                    @if (request()->path() == 'admin/portfolios') active
-                                                    @elseif(request()->is('admin/portfolio/*/edit')) active @endif">
-                                                                        <a href="{{ route('admin.portfolio.index') . '?language=' . $default->code }}">
-                                                                            <span class="sub-item">Portfolios</span>
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </li>
+            @php
+                $portfolioActive = request()->is(
+                    'admin/portfolios',
+                    'admin/portfolio/create',
+                    'admin/portfolio/*/edit',
+                    'admin/portfolio/settings',
+                );
+            @endphp
+
+            <li class="{{ $portfolioActive ? 'selected' : '' }}">
+                <a data-toggle="collapse" href="#portfolio">
+                    <span class="sub-item">Portfolios</span>
+                    <span class="caret"></span>
+                </a>
+
+                <div class="collapse {{ $portfolioActive ? 'show' : '' }}" id="portfolio">
+                    <ul class="nav nav-collapse subnav">
+
+                        <li class="{{ request()->is('admin/portfolio/settings') ? 'active' : '' }}">
+                            <a href="{{ route('admin.portfolio.settings', ['language' => $default->code]) }}">
+                                <span class="sub-item">Settings</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->is('admin/portfolio/create') ? 'active' : '' }}">
+                            <a href="{{ route('admin.portfolio.create') }}">
+                                <span class="sub-item">Add Portfolio</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->is('admin/portfolios', 'admin/portfolio/*/edit') ? 'active' : '' }}">
+                            <a href="{{ route('admin.portfolio.index', ['language' => $default->code]) }}">
+                                <span class="sub-item">Portfolios</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
             {{-- Blogs Management --}}
-            <li
-                class="
-            @if (request()->path() == 'admin/blog/settings') selected
-            @elseif(request()->path() == 'admin/bcategorys') selected
-            @elseif(request()->path() == 'admin/blogs') selected
-            @elseif(request()->path() == 'admin/archives') selected
-            @elseif(request()->is('admin/blog/*/edit')) selected @endif">
+            @php
+                $blogActive = request()->is(
+                    'admin/blog/settings',
+                    'admin/bcategorys',
+                    'admin/blogs',
+                    'admin/archives',
+                    'admin/blog/*/edit',
+                );
+            @endphp
+
+            <li class="{{ $blogActive ? 'selected' : '' }}">
                 <a data-toggle="collapse" href="#blogs">
                     <span class="sub-item">Blogs</span>
                     <span class="caret"></span>
                 </a>
-                <div class="collapse
-                @if (request()->path() == 'admin/blog/settings') show
-                @elseif(request()->path() == 'admin/bcategorys') show
-                @elseif(request()->path() == 'admin/blogs') show
-                @elseif(request()->path() == 'admin/archives') show
-                @elseif(request()->is('admin/blog/*/edit')) show @endif"
-                    id="blogs">
+
+                <div class="collapse {{ $blogActive ? 'show' : '' }}" id="blogs">
                     <ul class="nav nav-collapse subnav">
-                        <li class="@if (request()->path() == 'admin/blog/settings') active @endif">
-                            <a href="{{ route('admin.blog.settings') . '?language=' . $default->code }}">
+
+                        <li class="{{ request()->is('admin/blog/settings') ? 'active' : '' }}">
+                            <a href="{{ route('admin.blog.settings', ['language' => $default->code]) }}">
                                 <span class="sub-item">Settings</span>
                             </a>
                         </li>
-                        <li class="@if (request()->path() == 'admin/bcategorys') active @endif">
-                            <a href="{{ route('admin.bcategory.index') . '?language=' . $default->code }}">
+
+                        <li class="{{ request()->is('admin/bcategorys') ? 'active' : '' }}">
+                            <a href="{{ route('admin.bcategory.index', ['language' => $default->code]) }}">
                                 <span class="sub-item">Category</span>
                             </a>
                         </li>
-                        <li
-                            class="
-                            @if (request()->path() == 'admin/blogs') active
-                            @elseif(request()->is('admin/blog/*/edit')) active @endif">
-                            <a href="{{ route('admin.blog.index') . '?language=' . $default->code }}">
+
+                        <li class="{{ request()->is('admin/blogs', 'admin/blog/*/edit') ? 'active' : '' }}">
+                            <a href="{{ route('admin.blog.index', ['language' => $default->code]) }}">
                                 <span class="sub-item">Blogs</span>
                             </a>
                         </li>
-                        <li class="@if (request()->path() == 'admin/archives') active @endif">
+
+                        <li class="{{ request()->is('admin/archives') ? 'active' : '' }}">
                             <a href="{{ route('admin.archive.index') }}">
                                 <span class="sub-item">Archives</span>
                             </a>
                         </li>
+
                     </ul>
                 </div>
             </li>

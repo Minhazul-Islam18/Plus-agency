@@ -727,7 +727,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/portfolio/bulk-delete', 'Admin\PortfolioController@bulkDelete')->name('admin.portfolio.bulk.delete');
         Route::get('portfolio/{id}/getservices', 'Admin\PortfolioController@getservices')->name('admin.portfolio.getservices');
         Route::post('/portfolio/feature', 'Admin\PortfolioController@feature')->name('admin.portfolio.feature');
-
+        Route::get('/portfolio/settings', 'Admin\PortfolioController@settings')->name('admin.portfolio.settings');
+        Route::post('/portfolio/{langid}/update_settings', 'Admin\PortfolioController@updateSettings')->name('admin.portfolio.update_settings');
+        Route::post('/portfolio/{langid}/delete_breadcrumb_bg', 'Admin\PortfolioController@deleteBreadcrumbBg')->name('admin.portfolio.delete_breadcrumb_bg');
 
         // Admin Blog Category Routes
         Route::get('/bcategorys', 'Admin\BcategoryController@index')->name('admin.bcategory.index');
@@ -739,8 +741,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
         // Admin Blog Settings Routes
         Route::get('/blog/settings', 'Admin\BlogSettingsController@settings')->name('admin.blog.settings');
-        Route::post('/blog/update_settings', 'Admin\BlogSettingsController@updateSettings')->name('admin.blog.update_settings');
-        Route::post('/blog/delete_breadcrumb_bg', 'Admin\BlogSettingsController@deleteBreadcrumbBg')->name('admin.blog.delete_breadcrumb_bg');
+        Route::post('/blog/{langid}/update_settings', 'Admin\BlogSettingsController@updateSettings')->name('admin.blog.update_settings');
+        Route::post('/blog/{langid}/delete_breadcrumb_bg', 'Admin\BlogSettingsController@deleteBreadcrumbBg')->name('admin.blog.delete_breadcrumb_bg');
 
         // Admin Blog Routes
         Route::get('/blogs', 'Admin\BlogController@index')->name('admin.blog.index');
@@ -762,8 +764,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
         // Admin Gallery Settings Routes
         Route::get('/gallery/settings', 'Admin\GalleryCategoryController@settings')->name('admin.gallery.settings');
-        Route::post('/gallery/update_settings', 'Admin\GalleryCategoryController@updateSettings')->name('admin.gallery.update_settings');
-        Route::post('/gallery/delete_breadcrumb_bg', 'Admin\GalleryCategoryController@deleteBreadcrumbBg')->name('admin.gallery.delete_breadcrumb_bg');
+        Route::post('/gallery/{langid}/update_settings', 'Admin\GalleryCategoryController@updateSettings')->name('admin.gallery.update_settings');
+        Route::post('/gallery/{langid}/delete_breadcrumb_bg', 'Admin\GalleryCategoryController@deleteBreadcrumbBg')->name('admin.gallery.delete_breadcrumb_bg');
 
         // Admin Gallery Category Routes
         Route::get('/gallery/categories', 'Admin\GalleryCategoryController@index')->name('admin.gallery.categories');
@@ -785,8 +787,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
         // Admin FAQ Settings Routes
         Route::get('/faq/settings', 'Admin\FAQCategoryController@settings')->name('admin.faq.settings');
-        Route::post('/faq/update_settings', 'Admin\FAQCategoryController@updateSettings')->name('admin.faq.update_settings');
-        Route::post('/faq/delete_breadcrumb_bg', 'Admin\FAQCategoryController@deleteBreadcrumbBg')->name('admin.faq.delete_breadcrumb_bg');
+        Route::post('/faq/{langid}/update_settings', 'Admin\FAQCategoryController@updateSettings')->name('admin.faq.update_settings');
+        Route::post('/faq/{langid}/delete_breadcrumb_bg', 'Admin\FAQCategoryController@deleteBreadcrumbBg')->name('admin.faq.delete_breadcrumb_bg');
 
         // Admin FAQ Category Routes
         Route::get('/faq/categories', 'Admin\FAQCategoryController@index')->name('admin.faq.categories');

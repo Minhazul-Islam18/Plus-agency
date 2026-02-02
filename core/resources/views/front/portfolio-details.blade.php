@@ -11,6 +11,58 @@
 @section('breadcrumb-subtitle', convertUtf8($portfolio->title))
 @section('breadcrumb-link', __('Portfolio Details'))
 
+@if (!empty($bs->portfolio_breadcrumb_bg))
+    @section('breadcrumb-bg', asset('assets/front/img/' . $bs->portfolio_breadcrumb_bg))
+@endif
+
+@if (!empty($bs->portfolio_breadcrumb_overlay_color))
+    @section('breadcrumb-overlay-color', $bs->portfolio_breadcrumb_overlay_color)
+@endif
+
+@if (!empty($bs->portfolio_breadcrumb_overlay_opacity))
+    @section('breadcrumb-overlay-opacity', $bs->portfolio_breadcrumb_overlay_opacity)
+@endif
+
+@section('styles')
+    <style>
+        .project-infos {
+            font-size: 15px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 125px 12px 1fr;
+            column-gap: 6px;
+            margin-bottom: 8px;
+            align-items: start;
+        }
+
+        .info-row .label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .info-row .colon {
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .info-row .value {
+            word-break: break-word;
+        }
+
+        @media (max-width: 576px) {
+            .info-row {
+                grid-template-columns: 1fr;
+                row-gap: 2px;
+            }
+
+            .info-row .colon {
+                display: none;
+            }
+        }
+    </style>
+@endsection
 @section('content')
     <!--    case details section start   -->
     <div class="case-details-section">
@@ -41,72 +93,97 @@
                             <div class="col-xl-12 col-lg-12 col-md-12">
                                 <div class="project-infos">
                                     <h3>{{ convertUtf8($portfolio->title) }}</h3>
-                                    <div class="row mb-2">
-                                        <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                            <strong>{{ __('Client Name') }}</strong>
-                                        </div>
-                                        <div class="col-7"><span>:</span> {{ convertUtf8($portfolio->client_name) }}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                            <strong>{{ __('Service') }}</strong>
-                                        </div>
-                                        @if (!empty($portfolio->service->title))
-                                            <div class="col-7"><span>:</span>
-                                                {{ convertUtf8($portfolio->service->title) }}</div>
-                                        @endif
+
+                                    <div class="info-row">
+                                        <div class="label">{{ __('Client Name') }}</div>
+                                        <div class="colon">:</div>
+                                        <div class="value">{{ convertUtf8($portfolio->client_name) }}</div>
                                     </div>
 
-                                    @if ($portfolio->start_date != null)
-                                        @php
-                                            $startDate = Carbon\Carbon::parse($portfolio->start_date);
-                                        @endphp
-                                        <div class="row mb-2">
-                                            <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                                <strong>{{ __('Start Date') }}</strong>
-                                            </div>
-                                            <div class="col-7"><span>:</span> {{ date_format($startDate, 'M d, Y') }}
-                                            </div>
+                                    @if (!empty($portfolio->service->title))
+                                        <div class="info-row">
+                                            <div class="label">{{ __('Service') }}</div>
+                                            <div class="colon">:</div>
+                                            <div class="value">{{ convertUtf8($portfolio->service->title) }}</div>
                                         </div>
                                     @endif
 
-                                    @if ($portfolio->submission_date != null)
-                                        @php
-                                            $submissionDate = Carbon\Carbon::parse($portfolio->submission_date);
-                                        @endphp
-                                        <div class="row mb-2">
-                                            <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                                <strong>{{ __('End Date') }}</strong>
-                                            </div>
-                                            <div class="col-7"><span>:</span> {{ date_format($submissionDate, 'M d, Y') }}
-                                            </div>
+                                    @if ($portfolio->start_date)
+                                        @php $startDate = Carbon\Carbon::parse($portfolio->start_date); @endphp
+                                        <div class="info-row">
+                                            <div class="label">{{ __('Start Date') }}</div>
+                                            <div class="colon">:</div>
+                                            <div class="value">{{ date_format($startDate, 'M d, Y') }}</div>
                                         </div>
                                     @endif
+
+                                    @if ($portfolio->submission_date)
+                                        @php $submissionDate = Carbon\Carbon::parse($portfolio->submission_date); @endphp
+                                        <div class="info-row">
+                                            <div class="label">{{ __('End Date') }}</div>
+                                            <div class="colon">:</div>
+                                            <div class="value">{{ date_format($submissionDate, 'M d, Y') }}</div>
+                                        </div>
+                                    @endif
+
                                     @if (!empty($portfolio->cost_of_service))
-                                        <div class="row mb-2">
-                                            <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                                <strong>{{ __('Cost of Service') }}</strong>
+                                        <div class="info-row">
+                                            <div class="label">{{ __('Cost of Service') }}</div>
+                                            <div class="colon">:</div>
+                                            <div class="value">
+                                                @php
+                                                    $decimalSeparator = app()->getLocale() == 'fr' ? ',' : '.';
+                                                    $thousandSeparator = app()->getLocale() == 'fr' ? ' ' : ',';
+
+                                                    // Determine if the amount has decimals
+                                                    if (
+                                                        floor($portfolio->cost_of_service) ==
+                                                        $portfolio->cost_of_service
+                                                    ) {
+                                                        // Whole number, no decimals
+                                                        $formattedAmount = number_format(
+                                                            $portfolio->cost_of_service,
+                                                            0,
+                                                            $decimalSeparator,
+                                                            $thousandSeparator,
+                                                        );
+                                                    } else {
+                                                        // Has decimals
+                                                        $formattedAmount = number_format(
+                                                            $portfolio->cost_of_service,
+                                                            2,
+                                                            $decimalSeparator,
+                                                            $thousandSeparator,
+                                                        );
+                                                    }
+                                                @endphp
+
+                                                @if ($bex?->base_currency_symbol_position == 'left')
+                                                    {{ $bex?->base_currency_symbol }} {{ $formattedAmount }}
+                                                @else
+                                                    {{ $formattedAmount }} {{ $bex?->base_currency_symbol }}
+                                                @endif
                                             </div>
-                                            <div class="col-7"><span>:</span> {!! nl2br(convertUtf8($portfolio->cost_of_service)) !!}</div>
                                         </div>
                                     @endif
-                                    <div class="row {{ $portfolio->website_link != null ? 'mb-2' : 'mb-0' }}">
-                                        <div class="col-5 {{ $rtl == 1 ? 'pl-0' : 'pr-0' }}">
-                                            <strong>{{ __('Status') }}</strong>
-                                        </div>
-                                        <div class="col-7"><span>:</span> {{ $portfolio->status }}</div>
+
+
+                                    <div class="info-row">
+                                        <div class="label">{{ __('Status') }}</div>
+                                        <div class="colon">:</div>
+                                        <div class="value">{{ convertUtf8($portfolio->status) }}</div>
                                     </div>
 
-                                    @if ($portfolio->website_link != null)
-                                        <div class="row mb-0">
-                                            <div class="col-12">
-                                                <a href="{{ $portfolio->website_link }}"
-                                                    class="btn base-bg text-white btn-sm"
-                                                    target="_blank">{{ __('Live Demo') }}</a>
-                                            </div>
+                                    @if ($portfolio->website_link)
+                                        <div class="mt-2">
+                                            <a href="{{ $portfolio->website_link }}" class="btn base-bg text-white btn-sm"
+                                                target="_blank">
+                                                {{ __('Live Demo') }}
+                                            </a>
                                         </div>
                                     @endif
                                 </div>
+
                                 <div class="subscribe-section">
                                     <span>{{ __('SUBSCRIBE') }}</span>
                                     <h3>{{ __('SUBSCRIBE FOR NEWSLETTER') }}</h3>

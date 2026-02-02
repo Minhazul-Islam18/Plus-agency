@@ -79,14 +79,16 @@
                     <div class="card-body pt-5 pb-5">
                         <div class="row">
                             <div class="col-lg-6 offset-lg-3">
-                                <form id="settingsForm" action="{{ route('admin.faq.update_settings') }}" method="post">
+                                <form id="settingsForm" action="{{ route('admin.faq.update_settings', $lang_id) }}"
+                                    method="post">
                                     @csrf
                                     <div class="form-group">
                                         <label for="">FAQ Breadcrumb Background Image **</label>
+                                        <!-- DEBUG: lang_id={{ $lang_id }}, bs_id={{ $bsData->id ?? 'NULL' }}, faq_breadcrumb_bg={{ $bsData->faq_breadcrumb_bg ?? 'NULL' }} -->
                                         <br>
                                         <div class="thumb-preview" id="thumbPreview1">
-                                            @if (!empty($bs->faq_breadcrumb_bg))
-                                                <img src="{{ asset('assets/front/img/' . $bs->faq_breadcrumb_bg) }}"
+                                            @if (!empty($bsData->faq_breadcrumb_bg))
+                                                <img src="{{ asset('assets/front/img/' . $bsData->faq_breadcrumb_bg) }}"
                                                     alt="Breadcrumb Background" class="uploaded-img">
                                                 <button type="button" class="btn btn-danger btn-sm remove-img-btn">
                                                     <i class="fas fa-times"></i>
@@ -113,7 +115,7 @@
                                     <div class="form-group">
                                         <label>Breadcrumb Overlay Color Code</label>
                                         <input class="form-control jscolor ltr" name="faq_breadcrumb_overlay_color"
-                                            value="{{ $bs->faq_breadcrumb_overlay_color ?? '000000' }}"
+                                            value="{{ $bsData->faq_breadcrumb_overlay_color ?? '000000' }}"
                                             placeholder="Enter Color Code">
                                         @if ($errors->has('faq_breadcrumb_overlay_color'))
                                             <p class="mb-0 text-danger">
@@ -124,7 +126,7 @@
                                     <div class="form-group">
                                         <label>Breadcrumb Overlay Opacity</label>
                                         <input type="number" class="form-control" name="faq_breadcrumb_overlay_opacity"
-                                            value="{{ $bs->faq_breadcrumb_overlay_opacity ?? 0.5 }}" step="0.01"
+                                            value="{{ $bsData->faq_breadcrumb_overlay_opacity ?? 0.5 }}" step="0.01"
                                             min="0" max="1" placeholder="Enter opacity (0 to 1)">
                                         <p class="text-warning mb-0">Value must be between 0 to 1 (e.g. 0.5 for 50% opacity)
                                         </p>
@@ -140,13 +142,13 @@
                                             <label class="selectgroup-item">
                                                 <input type="radio" name="faq_category_status" value="1"
                                                     class="selectgroup-input"
-                                                    {{ $abex->faq_category_status == 1 ? 'checked' : '' }}>
+                                                    {{ $abex?->faq_category_status == 1 ? 'checked' : '' }}>
                                                 <span class="selectgroup-button">Active</span>
                                             </label>
                                             <label class="selectgroup-item">
                                                 <input type="radio" name="faq_category_status" value="0"
                                                     class="selectgroup-input"
-                                                    {{ $abex->faq_category_status == 0 ? 'checked' : '' }}>
+                                                    {{ $abex?->faq_category_status == 0 ? 'checked' : '' }}>
                                                 <span class="selectgroup-button">Deactive</span>
                                             </label>
                                         </div>
@@ -244,7 +246,7 @@
                     }).then((willDelete) => {
                         if (willDelete) {
                             $.ajax({
-                                url: '{{ route('admin.faq.delete_breadcrumb_bg') }}',
+                                url: '{{ route('admin.faq.delete_breadcrumb_bg', $lang_id) }}',
                                 type: 'POST',
                                 data: {
                                     _token: '{{ csrf_token() }}'

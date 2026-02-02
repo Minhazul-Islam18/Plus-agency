@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="{{ asset('assets/front/css/common-style.css') }}">
     @yield('styles')
 
-    @if ($bs->is_tawkto == 1 || $bex->is_whatsapp == 1)
+    @if ($bs->is_tawkto == 1 || $bex?->is_whatsapp == 1)
         <style>
             .back-to-top.show {
                 right: auto;
@@ -132,7 +132,7 @@
                         @endif
 
                         @guest
-                            @if ($bex->is_user_panel == 1)
+                            @if ($bex?->is_user_panel == 1)
                                 <ul class="login">
                                     <li><a href="{{ route('user.login') }}">{{ __('Login') }}</a></li>
                                 </ul>
@@ -148,41 +148,41 @@
                                         <a href="{{ route('user-dashboard') }}">{{ __('Dashboard') }}</a>
                                     </li>
 
-                                    @if ($bex->recurring_billing == 1)
+                                    @if ($bex?->recurring_billing == 1)
                                         <li><a href="{{ route('user-packages') }}">{{ __('Packages') }}</a></li>
                                     @endif
 
-                                    @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
+                                    @if ($bex?->is_shop == 1 && $bex?->catalog_mode == 0)
                                         <li><a href="{{ route('user-orders') }}">{{ __('Product Orders') }} </a></li>
                                     @endif
 
-                                    @if ($bex->recurring_billing == 0)
+                                    @if ($bex?->recurring_billing == 0)
                                         <li><a href="{{ route('user-package-orders') }}">{{ __('Package Orders') }} </a>
                                         </li>
                                     @endif
 
 
-                                    @if ($bex->is_course == 1)
+                                    @if ($bex?->is_course == 1)
                                         <li>
                                             <a href="{{ route('user.course_orders') }}">{{ __('Courses') }}</a>
                                         </li>
                                     @endif
 
 
-                                    @if ($bex->is_event == 1)
+                                    @if ($bex?->is_event == 1)
                                         <li>
                                             <a href="{{ route('user-events') }}">{{ __('Event Bookings') }}</a>
                                         </li>
                                     @endif
 
 
-                                    @if ($bex->is_donation == 1)
+                                    @if ($bex?->is_donation == 1)
                                         <li>
                                             <a href="{{ route('user-donations') }}">{{ __('Donations') }}</a>
                                         </li>
                                     @endif
 
-                                    @if ($bex->is_ticket == 1)
+                                    @if ($bex?->is_ticket == 1)
                                         <li>
                                             <a href="{{ route('user-tickets') }}">{{ __('Support Tickets') }}</a>
                                         </li>
@@ -192,7 +192,7 @@
                                         <a href="{{ route('user-profile') }}">{{ __('Edit Profile') }}</a>
                                     </li>
 
-                                    @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
+                                    @if ($bex?->is_shop == 1 && $bex?->catalog_mode == 0)
                                         <li>
                                             <a href="{{ route('shpping-details') }}">{{ __('Shipping Details') }}</a>
                                         </li>
@@ -255,7 +255,7 @@
     <!--    footer section start   -->
     <footer class="footer-section">
         <div class="container">
-            @if (!($bex->home_page_pagebuilder == 0 && $bs->top_footer_section == 0))
+            @if (!($bex?->home_page_pagebuilder == 0 && $bs->top_footer_section == 0))
                 <div class="top-footer-section">
                     <div class="row">
                         <div class="col-lg-4 col-md-12">
@@ -301,7 +301,7 @@
                                 <ul>
                                     <li><i class="fa fa-home"></i>
                                         @php
-                                            $addresses = explode(PHP_EOL, $bex->contact_addresses);
+                                            $addresses = explode(PHP_EOL, $bex?->contact_addresses);
                                         @endphp
                                         <span>
                                             @foreach ($addresses as $address)
@@ -315,7 +315,7 @@
 
                                     <li><i class="fa fa-phone"></i>
                                         @php
-                                            $phones = explode(',', $bex->contact_numbers);
+                                            $phones = explode(',', $bex?->contact_numbers);
                                         @endphp
                                         <span>
                                             @foreach ($phones as $phone)
@@ -328,7 +328,7 @@
                                     </li>
                                     <li><i class="far fa-envelope"></i>
                                         @php
-                                            $mails = explode(',', $bex->contact_mails);
+                                            $mails = explode(',', $bex?->contact_mails);
                                         @endphp
                                         <span>
                                             @foreach ($mails as $mail)
@@ -346,7 +346,7 @@
                 </div>
             @endif
 
-            @if (!($bex->home_page_pagebuilder == 0 && $bs->copyright_section == 0))
+            @if (!($bex?->home_page_pagebuilder == 0 && $bs->copyright_section == 0))
                 <div class="copyright-section">
                     <div class="row">
                         <div class="col-sm-12 text-center">
@@ -364,16 +364,16 @@
     <div id="WAButton"></div>
 
     <!--====== PRELOADER PART START ======-->
-    @if ($bex->preloader_status == 1)
+    @if ($bex?->preloader_status == 1)
         <div id="preloader">
             <div class="loader revolve">
-                <img src="{{ asset('assets/front/img/' . $bex->preloader) }}" alt="">
+                <img src="{{ asset('assets/front/img/' . $bex?->preloader) }}" alt="">
             </div>
         </div>
     @endif
     <!--====== PRELOADER PART ENDS ======-->
 
-    @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
+    @if ($bex?->is_shop == 1 && $bex?->catalog_mode == 0)
         <div id="cartIconWrapper">
             <a class="d-block" id="cartIcon" href="{{ route('front.cart') }}">
                 <div class="cart-length">
@@ -381,9 +381,9 @@
                     <span class="length">{{ cartLength() }} {{ __('ITEMS') }}</span>
                 </div>
                 <div class="cart-total">
-                    {{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}
+                    {{ $bex?->base_currency_symbol_position == 'left' ? $bex?->base_currency_symbol : '' }}
                     {{ cartTotal() }}
-                    {{ $bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '' }}
+                    {{ $bex?->base_currency_symbol_position == 'right' ? $bex?->base_currency_symbol : '' }}
                 </div>
             </a>
         </div>
@@ -428,15 +428,15 @@
     <script src="{{ asset('assets/front/js/common-main.js') }}" defer></script>
 
     {{-- whatsapp init code --}}
-    @if ($bex->is_whatsapp == 1)
+    @if ($bex?->is_whatsapp == 1)
         <script type="text/javascript">
-            var whatsapp_popup = {{ $bex->whatsapp_popup }};
+            var whatsapp_popup = {{ $bex?->whatsapp_popup }};
             var whatsappImg = "{{ asset('assets/front/img/whatsapp.svg') }}";
             $(function() {
                 $('#WAButton').floatingWhatsApp({
-                    phone: "{{ $bex->whatsapp_number }}", //WhatsApp Business phone number
-                    headerTitle: "{{ $bex->whatsapp_header_title }}", //Popup Title
-                    popupMessage: `{!! nl2br($bex->whatsapp_popup_message) !!}`, //Popup Message
+                    phone: "{{ $bex?->whatsapp_number }}", //WhatsApp Business phone number
+                    headerTitle: "{{ $bex?->whatsapp_header_title }}", //Popup Title
+                    popupMessage: `{!! nl2br($bex?->whatsapp_popup_message) !!}`, //Popup Message
                     showPopup: whatsapp_popup == 1 ? true : false, //Enables popup display
                     buttonImage: '<img src="' + whatsappImg + '" />', //Button Image
                     position: "right" //Position: left | right

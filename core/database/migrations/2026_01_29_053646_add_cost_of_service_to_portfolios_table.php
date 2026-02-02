@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('portfolios', function (Blueprint $table) {
-            $table->text('cost_of_service')->nullable()->after('website_link');
+            $table->integer('cost_of_service', 100)->nullable()->after('website_link');
             $table->string('client_name', 1000)->change();
         });
     }

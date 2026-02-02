@@ -226,12 +226,15 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group">
-                                            <label for="">Cost of Service</label>
-                                            <textarea class="form-control" name="cost_of_service" rows="3" placeholder="Enter cost of service details"></textarea>
+                                            <label for="cost_of_service">Cost of Service
+                                                ({{ $bex->base_currency_symbol }})</label> <input type="number"
+                                                class="form-control" name="cost_of_service" id="cost_of_service"
+                                                placeholder="Enter cost of service" step="0.01" min="0">
                                             <p id="errcost_of_service" class="mb-0 text-danger em"></p>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="form-group">

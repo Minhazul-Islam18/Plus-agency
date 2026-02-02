@@ -13,165 +13,169 @@ use Illuminate\Support\Facades\Validator;
 
 class GalleryCategoryController extends Controller
 {
-  public function settings()
-  {
-    $data['abex'] = BasicExtra::first();
-    $data['bs'] = BasicSetting::first();
+    public function settings(Request $request)
+    {
+        $lang = Language::where('code', $request->language)->firstOrFail();
+        $data['lang_id'] = $lang->id;
+        $data['abex'] = BasicExtra::where('language_id', $lang->id)->first();
+        $data['bsData'] = BasicSetting::where('language_id', $lang->id)->first();
 
-    return view('admin.gallery.settings', $data);
-  }
-
-  public function updateSettings(Request $request)
-  {
-    $request->validate([
-      'gallery_breadcrumb_overlay_color' => 'nullable|max:20',
-      'gallery_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
-    ]);
-
-    // Update BasicExtra for gallery_category_status
-    $bexs = BasicExtra::all();
-    foreach ($bexs as $bex) {
-      $bex->update([
-        'gallery_category_status' => $request->gallery_category_status
-      ]);
+        return view('admin.gallery.settings', $data);
     }
 
-    // Update BasicSetting for breadcrumb fields
-    $bs = BasicSetting::first();
-    $bs->gallery_breadcrumb_overlay_color = $request->gallery_breadcrumb_overlay_color;
-    $bs->gallery_breadcrumb_overlay_opacity = $request->gallery_breadcrumb_overlay_opacity;
+    public function updateSettings(Request $request, $langid)
+    {
+        $request->validate([
+            'gallery_breadcrumb_overlay_color' => 'nullable|max:20',
+            'gallery_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+        ]);
 
-    if ($request->filled('gallery_breadcrumb_bg')) {
-      $allowedExts = ['jpg', 'jpeg', 'png'];
-      $extBg = pathinfo($request->gallery_breadcrumb_bg, PATHINFO_EXTENSION);
-      if (in_array($extBg, $allowedExts)) {
-        @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
-        $filename = uniqid() . '.' . $extBg;
-        @copy($request->gallery_breadcrumb_bg, 'assets/front/img/' . $filename);
-        $bs->gallery_breadcrumb_bg = $filename;
-      }
+        // Update BasicExtra for gallery_category_status
+        $bexs = BasicExtra::all();
+        foreach ($bexs as $bex) {
+            $bex->update([
+                'gallery_category_status' => $request->gallery_category_status
+            ]);
+        }
+
+        // Update BasicSetting for breadcrumb fields
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->gallery_breadcrumb_overlay_color = $request->gallery_breadcrumb_overlay_color;
+        $bs->gallery_breadcrumb_overlay_opacity = $request->gallery_breadcrumb_overlay_opacity;
+
+        if ($request->filled('gallery_breadcrumb_bg')) {
+            $allowedExts = ['jpg', 'jpeg', 'png'];
+            $extBg = pathinfo($request->gallery_breadcrumb_bg, PATHINFO_EXTENSION);
+            if (in_array($extBg, $allowedExts)) {
+                @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->gallery_breadcrumb_bg, 'assets/front/img/' . $filename);
+                $bs->gallery_breadcrumb_bg = $filename;
+            }
+        }
+
+        $bs->save();
+
+        $lang = Language::find($langid);
+
+        Session::flash('success', 'Settings updated successfully.');
+
+        return redirect()->route('admin.gallery.settings', ['language' => $lang->code]);
     }
 
-    $bs->save();
+    public function deleteBreadcrumbBg($langid)
+    {
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
 
-    Session::flash('success', 'Settings updated successfully.');
+        if ($bs && $bs->gallery_breadcrumb_bg) {
+            @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
+            $bs->gallery_breadcrumb_bg = null;
+            $bs->save();
 
-    return redirect()->back();
-  }
+            return response()->json(['success' => true]);
+        }
 
-  public function deleteBreadcrumbBg()
-  {
-    $bs = BasicSetting::first();
-
-    if ($bs && $bs->gallery_breadcrumb_bg) {
-      @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
-      $bs->gallery_breadcrumb_bg = null;
-      $bs->save();
-
-      return response()->json(['success' => true]);
+        return response()->json(['success' => false], 404);
     }
 
-    return response()->json(['success' => false], 404);
-  }
 
+    public function index(Request $request)
+    {
+        $language = Language::where('code', $request->language)->first();
 
-  public function index(Request $request)
-  {
-    $language = Language::where('code', $request->language)->first();
+        $categories = GalleryCategory::where('language_id', $language->id)
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
-    $categories = GalleryCategory::where('language_id', $language->id)
-      ->orderBy('id', 'desc')
-      ->paginate(10);
-
-    return view('admin.gallery.categories', compact('categories'));
-  }
-
-  public function store(Request $request)
-  {
-    $rules = [
-      'language_id' => 'required',
-      'name' => 'required',
-      'status' => 'required',
-      'serial_number' => 'required'
-    ];
-
-    $validator = Validator::make($request->all(), $rules);
-
-    if ($validator->fails()) {
-      $validator->getMessageBag()->add('error', 'true');
-
-      return response()->json($validator->errors());
+        return view('admin.gallery.categories', compact('categories'));
     }
 
-    GalleryCategory::create($request->all());
+    public function store(Request $request)
+    {
+        $rules = [
+            'language_id' => 'required',
+            'name' => 'required',
+            'status' => 'required',
+            'serial_number' => 'required'
+        ];
 
-    Session::flash('success', 'New gallery category added successfully.');
+        $validator = Validator::make($request->all(), $rules);
 
-    return 'success';
-  }
+        if ($validator->fails()) {
+            $validator->getMessageBag()->add('error', 'true');
 
-  public function update(Request $request)
-  {
-    $rules = [
-      'name' => 'required',
-      'status' => 'required',
-      'serial_number' => 'required'
-    ];
+            return response()->json($validator->errors());
+        }
 
-    $validator = Validator::make($request->all(), $rules);
+        GalleryCategory::create($request->all());
 
-    if ($validator->fails()) {
-      $validator->getMessageBag()->add('error', 'true');
-
-      return response()->json($validator->errors());
-    }
-
-    GalleryCategory::findOrFail($request->categoryId)->update($request->all());
-
-    Session::flash('success', 'Gallery category updated successfully.');
-
-    return 'success';
-  }
-
-  public function delete(Request $request)
-  {
-    $category = GalleryCategory::findOrFail($request->categoryId);
-
-    if ($category->galleryImg->count() > 0) {
-      Session::flash('warning', 'First delete all the images of this category');
-
-      return redirect()->back();
-    }
-
-    $category->delete();
-
-    Session::flash('success', 'Gallery category deleted successfully.');
-
-    return redirect()->back();
-  }
-
-  public function bulkDelete(Request $request)
-  {
-    $ids = $request->ids;
-
-    foreach ($ids as $id) {
-      $category = GalleryCategory::findOrFail($id);
-
-      if ($category->galleryImg->count() > 0) {
-        Session::flash('warning', 'First delete all the images of those categories');
+        Session::flash('success', 'New gallery category added successfully.');
 
         return 'success';
-      }
     }
 
-    foreach ($ids as $id) {
-      $category = GalleryCategory::findOrFail($id);
+    public function update(Request $request)
+    {
+        $rules = [
+            'name' => 'required',
+            'status' => 'required',
+            'serial_number' => 'required'
+        ];
 
-      $category->delete();
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            $validator->getMessageBag()->add('error', 'true');
+
+            return response()->json($validator->errors());
+        }
+
+        GalleryCategory::findOrFail($request->categoryId)->update($request->all());
+
+        Session::flash('success', 'Gallery category updated successfully.');
+
+        return 'success';
     }
 
-    Session::flash('success', 'Gallery categories deleted successfully.');
+    public function delete(Request $request)
+    {
+        $category = GalleryCategory::findOrFail($request->categoryId);
 
-    return 'success';
-  }
+        if ($category->galleryImg->count() > 0) {
+            Session::flash('warning', 'First delete all the images of this category');
+
+            return redirect()->back();
+        }
+
+        $category->delete();
+
+        Session::flash('success', 'Gallery category deleted successfully.');
+
+        return redirect()->back();
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+
+        foreach ($ids as $id) {
+            $category = GalleryCategory::findOrFail($id);
+
+            if ($category->galleryImg->count() > 0) {
+                Session::flash('warning', 'First delete all the images of those categories');
+
+                return 'success';
+            }
+        }
+
+        foreach ($ids as $id) {
+            $category = GalleryCategory::findOrFail($id);
+
+            $category->delete();
+        }
+
+        Session::flash('success', 'Gallery categories deleted successfully.');
+
+        return 'success';
+    }
 }

@@ -8,7 +8,7 @@
 @section('meta-description', "$portfolio->meta_description")
 
 @section('breadcrumb-title', convertUtf8($bs->portfolio_details_title))
-@section('breadcrumb-subtitle', convertUtf8($portfolio->title))
+@section('breadcrumb-subtitle', \Illuminate\Support\Str::limit(convertUtf8($portfolio->title), 70))
 @section('breadcrumb-link', __('Portfolio Details'))
 
 @if (!empty($bs->portfolio_breadcrumb_bg))

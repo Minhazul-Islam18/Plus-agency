@@ -2,37 +2,80 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\BasicExtended;
-use App\BasicExtra;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Str;
+use Session;
+use Validator;
 use App\Service;
-use App\Scategory;
 use App\Language;
 use App\Megamenu;
-use Validator;
-use Session;
+use App\Scategory;
+use App\BasicExtra;
+use App\BasicSetting;
+use App\BasicExtended;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class ServiceController extends Controller
 {
 
-    public function settings()
+    public function settings(Request $request)
     {
+        $lang = Language::where('code', $request->language)->firstOrFail();
+        $data['lang_id'] = $lang->id;
         $data['abex'] = BasicExtra::first();
+        $data['bsData'] = BasicSetting::where('language_id', $lang->id)->first();
+
         return view('admin.service.settings', $data);
     }
 
-    public function updateSettings(Request $request)
+    public function updateSettings(Request $request, $langid)
     {
+        $request->validate([
+            'service_breadcrumb_overlay_color' => 'nullable|max:20',
+            'service_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+        ]);
+
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->service_breadcrumb_overlay_color = $request->service_breadcrumb_overlay_color;
+        $bs->service_breadcrumb_overlay_opacity = $request->service_breadcrumb_overlay_opacity;
+
+        if ($request->filled('service_breadcrumb_bg')) {
+            $allowedExts = ['jpg', 'jpeg', 'png'];
+            $extBg = pathinfo($request->service_breadcrumb_bg, PATHINFO_EXTENSION);
+            if (in_array($extBg, $allowedExts)) {
+                @unlink('assets/front/img/' . $bs->service_breadcrumb_bg);
+                $filename = uniqid() . '.' . $extBg;
+                @copy($request->service_breadcrumb_bg, 'assets/front/img/' . $filename);
+                $bs->service_breadcrumb_bg = $filename;
+            }
+        }
+
+        $bs->save();
+
         $bexs = BasicExtra::all();
         foreach ($bexs as $bex) {
             $bex->service_category = $request->service_category;
             $bex->save();
         }
+        $lang = Language::find($langid);
 
         $request->session()->flash('success', 'Settings updated successfully!');
-        return back();
+        return redirect()->route('admin.service.settings', ['language' => $lang->code]);
+    }
+
+    public function deleteBreadcrumbBg($langid)
+    {
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+
+        if ($bs && $bs->service_breadcrumb_bg) {
+            @unlink('assets/front/img/' . $bs->service_breadcrumb_bg);
+            $bs->service_breadcrumb_bg = null;
+            $bs->save();
+
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
     }
 
     public function index(Request $request)
@@ -122,7 +165,7 @@ class ServiceController extends Controller
         $service->title = $request->title;
 
         if ($request->filled('image')) {
-            $filename = uniqid() .'.'. $extImage;
+            $filename = uniqid() . '.' . $extImage;
             @copy($image, 'assets/front/img/services/' . $filename);
             $service->main_image = $filename;
         }
@@ -214,7 +257,7 @@ class ServiceController extends Controller
 
         if ($request->filled('image')) {
             @unlink('assets/front/img/services/' . $service->main_image);
-            $filename = uniqid() .'.'. $extImage;
+            $filename = uniqid() . '.' . $extImage;
             @copy($image, 'assets/front/img/services/' . $filename);
             $service->main_image = $filename;
         }
@@ -225,7 +268,8 @@ class ServiceController extends Controller
         return "success";
     }
 
-    public function deleteFromMegaMenu($service) {
+    public function deleteFromMegaMenu($service)
+    {
         // unset service from megamenu for service_category = 1
         $megamenu = Megamenu::where('language_id', $service->language_id)->where('category', 1)->where('type', 'services');
         if ($megamenu->count() > 0) {

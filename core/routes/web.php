@@ -690,7 +690,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
         // Service Settings Route
         Route::get('/service/settings', 'Admin\ServiceController@settings')->name('admin.service.settings');
-        Route::post('/service/updateSettings', 'Admin\ServiceController@updateSettings')->name('admin.service.updateSettings');
+        Route::post('/service/updateSettings/{langid}/update', 'Admin\ServiceController@updateSettings')->name('admin.service.updateSettings');
+        Route::post('/service/{langid}/delete_breadcrumb_bg', 'Admin\ServiceController@deleteBreadcrumbBg')->name('admin.service.delete_breadcrumb_bg');
+
 
         // Admin Service Category Routes
         Route::get('/scategorys', 'Admin\ScategoryController@index')->name('admin.scategory.index');

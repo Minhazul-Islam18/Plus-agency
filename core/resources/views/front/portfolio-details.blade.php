@@ -113,7 +113,9 @@
                                         <div class="info-row">
                                             <div class="label">{{ __('Start Date') }}</div>
                                             <div class="colon">:</div>
-                                            <div class="value">{{ date_format($startDate, 'M d, Y') }}</div>
+                                            <div class="value">
+                                                {{ date_format($startDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}
+                                            </div>
                                         </div>
                                     @endif
 
@@ -122,7 +124,9 @@
                                         <div class="info-row">
                                             <div class="label">{{ __('End Date') }}</div>
                                             <div class="colon">:</div>
-                                            <div class="value">{{ date_format($submissionDate, 'M d, Y') }}</div>
+                                            <div class="value">
+                                                {{ date_format($submissionDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}
+                                            </div>
                                         </div>
                                     @endif
 
@@ -171,7 +175,7 @@
                                     <div class="info-row">
                                         <div class="label">{{ __('Status') }}</div>
                                         <div class="colon">:</div>
-                                        <div class="value">{{ convertUtf8($portfolio->status) }}</div>
+                                        <div class="value">{{ __(convertUtf8($portfolio->status)) }}</div>
                                     </div>
 
                                     @if ($portfolio->website_link)

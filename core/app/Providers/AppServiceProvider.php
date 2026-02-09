@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
   public function boot()
   {
     Paginator::useBootstrap();
-    $socials = Social::orderBy('serial_number', 'ASC')->get();
+    $socials = Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
     $langs = Language::where('status', 1)->get();
 
     view()->composer('*', function ($view) {

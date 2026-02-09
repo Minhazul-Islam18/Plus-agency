@@ -24,7 +24,7 @@ class BlogsectionController extends Controller
             $data['abs'] = $lang->basic_setting;
             $data['abe'] = $lang->basic_extended;
         }
-        $data['langs'] = Language::all();
+        $data['langs'] = Language::where('status', 1)->get();
         return view('admin.home.blog-section', $data);
     }
 

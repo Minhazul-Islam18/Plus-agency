@@ -20,7 +20,7 @@ class PartnerController extends Controller
         $data['partners'] = Partner::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
         $data['abs'] = $lang->basic_setting;
         $data['abe'] = $lang->basic_extended;
-        $data['langs'] = Language::all();
+        $data['langs'] = Language::where('status', 1)->get();
         $data['lang_id'] = $lang_id;
 
         return view('admin.home.partner.index', $data);
@@ -72,7 +72,7 @@ class PartnerController extends Controller
         $partner->serial_number = $request->serial_number;
 
         if ($request->filled('image')) {
-            $filename = uniqid() .'.'. $extImage;
+            $filename = uniqid() . '.' . $extImage;
             @copy($image, 'assets/front/img/partners/' . $filename);
             $partner->image = $filename;
         }
@@ -116,7 +116,7 @@ class PartnerController extends Controller
 
         if ($request->filled('image')) {
             @unlink('assets/front/img/partners/' . $partner->image);
-            $filename = uniqid() .'.'. $extImage;
+            $filename = uniqid() . '.' . $extImage;
             @copy($image, 'assets/front/img/partners/' . $filename);
             $partner->image = $filename;
         }

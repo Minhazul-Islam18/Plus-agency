@@ -21,7 +21,7 @@ class MemberController extends Controller
         $data['abe'] = $lang->basic_extended;
         $data['be'] = BS::first();
         $data['bex'] = BasicExtended::first();
-        $data['langs'] = Language::all();
+        $data['langs'] = Language::where('status', 1)->get();
         $data['members'] = Member::where('language_id', $data['lang_id'])->get();
 
         return view('admin.home.member.index', $data);

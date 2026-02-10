@@ -329,7 +329,8 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('.status-toggle').on('change', function() {
+            // Use event delegation for status toggle to work with paginated rows
+            $(document).on('change', '.status-toggle', function() {
                 let status = $(this).is(':checked') ? 1 : 0;
                 let id = $(this).data('id');
 

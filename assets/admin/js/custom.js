@@ -441,34 +441,42 @@ $(function ($) {
         
         $(e.target).attr('disabled', false);
         $(".request-loader").removeClass("show");
-        
+
         $(".em").each(function () {
           $(this).html('');
         })
-        
+
         if (data == "success") {
-          location.reload();
+          if (typeof window.ajaxSuccessRedirect !== 'undefined') {
+            window.location.href = window.ajaxSuccessRedirect;
+          } else {
+            location.reload();
+          }
         }
-        
+
         // if error occurs
         else if (typeof data.error != 'undefined') {
+          bootnotify('Please fix the errors below.', 'Validation Error!', 'danger');
           for (let x in data) {
             console.log(x);
             if (x == 'error') {
               continue;
             }
-            document.getElementById('err' + x).innerHTML = data[x][0];
+            var el = document.getElementById('err' + x);
+            if (el) el.innerHTML = data[x][0];
           }
         }
-        
+
       },
       error: function (error){
         $(".em").each(function () {
           $(this).html('');
         })
+        bootnotify('Something went wrong. Please try again.', 'Error!', 'danger');
         for (let x in error.responseJSON.errors) {
           console.log('err'+x);
-          document.getElementById('err' + x).innerHTML = error.responseJSON.errors[x][0];
+          var el = document.getElementById('err' + x);
+          if (el) el.innerHTML = error.responseJSON.errors[x][0];
         }
         $(".request-loader").removeClass("show");
         $(e.target).attr('disabled', false);
@@ -566,29 +574,37 @@ $(function ($) {
         console.log(data);
         
         $(".request-loader").removeClass("show");
-        
+
         $(".em").each(function () {
           $(this).html('');
         })
-        
+
         if (data == "success") {
-          location.reload();
+          if (typeof window.ajaxSuccessRedirect !== 'undefined') {
+            window.location.href = window.ajaxSuccessRedirect;
+          } else {
+            location.reload();
+          }
         }
-        
+
         // if error occurs
         else if (typeof data.error != 'undefined') {
+          bootnotify('Please fix the errors below.', 'Validation Error!', 'danger');
           for (let x in data) {
             console.log(x);
             if (x == 'error') {
               continue;
             }
-            document.getElementById('eerr' + x).innerHTML = data[x][0];
+            var el = document.getElementById('eerr' + x);
+            if (el) el.innerHTML = data[x][0];
           }
         }
       },
       error: function (error){
+        bootnotify('Something went wrong. Please try again.', 'Error!', 'danger');
         for (let x in error.responseJSON.errors) {
-          document.getElementById('eerr' + x).innerHTML = error.responseJSON.errors[x][0];
+          var el = document.getElementById('eerr' + x);
+          if (el) el.innerHTML = error.responseJSON.errors[x][0];
         }
         $(".request-loader").removeClass("show");
         $(e.target).attr('disabled', false);

@@ -207,6 +207,10 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
     Route::post('/course/review', 'Front\CourseController@giveReview')->name('course.review');
 });
 
+/** Tender Frontend Routes **/
+Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
+Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
+
 
 
 
@@ -1041,50 +1045,50 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
     });
 
 
-    Route::group(['middleware' => 'checkpermission:Course Management'], function () {
-        // Admin Course Category Routes
-        Route::get('/course_categories', 'Admin\CourseCategoryController@index')->name('admin.course_category.index');
-        Route::post('/course_category/store', 'Admin\CourseCategoryController@store')->name('admin.course_category.store');
-        Route::post('/course_category/update', 'Admin\CourseCategoryController@update')->name('admin.course_category.update');
-        Route::post('/course_category/delete', 'Admin\CourseCategoryController@delete')->name('admin.course_category.delete');
-        Route::post('/course_category/bulk_delete', 'Admin\CourseCategoryController@bulkDelete')->name('admin.course_category.bulk_delete');
+    Route::group(['middleware' => 'checkpermission:Tender Management'], function () {
+        // Admin Tender Category Routes
+        Route::get('/tender_categories', 'Admin\TenderCategoryController@index')->name('admin.tender_category.index');
+        Route::post('/tender_category/store', 'Admin\TenderCategoryController@store')->name('admin.tender_category.store');
+        Route::post('/tender_category/update', 'Admin\TenderCategoryController@update')->name('admin.tender_category.update');
+        Route::post('/tender_category/delete', 'Admin\TenderCategoryController@delete')->name('admin.tender_category.delete');
+        Route::post('/tender_category/bulk_delete', 'Admin\TenderCategoryController@bulkDelete')->name('admin.tender_category.bulk_delete');
 
-        // Admin Course Routes
-        Route::get('/courses', 'Admin\CourseController@index')->name('admin.course.index');
-        Route::get('/course/create', 'Admin\CourseController@create')->name('admin.course.create');
-        Route::get('/course/{langId}/get_categories', 'Admin\CourseController@getCategories');
-        Route::post('/course/store', 'Admin\CourseController@store')->name('admin.course.store');
-        Route::get('/course/{id}/edit', 'Admin\CourseController@edit')->name('admin.course.edit');
-        Route::post('/course/update', 'Admin\CourseController@update')->name('admin.course.update');
-        Route::post('/course/delete', 'Admin\CourseController@delete')->name('admin.course.delete');
-        Route::post('/course/bulk_delete', 'Admin\CourseController@bulkDelete')->name('admin.course.bulk_delete');
-        Route::post('/course/featured', 'Admin\CourseController@featured')->name('admin.course.featured');
-        Route::get('/course/purchase-log', 'Admin\CourseController@purchaseLog')->name('admin.course.purchaseLog');
-        Route::post('/course/purchase/payment-status', 'Admin\CourseController@purchasePaymentStatus')->name('admin.course.purchasePaymentStatus');
-        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchase.delete');
-        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchaseDelete');
-        Route::post('/course/purchase/bulk_delete', 'Admin\CourseController@purchaseBulkOrderDelete')->name('admin.course.purchaseBulkOrderDelete');
+        // Admin Tender Routes
+        Route::get('/tenders', 'Admin\TenderController@index')->name('admin.tender.index');
+        Route::get('/tender/create', 'Admin\TenderController@create')->name('admin.tender.create');
+        Route::get('/tender/{langId}/get_categories', 'Admin\TenderController@getCategories');
+        Route::post('/tender/store', 'Admin\TenderController@store')->name('admin.tender.store');
+        Route::get('/tender/{id}/edit', 'Admin\TenderController@edit')->name('admin.tender.edit');
+        Route::post('/tender/update', 'Admin\TenderController@update')->name('admin.tender.update');
+        Route::post('/tender/delete', 'Admin\TenderController@delete')->name('admin.tender.delete');
+        Route::post('/tender/bulk_delete', 'Admin\TenderController@bulkDelete')->name('admin.tender.bulk_delete');
+        Route::post('/tender/featured', 'Admin\TenderController@featured')->name('admin.tender.featured');
+        Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
+        Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
+        Route::post('/tender/purchase/delete', 'Admin\TenderController@purchaseDelete')->name('admin.tender.purchaseDelete');
+        Route::post('/tender/purchase/bulk_delete', 'Admin\TenderController@purchaseBulkOrderDelete')->name('admin.tender.purchaseBulkOrderDelete');
 
-        // Admin Course Modules Routes
-        Route::get('/course/{id?}/modules', 'Admin\ModuleController@index')->name('admin.course.module.index');
-        Route::post('/course/module/store', 'Admin\ModuleController@store')->name('admin.course.module.store');
-        Route::post('/course/module/update', 'Admin\ModuleController@update')->name('admin.course.module.update');
-        Route::post('/course/module/delete', 'Admin\ModuleController@delete')->name('admin.course.module.delete');
-        Route::post('/course/module/bulk_delete', 'Admin\ModuleController@bulkDelete')->name('admin.course.module.bulk_delete');
+        // Admin Tender Module Routes
+        Route::get('/tender/{id}/modules', 'Admin\TenderModuleController@index')->name('admin.tender.module.index');
+        Route::post('/tender/module/store', 'Admin\TenderModuleController@store')->name('admin.tender.module.store');
+        Route::post('/tender/module/update', 'Admin\TenderModuleController@update')->name('admin.tender.module.update');
+        Route::post('/tender/module/delete', 'Admin\TenderModuleController@delete')->name('admin.tender.module.delete');
+        Route::post('/tender/module/bulk_delete', 'Admin\TenderModuleController@bulkDelete')->name('admin.tender.module.bulk_delete');
+        Route::post('/tender/module/status', 'Admin\TenderModuleController@status')->name('admin.tender.module.status');
 
-        // Admin Module Lessons Routes
-        Route::get('/module/{id}/lessons', 'Admin\LessonController@index')->name('admin.module.lesson.index');
-        Route::post('/module/lesson/store', 'Admin\LessonController@store')->name('admin.module.lesson.store');
-        Route::post('module/lesson/update', 'Admin\LessonController@update')->name('admin.module.lesson.update');
-        Route::post('/module/lesson/delete', 'Admin\LessonController@delete')->name('admin.module.lesson.delete');
-        Route::post('/module/lesson/bulk_delete', 'Admin\LessonController@bulkDelete')->name('admin.module.lesson.bulk_delete');
+        // Admin Tender Section Routes
+        Route::get('/tender/module/{id}/sections', 'Admin\TenderSectionController@index')->name('admin.tender.module.section.index');
+        Route::post('/tender/module/section/store', 'Admin\TenderSectionController@store')->name('admin.tender.module.section.store');
+        Route::post('/tender/module/section/update', 'Admin\TenderSectionController@update')->name('admin.tender.module.section.update');
+        Route::post('/tender/module/section/delete', 'Admin\TenderSectionController@delete')->name('admin.tender.module.section.delete');
+        Route::post('/tender/module/section/bulk_delete', 'Admin\TenderSectionController@bulkDelete')->name('admin.tender.module.section.bulk_delete');
 
-        Route::get('/course/settings', 'Admin\CourseController@settings')->name('admin.course.settings');
-        Route::post('/course/settings', 'Admin\CourseController@updateSettings')->name('admin.course.settings');
+        Route::get('/tender/settings', 'Admin\TenderController@settings')->name('admin.tender.settings');
+        Route::post('/tender/settings', 'Admin\TenderController@updateSettings')->name('admin.tender.updateSettings');
 
-        // Admin Course Enroll Report Routes
-        Route::get('/course/enrolls/report', 'Admin\CourseController@report')->name('admin.enrolls.report');
-        Route::get('/course/export/report', 'Admin\CourseController@exportReport')->name('admin.enrolls.export');
+        // Admin Tender Enroll Report Routes
+        Route::get('/tender/enrolls/report', 'Admin\TenderController@report')->name('admin.tender.enrolls.report');
+        Route::get('/tender/export/report', 'Admin\TenderController@exportReport')->name('admin.tender.enrolls.export');
     });
 
 
@@ -1306,6 +1310,8 @@ Route::group(['middleware' => ['setlang']], function () {
             Route::get("$permalink/{slug}", 'Front\ProductController@productDetails')->name('front.product.details');
         } elseif ($type == 'course_details') {
             Route::get("$permalink/{slug}", 'Front\CourseController@courseDetails')->name('course_details');
+        } elseif ($type == 'tender_details') {
+            Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'cause_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@causeDetails')->name('front.cause_details');
         } elseif ($type == 'event_details') {
@@ -1355,6 +1361,9 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'courses') {
             $action = 'Front\CourseController@courses';
             $routeName = 'courses';
+        } elseif ($type == 'tenders') {
+            $action = 'Front\TenderController@tenders';
+            $routeName = 'tenders';
         } elseif ($type == 'causes') {
             $action = 'Front\FrontendController@causes';
             $routeName = 'front.causes';

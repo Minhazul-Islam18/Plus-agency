@@ -625,68 +625,62 @@
                     </li>
                 @endif
 
-                @if (empty($admin->role) || (!empty($permissions) && in_array('Course Management', $permissions)))
-                    {{-- Courses --}}
+                @if (empty($admin->role) || (!empty($permissions) && in_array('Tender Management', $permissions)))
+                    {{-- Tenders --}}
                     <li
                         class="nav-item
-@if (request()->path() == 'admin/course_categories') active
-@elseif(request()->path() == 'admin/course/settings') active
-@elseif(request()->path() == 'admin/course/purchase-log') active
-@elseif(request()->path() == 'admin/courses') active
-@elseif(request()->path() == 'admin/course/create') active
-@elseif(request()->is('admin/course/*/edit')) active
-@elseif(request()->is('admin/course/*/modules')) active
-@elseif(request()->is('admin/module/*/lessons')) active
-@elseif(request()->path() == 'admin/course/enrolls/report') active @endif">
-                        <a data-toggle="collapse" href="#course">
-                            <i class='fas fa-book-open'></i>
-                            <p>Course Management</p>
+@if (request()->path() == 'admin/tender_categories') active
+@elseif(request()->path() == 'admin/tender/settings') active
+@elseif(request()->path() == 'admin/tender/purchase-log') active
+@elseif(request()->path() == 'admin/tenders') active
+@elseif(request()->path() == 'admin/tender/create') active
+@elseif(request()->is('admin/tender/*/edit')) active
+@elseif(request()->path() == 'admin/tender/enrolls/report') active @endif">
+                        <a data-toggle="collapse" href="#tender">
+                            <i class='fas fa-file-contract'></i>
+                            <p>Tender Management</p>
                             <span class="caret"></span>
                         </a>
                         <div class="collapse
-@if (request()->path() == 'admin/course_categories') show
-@elseif(request()->path() == 'admin/course/settings') show
-@elseif(request()->path() == 'admin/course/purchase-log') show
-@elseif(request()->path() == 'admin/courses') show
-@elseif(request()->path() == 'admin/course/create') show
-@elseif(request()->is('admin/course/*/edit')) show
-@elseif(request()->is('admin/course/*/modules')) show
-@elseif(request()->is('admin/module/*/lessons')) show
-@elseif(request()->path() == 'admin/course/enrolls/report') show @endif"
-                            id="course">
+@if (request()->path() == 'admin/tender_categories') show
+@elseif(request()->path() == 'admin/tender/settings') show
+@elseif(request()->path() == 'admin/tender/purchase-log') show
+@elseif(request()->path() == 'admin/tenders') show
+@elseif(request()->path() == 'admin/tender/create') show
+@elseif(request()->is('admin/tender/*/edit')) show
+@elseif(request()->path() == 'admin/tender/enrolls/report') show @endif"
+                            id="tender">
                             <ul class="nav nav-collapse">
-                                <li class="@if (request()->path() == 'admin/course/settings') active @endif">
-                                    <a href="{{ route('admin.course.settings') }}">
+                                <li class="@if (request()->path() == 'admin/tender/settings') active @endif">
+                                    <a href="{{ route('admin.tender.settings') }}">
                                         <span class="sub-item">Settings</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->path() == 'admin/course_categories') active @endif">
+                                <li class="@if (request()->path() == 'admin/tender_categories') active @endif">
                                     <a
-                                        href="{{ route('admin.course_category.index') . '?language=' . $default->code }}">
+                                        href="{{ route('admin.tender_category.index') . '?language=' . $default->code }}">
                                         <span class="sub-item">Category</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->path() == 'admin/course/create') active @endif">
-                                    <a href="{{ route('admin.course.create') . '?language=' . $default->code }}">
-                                        <span class="sub-item">Add Course</span>
+                                <li class="@if (request()->path() == 'admin/tender/create') active @endif">
+                                    <a href="{{ route('admin.tender.create') . '?language=' . $default->code }}">
+                                        <span class="sub-item">Add Tender</span>
                                     </a>
                                 </li>
                                 <li
-                                    class="@if (request()->path() == 'admin/courses') active
-        @elseif(request()->is('admin/course/*/edit')) active
-        @elseif(request()->is('admin/course/*/modules')) active
-        @elseif(request()->is('admin/module/*/lessons')) active @endif">
-                                    <a href="{{ route('admin.course.index') . '?language=' . $default->code }}">
-                                        <span class="sub-item">Courses</span>
+                                    class="@if (request()->path() == 'admin/tenders') active
+        @elseif(request()->is('admin/tender/*/edit')) active @endif">
+                                    <a href="{{ route('admin.tender.index') . '?language=' . $default->code }}">
+                                        <span class="sub-item">All Tenders</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->path() == 'admin/course/purchase-log') active @endif">
-                                    <a href="{{ route('admin.course.purchaseLog') }}">
+                                <li class="@if (request()->path() == 'admin/tender/purchase-log') active @endif">
+                                    <a href="{{ route('admin.tender.purchaseLog') }}">
                                         <span class="sub-item">Enrolls</span>
                                     </a>
                                 </li>
-                                <li class="@if (request()->path() == 'admin/course/enrolls/report') active @endif">
-                                    <a href="{{ route('admin.enrolls.report') }}">
+                                <li class="@if (request()->path() == 'admin/tender/enrolls/report') active @endif">
+                                    <a href="{{ route('admin.tender.enrolls.report') }}">
                                         <span class="sub-item">Report</span>
                                     </a>
                                 </li>

@@ -100,46 +100,163 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none; /* overlay itself doesn't block clicks */
+            pointer-events: none;
+            /* overlay itself doesn't block clicks */
         }
 
         .tender-thumb-box .video-overlay a.video-popup {
             pointer-events: all;
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.92);
+        }
+
+        /* ── Left thumb card ── */
+        .tender-thumb-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .tender-thumb-card .tender-thumb-box {
+            position: relative;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .days-overlay-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 3;
+            width: 58px;
+            height: 58px;
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--main-color, #3498db);
-            font-size: 26px;
+            font-weight: 800;
+            font-size: 11px;
+            line-height: 1.1;
+            text-align: center;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+        }
+
+        .days-overlay-badge .days-num {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .days-overlay-badge.badge-ok {
+            background: #e8f8f0;
+            color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .days-overlay-badge.badge-soon {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .days-overlay-badge.badge-urgent {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .days-overlay-badge.badge-expired {
+            background: #aaa;
+            color: #fff;
+        }
+
+        .td-card-body {
+            padding: 16px 20px 20px;
+        }
+
+        .td-cat-pill {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            z-index: 3;
+            display: inline-block;
+            background: #4aa4f8;
+            color: #fff !important;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
             text-decoration: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-            transition: transform .2s, background .2s;
-            animation: pulse-ring 2s ease-out infinite;
         }
 
-        .tender-thumb-box .video-overlay a.video-popup:hover {
-            transform: scale(1.1);
-            background: #fff;
+        .td-cat-pill:hover {
+            color: #fff;
+            opacity: .85;
         }
 
-        .tender-thumb-box .video-overlay a.video-popup i {
-            margin-left: 4px; /* optical centre for play icon */
+        .td-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
         }
 
-        @keyframes pulse-ring {
-            0%   { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.5), 0 4px 20px rgba(0,0,0,.35); }
-            70%  { box-shadow: 0 0 0 14px rgba(52, 152, 219, 0), 0 4px 20px rgba(0,0,0,.35); }
-            100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0), 0 4px 20px rgba(0,0,0,.35); }
+        .td-deadline-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #27ae60;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 20px;
         }
 
-        .tender-thumb-box .video-overlay a:hover {
-            transform: scale(1.1);
+        .td-id-pill {
+            display: inline-block;
+            border: 1.5px solid #bbb;
+            color: #555;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: .3px;
         }
 
-        /* ── Date + flag row ── */
+        .td-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .td-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .td-footer .td-country i {
+            color: var(--main-color, #3498db);
+            margin-right: 4px;
+        }
+
+        .td-footer .td-price {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--main-color, #3498db);
+        }
+
+        .td-footer .td-price.free {
+            color: #27ae60;
+        }
+
         /* ── Deadline card ── */
         .deadline-card {
             display: flex;
@@ -148,8 +265,9 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #e0e0e0;
-            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
         }
+
         .deadline-card .dl-icon-col {
             display: flex;
             align-items: center;
@@ -160,10 +278,23 @@
             font-size: 22px;
             flex-shrink: 0;
         }
-        .deadline-card .dl-icon-col.expired { background: #e74c3c; }
-        .deadline-card .dl-icon-col.urgent  { background: #e74c3c; }
-        .deadline-card .dl-icon-col.soon    { background: #f39c12; }
-        .deadline-card .dl-icon-col.ok      { background: #27ae60; }
+
+        .deadline-card .dl-icon-col.expired {
+            background: #e74c3c;
+        }
+
+        .deadline-card .dl-icon-col.urgent {
+            background: #e74c3c;
+        }
+
+        .deadline-card .dl-icon-col.soon {
+            background: #f39c12;
+        }
+
+        .deadline-card .dl-icon-col.ok {
+            background: #27ae60;
+        }
+
         .deadline-card .dl-body {
             flex: 1;
             padding: 10px 16px;
@@ -172,6 +303,7 @@
             flex-direction: column;
             justify-content: center;
         }
+
         .deadline-card .dl-body .dl-label {
             font-size: 11px;
             font-weight: 700;
@@ -180,11 +312,13 @@
             color: #999;
             margin-bottom: 3px;
         }
+
         .deadline-card .dl-body .dl-date {
             font-size: 15px;
             font-weight: 700;
             color: #222;
         }
+
         .deadline-card .dl-badge-col {
             display: flex;
             align-items: center;
@@ -193,6 +327,7 @@
             background: #f8f9fa;
             flex-shrink: 0;
         }
+
         .deadline-card .dl-days-badge {
             display: flex;
             flex-direction: column;
@@ -206,11 +341,36 @@
             line-height: 1.2;
             text-align: center;
         }
-        .deadline-card .dl-days-badge .days-num  { font-size: 18px; line-height: 1; }
-        .deadline-card .dl-days-badge.badge-ok       { background: #e8f8f0; color: #27ae60; border: 2px solid #27ae60; }
-        .deadline-card .dl-days-badge.badge-soon     { background: #fff3e0; color: #f39c12; border: 2px solid #f39c12; }
-        .deadline-card .dl-days-badge.badge-urgent   { background: #fdecea; color: #e74c3c; border: 2px solid #e74c3c; }
-        .deadline-card .dl-days-badge.badge-expired  { background: #f5f5f5; color: #aaa;    border: 2px solid #ddd; }
+
+        .deadline-card .dl-days-badge .days-num {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .deadline-card .dl-days-badge.badge-ok {
+            background: #e8f8f0;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+
+        .deadline-card .dl-days-badge.badge-soon {
+            background: #fff3e0;
+            color: #f39c12;
+            border: 2px solid #f39c12;
+        }
+
+        .deadline-card .dl-days-badge.badge-urgent {
+            background: #fdecea;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .deadline-card .dl-days-badge.badge-expired {
+            background: #f5f5f5;
+            color: #aaa;
+            border: 2px solid #ddd;
+        }
+
         .deadline-card .dl-country {
             display: flex;
             align-items: center;
@@ -223,7 +383,10 @@
             border-left: 1px solid #eee;
             padding-left: 14px;
         }
-        .deadline-card .dl-country i { color: var(--main-color, #3498db); }
+
+        .deadline-card .dl-country i {
+            color: var(--main-color, #3498db);
+        }
 
 
         /* ── Right column: info ── */
@@ -519,6 +682,25 @@
             line-height: 1.7;
         }
 
+        .module-sections-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .module-sections-list li {
+            font-size: 14px;
+            color: #444;
+            padding: 6px 0;
+            border-bottom: 1px solid #f2f2f2;
+            display: flex;
+            align-items: center;
+        }
+
+        .module-sections-list li:last-child {
+            border-bottom: none;
+        }
+
         /* ── Deadline color classes ── */
         .deadline-urgent {
             color: #e74c3c;
@@ -537,9 +719,9 @@
     </style>
 @endsection
 
-@section('breadcrumb-title', $bex->course_details_title ?? __('Tender Details'))
-@section('breadcrumb-subtitle', $tender->title)
-@section('breadcrumb-link', $tender->title)
+@section('breadcrumb-title', $bex?->tender_details_title ?? __('Tender Details'))
+@section('breadcrumb-subtitle', Str::limit($tender->title, 60))
+@section('breadcrumb-link', Str::limit($tender->title, 60))
 
 @section('content')
     <section class="course-details-section pt-120 pb-120">
@@ -566,88 +748,100 @@
     ═══════════════════════════════════════════ --}}
             <div class="row">
 
-                {{-- LEFT: Image / Video + Deadline + Flag --}}
+                {{-- LEFT: Thumb card --}}
                 <div class="col-lg-6 mb-4">
-                    <div class="tender-thumb-box">
-                        @if (!empty($tender->tender_image))
-                            <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}" class="lazy"
-                                alt="{{ $tender->title }}">
-                        @else
-                            <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
-                        @endif
-                        @if (!empty($tender->video_link))
-                            <div class="video-overlay">
-                                <a href="{{ $tender->video_link }}" class="video-popup">
-                                    <i class="fas fa-play"></i>
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Deadline card --}}
-                    @if ($tender->submission_deadline)
-                        @php
-                            $deadline  = \Carbon\Carbon::parse($tender->submission_deadline);
-                            $daysLeft  = (int) now()->diffInDays($deadline, false);
-                            $isExpired = $daysLeft < 0;
-                            $iconState = $isExpired ? 'expired' : ($daysLeft <= 3 ? 'urgent' : ($daysLeft <= 7 ? 'soon' : 'ok'));
-                            $badgeClass = 'badge-' . $iconState;
-                        @endphp
-                        <div class="deadline-card">
-                            <div class="dl-icon-col {{ $iconState }}">
-                                <i class="fas fa-hourglass-{{ $isExpired ? 'end' : ($daysLeft <= 7 ? 'half' : 'start') }}"></i>
-                            </div>
-                            <div class="dl-body">
-                                <div class="dl-label">{{ __('Submission Deadline') }}</div>
-                                <div class="dl-date">{{ $deadline->format('d-m-Y, H:i') }} <small class="text-muted" style="font-weight:500;">TU</small></div>
-                            </div>
-                            <div class="dl-badge-col">
-                                <div class="dl-days-badge {{ $badgeClass }}">
+                    @php
+                        $deadline = $tender->submission_deadline
+                            ? \Carbon\Carbon::parse($tender->submission_deadline)
+                            : null;
+                        $daysLeft = $deadline ? (int) now()->diffInDays($deadline, false) : null;
+                        $isExpired = $daysLeft !== null && $daysLeft < 0;
+                        $iconState =
+                            $daysLeft === null
+                                ? null
+                                : ($isExpired
+                                    ? 'expired'
+                                    : ($daysLeft <= 3
+                                        ? 'urgent'
+                                        : ($daysLeft <= 7
+                                            ? 'soon'
+                                            : 'ok')));
+                    @endphp
+                    <div class="tender-thumb-card">
+                        {{-- Thumbnail --}}
+                        <div class="tender-thumb-box">
+                            @if (!empty($tender->tender_image))
+                                <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}"
+                                    class="lazy" alt="{{ $tender->title }}">
+                            @else
+                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
+                            @endif
+                            @if (!empty($tender->video_link))
+                                <div class="video-overlay">
+                                    <a href="{{ $tender->video_link }}" class="video-popup video-play-button">
+                                        <span></span>
+                                    </a>
+                                </div>
+                            @endif
+                            {{-- Days badge overlay --}}
+                            @if ($daysLeft !== null)
+                                <div class="days-overlay-badge badge-{{ $iconState }}">
                                     @if ($isExpired)
-                                        <span style="font-size:11px;font-weight:700;">{{ __('EXPIRED') }}</span>
+                                        <span style="font-size:9px;font-weight:800;">EXPIRED</span>
                                     @elseif ($daysLeft === 0)
-                                        <span style="font-size:11px;font-weight:700;">{{ __('TODAY') }}</span>
+                                        <span style="font-size:9px;font-weight:800;">TODAY</span>
                                     @else
                                         <span class="days-num">{{ $daysLeft }}</span>
-                                        <span style="font-size:10px;">{{ __('days') }}</span>
+                                        <span>{{ __('days') }}</span>
                                     @endif
                                 </div>
-                            </div>
-                            @if ($tender->country)
-                            <div class="dl-country">
-                                <i class="fas fa-map-marker-alt"></i>
-                                {{ $tender->country }}
-                            </div>
+                            @endif
+                            {{-- Category pill: bottom-left overlay --}}
+                            @if ($tender->tenderCategory)
+                                <a href="{{ route('tenders', ['category_id' => $tender->tender_category_id]) }}"
+                                    class="td-cat-pill">
+                                    {{ $tender->tenderCategory->name }}
+                                </a>
                             @endif
                         </div>
-                    @else
-                        <div class="deadline-card">
-                            <div class="dl-icon-col" style="background:#aaa;">
-                                <i class="fas fa-hourglass-start"></i>
+
+                        <div class="td-card-body">
+
+                            {{-- Date + Tender ID row --}}
+                            <div class="td-info-row">
+                                @if ($deadline)
+                                    <div class="td-deadline-pill">
+                                        <i class="far fa-clock"></i> {{ $deadline->format('d M Y, H:i') }}
+                                    </div>
+                                @endif
+                                @if ($tender->tender_code)
+                                    <div class="td-id-pill">{{ $tender->tender_code }}</div>
+                                @endif
                             </div>
-                            <div class="dl-body">
-                                <div class="dl-label">{{ __('Submission Deadline') }}</div>
-                                <div class="dl-date text-muted">{{ __('Not set') }}</div>
+
+                            {{-- Title --}}
+                            <p class="td-title">{{ convertUtf8($tender->title) }}</p>
+
+                            {{-- Footer: country + price --}}
+                            <div class="td-footer">
+                                <span class="td-country">
+                                    <i class="fas fa-map-marker-alt"></i> {{ $tender->country }}
+                                </span>
+                                <span class="td-price {{ is_null($tender->current_price) ? 'free' : '' }}">
+                                    @if (is_null($tender->current_price))
+                                        {{ __('Free') }}
+                                    @else
+                                        {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($tender->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                    @endif
+                                </span>
                             </div>
-                            @if ($tender->country)
-                            <div class="dl-country">
-                                <i class="fas fa-map-marker-alt"></i>
-                                {{ $tender->country }}
-                            </div>
-                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
 
                 {{-- RIGHT: Tender Info & Purchase --}}
                 <div class="col-lg-6">
                     <div class="tender-info-wrap">
-
-                        {{-- Category badge (top-right corner) --}}
-                        @if ($tender->tenderCategory)
-                            <a href="{{ route('tenders', ['category_id' => $tender->tender_category_id]) }}"
-                                class="tender-cat-badge">{{ $tender->tenderCategory->name }}</a>
-                        @endif
 
                         {{-- Stars (placeholder – no reviews system yet) --}}
                         <div class="tender-rating">
@@ -657,14 +851,6 @@
                             </span>
                             <span class="count">0 (0)</span>
                         </div>
-
-                        {{-- Tender ID badge --}}
-                        @if ($tender->tender_code)
-                            <div class="tender-id-bar">{{ $tender->tender_code }}</div>
-                        @endif
-
-                        {{-- Title --}}
-                        <h3 class="mb-3" style="font-size:22px; line-height:1.4;">{{ convertUtf8($tender->title) }}</h3>
 
                         {{-- Price --}}
                         <div class="tender-price-wrap">
@@ -682,19 +868,6 @@
                                 @endif
                             @endif
                         </div>
-
-                        {{-- Summary --}}
-                        <p class="mb-2">{{ $tender->summary }}</p>
-
-                        {{-- Category text line --}}
-                        @if ($tender->tenderCategory)
-                            <p class="mb-3">
-                                <strong>{{ __('Category') }}:</strong>
-                                <a href="{{ route('tenders', ['category_id' => $tender->tender_category_id]) }}">
-                                    {{ $tender->tenderCategory->name }}
-                                </a>
-                            </p>
-                        @endif
 
                         {{-- ── Purchase form (paid tender) ── --}}
                         @if (!is_null($tender->current_price))
@@ -792,11 +965,6 @@
                                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $tender->expert_whatsapp) }}"
                                         class="btn-whatsapp" target="_blank">
                                         <i class="fab fa-whatsapp"></i> {{ __('WhatsApp Expert') }}
-                                    </a>
-                                @endif
-                                @if (!empty($tender->expert_phone))
-                                    <a href="tel:{{ $tender->expert_phone }}" class="btn-phone">
-                                        <i class="fas fa-phone"></i> {{ $tender->expert_phone }}
                                     </a>
                                 @endif
                             </div>
@@ -920,8 +1088,19 @@
                                                     </div>
                                                 </div>
                                                 <div id="module-body-{{ $module->id }}" class="collapse module-body">
-                                                    <p>{{ !empty($module->summary) ? $module->summary : __('No description available.') }}
-                                                    </p>
+                                                    @if (!empty($module->summary))
+                                                        <p class="mb-3">{{ $module->summary }}</p>
+                                                    @endif
+                                                    @if ($module->sections->count() > 0)
+                                                        <ul class="module-sections-list">
+                                                            @foreach ($module->sections as $section)
+                                                                <li>
+                                                                    <i class="fas fa-check-circle text-success mr-2"></i>
+                                                                    {{ $section->name }}
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
                                                 </div>
                                             </div>
                                         @endforeach
@@ -958,9 +1137,9 @@
                                                             {{ $tender->expert_whatsapp }}
                                                         </a>
                                                     @endif
-                                                    @if (!empty($tender->expert_phone))
-                                                        <a href="tel:{{ $tender->expert_phone }}" class="btn-phone">
-                                                            <i class="fas fa-phone"></i> {{ $tender->expert_phone }}
+                                                    @if (!empty($tender->expert_email))
+                                                        <a href="mailto:{{ $tender->expert_email }}" class="btn-phone">
+                                                            <i class="fas fa-envelope"></i> {{ $tender->expert_email }}
                                                         </a>
                                                     @endif
                                                 </div>
@@ -1103,15 +1282,16 @@
                 selectedModules[id] = cost;
             }
 
-            // Sum selected module costs
+            // Sum selected module costs; fall back to basePrice when nothing selected
             var total = 0;
             $.each(selectedModules, function(k, v) {
                 total += v;
             });
+            var displayTotal = Object.keys(selectedModules).length > 0 ? total : basePrice;
 
             // Update displayed price and hidden form field
-            $('#priceAmount').text(total.toLocaleString('fr-FR'));
-            $('#selectedAmount').val(total);
+            $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
+            $('#selectedAmount').val(displayTotal);
         }
     </script>
 @endsection

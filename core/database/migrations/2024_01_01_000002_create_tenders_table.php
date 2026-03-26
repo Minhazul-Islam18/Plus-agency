@@ -27,7 +27,7 @@ class CreateTendersTable extends Migration
             $table->string('expert_position');
             $table->text('expert_details');
             $table->string('expert_whatsapp');
-            $table->string('expert_phone');
+            $table->string('expert_email');
             $table->string('expert_image')->nullable();
             $table->tinyInteger('is_featured')->default(0);
             $table->timestamps();

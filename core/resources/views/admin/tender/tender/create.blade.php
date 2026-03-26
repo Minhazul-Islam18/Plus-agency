@@ -153,9 +153,9 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>Current Price ({{ $bex->base_currency_text }})</label>
-                    <input type="number" step="0.01" class="form-control ltr" name="current_price"
-                      placeholder="Enter Current Price">
-                    <p class="mb-0 text-danger em"></p>
+                    <input type="text" class="form-control ltr" readonly
+                      placeholder="Auto-calculated from modules" style="background:#f8f9fa;cursor:not-allowed;">
+                    <p class="mb-0 text-warning"><small><i class="fas fa-info-circle"></i> Auto-calculated from the sum of active module costs.</small></p>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -166,14 +166,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <p class="mb-0 text-danger em"></p>
                   </div>
                 </div>
-              </div>
-
-              {{-- Tender Summary --}}
-              <div class="form-group">
-                <label>Tender Summary **</label>
-                <textarea class="form-control" name="summary" rows="5"
-                  placeholder="Enter Tender Summary"></textarea>
-                <p class="mb-0 text-danger em"></p>
               </div>
 
               {{-- Tender Video --}}
@@ -232,10 +224,10 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label>Expert Phone Number **</label>
-                    <input type="text" class="form-control ltr" name="expert_phone"
-                      placeholder="Enter Expert Phone">
-                    <p id="errexpert_phone" class="mb-0 text-danger em"></p>
+                    <label>Expert Email **</label>
+                    <input type="email" class="form-control ltr" name="expert_email"
+                      placeholder="Enter Expert Email">
+                    <p id="errexpert_email" class="mb-0 text-danger em"></p>
                   </div>
                 </div>
               </div>

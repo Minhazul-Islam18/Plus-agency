@@ -56,6 +56,143 @@
         .slider.round:before {
             border-radius: 50%;
         }
+
+        .file-picker-wrap .no-file-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #fafbfc;
+            border: 2px dashed #d0d7de;
+            border-radius: 10px;
+            padding: 22px 16px;
+            margin-bottom: 8px;
+            text-align: center;
+            cursor: default;
+        }
+
+        .file-picker-wrap .no-file-label .nf-icon {
+            font-size: 28px;
+            color: #c0c8d0;
+        }
+
+        .file-picker-wrap .no-file-label .nf-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7a8694;
+            margin: 0;
+        }
+
+        .file-picker-wrap .no-file-label .nf-hint {
+            font-size: 11px;
+            color: #b0b8c2;
+            margin: 0;
+        }
+
+        .file-selected-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f0f7ff;
+            border: 1.5px solid #cce0ff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .file-selected-card .file-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .file-selected-card .file-icon.zip {
+            background: #f39c12;
+        }
+
+        .file-selected-card .file-icon.pdf {
+            background: #e74c3c;
+        }
+
+        .file-selected-card .file-icon.word {
+            background: #2980b9;
+        }
+
+        .file-selected-card .file-icon.excel {
+            background: #27ae60;
+        }
+
+        .file-selected-card .file-icon.other {
+            background: #7f8c8d;
+        }
+
+        .file-selected-card .file-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-selected-card .file-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-selected-card .file-ext-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        .file-selected-card .file-ext-badge.zip {
+            background: #f39c12;
+        }
+
+        .file-selected-card .file-ext-badge.pdf {
+            background: #e74c3c;
+        }
+
+        .file-selected-card .file-ext-badge.word {
+            background: #2980b9;
+        }
+
+        .file-selected-card .file-ext-badge.excel {
+            background: #27ae60;
+        }
+
+        .file-selected-card .file-ext-badge.other {
+            background: #7f8c8d;
+        }
+
+        .file-selected-card .btn-clear-file {
+            background: none;
+            border: none;
+            color: #bbb;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 2px 4px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .file-selected-card .btn-clear-file:hover {
+            color: #e74c3c;
+        }
     </style>
 @endsection
 
@@ -193,19 +330,28 @@
                         @csrf
                         <input type="hidden" name="tender_id" value="{{ $tender->id }}">
 
-                        <div class="form-group">
+                        <div class="form-group file-picker-wrap">
                             <label>Tender File **</label>
-                            <br>
-                            <div class="thumb-preview" id="thumbPreview1">
-                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="Tender Image">
+                            <div id="fileDetail1" class="file-selected-card" style="display:none;">
+                                <div id="fileIcon1" class="file-icon other"><i class="fas fa-file"></i></div>
+                                <div class="file-meta">
+                                    <div id="fileName1" class="file-name"></div>
+                                    <span id="fileExt1" class="file-ext-badge other"></span>
+                                </div>
+                                <button type="button" class="btn-clear-file" onclick="clearFile(1)" title="Remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <br><br>
+                            <div id="noFile1" class="no-file-label">
+                                <i class="fas fa-cloud-upload-alt nf-icon"></i>
+                                <p class="nf-title">No file selected</p>
+                                <p class="nf-hint">ZIP, PDF, Word, Excel accepted</p>
+                            </div>
                             <input id="fileInput1" type="hidden" name="tender_file">
-                            <button id="chooseImage1" class="choose-image btn btn-primary" type="button"
+                            <button id="chooseImage1" class="choose-image btn btn-primary btn-sm" type="button"
                                 data-multiple="false" data-toggle="modal" data-target="#lfmModal1">
-                                Choose File
+                                <i class="fas fa-paperclip mr-1"></i> Choose File
                             </button>
-                            <p class="text-warning mb-0">ZIP, PDF, Word, Excel are allowed</p>
                             <p class="em text-danger mb-0" id="errtender_file"></p>
                         </div>
 
@@ -256,19 +402,28 @@
                         @csrf
                         <input id="inmodule_id" type="hidden" name="module_id" value="">
 
-                        <div class="form-group">
+                        <div class="form-group file-picker-wrap">
                             <label>Tender File <span class="text-muted">(Choose new to replace)</span></label>
-                            <br>
-                            <div class="thumb-preview" id="thumbPreview2">
-                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="Tender File">
+                            <div id="fileDetail2" class="file-selected-card" style="display:none;">
+                                <div id="fileIcon2" class="file-icon other"><i class="fas fa-file"></i></div>
+                                <div class="file-meta">
+                                    <div id="fileName2" class="file-name"></div>
+                                    <span id="fileExt2" class="file-ext-badge other"></span>
+                                </div>
+                                <button type="button" class="btn-clear-file" onclick="clearFile(2)" title="Remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <br><br>
+                            <div id="noFile2" class="no-file-label">
+                                <i class="fas fa-cloud-upload-alt nf-icon"></i>
+                                <p class="nf-title">No file selected</p>
+                                <p class="nf-hint">ZIP, PDF, Word, Excel accepted</p>
+                            </div>
                             <input id="fileInput2" type="hidden" name="tender_file">
-                            <button id="chooseImage2" class="choose-image btn btn-primary" type="button"
+                            <button id="chooseImage2" class="choose-image btn btn-primary btn-sm" type="button"
                                 data-multiple="false" data-toggle="modal" data-target="#lfmModal2">
-                                Choose File
+                                <i class="fas fa-paperclip mr-1"></i> Choose File
                             </button>
-                            <p class="text-warning mb-0">ZIP, PDF, Word, Excel are allowed</p>
                         </div>
 
                         <div class="form-group">
@@ -306,7 +461,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    <iframe src="{{ url('laravel-filemanager') }}?serial=1"
+                    <iframe src="{{ url('laravel-filemanager') }}?type=file&serial=1&callback=SetUrl"
                         style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
                 </div>
             </div>
@@ -319,7 +474,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    <iframe src="{{ url('laravel-filemanager') }}?serial=2"
+                    <iframe src="{{ url('laravel-filemanager') }}?type=file&serial=2&callback=SetUrl"
                         style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
                 </div>
             </div>
@@ -330,6 +485,101 @@
 
 @section('scripts')
     <script>
+        var extMap = {
+            zip: {
+                cls: 'zip',
+                icon: 'fa-file-archive',
+                label: 'ZIP'
+            },
+            rar: {
+                cls: 'zip',
+                icon: 'fa-file-archive',
+                label: 'RAR'
+            },
+            pdf: {
+                cls: 'pdf',
+                icon: 'fa-file-pdf',
+                label: 'PDF'
+            },
+            doc: {
+                cls: 'word',
+                icon: 'fa-file-word',
+                label: 'DOC'
+            },
+            docx: {
+                cls: 'word',
+                icon: 'fa-file-word',
+                label: 'DOCX'
+            },
+            xls: {
+                cls: 'excel',
+                icon: 'fa-file-excel',
+                label: 'XLS'
+            },
+            xlsx: {
+                cls: 'excel',
+                icon: 'fa-file-excel',
+                label: 'XLSX'
+            },
+        };
+
+        function renderFileCard(serial, name) {
+            if (!name) {
+                clearFile(serial);
+                return;
+            }
+            var ext = name.split('.').pop().toLowerCase();
+            var info = extMap[ext] || {
+                cls: 'other',
+                icon: 'fa-file',
+                label: ext.toUpperCase()
+            };
+
+            $('#fileIcon' + serial).attr('class', 'file-icon ' + info.cls)
+                .html('<i class="fas ' + info.icon + '"></i>');
+            $('#fileName' + serial).text(name);
+            $('#fileExt' + serial).attr('class', 'file-ext-badge ' + info.cls).text(info.label);
+            $('#fileDetail' + serial).show();
+            $('#noFile' + serial).hide();
+        }
+
+        function clearFile(serial) {
+            $('#fileInput' + serial).val('');
+            $('#fileDetail' + serial).hide();
+            $('#noFile' + serial).show();
+        }
+
+        var allowedExts = ['zip', 'rar', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+
+        window.SetUrl = function(items) {
+            var activeModal = $('.lfm-modal.show');
+            var serial = activeModal.length ? activeModal.attr('id').replace('lfmModal', '') : '';
+            if (!serial || !items || !items.length) return;
+
+            var item = items[0];
+            var ext = item.name.split('.').pop().toLowerCase();
+
+            activeModal.modal('hide');
+
+            if (allowedExts.indexOf(ext) === -1) {
+                clearFile(serial);
+                $.notify({
+                    message: 'Invalid file type ".' + ext + '". Allowed: ' + allowedExts.join(', '),
+                    icon: 'fa fa-exclamation-triangle'
+                }, {
+                    type: 'danger',
+                    placement: { from: 'top', align: 'right' },
+                    showProgressbar: true,
+                    time: 1000,
+                    delay: 4000
+                });
+                return;
+            }
+
+            $('#fileInput' + serial).val(item.url);
+            renderFileCard(serial, item.name);
+        };
+
         $(document).ready(function() {
 
             // Populate edit modal
@@ -345,11 +595,7 @@
                 $('#incost').val(cost);
                 $('#insummary').val(summary);
                 $('#fileInput2').val('');
-                if (file) {
-                    $('#thumbPreview2 img').attr('src', '{{ asset('assets/front/files/tender_modules') }}/' + file);
-                } else {
-                    $('#thumbPreview2 img').attr('src', '{{ asset('assets/admin/img/noimage.jpg') }}');
-                }
+                renderFileCard(2, file || null);
             });
 
             // Status toggle

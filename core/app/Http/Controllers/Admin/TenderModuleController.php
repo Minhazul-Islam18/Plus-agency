@@ -51,6 +51,8 @@ class TenderModuleController extends Controller
 
         $module->save();
 
+        Tender::findOrFail($request->tender_id)->recalculatePrice();
+
         Session::flash('success', 'Tender Module Added Successfully');
 
         return 'success';
@@ -91,6 +93,8 @@ class TenderModuleController extends Controller
 
         $module->save();
 
+        Tender::findOrFail($module->tender_id)->recalculatePrice();
+
         Session::flash('success', 'Tender Module Updated Successfully');
 
         return 'success';
@@ -109,7 +113,10 @@ class TenderModuleController extends Controller
             @unlink('assets/front/files/tender_modules/' . $module->tender_file);
         }
 
+        $tenderId = $module->tender_id;
         $module->delete();
+
+        Tender::findOrFail($tenderId)->recalculatePrice();
 
         Session::flash('success', 'Tender Module Deleted Successfully');
 
@@ -147,6 +154,8 @@ class TenderModuleController extends Controller
         $module         = TenderModule::findOrFail($request->id);
         $module->status = $request->status;
         $module->save();
+
+        Tender::findOrFail($module->tender_id)->recalculatePrice();
 
         return response()->json(['success' => true]);
     }

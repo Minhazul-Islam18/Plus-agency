@@ -1311,7 +1311,7 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'course_details') {
             Route::get("$permalink/{slug}", 'Front\CourseController@courseDetails')->name('course_details');
         } elseif ($type == 'tender_details') {
-            Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
+            Route::get("$permalink/{id}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'cause_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@causeDetails')->name('front.cause_details');
         } elseif ($type == 'event_details') {

@@ -22,29 +22,179 @@ class TenderController extends Controller
     private function countries()
     {
         return [
-            'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia', 'Australia',
-            'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Belarus', 'Belgium', 'Belize',
-            'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei',
-            'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde',
-            'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo',
-            'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark',
-            'Djibouti', 'Dominican Republic', 'DR Congo', 'Ecuador', 'Egypt', 'El Salvador',
-            'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland',
-            'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Guatemala', 'Guinea',
-            'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia',
-            'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan',
-            'Kenya', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia',
-            'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi', 'Malaysia',
-            'Maldives', 'Mali', 'Malta', 'Mauritania', 'Mauritius', 'Mexico', 'Moldova', 'Monaco',
-            'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nepal',
-            'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Macedonia', 'Norway',
-            'Oman', 'Pakistan', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland',
-            'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 'Senegal', 'Serbia',
-            'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Somalia', 'South Africa', 'South Sudan',
-            'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan',
-            'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Trinidad and Tobago', 'Tunisia',
-            'Turkey', 'Turkmenistan', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom',
-            'United States', 'Uruguay', 'Uzbekistan', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
+            'Afghanistan',
+            'Albania',
+            'Algeria',
+            'Andorra',
+            'Angola',
+            'Argentina',
+            'Armenia',
+            'Australia',
+            'Austria',
+            'Azerbaijan',
+            'Bahamas',
+            'Bahrain',
+            'Bangladesh',
+            'Belarus',
+            'Belgium',
+            'Belize',
+            'Benin',
+            'Bhutan',
+            'Bolivia',
+            'Bosnia and Herzegovina',
+            'Botswana',
+            'Brazil',
+            'Brunei',
+            'Bulgaria',
+            'Burkina Faso',
+            'Burundi',
+            'Cambodia',
+            'Cameroon',
+            'Canada',
+            'Cape Verde',
+            'Central African Republic',
+            'Chad',
+            'Chile',
+            'China',
+            'Colombia',
+            'Comoros',
+            'Congo',
+            'Costa Rica',
+            "Côte d'Ivoire",
+            'Croatia',
+            'Cuba',
+            'Cyprus',
+            'Czech Republic',
+            'Denmark',
+            'Djibouti',
+            'Dominican Republic',
+            'DR Congo',
+            'Ecuador',
+            'Egypt',
+            'El Salvador',
+            'Equatorial Guinea',
+            'Eritrea',
+            'Estonia',
+            'Eswatini',
+            'Ethiopia',
+            'Fiji',
+            'Finland',
+            'France',
+            'Gabon',
+            'Gambia',
+            'Georgia',
+            'Germany',
+            'Ghana',
+            'Greece',
+            'Guatemala',
+            'Guinea',
+            'Guinea-Bissau',
+            'Guyana',
+            'Haiti',
+            'Honduras',
+            'Hungary',
+            'Iceland',
+            'India',
+            'Indonesia',
+            'Iran',
+            'Iraq',
+            'Ireland',
+            'Israel',
+            'Italy',
+            'Jamaica',
+            'Japan',
+            'Jordan',
+            'Kazakhstan',
+            'Kenya',
+            'Kosovo',
+            'Kuwait',
+            'Kyrgyzstan',
+            'Laos',
+            'Latvia',
+            'Lebanon',
+            'Lesotho',
+            'Liberia',
+            'Libya',
+            'Liechtenstein',
+            'Lithuania',
+            'Luxembourg',
+            'Madagascar',
+            'Malawi',
+            'Malaysia',
+            'Maldives',
+            'Mali',
+            'Malta',
+            'Mauritania',
+            'Mauritius',
+            'Mexico',
+            'Moldova',
+            'Monaco',
+            'Mongolia',
+            'Montenegro',
+            'Morocco',
+            'Mozambique',
+            'Myanmar',
+            'Namibia',
+            'Nepal',
+            'Netherlands',
+            'New Zealand',
+            'Nicaragua',
+            'Niger',
+            'Nigeria',
+            'North Macedonia',
+            'Norway',
+            'Oman',
+            'Pakistan',
+            'Panama',
+            'Papua New Guinea',
+            'Paraguay',
+            'Peru',
+            'Philippines',
+            'Poland',
+            'Portugal',
+            'Qatar',
+            'Romania',
+            'Russia',
+            'Rwanda',
+            'Saudi Arabia',
+            'Senegal',
+            'Serbia',
+            'Sierra Leone',
+            'Singapore',
+            'Slovakia',
+            'Slovenia',
+            'Somalia',
+            'South Africa',
+            'South Sudan',
+            'Spain',
+            'Sri Lanka',
+            'Sudan',
+            'Suriname',
+            'Sweden',
+            'Switzerland',
+            'Syria',
+            'Taiwan',
+            'Tajikistan',
+            'Tanzania',
+            'Thailand',
+            'Timor-Leste',
+            'Togo',
+            'Trinidad and Tobago',
+            'Tunisia',
+            'Turkey',
+            'Turkmenistan',
+            'Uganda',
+            'Ukraine',
+            'United Arab Emirates',
+            'United Kingdom',
+            'United States',
+            'Uruguay',
+            'Uzbekistan',
+            'Venezuela',
+            'Vietnam',
+            'Yemen',
+            'Zambia',
+            'Zimbabwe',
         ];
     }
 
@@ -113,7 +263,7 @@ class TenderController extends Controller
             'expert_position'     => 'required',
             'expert_details'      => 'required',
             'expert_whatsapp'     => 'required',
-            'expert_phone'        => 'required',
+            'expert_email'        => 'required|email',
             'tender_image'        => 'required',
             'expert_image'        => 'required',
         ];
@@ -170,7 +320,6 @@ class TenderController extends Controller
         $tender->title              = $request->title;
         $tender->slug               = $slug;
         $tender->submission_deadline = $request->submission_deadline;
-        $tender->current_price      = $request->current_price;
         $tender->previous_price     = $request->previous_price;
         $tender->summary            = $request->summary;
 
@@ -202,7 +351,7 @@ class TenderController extends Controller
         $tender->expert_position = $request->expert_position;
         $tender->expert_details  = $request->expert_details;
         $tender->expert_whatsapp = $request->expert_whatsapp;
-        $tender->expert_phone    = $request->expert_phone;
+        $tender->expert_email    = $request->expert_email;
         $tender->save();
 
         Session::flash('success', 'Tender Added Successfully');
@@ -245,7 +394,7 @@ class TenderController extends Controller
             'expert_position'     => 'required',
             'expert_details'      => 'required',
             'expert_whatsapp'     => 'required',
-            'expert_phone'        => 'required',
+            'expert_email'        => 'required|email',
         ];
 
         if ($request->filled('tender_image')) {
@@ -295,7 +444,6 @@ class TenderController extends Controller
         $tender->title              = $request->title;
         $tender->slug               = $slug;
         $tender->submission_deadline = $request->submission_deadline;
-        $tender->current_price      = $request->current_price;
         $tender->previous_price     = $request->previous_price;
         $tender->summary            = $request->summary;
 
@@ -327,7 +475,7 @@ class TenderController extends Controller
         $tender->expert_position = $request->expert_position;
         $tender->expert_details  = $request->expert_details;
         $tender->expert_whatsapp = $request->expert_whatsapp;
-        $tender->expert_phone    = $request->expert_phone;
+        $tender->expert_email    = $request->expert_email;
         $tender->save();
 
         Session::flash('success', 'Tender Updated Successfully');
@@ -375,11 +523,17 @@ class TenderController extends Controller
 
     public function featured(Request $request)
     {
-        $tender = Tender::findOrFail($request->tender_id);
-        $tender->is_featured = $request->is_featured;
-        $tender->save();
+        $result = rescue(function () use ($request) {
+            $tender = Tender::findOrFail($request->tender_id);
+            $tender->is_featured = $request->is_featured;
+            $tender->save();
+        }, false);
 
-        return 'success';
+        if ($result === false) {
+            return redirect()->back()->with('error', 'Failed to update featured status.');
+        }
+
+        return redirect()->back()->with('success', 'Featured status updated successfully.');
     }
 
     public function purchaseLog(Request $request)

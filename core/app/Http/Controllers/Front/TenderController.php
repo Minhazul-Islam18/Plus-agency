@@ -72,7 +72,10 @@ class TenderController extends Controller
         $filterKey  = $request->filterValue;
 
         $data['tenders'] = Tender::where('language_id', $currentLang->id)
-            ->when($searchKey, fn($q) => $q->where('title', 'like', '%' . $searchKey . '%'))
+            ->when($searchKey, fn($q) => $q->where(function ($q) use ($searchKey) {
+                $q->where('title', 'like', '%' . $searchKey . '%')
+                  ->orWhere('tender_code', 'like', '%' . $searchKey . '%');
+            }))
             ->when($categoryId, fn($q) => $q->where('tender_category_id', $categoryId))
             ->when($countryFilter, fn($q) => $q->where('country', $countryFilter))
             ->when($checked, function ($q) use ($checked) {
@@ -107,7 +110,7 @@ class TenderController extends Controller
         return view('front.tender.tenders', $data);
     }
 
-    public function tenderDetails($slug)
+    public function tenderDetails($id)
     {
         $currentLang = $this->getCurrentLang();
         $bex         = BasicExtra::first();
@@ -117,13 +120,14 @@ class TenderController extends Controller
         }
 
         $data['tender'] = Tender::where('language_id', $currentLang->id)
-            ->where('slug', $slug)
+            ->where('id', $id)
             ->firstOrFail();
 
         $tender = $data['tender'];
 
         $data['modules']         = TenderModule::where('tender_id', $tender->id)
             ->where('status', 1)
+            ->with('sections')
             ->get();
 
         $data['paymentGateways'] = PaymentGateway::where('status', 1)

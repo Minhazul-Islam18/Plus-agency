@@ -49,7 +49,7 @@ return [
         'file'  => [
             'folder_name'  => 'files',
             'startup_view' => 'list',
-            'max_size'     => 10000, // size in KB
+            'max_size'     => 20480, // size in KB
             'valid_mime'   => [
                 'image/jpeg',
                 'image/jpg',
@@ -61,6 +61,15 @@ return [
                 'application/zip',
                 'text/plain',
                 'video/mp4',
+                // Word
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                // Excel
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                // PowerPoint
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             ],
         ],
         'image' => [
@@ -103,9 +112,9 @@ return [
 
     'alphanumeric_directory'   => false,
 
-    'should_validate_size'     => false,
+    'should_validate_size'     => true,
 
-    'should_validate_mime'     => false,
+    'should_validate_mime'     => true,
 
     // behavior on files with identical name
     // setting it to true cause old file replace with new one

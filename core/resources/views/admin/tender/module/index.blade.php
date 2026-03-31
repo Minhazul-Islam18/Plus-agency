@@ -372,7 +372,7 @@
 
                         <div class="form-group">
                             <label>Module Summary **</label>
-                            <textarea class="form-control" name="summary" rows="4" placeholder="Enter Module Summary"></textarea>
+                            <textarea class="form-control summernote-create" name="summary" rows="4" placeholder="Enter Module Summary"></textarea>
                             <p id="errsummary" class="mb-0 text-danger em"></p>
                         </div>
                     </form>
@@ -442,7 +442,7 @@
 
                         <div class="form-group">
                             <label>Module Summary **</label>
-                            <textarea id="insummary" class="form-control" name="summary" rows="4" placeholder="Enter Module Summary"></textarea>
+                            <textarea id="insummary" class="form-control summernote-edit" name="summary" rows="4" placeholder="Enter Module Summary"></textarea>
                             <p id="eerrsummary" class="mb-0 text-danger em"></p>
                         </div>
                     </form>
@@ -580,6 +580,39 @@
             renderFileCard(serial, item.name);
         };
 
+        var summernoteOptions = {
+            height: 200,
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['strikethrough']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['insert', ['link']],
+                ['view', ['codeview']]
+            ]
+        };
+
+        $('#createModal').on('shown.bs.modal', function() {
+            if (!$('.summernote-create').next('.note-editor').length) {
+                $('.summernote-create').summernote(summernoteOptions);
+            }
+        });
+        $('#createModal').on('hidden.bs.modal', function() {
+            if ($('.summernote-create').next('.note-editor').length) {
+                $('.summernote-create').summernote('destroy');
+            }
+        });
+
+        $('#editModal').on('shown.bs.modal', function() {
+            if (!$('.summernote-edit').next('.note-editor').length) {
+                $('.summernote-edit').summernote(summernoteOptions);
+            }
+        });
+        $('#editModal').on('hidden.bs.modal', function() {
+            if ($('.summernote-edit').next('.note-editor').length) {
+                $('.summernote-edit').summernote('destroy');
+            }
+        });
+
         $(document).ready(function() {
 
             // Populate edit modal
@@ -593,9 +626,18 @@
                 $('#inmodule_id').val(id);
                 $('#inname').val(name);
                 $('#incost').val(cost);
-                $('#insummary').val(summary);
+                // Set after modal shown (summernote may not be initialized yet)
+                $('#editModal').data('pending-summary', summary);
                 $('#fileInput2').val('');
                 renderFileCard(2, file || null);
+            });
+
+            $('#editModal').on('shown.bs.modal', function() {
+                var pending = $(this).data('pending-summary');
+                if (pending !== undefined) {
+                    $('.summernote-edit').summernote('code', pending);
+                    $(this).removeData('pending-summary');
+                }
             });
 
             // Status toggle

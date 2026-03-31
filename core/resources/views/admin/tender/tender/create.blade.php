@@ -21,6 +21,19 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 @endif
 
 @section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<style>
+  .wa-code-select + .select2-container { flex-shrink: 0; }
+  .wa-code-select + .select2-container .select2-selection--single {
+    height: 38px; border-radius: 4px 0 0 4px; border-right: 0; border-color: #ebedf2;
+  }
+  .wa-code-select + .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 36px; padding-right: 24px;
+  }
+  .wa-code-select + .select2-container .select2-selection__arrow { height: 36px; }
+  .wa-flag-option { display:flex; align-items:center; gap:8px; }
+  .wa-flag-option .fi { font-size:16px; flex-shrink:0; }
+</style>
 <div class="page-header">
   <h4 class="page-title">Add New Tender</h4>
   <ul class="breadcrumbs">
@@ -212,13 +225,19 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <p id="errexpert_details" class="mb-0 text-danger em"></p>
               </div>
 
-              {{-- Expert WhatsApp & Phone --}}
+              {{-- Expert WhatsApp & Email --}}
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
                     <label>Expert WhatsApp **</label>
-                    <input type="text" class="form-control ltr" name="expert_whatsapp"
-                      placeholder="Enter Expert WhatsApp">
+                    <div style="display:flex;">
+                      <select id="waCode" class="wa-code-select ltr">
+                        @include('admin.tender.tender._wa_codes')
+                      </select>
+                      <input type="text" id="waNumber" class="form-control ltr" style="border-radius:0 4px 4px 0;" placeholder="e.g. 1712345678" inputmode="numeric">
+                    </div>
+                    <input type="hidden" name="expert_whatsapp" id="waFull">
+                    <p class="mb-0 text-warning" style="font-size:11px;"><i class="fas fa-info-circle"></i> Enter number without country code</p>
                     <p id="errexpert_whatsapp" class="mb-0 text-danger em"></p>
                   </div>
                 </div>
@@ -298,7 +317,52 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 <script>
   window.ajaxSuccessRedirect = "{{ route('admin.tender.index') }}?language={{ request()->input('language') }}";
 
+  // WhatsApp combiner — handles: "01630968359" / "+8801630968359" / "8801630968359"
+  function syncWa() {
+    var code = $('#waCode').val().replace(/\D/g, '');          // e.g. "880"
+    var raw  = $('#waNumber').val().replace(/\D/g, '');        // digits only
+
+    var num;
+    if (!raw) { $('#waFull').val(''); return; }
+
+    if (raw.indexOf(code) === 0) {
+      num = raw;                   // already has country code: 8801630968359
+    } else if (raw.charAt(0) === '0') {
+      num = code + raw.slice(1);   // local format: 01630968359 → 8801630968359
+    } else {
+      num = code + raw;            // bare number: 1630968359 → 8801630968359
+    }
+    $('#waFull').val(num);
+  }
+  $('#waCode, #waNumber').on('input change', syncWa);
+
   $(document).ready(function () {
+
+    // Country code searchable dropdown with SVG flags (cross-platform incl. Windows)
+    function flagEmojiToIso(emoji) {
+      // Flag emoji = 2 Regional Indicator Symbols (U+1F1E6–U+1F1FF = A–Z)
+      var chars = [...emoji];
+      if (chars.length < 2) return null;
+      var a = chars[0].codePointAt(0) - 0x1F1E6;
+      var b = chars[1].codePointAt(0) - 0x1F1E6;
+      if (a < 0 || a > 25 || b < 0 || b > 25) return null;
+      return String.fromCharCode(97 + a) + String.fromCharCode(97 + b);
+    }
+    function waFlagTemplate(option, forSelection) {
+      if (!option.id) return option.text;
+      var allChars = [...option.text];
+      var iso = flagEmojiToIso(allChars[0] + allChars[1]);
+      var label = option.text.replace(/^(\S+\s)/, '').trim(); // strip flag char
+      if (!iso) return label;
+      var flagHtml = '<span class="fi fi-' + iso + '"></span>';
+      return $('<span class="wa-flag-option">' + flagHtml + '<span>' + label + '</span></span>');
+    }
+    $('#waCode').select2({
+      width: '145px',
+      dropdownAutoWidth: true,
+      templateResult: function(o) { return waFlagTemplate(o, false); },
+      templateSelection: function(o) { return waFlagTemplate(o, true); },
+    });
 
     // Load categories when language changes
     $("#language").on('change', function () {

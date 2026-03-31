@@ -176,7 +176,7 @@
         .td-cat-pill {
             position: absolute;
             bottom: 12px;
-            left: 12px;
+            left: 20px;
             z-index: 3;
             display: inline-block;
             background: #4aa4f8;
@@ -716,8 +716,160 @@
             color: #27ae60;
             font-weight: 600;
         }
+
+        /* ── Mobile tab scroll ── */
+        .tab-scroll-wrap {
+            position: relative;
+        }
+
+        .tab-scroll-wrap .tab-arrow {
+            display: none;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+            padding: 0;
+            line-height: 1;
+            font-size: 12px;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        .tab-scroll-wrap .tab-arrow.arrow-prev {
+            left: 0;
+        }
+
+        .tab-scroll-wrap .tab-arrow.arrow-next {
+            right: 0;
+        }
+
+        .tab-scroll-wrap .tab-arrow:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-nav-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .tab-nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-nav-scroll .nav-tabs {
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            border-bottom: none;
+        }
+
+        .tab-nav-scroll .nav-tabs .nav-item {
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 767px) {
+            .tab-scroll-wrap .tab-arrow {
+                display: flex;
+            }
+
+            .tab-scroll-wrap .tab-nav-scroll {
+                /* padding: 0 34px; */
+            }
+
+            .course-details-section .discription-area .discription-tabs .nav-tabs .nav-link {
+                padding: 10px 12px !important;
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+            }
+
+            .discription-tabs {
+                margin-bottom: 20px;
+            }
+
+            .course-details-section .discription-area .discription-tabs .nav-tabs {
+                margin-bottom: 0px;
+                padding: 10px 0;
+            }
+        }
     </style>
 @endsection
+
+@php
+    // Normalize stored WhatsApp number to E.164 digits only.
+    // Handles: "01630968359", "+8801630968359", "8801630968359", or doubled code "8808801630968359"
+    $waDigits = preg_replace('/[^0-9]/', '', $tender->expert_whatsapp ?? '');
+    if ($waDigits) {
+        // If > 15 digits (E.164 max), a country code was likely prepended twice — strip it
+        if (strlen($waDigits) > 15) {
+            foreach (
+                [
+                    '880',
+                    '966',
+                    '974',
+                    '971',
+                    '973',
+                    '972',
+                    '977',
+                    '95',
+                    '94',
+                    '92',
+                    '91',
+                    '90',
+                    '86',
+                    '84',
+                    '82',
+                    '81',
+                    '66',
+                    '65',
+                    '64',
+                    '63',
+                    '62',
+                    '61',
+                    '60',
+                    '55',
+                    '54',
+                    '52',
+                    '49',
+                    '48',
+                    '47',
+                    '46',
+                    '45',
+                    '44',
+                    '43',
+                    '41',
+                    '40',
+                    '39',
+                    '34',
+                    '33',
+                    '32',
+                    '31',
+                    '30',
+                    '27',
+                    '20',
+                    '7',
+                    '1',
+                ]
+                as $c
+            ) {
+                if (str_starts_with($waDigits, $c . $c)) {
+                    $waDigits = substr($waDigits, strlen($c));
+                    break;
+                }
+            }
+        }
+        // Local format: leading 0 without country code — strip 0 (no-op if we can't determine code)
+        // Numbers starting with 0 AND no clear country code are left for the admin to fix
+    }
+@endphp
 
 @section('breadcrumb-title', $bex?->tender_details_title ?? __('Tender Details'))
 @section('breadcrumb-subtitle', Str::limit($tender->title, 60))
@@ -827,8 +979,8 @@
                                 <span class="td-country">
                                     <i class="fas fa-map-marker-alt"></i> {{ $tender->country }}
                                 </span>
-                                <span class="td-price {{ is_null($tender->current_price) ? 'free' : '' }}">
-                                    @if (is_null($tender->current_price))
+                                <span class="td-price {{ !$tender->current_price ? 'free' : '' }}">
+                                    @if (!$tender->current_price)
                                         {{ __('Free') }}
                                     @else
                                         {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($tender->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
@@ -854,7 +1006,7 @@
 
                         {{-- Price --}}
                         <div class="tender-price-wrap">
-                            @if (is_null($tender->current_price))
+                            @if (!$tender->current_price)
                                 <span class="price-current free-price" id="displayedPrice">{{ __('Free') }}</span>
                             @else
                                 <span class="price-current" id="displayedPrice">
@@ -870,7 +1022,7 @@
                         </div>
 
                         {{-- ── Purchase form (paid tender) ── --}}
-                        @if (!is_null($tender->current_price))
+                        @if ($tender->current_price)
                             <form method="POST" id="paymentGatewayForm" action="{{ route('tender.purchase.submit') }}"
                                 enctype="multipart/form-data">
                                 @csrf
@@ -960,14 +1112,14 @@
                             </form>
                         @else
                             {{-- Free tender: contact expert buttons --}}
-                            <div class="expert-contact-btns">
+                            {{-- <div class="expert-contact-btns">
                                 @if (!empty($tender->expert_whatsapp))
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $tender->expert_whatsapp) }}"
+                                    <a href="https://wa.me/{{ $waDigits }}"
                                         class="btn-whatsapp" target="_blank">
                                         <i class="fab fa-whatsapp"></i> {{ __('WhatsApp Expert') }}
                                     </a>
                                 @endif
-                            </div>
+                            </div> --}}
                         @endif
 
                         {{-- Social share --}}
@@ -1035,25 +1187,34 @@
                 <div class="col-lg-12">
                     <div class="discription-area">
                         <div class="discription-tabs">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a class="nav-link active" data-toggle="tab"
-                                        href="#overview">{{ __('Tender Overview') }}</a>
-                                </li>
-                                @if ($modules->count() > 0)
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#modules"
-                                            id="modules-tab-link">{{ __('Tender Fees') }}</a>
-                                    </li>
-                                @endif
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab"
-                                        href="#expert">{{ __('Tendering Expert') }}</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#reviews">{{ __('Reviews') }}</a>
-                                </li>
-                            </ul>
+                            <div class="tab-scroll-wrap">
+                                <button class="tab-arrow arrow-prev" id="tabArrowPrev"
+                                    aria-label="Scroll left">&#8249;</button>
+                                <div class="tab-nav-scroll" id="tabNavScroll">
+                                    <ul class="nav nav-tabs">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab"
+                                                href="#overview">{{ __('Tender Overview') }}</a>
+                                        </li>
+                                        @if ($modules->count() > 0)
+                                            <li class="nav-item">
+                                                <a class="nav-link" data-toggle="tab" href="#modules"
+                                                    id="modules-tab-link">{{ __('Tender Fees') }}</a>
+                                            </li>
+                                        @endif
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab"
+                                                href="#expert">{{ __('Tendering Expert') }}</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab"
+                                                href="#reviews">{{ __('Reviews') }}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="tab-arrow arrow-next" id="tabArrowNext"
+                                    aria-label="Scroll right">&#8250;</button>
+                            </div>
                         </div>
 
                         <div class="tab-content">
@@ -1089,7 +1250,7 @@
                                                 </div>
                                                 <div id="module-body-{{ $module->id }}" class="collapse module-body">
                                                     @if (!empty($module->summary))
-                                                        <p class="mb-3">{{ $module->summary }}</p>
+                                                        <div class="mb-3">{!! $module->summary !!}</div>
                                                     @endif
                                                     @if ($module->sections->count() > 0)
                                                         <ul class="module-sections-list">
@@ -1131,8 +1292,8 @@
                                                 @endif
                                                 <div class="expert-contact-btns">
                                                     @if (!empty($tender->expert_whatsapp))
-                                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $tender->expert_whatsapp) }}"
-                                                            class="btn-whatsapp" target="_blank">
+                                                        <a href="https://wa.me/{{ $waDigits }}" class="btn-whatsapp"
+                                                            target="_blank">
                                                             <i class="fab fa-whatsapp"></i> {{ __('WhatsApp') }}:
                                                             {{ $tender->expert_whatsapp }}
                                                         </a>
@@ -1172,6 +1333,35 @@
     <script src="{{ asset('assets/front/js/jquery.magnific-popup.min.js') }}"></script>
     <script src="{{ asset('assets/front/js/jquery.nice-select.min.js') }}"></script>
     <script>
+        // ── Mobile tab scroll arrows ──
+        (function() {
+            var $scroll = $('#tabNavScroll');
+            var $prev = $('#tabArrowPrev');
+            var $next = $('#tabArrowNext');
+            var step = 120;
+
+            function updateArrows() {
+                var el = $scroll[0];
+                $prev.css('opacity', el.scrollLeft > 0 ? 1 : 0.3);
+                $next.css('opacity', el.scrollLeft + el.clientWidth < el.scrollWidth - 1 ? 1 : 0.3);
+            }
+
+            $prev.on('click', function() {
+                $scroll.animate({
+                    scrollLeft: $scroll.scrollLeft() - step
+                }, 200, updateArrows);
+            });
+
+            $next.on('click', function() {
+                $scroll.animate({
+                    scrollLeft: $scroll.scrollLeft() + step
+                }, 200, updateArrows);
+            });
+
+            $scroll.on('scroll', updateArrows);
+            updateArrows();
+        })();
+
         $(document).ready(function() {
 
             // Video popup – explicit YouTube pattern so watch?v= URLs embed correctly

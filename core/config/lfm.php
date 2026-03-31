@@ -59,6 +59,10 @@ return [
                 'image/svg+xml',
                 'application/pdf',
                 'application/zip',
+                'application/x-zip',
+                'application/x-zip-compressed',
+                'application/octet-stream',
+                'multipart/x-zip',
                 'text/plain',
                 'video/mp4',
                 // Word

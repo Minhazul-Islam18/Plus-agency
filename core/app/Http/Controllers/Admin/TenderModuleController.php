@@ -42,7 +42,7 @@ class TenderModuleController extends Controller
         if ($request->filled('tender_file')) {
             $filePath = $request->tender_file;
             $ext      = pathinfo($filePath, PATHINFO_EXTENSION);
-            $filename = uniqid() . '.' . $ext;
+            $filename = pathinfo($filePath, PATHINFO_FILENAME) . '.' . $ext;
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);
@@ -84,7 +84,7 @@ class TenderModuleController extends Controller
 
             $filePath = $request->tender_file;
             $ext      = pathinfo($filePath, PATHINFO_EXTENSION);
-            $filename = uniqid() . '.' . $ext;
+            $filename = pathinfo($filePath, PATHINFO_FILENAME) . '.' . $ext;
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);

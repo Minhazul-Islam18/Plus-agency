@@ -167,6 +167,10 @@ class Language extends Model
   {
     return $this->hasMany('App\CourseCategory');
   }
+  public function tender_categories()
+  {
+    return $this->hasMany('App\TenderCategory');
+  }
   public function courses()
   {
     return $this->hasMany('App\Course');

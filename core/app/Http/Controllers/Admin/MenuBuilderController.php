@@ -135,6 +135,13 @@ class MenuBuilderController extends Controller
             $catStatus = 1;
         }
 
+        // for 'tenders' mega menu
+        if ($request->type == 'tenders') {
+            $data['cats'] = $lang->tender_categories()->get();
+            $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'tenders')->where('category', 1);
+            $catStatus = 1;
+        }
+
         $data['lang'] = $lang;
 
         if ($megamenu->count() == 0) {
@@ -234,6 +241,16 @@ class MenuBuilderController extends Controller
                 }
 
                 $megamenu = Megamenu::where('language_id', $langid)->where('type', 'blogs')->where('category', 1)->firstOrFail();
+            }
+        } elseif ($type == 'tenders') {
+            if (!empty($items)) {
+                foreach ($items as $key => $item) {
+                    $item = json_decode($item, true);
+                    $catid = $item[0];
+                    $menus["$catid"][] = $item[1];
+                }
+
+                $megamenu = Megamenu::where('language_id', $langid)->where('type', 'tenders')->where('category', 1)->firstOrFail();
             }
         }
 

@@ -17,6 +17,8 @@
         $name = 'Events';
     } elseif($type == 'blogs') {
         $name = 'Blogs';
+    } elseif($type == 'tenders') {
+        $name = 'Tenders';
     } else {
         $name = '';
     }
@@ -72,7 +74,7 @@
                     <input type="hidden" name="language_id" value="{{$lang->id}}">
                     <input type="hidden" name="type" value="{{request()->input('type')}}">
 
-                    @if (($type == 'services' && serviceCategory()) || ($type == 'products') || ($type == 'portfolios' && serviceCategory()) || ($type == 'courses') || ($type == 'events') || ($type == 'blogs'))
+                    @if (($type == 'services' && serviceCategory()) || ($type == 'products') || ($type == 'portfolios' && serviceCategory()) || ($type == 'courses') || ($type == 'events') || ($type == 'blogs') || ($type == 'tenders'))
                         @foreach ($cats as $cat)
                             @php
                                 $type = request()->input('type');
@@ -95,6 +97,8 @@
                                     $items = $cat->events;
                                 } elseif($type == 'blogs') {
                                     $items = $cat->blogs;
+                                } elseif($type == 'tenders') {
+                                    $items = $cat->tenders;
                                 }
                             @endphp
 

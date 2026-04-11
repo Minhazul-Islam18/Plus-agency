@@ -98,6 +98,8 @@ if (!function_exists('getHref') ) {
             $href = route('front.team');
         } else if ($link["type"] == 'career') {
             $href = route('front.career');
+        } else if ($link["type"] == 'tenders' || $link["type"] == 'tenders-megamenu') {
+            $href = route('tenders');
         } else if ($link["type"] == 'courses' || $link["type"] == 'courses-megamenu') {
             $href = route('courses');
         } else if ($link["type"] == 'events' || $link["type"] == 'events-megamenu') {

@@ -116,6 +116,19 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         </li>
                                     @endif
 
+                                    @if ($bex->is_tender == 1)
+                                        <li class="list-group-item">
+                                            {{__('Tenders')}}
+                                            <span class="badge badge-dark">Non Mega Menu</span>
+                                            <a data-text="{{__('Tenders')}}" data-type="tenders" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
+                                        </li>
+                                        <li class="list-group-item">
+                                            {{__('Tenders')}}
+                                            <span class="badge badge-danger">Mega Menu</span>
+                                            <a data-text="{{__('Tenders')}}" data-type="tenders-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
+                                        </li>
+                                    @endif
+
                                     @if ($bex->is_donation == 1)
                                         <li class="list-group-item">
                                             {{__('Causes')}}

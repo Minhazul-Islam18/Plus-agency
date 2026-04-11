@@ -134,6 +134,19 @@
                             </a>
                           </td>
                         </tr>
+                        @if ($bex->is_tender == 1)
+                        <tr>
+                          <td>Tenders</td>
+                          <td>
+                            <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'tenders'])}}">
+                              <span class="btn-label">
+                                <i class="fas fa-edit"></i>
+                              </span>
+                              Edit
+                            </a>
+                          </td>
+                        </tr>
+                        @endif
                     </tbody>
                   </table>
                 </div>

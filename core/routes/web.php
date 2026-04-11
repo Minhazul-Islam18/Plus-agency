@@ -1045,6 +1045,53 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
     });
 
 
+    Route::group(['middleware' => 'checkpermission:Course Management'], function () {
+        // Admin Course Category Routes
+        Route::get('/course_categories', 'Admin\CourseCategoryController@index')->name('admin.course_category.index');
+        Route::post('/course_category/store', 'Admin\CourseCategoryController@store')->name('admin.course_category.store');
+        Route::post('/course_category/update', 'Admin\CourseCategoryController@update')->name('admin.course_category.update');
+        Route::post('/course_category/delete', 'Admin\CourseCategoryController@delete')->name('admin.course_category.delete');
+        Route::post('/course_category/bulk_delete', 'Admin\CourseCategoryController@bulkDelete')->name('admin.course_category.bulk_delete');
+
+        // Admin Course Routes
+        Route::get('/courses', 'Admin\CourseController@index')->name('admin.course.index');
+        Route::get('/course/create', 'Admin\CourseController@create')->name('admin.course.create');
+        Route::get('/course/{langId}/get_categories', 'Admin\CourseController@getCategories');
+        Route::post('/course/store', 'Admin\CourseController@store')->name('admin.course.store');
+        Route::get('/course/{id}/edit', 'Admin\CourseController@edit')->name('admin.course.edit');
+        Route::post('/course/update', 'Admin\CourseController@update')->name('admin.course.update');
+        Route::post('/course/delete', 'Admin\CourseController@delete')->name('admin.course.delete');
+        Route::post('/course/bulk_delete', 'Admin\CourseController@bulkDelete')->name('admin.course.bulk_delete');
+        Route::post('/course/featured', 'Admin\CourseController@featured')->name('admin.course.featured');
+        Route::get('/course/purchase-log', 'Admin\CourseController@purchaseLog')->name('admin.course.purchaseLog');
+        Route::post('/course/purchase/payment-status', 'Admin\CourseController@purchasePaymentStatus')->name('admin.course.purchasePaymentStatus');
+        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchase.delete');
+        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchaseDelete');
+        Route::post('/course/purchase/bulk_delete', 'Admin\CourseController@purchaseBulkOrderDelete')->name('admin.course.purchaseBulkOrderDelete');
+
+        // Admin Course Modules Routes
+        Route::get('/course/{id?}/modules', 'Admin\ModuleController@index')->name('admin.course.module.index');
+        Route::post('/course/module/store', 'Admin\ModuleController@store')->name('admin.course.module.store');
+        Route::post('/course/module/update', 'Admin\ModuleController@update')->name('admin.course.module.update');
+        Route::post('/course/module/delete', 'Admin\ModuleController@delete')->name('admin.course.module.delete');
+        Route::post('/course/module/bulk_delete', 'Admin\ModuleController@bulkDelete')->name('admin.course.module.bulk_delete');
+
+        // Admin Module Lessons Routes
+        Route::get('/module/{id}/lessons', 'Admin\LessonController@index')->name('admin.module.lesson.index');
+        Route::post('/module/lesson/store', 'Admin\LessonController@store')->name('admin.module.lesson.store');
+        Route::post('module/lesson/update', 'Admin\LessonController@update')->name('admin.module.lesson.update');
+        Route::post('/module/lesson/delete', 'Admin\LessonController@delete')->name('admin.module.lesson.delete');
+        Route::post('/module/lesson/bulk_delete', 'Admin\LessonController@bulkDelete')->name('admin.module.lesson.bulk_delete');
+
+        Route::get('/course/settings', 'Admin\CourseController@settings')->name('admin.course.settings');
+        Route::post('/course/settings', 'Admin\CourseController@updateSettings')->name('admin.course.settings');
+
+        // Admin Course Enroll Report Routes
+        Route::get('/course/enrolls/report', 'Admin\CourseController@report')->name('admin.enrolls.report');
+        Route::get('/course/export/report', 'Admin\CourseController@exportReport')->name('admin.enrolls.export');
+    });
+
+
     Route::group(['middleware' => 'checkpermission:Tender Management'], function () {
         // Admin Tender Category Routes
         Route::get('/tender_categories', 'Admin\TenderCategoryController@index')->name('admin.tender_category.index');

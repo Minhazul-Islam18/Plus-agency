@@ -624,6 +624,75 @@
                         </div>
                     </li>
                 @endif
+                @if (empty($admin->role) || (!empty($permissions) && in_array('Course Management', $permissions)))
+                    {{-- Courses --}}
+                    <li
+                        class="nav-item
+@if (request()->path() == 'admin/course_categories') active
+@elseif(request()->path() == 'admin/course/settings') active
+@elseif(request()->path() == 'admin/course/purchase-log') active
+@elseif(request()->path() == 'admin/courses') active
+@elseif(request()->path() == 'admin/course/create') active
+@elseif(request()->is('admin/course/*/edit')) active
+@elseif(request()->is('admin/course/*/modules')) active
+@elseif(request()->is('admin/module/*/lessons')) active
+@elseif(request()->path() == 'admin/course/enrolls/report') active @endif">
+                        <a data-toggle="collapse" href="#course">
+                            <i class='fas fa-book-open'></i>
+                            <p>Course Management</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse
+@if (request()->path() == 'admin/course_categories') show
+@elseif(request()->path() == 'admin/course/settings') show
+@elseif(request()->path() == 'admin/course/purchase-log') show
+@elseif(request()->path() == 'admin/courses') show
+@elseif(request()->path() == 'admin/course/create') show
+@elseif(request()->is('admin/course/*/edit')) show
+@elseif(request()->is('admin/course/*/modules')) show
+@elseif(request()->is('admin/module/*/lessons')) show
+@elseif(request()->path() == 'admin/course/enrolls/report') show @endif"
+                            id="course">
+                            <ul class="nav nav-collapse">
+                                <li class="@if (request()->path() == 'admin/course/settings') active @endif">
+                                    <a href="{{ route('admin.course.settings') }}">
+                                        <span class="sub-item">Settings</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == 'admin/course_categories') active @endif">
+                                    <a
+                                        href="{{ route('admin.course_category.index') . '?language=' . $default->code }}">
+                                        <span class="sub-item">Category</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == 'admin/course/create') active @endif">
+                                    <a href="{{ route('admin.course.create') . '?language=' . $default->code }}">
+                                        <span class="sub-item">Add Course</span>
+                                    </a>
+                                </li>
+                                <li
+                                    class="@if (request()->path() == 'admin/courses') active
+        @elseif(request()->is('admin/course/*/edit')) active
+        @elseif(request()->is('admin/course/*/modules')) active
+        @elseif(request()->is('admin/module/*/lessons')) active @endif">
+                                    <a href="{{ route('admin.course.index') . '?language=' . $default->code }}">
+                                        <span class="sub-item">Courses</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == 'admin/course/purchase-log') active @endif">
+                                    <a href="{{ route('admin.course.purchaseLog') }}">
+                                        <span class="sub-item">Enrolls</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == 'admin/course/enrolls/report') active @endif">
+                                    <a href="{{ route('admin.enrolls.report') }}">
+                                        <span class="sub-item">Report</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
 
                 @if (empty($admin->role) || (!empty($permissions) && in_array('Tender Management', $permissions)))
                     {{-- Tenders --}}

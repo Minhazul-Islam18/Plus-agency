@@ -211,6 +211,13 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
 
+/** Find My Files — Secure File Recovery **/
+Route::post('/find-my-files/request-link', 'Front\FindMyFilesController@requestLink')->name('find_my_files.request_link');
+Route::get('/find-my-files/link-sent', 'Front\FindMyFilesController@linkSent')->name('find_my_files.link_sent');
+Route::get('/find-my-files/security-verification', 'Front\FindMyFilesController@securityInfo')->name('find_my_files.security_info');
+Route::get('/find-my-files/download', 'Front\FindMyFilesController@download')->name('find_my_files.download');
+Route::get('/find-my-files/download/stream', 'Front\FindMyFilesController@downloadStream')->name('find_my_files.stream');
+
 
 
 
@@ -1411,6 +1418,9 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'tenders') {
             $action = 'Front\TenderController@tenders';
             $routeName = 'tenders';
+        } elseif ($type == 'find_my_files') {
+            $action = 'Front\FindMyFilesController@index';
+            $routeName = 'find_my_files';
         } elseif ($type == 'causes') {
             $action = 'Front\FrontendController@causes';
             $routeName = 'front.causes';

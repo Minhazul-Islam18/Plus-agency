@@ -184,12 +184,20 @@ class TenderController extends Controller
 
         $purchase->save();
 
-        return redirect()->route('tender.purchase.complete')->with('success', 'Your purchase request has been submitted successfully!');
+        return redirect()->route('tender.purchase.complete')
+            ->with('fmf_purchase_id', $purchase->id);
     }
 
     public function purchaseComplete()
     {
         $currentLang = $this->getCurrentLang();
+
+        $purchase = null;
+        if (session()->has('fmf_purchase_id')) {
+            $purchase = TenderPurchase::with('tender')->find(session('fmf_purchase_id'));
+        }
+
+        $data['purchase']    = $purchase;
         $data['version']     = $this->getVersionData($currentLang);
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;

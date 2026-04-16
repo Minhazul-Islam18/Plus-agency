@@ -1,3 +1,12 @@
+@php
+    $moduleList = ($purchase->tender && $purchase->tender->tenderModules)
+        ? $purchase->tender->tenderModules
+        : collect([]);
+    $qty        = $moduleList->count();
+    $summaryFee = $moduleList->sum('cost');
+    $currency   = $purchase->currency_code ?? '';
+@endphp
+
 <!-- Receipt Details Modal -->
 <div class="modal fade" id="detailsModal{{ $purchase->id }}" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -43,42 +52,33 @@
 
                     <div class="row">
                         <div class="col-lg-5"><strong>Qty:</strong></div>
-                        <div class="col-lg-7">{{ $purchase->qty }}</div>
+                        <div class="col-lg-7">{{ $qty }}</div>
                     </div>
                     <hr>
 
-                    <div class="row">
-                        <div class="col-lg-5"><strong>Technical Proposal Fee:</strong></div>
-                        <div class="col-lg-7">
-                            {{ number_format($purchase->technical_proposal_fee, 0, '.', ' ') }}
-                            {{ $purchase->currency_code }}
+                    {{-- Dynamic module fee rows --}}
+                    @foreach ($moduleList as $module)
+                        <div class="row">
+                            <div class="col-lg-5"><strong>{{ $module->name }}:</strong></div>
+                            <div class="col-lg-7">
+                                @if (!is_null($module->cost) && $module->cost > 0)
+                                    {{ number_format($module->cost, 2) }} {{ $currency }}
+                                @else
+                                    Free
+                                @endif
+                            </div>
                         </div>
-                    </div>
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-lg-5"><strong>Financial Proposal Fee:</strong></div>
-                        <div class="col-lg-7">
-                            {{ number_format($purchase->financial_proposal_fee, 0, '.', ' ') }}
-                            {{ $purchase->currency_code }}
-                        </div>
-                    </div>
-                    <hr>
+                        <hr>
+                    @endforeach
 
                     <div class="row">
                         <div class="col-lg-5"><strong>Summary Fee:</strong></div>
                         <div class="col-lg-7">
-                            {{ number_format($purchase->summary_fee, 0, '.', ' ') }}
-                            {{ $purchase->currency_code }}
-                        </div>
-                    </div>
-                    <hr>
-
-                    <div class="row">
-                        <div class="col-lg-5"><strong>Tender Notice Publication Fee:</strong></div>
-                        <div class="col-lg-7">
-                            {{ number_format($purchase->tender_notice_publication_fee, 0, '.', ' ') }}
-                            {{ $purchase->currency_code }}
+                            @if ($summaryFee > 0)
+                                {{ number_format($summaryFee, 2) }} {{ $currency }}
+                            @else
+                                -
+                            @endif
                         </div>
                     </div>
                     <hr>

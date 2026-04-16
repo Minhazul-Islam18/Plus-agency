@@ -1121,6 +1121,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
         Route::post('/tender/purchase/delete', 'Admin\TenderController@purchaseDelete')->name('admin.tender.purchaseDelete');
         Route::post('/tender/purchase/bulk_delete', 'Admin\TenderController@purchaseBulkOrderDelete')->name('admin.tender.purchaseBulkOrderDelete');
+        Route::get('/tender/purchase/{id}/invoice', 'Admin\TenderController@invoiceDownload')->name('admin.tender.invoiceDownload');
+        Route::post('/tender/purchase/{id}/generate-invoice', 'Admin\TenderController@purchaseGenerateInvoice')->name('admin.tender.purchaseGenerateInvoice');
 
         // Admin Tender Module Routes
         Route::get('/tender/{id}/modules', 'Admin\TenderModuleController@index')->name('admin.tender.module.index');

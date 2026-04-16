@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\BasicExtra;
+use App\SecureToken;
 use App\Tender;
 use App\TenderCategory;
 use App\TenderPurchase;
@@ -15,7 +16,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use PDF;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class TenderController extends Controller
 {
@@ -541,7 +546,10 @@ class TenderController extends Controller
         $orderNum = $request->order_number;
         $langCode = $request->language;
 
-        $purchases = TenderPurchase::with('tender')
+        $purchases = TenderPurchase::with([
+                'tender',
+                'tender.tenderModules' => fn($q) => $q->where('status', 1)->orderBy('id'),
+            ])
             ->when($orderNum, fn($q) => $q->where('order_number', $orderNum))
             ->when($langCode, function ($q) use ($langCode) {
                 $language = Language::where('code', $langCode)->first();
@@ -558,12 +566,187 @@ class TenderController extends Controller
 
     public function purchasePaymentStatus(Request $request)
     {
-        $purchase = TenderPurchase::findOrFail($request->purchase_id);
+        $purchase        = TenderPurchase::findOrFail($request->purchase_id);
+        $previousStatus  = $purchase->payment_status;
         $purchase->payment_status = $request->payment_status;
         $purchase->save();
 
+        // Send secure download link email when payment is first approved
+        if ($request->payment_status === 'Completed' && $previousStatus !== 'Completed') {
+            $this->sendPurchaseApprovedEmail($purchase);
+        }
+
         Session::flash('success', 'Payment status changed successfully!');
         return back();
+    }
+
+    private function generateInvoice(TenderPurchase $purchase): string
+    {
+        $language = Language::where('is_default', 1)->first();
+        $bse      = $language->basic_extra;
+        $bs       = $language->basic_setting;
+
+        // Embed logo as base64 so dompdf never needs to fetch a remote URL
+        $logoSrc = null;
+        if (!empty($bs->logo)) {
+            // Try multiple possible logo locations
+            $candidates = [
+                storage_path('app/public/front/img/' . $bs->logo),
+                base_path('public/assets/front/img/' . $bs->logo),
+                base_path('../assets/front/img/' . $bs->logo),
+            ];
+            foreach ($candidates as $abs) {
+                if (file_exists($abs)) {
+                    $ext     = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
+                    $mime    = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
+                    $logoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($abs));
+                    break;
+                }
+            }
+        }
+
+        // Eager-load tender so price is available in the view
+        $purchase->load('tender');
+
+        $fileName  = $purchase->order_number . '.pdf';
+        $directory = storage_path('app/invoices/tender/');
+        if (!is_dir($directory)) {
+            mkdir($directory, 0775, true);
+        }
+
+        PDF::loadView('pdf.tender', [
+            'order'   => $purchase,
+            'bse'     => $bse,
+            'logoSrc' => $logoSrc,
+        ])->setPaper('a4', 'portrait')->save($directory . $fileName);
+
+        $purchase->update(['invoice' => $fileName]);
+
+        return $directory . $fileName;
+    }
+
+    public function invoiceDownload($id)
+    {
+        $purchase = TenderPurchase::findOrFail($id);
+
+        if (empty($purchase->invoice)) {
+            abort(404, 'Invoice not found.');
+        }
+
+        $path = storage_path('app/invoices/tender/' . $purchase->invoice);
+
+        // Fallback: check old assets path for invoices generated before the migration
+        if (!file_exists($path)) {
+            $legacyPath = base_path('../assets/front/invoices/tender/' . $purchase->invoice);
+            if (file_exists($legacyPath)) {
+                $path = $legacyPath;
+            } else {
+                abort(404, 'Invoice file not found.');
+            }
+        }
+
+        return response()->download($path, $purchase->order_number . '_invoice.pdf', [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function purchaseGenerateInvoice($id)
+    {
+        $purchase = TenderPurchase::findOrFail($id);
+
+        try {
+            $this->generateInvoice($purchase);
+            Session::flash('success', 'Invoice generated successfully.');
+        } catch (\Exception $e) {
+            Log::error('[Tender] Manual invoice generation failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+            Session::flash('error', 'Invoice generation failed: ' . $e->getMessage());
+        }
+
+        return back();
+    }
+
+    private function sendPurchaseApprovedEmail(TenderPurchase $purchase): void
+    {
+        $language = Language::where('is_default', 1)->first();
+        $be       = $language->basic_extended;
+
+        // Generate invoice PDF (non-fatal — email always sends even if PDF fails)
+        $invoicePath = null;
+        try {
+            $invoicePath = $this->generateInvoice($purchase);
+        } catch (\Exception $e) {
+            Log::error('[Tender] Invoice generation failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // Revoke any previous active tokens for this order
+        SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        // Generate signed token
+        $payload   = implode('|', [$purchase->order_number, $purchase->email, now()->timestamp, Str::random(16)]);
+        $rawToken  = hash_hmac('sha256', $payload, config('app.key'));
+        $tokenHash = hash('sha256', $rawToken);
+
+        SecureToken::create([
+            'order_id'       => $purchase->order_number,
+            'email_hash'     => hash('sha256', strtolower(trim($purchase->email))),
+            'token_hash'     => $tokenHash,
+            'issued_at'      => now(),
+            'expires_at'     => now()->addHours(24),
+            'max_downloads'  => 3,
+            'download_count' => 0,
+            'status'         => 'active',
+            'device_hash'    => '',
+            'ip'             => request()->ip(),
+        ]);
+
+        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
+        $fromName    = $be->from_name ?: config('app.name');
+
+        $body = view('mail.secure_download_link', [
+            'purchase'     => $purchase,
+            'downloadUrl'  => $downloadUrl,
+            'expiresAt'    => now()->addHours(24)->format('d M Y, H:i'),
+            'maxDownloads' => 3,
+            'fromName'     => $fromName,
+            'appUrl'       => config('app.url'),
+        ])->render();
+
+        $mail = new PHPMailer(true);
+
+        try {
+            if ($be->is_smtp == 1) {
+                $mail->isSMTP();
+                $mail->Host       = $be->smtp_host;
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $be->smtp_username;
+                $mail->Password   = $be->smtp_password;
+                $mail->SMTPSecure = $be->encryption;
+                $mail->Port       = $be->smtp_port;
+            }
+
+            $mail->setFrom($be->from_mail, $fromName);
+            $mail->addAddress($purchase->email, trim($purchase->first_name . ' ' . $purchase->last_name));
+            if (file_exists($invoicePath)) {
+                $mail->addAttachment($invoicePath, $purchase->order_number . '_invoice.pdf');
+            }
+            $mail->isHTML(true);
+            $mail->Subject = 'Your Secure Download Link — Order ' . $purchase->order_number;
+            $mail->Body    = $body;
+            $mail->send();
+        } catch (\Exception $e) {
+            Log::error('[Tender] Approval email failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function purchaseDelete(Request $request)
@@ -571,6 +754,10 @@ class TenderController extends Controller
         $purchase = TenderPurchase::findOrFail($request->purchase_id);
         if (!empty($purchase->receipt)) {
             @unlink('assets/front/receipt/' . $purchase->receipt);
+        }
+        if (!empty($purchase->invoice)) {
+            @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
+            @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
         }
         $purchase->delete();
 
@@ -584,6 +771,10 @@ class TenderController extends Controller
             $purchase = TenderPurchase::findOrFail($id);
             if (!empty($purchase->receipt)) {
                 @unlink('assets/front/receipt/' . $purchase->receipt);
+            }
+            if (!empty($purchase->invoice)) {
+                @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
+                @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
             }
             $purchase->delete();
         }

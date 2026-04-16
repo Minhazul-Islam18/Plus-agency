@@ -14,8 +14,10 @@ use App\TenderPurchase;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class TenderController extends Controller
 {
@@ -178,11 +180,13 @@ class TenderController extends Controller
         if ($request->hasFile('receipt')) {
             $file     = $request->file('receipt');
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('assets/front/receipt'), $filename);
+            $file->move('assets/front/receipt', $filename);
             $purchase->receipt = $filename;
         }
 
         $purchase->save();
+
+        $this->sendOrderReceivedEmail($purchase);
 
         return redirect()->route('tender.purchase.complete')
             ->with('fmf_purchase_id', $purchase->id);
@@ -203,5 +207,45 @@ class TenderController extends Controller
         $data['currentLang'] = $currentLang;
 
         return view('front.tender.purchase_complete', $data);
+    }
+
+    private function sendOrderReceivedEmail(TenderPurchase $purchase): void
+    {
+        $currentLang = $this->getCurrentLang();
+        $be          = $currentLang->basic_extended;
+        $fromName    = $be->from_name ?: config('app.name');
+        $tender      = Tender::find($purchase->tender_id);
+
+        $body = view('mail.tender_order_received', [
+            'purchase'     => $purchase,
+            'tenderTitle'  => $tender ? $tender->title : 'Tender Document',
+            'fromName'     => $fromName,
+        ])->render();
+
+        $mail = new PHPMailer(true);
+
+        try {
+            if ($be->is_smtp == 1) {
+                $mail->isSMTP();
+                $mail->Host       = $be->smtp_host;
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $be->smtp_username;
+                $mail->Password   = $be->smtp_password;
+                $mail->SMTPSecure = $be->encryption;
+                $mail->Port       = $be->smtp_port;
+            }
+
+            $mail->setFrom($be->from_mail, $fromName);
+            $mail->addAddress($purchase->email, trim($purchase->first_name . ' ' . $purchase->last_name));
+            $mail->isHTML(true);
+            $mail->Subject = 'Order Received — ' . $purchase->order_number;
+            $mail->Body    = $body;
+            $mail->send();
+        } catch (\Exception $e) {
+            Log::error('[Tender] Order received email failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

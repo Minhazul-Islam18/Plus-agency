@@ -26,6 +26,7 @@ class TenderPurchase extends Model
         'gateway_type',
         'payment_status',
         'receipt',
+        'invoice',
     ];
 
     public function tender()

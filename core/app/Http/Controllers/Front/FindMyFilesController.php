@@ -421,6 +421,13 @@ class FindMyFilesController extends Controller
         // Risk score for display
         $risk = $this->riskScore($request, $token->email_hash);
 
+        // ── Count this link open and expire if exhausted ─────────────────────
+        $token->increment('download_count');
+
+        if ($token->download_count >= $token->max_downloads) {
+            $token->update(['status' => 'expired']);
+        }
+
         AccessLog::record(AccessLog::LINK_CLICKED, [
             'ip'          => $request->ip(),
             'device_hash' => $this->deviceHash($request),
@@ -520,13 +527,6 @@ class FindMyFilesController extends Controller
         if ($added === 0) {
             @unlink($zipPath);
             abort(404);
-        }
-
-        // ── Increment download count + log ────────────────────────────────────
-        $token->increment('download_count');
-
-        if ($token->download_count >= $token->max_downloads) {
-            $token->update(['status' => 'expired']);
         }
 
         AccessLog::record(AccessLog::DOWNLOAD_SUCCESS, [

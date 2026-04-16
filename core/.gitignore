@@ -12,3 +12,8 @@ yarn-error.log
 **/.keep
 /assets/front/img
 .env
+storage/app/invoices/
+storage/app/temp/
+../assets/front/invoices/
+*.pdf
+*.zip

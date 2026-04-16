@@ -1145,7 +1145,7 @@
             @if ($modules->count() > 0)
                 <div class="row mt-5">
                     <div class="col-12">
-                        <a href="#" class="downloads-link" id="downloadsLink">
+                        <a href="/find-my-files" class="downloads-link">
                             <i class="fas fa-download"></i> {{ __('Click here to find your downloads') }}
                         </a>
                         <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>
@@ -1435,15 +1435,6 @@
                     e.preventDefault();
                     $('.payment-warning').fadeIn().delay(2000).fadeOut();
                 }
-            });
-
-            // "Click here to find your downloads" → switch to Tender Fees tab
-            $(document).on('click', '#downloadsLink', function(e) {
-                e.preventDefault();
-                $('#modules-tab-link').tab('show');
-                $('html, body').animate({
-                    scrollTop: $('.discription-area').offset().top - 80
-                }, 500);
             });
 
         });

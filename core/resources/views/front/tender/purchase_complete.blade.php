@@ -334,8 +334,21 @@
                                 <span class="pc-row-value">{{ $purchase->payment_method }}</span>
                             </div>
                             <div class="pc-row">
-                                <span class="pc-row-label">{{ __('Currency') }}</span>
-                                <span class="pc-row-value">{{ $purchase->currency_code }}</span>
+                                <span class="pc-row-label">{{ __('Total Price') }}</span>
+                                <span class="pc-row-value">
+                                    @php
+                                        $price = optional($purchase->tender)->current_price;
+                                        $sym   = $bse->base_currency_symbol ?? '';
+                                        $pos   = $bse->base_currency_symbol_position ?? 'left';
+                                        $code  = $purchase->currency_code ?? '';
+                                    @endphp
+                                    @if ($price)
+                                        @if ($pos === 'left'){{ $sym }}@endif{{ number_format($price, 2) }}@if ($pos === 'right') {{ $sym }}@endif
+                                        <span style="font-size:12px; color:#64748b; font-weight:500;"> {{ $code }}</span>
+                                    @else
+                                        {{ __('Free') }}
+                                    @endif
+                                </span>
                             </div>
                             <div class="pc-row">
                                 <span class="pc-row-label">{{ __('Status') }}</span>

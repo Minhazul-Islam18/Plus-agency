@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
-<title>Your Secure Download Link</title>
+<title>Order Received</title>
 <!--[if mso]>
 <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
 <![endif]-->
@@ -24,11 +24,10 @@
             <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
               <tr>
                 <td>
-                  <!-- Logo / brand name -->
                   <span style="font-size:20px; font-weight:700; color:#ffffff; letter-spacing:0.04em;">{{ $fromName }}</span>
                 </td>
                 <td align="right">
-                  <span style="font-size:12px; color:#94a3b8; letter-spacing:0.05em; text-transform:uppercase;">Secure Document Delivery</span>
+                  <span style="font-size:12px; color:#94a3b8; letter-spacing:0.05em; text-transform:uppercase;">Tender Order Notification</span>
                 </td>
               </tr>
             </table>
@@ -45,21 +44,21 @@
           <td style="padding:44px 44px 32px; border-bottom:1px solid #f1f5f9;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
               <tr>
-                <!-- Green shield icon -->
+                <!-- Orange clock icon -->
                 <td width="56" valign="top" style="padding-right:18px;">
                   <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                     <tr>
                       <td width="56" height="56" align="center" valign="middle"
-                          style="width:56px; height:56px; background-color:#16a34a; border-radius:14px; text-align:center; vertical-align:middle;">
-                        <span style="font-size:26px; color:#ffffff; line-height:56px; display:block;">&#10003;</span>
+                          style="width:56px; height:56px; background-color:#d97706; border-radius:14px; text-align:center; vertical-align:middle;">
+                        <span style="font-size:26px; color:#ffffff; line-height:56px; display:block;">&#128337;</span>
                       </td>
                     </tr>
                   </table>
                 </td>
                 <!-- Title -->
                 <td valign="middle">
-                  <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#16a34a; letter-spacing:0.09em; text-transform:uppercase;">Order Confirmed</p>
-                  <p style="margin:0; font-size:22px; font-weight:700; color:#0f172a; line-height:1.3;">Your files are ready to download.</p>
+                  <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#d97706; letter-spacing:0.09em; text-transform:uppercase;">Order Received</p>
+                  <p style="margin:0; font-size:22px; font-weight:700; color:#0f172a; line-height:1.3;">We have received your order.</p>
                 </td>
               </tr>
             </table>
@@ -70,73 +69,53 @@
         <tr>
           <td style="padding:32px 44px 0;">
             <p style="margin:0 0 6px 0; font-size:15px; color:#334155; line-height:1.7;">
-              Hello,
+              Hello, <strong style="color:#0f172a;">{{ $purchase->first_name }} {{ $purchase->last_name }}</strong>
             </p>
             <p style="margin:0 0 28px 0; font-size:15px; color:#334155; line-height:1.7;">
-              Your purchase for order <strong style="color:#0f172a;">{{ $purchase->order_number }}</strong> has been verified.
-              Click the button below to securely download your tender documents.
+              Thank you for your order. We have received your purchase request for
+              <strong style="color:#0f172a;">{{ $tenderTitle }}</strong>.
+              Your payment is currently <strong style="color:#d97706;">pending verification</strong>.
+              Once your payment is confirmed, we will send you a secure download link.
             </p>
           </td>
         </tr>
 
-        <!-- CTA button -->
+        <!-- Order summary table -->
         <tr>
           <td style="padding:0 44px 32px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
               <tr>
-                <td align="center" style="background-color:#2563eb; border-radius:8px;">
-                  <a href="{{ $downloadUrl }}"
-                     target="_blank"
-                     style="display:block; padding:17px 32px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:8px; text-align:center; background-color:#2563eb; letter-spacing:0.01em; line-height:1;">
-                    &#8659;&nbsp; Download Secure Files
-                  </a>
+                <td colspan="2" style="background-color:#f8fafc; padding:12px 16px; border-bottom:1px solid #e2e8f0;">
+                  <p style="margin:0; font-size:12px; font-weight:700; color:#64748b; letter-spacing:0.07em; text-transform:uppercase;">Order Summary</p>
                 </td>
               </tr>
-            </table>
-          </td>
-        </tr>
-
-        <!-- Info pills row -->
-        <tr>
-          <td style="padding:0 44px 36px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
               <tr>
-                <!-- Pill 1 -->
-                <td width="33%" align="center" style="padding:0 4px;">
-                  <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="width:100%;">
-                    <tr>
-                      <td align="center" style="background-color:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 8px;">
-                        <p style="margin:0 0 3px 0; font-size:18px; color:#16a34a;">&#128274;</p>
-                        <p style="margin:0 0 2px 0; font-size:12px; font-weight:700; color:#15803d;">Secured</p>
-                        <p style="margin:0; font-size:11px; color:#4ade80; color:#166534;">End-to-end signed</p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <!-- Pill 2 -->
-                <td width="33%" align="center" style="padding:0 4px;">
-                  <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="width:100%;">
-                    <tr>
-                      <td align="center" style="background-color:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px 8px;">
-                        <p style="margin:0 0 3px 0; font-size:18px;">&#128337;</p>
-                        <p style="margin:0 0 2px 0; font-size:12px; font-weight:700; color:#1d4ed8;">24 Hours</p>
-                        <p style="margin:0; font-size:11px; color:#1e40af;">Link expiry window</p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <!-- Pill 3 -->
-                <td width="33%" align="center" style="padding:0 4px;">
-                  <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="width:100%;">
-                    <tr>
-                      <td align="center" style="background-color:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; padding:12px 8px;">
-                        <p style="margin:0 0 3px 0; font-size:18px;">&#128190;</p>
-                        <p style="margin:0 0 2px 0; font-size:12px; font-weight:700; color:#7c3aed;">{{ $maxDownloads }} Opens</p>
-                        <p style="margin:0; font-size:11px; color:#6d28d9;">Link opens allowed</p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9; width:40%;">Order Number</td>
+                <td style="padding:12px 16px; font-size:13px; font-weight:700; color:#0f172a; border-bottom:1px solid #f1f5f9;">{{ $purchase->order_number }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9;">Tender</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155; border-bottom:1px solid #f1f5f9;">{{ $tenderTitle }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9;">Name</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155; border-bottom:1px solid #f1f5f9;">{{ $purchase->first_name }} {{ $purchase->last_name }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9;">Email</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155; border-bottom:1px solid #f1f5f9;">{{ $purchase->email }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9;">Phone</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155; border-bottom:1px solid #f1f5f9;">{{ $purchase->phone_number }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b; border-bottom:1px solid #f1f5f9;">Country</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155; border-bottom:1px solid #f1f5f9;">{{ $purchase->country }}</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-size:13px; color:#64748b;">Payment Method</td>
+                <td style="padding:12px 16px; font-size:13px; color:#334155;">{{ $purchase->payment_method }}</td>
               </tr>
             </table>
           </td>
@@ -155,28 +134,19 @@
 
         <!-- Notice box -->
         <tr>
-          <td style="padding:28px 44px 32px;">
+          <td style="padding:28px 44px 36px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
               <tr>
                 <td style="background-color:#fefce8; border-left:4px solid #facc15; border-radius:0 6px 6px 0; padding:14px 18px;">
                   <p style="margin:0; font-size:13px; color:#713f12; line-height:1.6;">
-                    <strong>Important:</strong> This link will automatically expire on
-                    <strong>{{ $expiresAt }}</strong>, or after being opened
-                    <strong>{{ $maxDownloads }} times</strong> — whichever comes first.
-                    Each time you open this link counts as one use.
-                    If you did not request this link, please ignore this email — no action is needed.
+                    <strong>What's next?</strong> Our team will verify your payment. Once confirmed, you will
+                    receive a <strong>secure download link</strong> at this email address to access your tender documents.
+                    If you have any questions, please contact us with your order number
+                    <strong>{{ $purchase->order_number }}</strong>.
                   </p>
                 </td>
               </tr>
             </table>
-          </td>
-        </tr>
-
-        <!-- Fallback plain link -->
-        <tr>
-          <td style="padding:0 44px 36px;">
-            <p style="margin:0 0 6px 0; font-size:12px; color:#94a3b8;">If the button above doesn't work, copy and paste this link into your browser:</p>
-            <p style="margin:0; font-size:11px; color:#2563eb; word-break:break-all;">{{ $downloadUrl }}</p>
           </td>
         </tr>
 
@@ -194,7 +164,6 @@
                   <p style="margin:0; font-size:12px; color:#64748b;">This is an automated message. Please do not reply.</p>
                 </td>
                 <td align="right" valign="middle">
-                  <!-- Social circles -->
                   <table cellpadding="0" cellspacing="0" border="0" role="presentation">
                     <tr>
                       <td style="padding-left:6px;">
@@ -222,7 +191,7 @@
           <td align="center">
             <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.7;">
               &copy; {{ date('Y') }} {{ $fromName }}. All rights reserved.<br>
-              You received this email because a file recovery was requested for order <strong style="color:#64748b;">{{ $purchase->order_number }}</strong>.
+              You received this email because an order was placed using this email address for order <strong style="color:#64748b;">{{ $purchase->order_number }}</strong>.
             </p>
           </td>
         </tr>

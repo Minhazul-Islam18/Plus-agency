@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\BasicExtra;
+use App\Services\SmsGateway\LogSmsGateway;
+use App\Services\SmsGateway\SmsGatewayInterface;
+use App\Services\SmsGateway\TwilioSmsGateway;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Social;
@@ -18,7 +22,22 @@ class AppServiceProvider extends ServiceProvider
    */
   public function register()
   {
-    //
+    $this->app->bind(SmsGatewayInterface::class, function () {
+      $bex = BasicExtra::first();
+
+      if ($bex && $bex->twilio_status == 1
+          && $bex->twilio_account_sid
+          && $bex->twilio_auth_token
+          && $bex->twilio_from_number) {
+        return new TwilioSmsGateway(
+          $bex->twilio_account_sid,
+          $bex->twilio_auth_token,
+          $bex->twilio_from_number
+        );
+      }
+
+      return new LogSmsGateway();
+    });
   }
 
   /**
@@ -29,8 +48,14 @@ class AppServiceProvider extends ServiceProvider
   public function boot()
   {
     Paginator::useBootstrap();
-    $socials = Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
-    $langs = Language::where('status', 1)->get();
+
+    try {
+      $socials = Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
+      $langs   = Language::where('status', 1)->get();
+    } catch (\Exception $e) {
+      $socials = collect();
+      $langs   = collect();
+    }
 
     view()->composer('*', function ($view) {
       // Get current locale (set by SetLangMiddleware or manual selection)

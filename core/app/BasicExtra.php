@@ -18,6 +18,10 @@ class BasicExtra extends Model
   protected $fillable = [
     'faq_category_status',
     'gallery_category_status',
-    'package_category_status'
+    'package_category_status',
+    'twilio_status',
+    'twilio_account_sid',
+    'twilio_auth_token',
+    'twilio_from_number',
   ];
 }

@@ -14,6 +14,8 @@
 # Ignore specific image directories
 /assets/lfm/files/
 /assets/front/receipt/
+/assets/front/files/tender_modules/
+/assets/front/invoices/tender/
 /assets/admin/img/
 /assets/user/img/
 /installer/img/

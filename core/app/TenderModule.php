@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TenderModule extends Model
 {
+    protected $guarded = ['id'];
     public function tender()
     {
         return $this->belongsTo('App\Tender');

@@ -24,46 +24,48 @@ if (! function_exists('setEnvironmentValue')) {
                 } else {
                     $str = str_replace($oldLine, "{$envKey}={$envValue}", $str);
                 }
-
             }
         }
 
         $str = substr($str, 0, -1);
         if (!file_put_contents($envFile, $str)) return false;
         return true;
-
     }
 }
 
 
 if (! function_exists('convertUtf8')) {
-    function convertUtf8( $value ) {
+    function convertUtf8($value)
+    {
         return mb_detect_encoding($value, mb_detect_order(), true) === 'UTF-8' ? $value : mb_convert_encoding($value, 'UTF-8');
     }
 }
 
 
 if (! function_exists('make_slug')) {
-    function make_slug($string) {
+    function make_slug($string)
+    {
         $slug = preg_replace('/\s+/u', '-', trim($string));
-        $slug = str_replace("/","",$slug);
-        $slug = str_replace("?","",$slug);
+        $slug = str_replace("/", "", $slug);
+        $slug = str_replace("?", "", $slug);
         return $slug;
     }
 }
 
 
 if (! function_exists('make_input_name')) {
-    function make_input_name($string) {
+    function make_input_name($string)
+    {
         return preg_replace('/\s+/u', '_', trim($string));
     }
 }
 
 
 if (! function_exists('serviceCategory')) {
-    function serviceCategory() {
+    function serviceCategory()
+    {
         $hbex = BasicExtra::first();
-        if($hbex->service_category == 1){
+        if ($hbex?->service_category == 1) {
             return true;
         } else {
             return false;
@@ -71,18 +73,20 @@ if (! function_exists('serviceCategory')) {
     }
 }
 
-if (!function_exists('slug_create') ) {
-    function slug_create($val) {
+if (!function_exists('slug_create')) {
+    function slug_create($val)
+    {
         $slug = preg_replace('/\s+/u', '-', trim($val));
-        $slug = str_replace("/","",$slug);
-        $slug = str_replace("?","",$slug);
+        $slug = str_replace("/", "", $slug);
+        $slug = str_replace("?", "", $slug);
         return $slug;
     }
 }
 
 
-if (!function_exists('getHref') ) {
-    function getHref($link) {
+if (!function_exists('getHref')) {
+    function getHref($link)
+    {
         $href = "#";
 
         if ($link["type"] == 'home') {
@@ -91,8 +95,7 @@ if (!function_exists('getHref') ) {
             $href = route('front.services');
         } else if ($link["type"] == 'packages') {
             $href = route('front.packages');
-        }
-        else if ($link["type"] == 'portfolios' || $link["type"] == 'portfolios-megamenu') {
+        } else if ($link["type"] == 'portfolios' || $link["type"] == 'portfolios-megamenu') {
             $href = route('front.portfolios');
         } else if ($link["type"] == 'team') {
             $href = route('front.team');
@@ -150,8 +153,9 @@ if (!function_exists('getHref') ) {
 
 
 
-if (!function_exists('create_menu') ) {
-    function create_menu($arr) {
+if (!function_exists('create_menu')) {
+    function create_menu($arr)
+    {
         echo '<ul style="z-index: 0;">';
         foreach ($arr["children"] as $el) {
 
@@ -166,8 +170,8 @@ if (!function_exists('create_menu') ) {
             $href = getHref($el);
 
 
-            echo '<li '.$class.'>';
-            echo '<a  href="'.$href.'" target="'.$el["target"].'">'.$el["text"].'</a>';
+            echo '<li ' . $class . '>';
+            echo '<a  href="' . $href . '" target="' . $el["target"] . '">' . $el["text"] . '</a>';
             if (array_key_exists("children", $el)) {
                 create_menu($el);
             }
@@ -179,28 +183,30 @@ if (!function_exists('create_menu') ) {
 
 
 
-if (!function_exists('hex2rgb') ) {
-    function hex2rgb( $colour ) {
-        if ( $colour[0] == '#' ) {
-            $colour = substr( $colour, 1 );
+if (!function_exists('hex2rgb')) {
+    function hex2rgb($colour)
+    {
+        if ($colour[0] == '#') {
+            $colour = substr($colour, 1);
         }
-        if ( strlen( $colour ) == 6 ) {
-            list( $r, $g, $b ) = array( $colour[0] . $colour[1], $colour[2] . $colour[3], $colour[4] . $colour[5] );
-        } elseif ( strlen( $colour ) == 3 ) {
-            list( $r, $g, $b ) = array( $colour[0] . $colour[0], $colour[1] . $colour[1], $colour[2] . $colour[2] );
+        if (strlen($colour) == 6) {
+            list($r, $g, $b) = array($colour[0] . $colour[1], $colour[2] . $colour[3], $colour[4] . $colour[5]);
+        } elseif (strlen($colour) == 3) {
+            list($r, $g, $b) = array($colour[0] . $colour[0], $colour[1] . $colour[1], $colour[2] . $colour[2]);
         } else {
             return false;
         }
-        $r = hexdec( $r );
-        $g = hexdec( $g );
-        $b = hexdec( $b );
-        return array( 'red' => $r, 'green' => $g, 'blue' => $b );
+        $r = hexdec($r);
+        $g = hexdec($g);
+        $b = hexdec($b);
+        return array('red' => $r, 'green' => $g, 'blue' => $b);
     }
 }
 
 
 if (!function_exists('onlyDigitalItemsInCart')) {
-    function onlyDigitalItemsInCart() {
+    function onlyDigitalItemsInCart()
+    {
         $cart = session()->get('cart');
 
         if (!empty($cart)) {
@@ -217,7 +223,8 @@ if (!function_exists('onlyDigitalItemsInCart')) {
 
 
 if (!function_exists('containsDigitalItemsInCart')) {
-    function containsDigitalItemsInCart() {
+    function containsDigitalItemsInCart()
+    {
         $cart = session()->get('cart');
 
         if (!empty($cart)) {
@@ -234,7 +241,8 @@ if (!function_exists('containsDigitalItemsInCart')) {
 
 
 if (!function_exists('onlyDigitalItems')) {
-    function onlyDigitalItems($order) {
+    function onlyDigitalItems($order)
+    {
         $oitems = $order->orderitems;
 
         foreach ($oitems as $key => $oitem) {
@@ -249,7 +257,8 @@ if (!function_exists('onlyDigitalItems')) {
 
 
 if (!function_exists('containsDigitalItem')) {
-    function containsDigitalItem($order) {
+    function containsDigitalItem($order)
+    {
         $oitems = $order->orderitems;
 
         foreach ($oitems as $key => $oitem) {
@@ -324,6 +333,3 @@ if (!function_exists('coupon')) {
         return session()->has('coupon') && !empty(session()->get('coupon')) ? round(session()->get('coupon'), 2) : 0.00;
     }
 }
-
-
-

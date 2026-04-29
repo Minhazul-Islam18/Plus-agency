@@ -26,6 +26,6 @@ class RateLimitAttempt extends Model
         if (!$this->isBlocked()) {
             return 0;
         }
-        return (int) ceil(now()->diffInMinutes($this->blocked_until, false) * -1);
+        return (int) ceil(now()->diffInSeconds($this->blocked_until) / 60);
     }
 }

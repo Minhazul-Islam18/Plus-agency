@@ -71,8 +71,8 @@ class FrontendController extends Controller
         $bs = BS::first();
         $be = BE::first();
 
-        Config::set('captcha.sitekey', $bs->google_recaptcha_site_key);
-        Config::set('captcha.secret', $bs->google_recaptcha_secret_key);
+        Config::set('captcha.sitekey', $bs?->google_recaptcha_site_key);
+        Config::set('captcha.secret', $bs?->google_recaptcha_secret_key);
     }
 
     public function index()
@@ -84,13 +84,13 @@ class FrontendController extends Controller
         }
         $data['currentLang'] = $currentLang;
 
-        $be = $currentLang->basic_extended;
-        $bex = $currentLang->basic_extra;
-        $lang_id = $currentLang->id;
+        $be = $currentLang?->basic_extended;
+        $bex = $currentLang?->basic_extra;
+        $lang_id = $currentLang?->id;
 
         $data['sliders'] = Slider::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
         $data['features'] = Feature::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
-        $version = $be->theme_version;
+        $version = $be?->theme_version;
 
         // if home page page builder is disabled
         if ($bex?->home_page_pagebuilder == 0) {

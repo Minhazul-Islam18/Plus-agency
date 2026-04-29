@@ -17,7 +17,7 @@ class AddWhatsappChatColsToBasicSettingsExtra extends Migration
             $table->tinyInteger('is_whatsapp')->default(1)->comment('1 - enable, 0 - disable');
             $table->string('whatsapp_number', 255)->nullable();
             $table->string('whatsapp_header_title', 255)->default('Chat with us on WhatsApp!');
-            $table->text('whatsapp_popup_message')->default('Hello, how can we help you?');
+            $table->text('whatsapp_popup_message')->nullable();
             $table->tinyInteger('whatsapp_popup')->default(1)->comment('1 - enable, 0 - disable');
         });
     }

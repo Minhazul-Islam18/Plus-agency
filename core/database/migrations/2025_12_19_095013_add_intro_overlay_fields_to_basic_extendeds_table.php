@@ -14,8 +14,12 @@ class AddIntroOverlayFieldsToBasicExtendedsTable extends Migration
     public function up()
     {
         Schema::table('basic_settings_extended', function (Blueprint $table) {
-            $table->string('intro_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('intro_overlay_opacity', 3, 2)->default(0.6)->nullable();
+            if (!Schema::hasColumn('basic_settings_extended', 'intro_overlay_color')) {
+                $table->string('intro_overlay_color', 10)->default('000000')->nullable();
+            }
+            if (!Schema::hasColumn('basic_settings_extended', 'intro_overlay_opacity')) {
+                $table->decimal('intro_overlay_opacity', 3, 2)->default(0.6)->nullable();
+            }
         });
     }
 

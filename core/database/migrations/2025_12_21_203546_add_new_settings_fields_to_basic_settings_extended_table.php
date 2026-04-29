@@ -6,55 +6,45 @@ use Illuminate\Support\Facades\Schema;
 
 class AddNewSettingsFieldsToBasicSettingsExtendedTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
-        Schema::table('basic_settings_extended', function (Blueprint $table) {
-            $table->string('service_section_bg', 255)->nullable();
-            $table->string('service_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('service_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('approach_section_bg', 255)->nullable();
-            $table->string('approach_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('approach_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('statistics_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('statistics_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('portfolio_section_bg', 255)->nullable();
-            $table->string('portfolio_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('portfolio_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('cta_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('cta_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('pricing_bg', 50)->nullable();
-            $table->string('blog_overlay_color', 20)->nullable();
-            $table->decimal('blog_overlay_opacity', 3, 2)->nullable();
-            $table->string('testimonial_section_bg', 255)->nullable();
-            $table->string('testimonial_overlay_color', 10)->default('000000')->nullable();
-            $table->decimal('testimonial_overlay_opacity', 3, 2)->default(0.6)->nullable();
-            $table->string('blog_bg', 50)->nullable();
-            $table->string('partner_overlay_color', 20)->nullable();
-            $table->decimal('partner_overlay_opacity', 3, 2)->nullable();
-            $table->string('partner_bg', 50)->nullable();
-        });
+        $columns = [
+            'service_section_bg'         => fn(Blueprint $t) => $t->string('service_section_bg', 255)->nullable(),
+            'service_overlay_color'       => fn(Blueprint $t) => $t->string('service_overlay_color', 10)->default('000000')->nullable(),
+            'service_overlay_opacity'     => fn(Blueprint $t) => $t->decimal('service_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'approach_section_bg'         => fn(Blueprint $t) => $t->string('approach_section_bg', 255)->nullable(),
+            'approach_overlay_color'      => fn(Blueprint $t) => $t->string('approach_overlay_color', 10)->default('000000')->nullable(),
+            'approach_overlay_opacity'    => fn(Blueprint $t) => $t->decimal('approach_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'statistics_overlay_color'    => fn(Blueprint $t) => $t->string('statistics_overlay_color', 10)->default('000000')->nullable(),
+            'statistics_overlay_opacity'  => fn(Blueprint $t) => $t->decimal('statistics_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'portfolio_section_bg'        => fn(Blueprint $t) => $t->string('portfolio_section_bg', 255)->nullable(),
+            'portfolio_overlay_color'     => fn(Blueprint $t) => $t->string('portfolio_overlay_color', 10)->default('000000')->nullable(),
+            'portfolio_overlay_opacity'   => fn(Blueprint $t) => $t->decimal('portfolio_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'cta_overlay_color'           => fn(Blueprint $t) => $t->string('cta_overlay_color', 10)->default('000000')->nullable(),
+            'cta_overlay_opacity'         => fn(Blueprint $t) => $t->decimal('cta_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'pricing_bg'                  => fn(Blueprint $t) => $t->string('pricing_bg', 50)->nullable(),
+            'blog_overlay_color'          => fn(Blueprint $t) => $t->string('blog_overlay_color', 20)->nullable(),
+            'blog_overlay_opacity'        => fn(Blueprint $t) => $t->decimal('blog_overlay_opacity', 3, 2)->nullable(),
+            'testimonial_section_bg'      => fn(Blueprint $t) => $t->string('testimonial_section_bg', 255)->nullable(),
+            'testimonial_overlay_color'   => fn(Blueprint $t) => $t->string('testimonial_overlay_color', 10)->default('000000')->nullable(),
+            'testimonial_overlay_opacity' => fn(Blueprint $t) => $t->decimal('testimonial_overlay_opacity', 3, 2)->default(0.6)->nullable(),
+            'blog_bg'                     => fn(Blueprint $t) => $t->string('blog_bg', 50)->nullable(),
+            'partner_overlay_color'       => fn(Blueprint $t) => $t->string('partner_overlay_color', 20)->nullable(),
+            'partner_overlay_opacity'     => fn(Blueprint $t) => $t->decimal('partner_overlay_opacity', 3, 2)->nullable(),
+            'partner_bg'                  => fn(Blueprint $t) => $t->string('partner_bg', 50)->nullable(),
+        ];
+
+        foreach ($columns as $col => $addFn) {
+            if (!Schema::hasColumn('basic_settings_extended', $col)) {
+                Schema::table('basic_settings_extended', $addFn);
+            }
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::table('basic_settings_extended', function (Blueprint $table) {
-            $table->dropColumn([
-                // 'blog_bg','service_section_bg', 'service_overlay_color', 'service_overlay_opacity', 'statistics_overlay_color', 'statistics_overlay_opacity', 'approach_section_bg', 'approach_overlay_color', 'approach_overlay_opacity', 'portfolio_section_bg', 'portfolio_overlay_color', 'portfolio_overlay_opacity', 'testimonial_section_bg', 'testimonial_overlay_color', 'testimonial_overlay_opacity', 'blog_overlay_color', 'blog_overlay_opacity', 'pricing_bg', 'cta_overlay_color', 'cta_overlay_opacity',
-                'blog_bg',
-                'partner_overlay_color',
-                'partner_overlay_opacity',
-                'partner_bg'
-            ]);
+            $table->dropColumn(['blog_bg', 'partner_overlay_color', 'partner_overlay_opacity', 'partner_bg']);
         });
     }
 }

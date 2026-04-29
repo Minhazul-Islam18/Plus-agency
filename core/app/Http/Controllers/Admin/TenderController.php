@@ -580,6 +580,16 @@ class TenderController extends Controller
         return back();
     }
 
+    public function purchaseUpdateReference(Request $request)
+    {
+        $purchase = TenderPurchase::findOrFail($request->purchase_id);
+        $purchase->payment_reference = strtoupper(trim($request->input('payment_reference', ''))) ?: null;
+        $purchase->save();
+
+        Session::flash('success', 'Payment reference updated successfully!');
+        return back();
+    }
+
     private function generateInvoice(TenderPurchase $purchase): string
     {
         $language = Language::where('is_default', 1)->first();

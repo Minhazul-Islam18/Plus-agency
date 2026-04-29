@@ -599,6 +599,11 @@ class BasicController extends Controller
             $bex->whatsapp_popup_message = $request->whatsapp_popup_message;
             $bex->whatsapp_popup = $request->whatsapp_popup;
 
+            $bex->twilio_status = $request->twilio_status ?? 0;
+            $bex->twilio_account_sid = $request->twilio_account_sid;
+            $bex->twilio_auth_token = $request->twilio_auth_token;
+            $bex->twilio_from_number = $request->twilio_from_number;
+
             $bex->save();
         }
         Session::flash('success', 'Scripts updated successfully!');

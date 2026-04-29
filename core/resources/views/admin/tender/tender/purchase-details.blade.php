@@ -101,6 +101,26 @@
                     </div>
                     <hr>
 
+                    <div class="row align-items-center">
+                        <div class="col-lg-5"><strong>Payment Reference:</strong></div>
+                        <div class="col-lg-7">
+                            <form action="{{ route('admin.tender.purchaseUpdateReference') }}" method="POST"
+                                class="d-flex align-items-center" style="gap:6px;">
+                                @csrf
+                                <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
+                                <input type="text" name="payment_reference"
+                                    class="form-control form-control-sm"
+                                    value="{{ $purchase->payment_reference }}"
+                                    placeholder="e.g. FLW-XXXX or TRF-2026-001"
+                                    maxlength="100"
+                                    style="text-transform:uppercase; font-family:monospace;">
+                                <button type="submit" class="btn btn-sm btn-primary text-nowrap">Save</button>
+                            </form>
+                            <small class="text-muted">Gateway txn ID or bank transfer reference.</small>
+                        </div>
+                    </div>
+                    <hr>
+
                 </div>
             </div>
             <div class="modal-footer">

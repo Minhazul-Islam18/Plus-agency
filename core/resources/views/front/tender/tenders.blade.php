@@ -192,7 +192,7 @@
                                 </div>
                                 <div class="card-body">
                                     <h4>
-                                        <a href="{{ route('tender_details', ['id' => $ft->id]) }}">
+                                        <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}">
                                             {{ strlen($ft->title) > 55 ? mb_substr($ft->title, 0, 55, 'utf-8') . '...' : $ft->title }}
                                         </a>
                                     </h4>
@@ -353,7 +353,7 @@
                                         </div>
                                         <div class="card-body">
                                             <h4>
-                                                <a href="{{ route('tender_details', ['id' => $tender->id]) }}">
+                                                <a href="{{ route('tender_details', ['slug' => $tender->slug]) }}">
                                                     {{ strlen($tender->title) > 55 ? mb_substr($tender->title, 0, 55, 'utf-8') . '...' : $tender->title }}
                                                 </a>
                                             </h4>

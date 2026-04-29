@@ -32,9 +32,9 @@
                         {{ __('The link may have expired (valid for 24 hours), already reached the download limit (3 attempts), or been revoked.') }}
                     </p>
 
-                    <a href="{{ route('find_my_files') }}"
+                    <a href="{{ route('find_my_files') }}#method=expired_link"
                        style="display:inline-block; padding:12px 28px; background:#3b6cf8; color:#fff; border-radius:7px; font-size:14px; font-weight:600; text-decoration:none; margin-right:10px;">
-                        {{ __('Request a New Link') }}
+                        {{ __('Regenerate My Link') }}
                     </a>
 
                     <a href="{{ route('front.contact') }}"

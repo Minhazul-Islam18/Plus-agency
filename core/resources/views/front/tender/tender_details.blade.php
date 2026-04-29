@@ -1106,6 +1106,15 @@
                                             <input type="text" name="city" class="form-control"
                                                 placeholder="{{ __('City') }}">
                                         </div>
+                                        <div class="col-12 mb-3">
+                                            <input type="text" name="payment_reference" class="form-control"
+                                                placeholder="{{ __('Payment / Transaction Reference (optional)') }}"
+                                                maxlength="100"
+                                                style="text-transform:uppercase;">
+                                            <small class="text-muted">
+                                                {{ __('Enter your bank transfer reference, gateway transaction ID, or any payment confirmation number. This helps recover your files later.') }}
+                                            </small>
+                                        </div>
                                     </div>
                                     <button type="submit" class="main-btn">{{ __('Confirm Purchase') }}</button>
                                 </div>
@@ -1145,7 +1154,7 @@
             @if ($modules->count() > 0)
                 <div class="row mt-5">
                     <div class="col-12">
-                        <a href="/find-my-files" class="downloads-link">
+                        <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-link">
                             <i class="fas fa-download"></i> {{ __('Click here to find your downloads') }}
                         </a>
                         <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>

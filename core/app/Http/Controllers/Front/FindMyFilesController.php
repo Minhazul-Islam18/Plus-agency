@@ -6,8 +6,10 @@ use App\AccessLog;
 use App\BasicExtra;
 use App\Http\Controllers\Controller;
 use App\Language;
+use App\OtpVerification;
 use App\RateLimitAttempt;
 use App\SecureToken;
+use App\Services\SmsGateway\SmsGatewayInterface;
 use App\Tender;
 use App\TenderModule;
 use App\TenderPurchase;
@@ -26,8 +28,9 @@ class FindMyFilesController extends Controller
     const BLOCK_MINUTES   = [30, 120, 1440]; // progressive blocks: 30min → 2hr → 24hr
 
     // Token TTL and max downloads
-    const TOKEN_TTL_HOURS  = 24;
-    const MAX_DOWNLOADS    = 3;
+    const TOKEN_TTL_HOURS    = 24;
+    const MAX_DOWNLOADS      = 3;
+    const MAX_REGEN_PER_DAY  = 3;
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -144,7 +147,7 @@ class FindMyFilesController extends Controller
 
     // ── Send email via PHPMailer (matching project pattern) ───────────────────
 
-    private function sendDownloadEmail(TenderPurchase $purchase, string $downloadUrl, $be): void
+    private function sendDownloadEmail(TenderPurchase $purchase, string $downloadUrl, $be): bool
     {
         $mail = new PHPMailer(true);
 
@@ -178,17 +181,41 @@ class FindMyFilesController extends Controller
             $mail->Subject = $subject;
             $mail->Body    = $body;
             $mail->send();
+
+            \Log::info('[FMF] Download email sent', [
+                'order' => $purchase->order_number,
+                'to'    => substr($recipient, 0, 4) . '***',
+            ]);
+            return true;
         } catch (\Exception $e) {
             \Log::error('[FMF] Email send failed', [
                 'order' => $purchase->order_number,
                 'error' => $e->getMessage(),
             ]);
+            return false;
         }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    private function resolveTender(Request $request): ?Tender
+    {
+        $slug = trim($request->input('tender_slug', ''));
+        if (!$slug) return null;
+        return Tender::where('slug', $slug)->first();
+    }
+
+    private function scopeToPurchase(object $query, ?Tender $tender): object
+    {
+        if ($tender) {
+            $query->where('tender_id', $tender->id);
+        }
+        return $query;
     }
 
     // ── Controller actions ─────────────────────────────────────────────────────
 
-    public function index()
+    public function index(Request $request)
     {
         $currentLang = $this->getCurrentLang();
         $bs          = $currentLang->basic_setting;
@@ -196,10 +223,16 @@ class FindMyFilesController extends Controller
         Config::set('captcha.sitekey', $bs->google_recaptcha_site_key);
         Config::set('captcha.secret', $bs->google_recaptcha_secret_key);
 
+        $slug    = trim($request->query('tender', ''));
+        $tender  = $slug ? Tender::where('slug', $slug)->first() : null;
+        $tenders = Tender::orderBy('title')->get(['id', 'title', 'slug']);
+
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
         $data['version']     = $this->getVersion($currentLang);
         $data['bs']          = $bs;
+        $data['tender']      = $tender;
+        $data['tenders']     = $tenders;
 
         return view('front.find-my-files.index', $data);
     }
@@ -338,9 +371,21 @@ class FindMyFilesController extends Controller
         $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
 
         // ── 10. Send email ────────────────────────────────────────────────────
-        $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+        $emailSent = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+        \Log::info('[OrderNumber] Email result', [
+            'order' => $purchase->order_number,
+            'sent'  => $emailSent,
+        ]);
 
         // ── 11. Log success ───────────────────────────────────────────────────
+        if (!$emailSent) {
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'EMAIL_FAILED',
+                'risk_score' => $risk,
+            ]));
+            return response()->json(['status' => 'error', 'type' => 'email_failed']);
+        }
+
         AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
             'result'     => 'OK',
             'risk_score' => $risk,
@@ -496,7 +541,7 @@ class FindMyFilesController extends Controller
             ->get();
 
         // ── Build ZIP ─────────────────────────────────────────────────────────
-        $tempDir = storage_path('app/temp');
+        $tempDir = env('FMF_ZIP_TEMP_PATH', storage_path('app/temp'));
         if (!is_dir($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
@@ -514,7 +559,8 @@ class FindMyFilesController extends Controller
             if (empty($module->tender_file)) {
                 continue;
             }
-            $filePath = base_path('../assets/front/files/tender_modules/' . $module->tender_file);
+            $modulesDir = env('FMF_MODULES_PATH', base_path('../assets/front/files/tender_modules'));
+            $filePath = rtrim($modulesDir, '/') . '/' . $module->tender_file;
             if (file_exists($filePath)) {
                 $ext      = pathinfo($module->tender_file, PATHINFO_EXTENSION);
                 $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $module->name);
@@ -545,5 +591,625 @@ class FindMyFilesController extends Controller
             'tender_documents_' . $token->order_id . '.zip',
             ['Content-Type' => 'application/zip']
         )->deleteFileAfterSend(true);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 4 — Expired Link / Regenerate
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function requestRegenerate(Request $request)
+    {
+        $currentLang = $this->getCurrentLang();
+        $be          = $currentLang->basic_extended;
+
+        $emailHash  = $this->emailHash($request->input('email', ''));
+        $deviceHash = $this->deviceHash($request);
+
+        $logMeta = [
+            'ip'          => $request->ip(),
+            'user_agent'  => substr($request->userAgent(), 0, 255),
+            'email_hash'  => $emailHash,
+            'device_hash' => $deviceHash,
+            'order_id'    => '',
+        ];
+
+        // ── 1. Format validation ──────────────────────────────────────────────
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        // ── 2. Rate limit check ───────────────────────────────────────────────
+        $blocked = $this->checkRateLimit($request, $emailHash);
+        if ($blocked) {
+            AccessLog::record(AccessLog::RATE_LIMIT_TRIGGERED, array_merge($logMeta, [
+                'result'     => 'RATE_LIMITED',
+                'risk_score' => 0,
+            ]));
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'rate_limited',
+                'minutes' => $blocked['minutes'],
+            ]);
+        }
+
+        $risk = $this->riskScore($request, $emailHash);
+
+        // ── 3. Find most recent completed purchase for this email (any tender) ──
+        $purchase = TenderPurchase::where('payment_status', 'Completed')
+            ->get()
+            ->filter(function ($p) use ($request) {
+                return strtolower(trim($p->email)) === strtolower(trim($request->input('email')));
+            })
+            ->sortByDesc('created_at')
+            ->first();
+
+        if (!$purchase) {
+            $this->incrementAttempts($request, $emailHash);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'REGEN_NO_MATCH',
+                'risk_score' => $risk,
+            ]));
+            // Neutral — same response as success
+            return response()->json([
+                'status'   => 'success',
+                'redirect' => route('find_my_files.link_sent'),
+            ]);
+        }
+
+        // ── 4. Regeneration cap: max 3 new tokens per order per 24h ──────────
+        $regenCount = SecureToken::where('email_hash', $emailHash)
+            ->where('order_id', $purchase->order_number)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->count();
+
+        if ($regenCount >= self::MAX_REGEN_PER_DAY) {
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'REGEN_LIMIT_EXCEEDED',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+            return response()->json([
+                'status' => 'error',
+                'type'   => 'regen_limit',
+            ]);
+        }
+
+        // ── 5. Revoke any current active tokens for this order ────────────────
+        SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        // ── 6. Issue new SecureToken ──────────────────────────────────────────
+        $rawToken  = $this->generateToken($purchase, $emailHash, $request);
+        $tokenHash = hash('sha256', $rawToken);
+
+        SecureToken::create([
+            'order_id'       => $purchase->order_number,
+            'email_hash'     => $emailHash,
+            'token_hash'     => $tokenHash,
+            'issued_at'      => now(),
+            'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
+            'max_downloads'  => self::MAX_DOWNLOADS,
+            'download_count' => 0,
+            'status'         => 'active',
+            'device_hash'    => $deviceHash,
+            'ip'             => $request->ip(),
+        ]);
+
+        // ── 7. Email the new download link ────────────────────────────────────
+        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
+        $emailSent   = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+        \Log::info('[Regenerate] Email result', [
+            'order' => $purchase->order_number,
+            'sent'  => $emailSent,
+        ]);
+
+        if (!$emailSent) {
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'REGEN_EMAIL_FAILED',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+            return response()->json(['status' => 'error', 'type' => 'email_failed']);
+        }
+
+        AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
+            'result'     => 'REGEN_OK',
+            'risk_score' => $risk,
+            'order_id'   => $purchase->order_number,
+        ]));
+
+        return response()->json([
+            'status'   => 'success',
+            'redirect' => route('find_my_files.link_sent'),
+        ]);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 3 — Email + Payment Reference
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function requestByPaymentRef(Request $request)
+    {
+        $currentLang = $this->getCurrentLang();
+        $bs          = $currentLang->basic_setting;
+        $be          = $currentLang->basic_extended;
+
+        $emailHash  = $this->emailHash($request->input('email', ''));
+        $deviceHash = $this->deviceHash($request);
+
+        $logMeta = [
+            'ip'          => $request->ip(),
+            'user_agent'  => substr($request->userAgent(), 0, 255),
+            'email_hash'  => $emailHash,
+            'device_hash' => $deviceHash,
+            'order_id'    => '',
+        ];
+
+        \Log::info('[PayRef] Request received', [
+            'ip'    => $request->ip(),
+            'email' => substr($request->input('email', ''), 0, 4) . '***',
+            'ref'   => substr($request->input('payment_reference', ''), 0, 6) . '***',
+        ]);
+
+        // ── 1. Format validation ──────────────────────────────────────────────
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'email'             => 'required|email',
+            'payment_reference' => ['required', 'string', 'min:4', 'max:200', 'regex:/^[A-Za-z0-9\-_\s]+$/'],
+        ]);
+
+        if ($validator->fails()) {
+            \Log::warning('[PayRef] Validation failed', ['errors' => $validator->errors()->toArray()]);
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        // ── 2. Rate limit check ───────────────────────────────────────────────
+        $blocked = $this->checkRateLimit($request, $emailHash);
+        if ($blocked) {
+            \Log::warning('[PayRef] Rate limited', ['ip' => $request->ip()]);
+            AccessLog::record(AccessLog::RATE_LIMIT_TRIGGERED, array_merge($logMeta, [
+                'result'     => 'RATE_LIMITED',
+                'risk_score' => 0,
+            ]));
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'rate_limited',
+                'minutes' => $blocked['minutes'],
+            ]);
+        }
+
+        $risk = $this->riskScore($request, $emailHash);
+
+        // ── 3. Lookup — normalised match on email + payment_reference ───────────
+        // Strip all whitespace before comparing so "ABC DEF" matches "ABCDEF"
+        $normalised = strtoupper(preg_replace('/\s+/', '', trim($request->input('payment_reference'))));
+
+        \Log::info('[PayRef] Searching purchase', ['ref_normalised' => $normalised]);
+
+        $purchase = TenderPurchase::where('payment_status', 'Completed')
+            ->whereNotNull('payment_reference')
+            ->get()
+            ->first(function ($p) use ($request, $normalised) {
+                $storedRef = strtoupper(preg_replace('/\s+/', '', trim($p->payment_reference)));
+                return $storedRef === $normalised
+                    && strtolower(trim($p->email)) === strtolower(trim($request->input('email')));
+            });
+
+        // ── 4. No match — return real error ──────────────────────────────────
+        if (!$purchase) {
+            \Log::info('[PayRef] No match found (ref or email mismatch)', ['ip' => $request->ip()]);
+            $this->incrementAttempts($request, $emailHash);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'PAYREF_NO_MATCH',
+                'risk_score' => $risk,
+            ]));
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'no_match',
+            ]);
+        }
+
+        \Log::info('[PayRef] Purchase matched', ['order' => $purchase->order_number]);
+
+        // ── 5. Revoke previous active tokens ──────────────────────────────────
+        SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        // ── 6. Issue SecureToken ──────────────────────────────────────────────
+        $rawToken  = $this->generateToken($purchase, $emailHash, $request);
+        $tokenHash = hash('sha256', $rawToken);
+
+        SecureToken::create([
+            'order_id'       => $purchase->order_number,
+            'email_hash'     => $emailHash,
+            'token_hash'     => $tokenHash,
+            'issued_at'      => now(),
+            'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
+            'max_downloads'  => self::MAX_DOWNLOADS,
+            'download_count' => 0,
+            'status'         => 'active',
+            'device_hash'    => $deviceHash,
+            'ip'             => $request->ip(),
+        ]);
+
+        \Log::info('[PayRef] SecureToken issued', ['order' => $purchase->order_number]);
+
+        // ── 7. Email the download link ────────────────────────────────────────
+        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
+        $emailSent   = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+
+        \Log::info('[PayRef] Email result', [
+            'order' => $purchase->order_number,
+            'sent'  => $emailSent,
+        ]);
+
+        if (!$emailSent) {
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'PAYREF_EMAIL_FAILED',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+            return response()->json([
+                'status' => 'error',
+                'type'   => 'email_failed',
+            ]);
+        }
+
+        AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
+            'result'     => 'PAYREF_OK',
+            'risk_score' => $risk,
+            'order_id'   => $purchase->order_number,
+        ]));
+
+        return response()->json([
+            'status'   => 'success',
+            'redirect' => route('find_my_files.link_sent'),
+        ]);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 2 — Email + Phone (OTP)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private function phoneHash(string $phone): string
+    {
+        return hash('sha256', preg_replace('/\D/', '', $phone));
+    }
+
+    public function requestOtp(Request $request)
+    {
+        $currentLang = $this->getCurrentLang();
+
+        $emailHash  = $this->emailHash($request->input('email', ''));
+        $phoneHash  = $this->phoneHash($request->input('phone', ''));
+        $deviceHash = $this->deviceHash($request);
+
+        $logMeta = [
+            'ip'          => $request->ip(),
+            'user_agent'  => substr($request->userAgent(), 0, 255),
+            'email_hash'  => $emailHash,
+            'device_hash' => $deviceHash,
+            'order_id'    => '',
+        ];
+
+        // ── Log every request that hits this endpoint ─────────────────────────
+        \Log::info('[OTP/requestOtp] Request received', [
+            'ip'    => $request->ip(),
+            'email' => substr($request->input('email', ''), 0, 5) . '***',
+            'phone' => substr($request->input('phone', ''), 0, 4) . '***',
+        ]);
+
+        // ── 1. Format validation ──────────────────────────────────────────────
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'email' => 'required|email',
+            'phone' => ['required', 'string', 'min:6', 'max:20', 'regex:/^\+?[\d\s\-\(\)]+$/'],
+        ]);
+
+        if ($validator->fails()) {
+            \Log::warning('[OTP/requestOtp] Validation failed', ['errors' => $validator->errors()->toArray()]);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'INVALID_INPUT',
+                'risk_score' => 0,
+            ]));
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        // ── 2. Rate limit check ───────────────────────────────────────────────
+        $blocked = $this->checkRateLimit($request, $emailHash);
+        if ($blocked) {
+            \Log::warning('[OTP/requestOtp] Rate limited', ['ip' => $request->ip()]);
+            AccessLog::record(AccessLog::RATE_LIMIT_TRIGGERED, array_merge($logMeta, [
+                'result'     => 'RATE_LIMITED',
+                'risk_score' => 0,
+            ]));
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'rate_limited',
+                'minutes' => $blocked['minutes'],
+            ]);
+        }
+
+        // ── 3. Neutral lookup ─────────────────────────────────────────────────
+        $risk     = $this->riskScore($request, $emailHash);
+        $tender   = $this->resolveTender($request);
+        $purchase = $this->scopeToPurchase(TenderPurchase::query(), $tender)
+            ->get()
+            ->first(function ($p) use ($request, $phoneHash) {
+                return strtolower(trim($p->email))    === strtolower(trim($request->input('email')))
+                    && $this->phoneHash($p->phone_number) === $phoneHash;
+            });
+
+        if (!$purchase) {
+            \Log::info('[OTP/requestOtp] No matching purchase (email+phone)', ['ip' => $request->ip()]);
+            $this->incrementAttempts($request, $emailHash);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'OTP_NO_MATCH',
+                'risk_score' => $risk,
+            ]));
+            return response()->json([
+                'status'        => 'success',
+                'otp_sent'      => false,
+                'session_token' => Str::uuid()->toString(),
+                'masked_phone'  => OtpVerification::maskPhone($request->input('phone')),
+                'resend_after'  => OtpVerification::RESEND_DELAY,
+            ]);
+        }
+
+        // ── 4. Check payment status ───────────────────────────────────────────
+        if ($purchase->payment_status !== 'Completed') {
+            \Log::info('[OTP/requestOtp] Purchase not completed', [
+                'order'  => $purchase->order_number,
+                'status' => $purchase->payment_status,
+            ]);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'OTP_PAYMENT_PENDING',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+            return response()->json([
+                'status' => 'error',
+                'type'   => 'payment_pending',
+            ]);
+        }
+
+        \Log::info('[OTP/requestOtp] Purchase matched and completed', ['order' => $purchase->order_number]);
+
+        // ── 4. Invalidate any previous pending OTP sessions ───────────────────
+        OtpVerification::where('order_id', $purchase->order_number)
+            ->where('status', 'pending')
+            ->update(['status' => 'expired']);
+
+        // ── 5. Generate & store OTP ───────────────────────────────────────────
+        $rawOtp       = OtpVerification::generateOtp();
+        $sessionToken = Str::uuid()->toString();
+        $maskedPhone  = OtpVerification::maskPhone($purchase->phone_number);
+
+        OtpVerification::create([
+            'session_token'  => $sessionToken,
+            'email_hash'     => $emailHash,
+            'phone_hash'     => $phoneHash,
+            'otp_hash'       => hash('sha256', $rawOtp),
+            'order_id'       => $purchase->order_number,
+            'expires_at'     => now()->addMinutes(OtpVerification::OTP_TTL_MIN),
+            'attempts'       => 0,
+            'last_resend_at' => now(),
+            'status'         => 'pending',
+            'ip'             => $request->ip(),
+            'device_hash'    => $deviceHash,
+            'masked_phone'   => $maskedPhone,
+        ]);
+
+        \Log::info('[OTP/requestOtp] OTP record created', [
+            'order'       => $purchase->order_number,
+            'masked_phone'=> $maskedPhone,
+        ]);
+
+        // ── 6. Send SMS ───────────────────────────────────────────────────────
+        $appName = config('app.name');
+        $message = "{$appName}: Your verification code is {$rawOtp}. Valid for " . OtpVerification::OTP_TTL_MIN . " minutes. Do not share this code.";
+
+        \Log::info('[OTP/requestOtp] Attempting SMS send', ['to' => substr($purchase->phone_number, 0, 5) . '***']);
+
+        try {
+            $sms  = app(SmsGatewayInterface::class);
+            $sent = $sms->send($purchase->phone_number, $message);
+        } catch (\Throwable $e) {
+            $sent = false;
+            \Log::error('[OTP/requestOtp] SMS threw exception', [
+                'exception' => $e->getMessage(),
+                'order'     => $purchase->order_number,
+            ]);
+        }
+
+        if (!$sent) {
+            OtpVerification::where('session_token', $sessionToken)->update(['status' => 'expired']);
+            \Log::error('[OTP/requestOtp] SMS send failed', ['order' => $purchase->order_number]);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'OTP_SMS_FAILED',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+            return response()->json(['status' => 'error', 'type' => 'sms_failed']);
+        }
+
+        \Log::info('[OTP/requestOtp] SMS sent successfully', ['order' => $purchase->order_number]);
+        AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+            'result'     => 'OTP_SENT',
+            'risk_score' => $risk,
+            'order_id'   => $purchase->order_number,
+        ]));
+
+        return response()->json([
+            'status'        => 'success',
+            'otp_sent'      => true,
+            'session_token' => $sessionToken,
+            'masked_phone'  => $maskedPhone,
+            'resend_after'  => OtpVerification::RESEND_DELAY,
+        ]);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $currentLang = $this->getCurrentLang();
+        $be          = $currentLang->basic_extended;
+        $deviceHash  = $this->deviceHash($request);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'session_token' => 'required|string|size:36',
+            'otp_code'      => 'required|string|size:6|regex:/^\d{6}$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        $otp = OtpVerification::where('session_token', $request->input('session_token'))->first();
+
+        if (!$otp) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        if (!$otp->isUsable()) {
+            $type = ($otp->status === 'exhausted') ? 'otp_exhausted' : 'otp_expired';
+            return response()->json(['status' => 'error', 'type' => $type]);
+        }
+
+        // ── Wrong OTP ─────────────────────────────────────────────────────────
+        if (!$otp->verifyOtp($request->input('otp_code'))) {
+            $otp->increment('attempts');
+
+            if ($otp->attempts >= OtpVerification::MAX_ATTEMPTS) {
+                $otp->update(['status' => 'exhausted']);
+                AccessLog::record(AccessLog::LINK_REQUESTED, [
+                    'ip'          => $request->ip(),
+                    'user_agent'  => substr($request->userAgent(), 0, 255),
+                    'email_hash'  => $otp->email_hash,
+                    'device_hash' => $deviceHash,
+                    'order_id'    => $otp->order_id ?? '',
+                    'result'      => 'OTP_EXHAUSTED',
+                    'risk_score'  => 0,
+                ]);
+                return response()->json(['status' => 'error', 'type' => 'otp_exhausted']);
+            }
+
+            return response()->json([
+                'status'        => 'error',
+                'type'          => 'otp_invalid',
+                'attempts_left' => OtpVerification::MAX_ATTEMPTS - $otp->attempts,
+            ]);
+        }
+
+        // ── OTP correct ───────────────────────────────────────────────────────
+        $purchase = TenderPurchase::where('order_number', $otp->order_id)->first();
+
+        if (!$purchase) {
+            $otp->update(['status' => 'expired']);
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        $otp->update(['status' => 'verified']);
+
+        SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        $emailHash   = $otp->email_hash;
+        $rawToken    = $this->generateToken($purchase, $emailHash, $request);
+        $tokenHash   = hash('sha256', $rawToken);
+
+        SecureToken::create([
+            'order_id'       => $purchase->order_number,
+            'email_hash'     => $emailHash,
+            'token_hash'     => $tokenHash,
+            'issued_at'      => now(),
+            'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
+            'max_downloads'  => self::MAX_DOWNLOADS,
+            'download_count' => 0,
+            'status'         => 'active',
+            'device_hash'    => $deviceHash,
+            'ip'             => $request->ip(),
+        ]);
+
+        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
+        $emailSent   = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+        \Log::info('[OTP/verifyOtp] Email result', [
+            'order' => $purchase->order_number,
+            'sent'  => $emailSent,
+        ]);
+
+        AccessLog::record(AccessLog::LINK_SENT, [
+            'ip'          => $request->ip(),
+            'user_agent'  => substr($request->userAgent(), 0, 255),
+            'email_hash'  => $emailHash,
+            'device_hash' => $deviceHash,
+            'order_id'    => $purchase->order_number,
+            'result'      => 'OTP_VERIFIED_OK',
+            'risk_score'  => 0,
+        ]);
+
+        return response()->json([
+            'status'   => 'success',
+            'redirect' => route('find_my_files.link_sent'),
+        ]);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'session_token' => 'required|string|size:36',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        $otp = OtpVerification::where('session_token', $request->input('session_token'))->first();
+
+        if (!$otp || !$otp->isUsable()) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        if (!$otp->canResend()) {
+            return response()->json([
+                'status'       => 'error',
+                'type'         => 'resend_too_soon',
+                'resend_after' => $otp->resendCooldownSeconds(),
+            ]);
+        }
+
+        $purchase = TenderPurchase::where('order_number', $otp->order_id)->first();
+
+        if (!$purchase) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        $rawOtp = OtpVerification::generateOtp();
+        $otp->update([
+            'otp_hash'       => hash('sha256', $rawOtp),
+            'expires_at'     => now()->addMinutes(OtpVerification::OTP_TTL_MIN),
+            'attempts'       => 0,
+            'last_resend_at' => now(),
+            'status'         => 'pending',
+        ]);
+
+        $appName = config('app.name');
+        $message = "{$appName}: Your new verification code is {$rawOtp}. Valid for " . OtpVerification::OTP_TTL_MIN . " minutes.";
+
+        $sms  = app(SmsGatewayInterface::class);
+        $sent = $sms->send($purchase->phone_number, $message);
+
+        if (!$sent) {
+            return response()->json(['status' => 'error', 'type' => 'sms_failed']);
+        }
+
+        return response()->json([
+            'status'       => 'success',
+            'resend_after' => OtpVerification::RESEND_DELAY,
+        ]);
     }
 }

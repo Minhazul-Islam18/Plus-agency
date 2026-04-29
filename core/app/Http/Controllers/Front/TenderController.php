@@ -112,7 +112,7 @@ class TenderController extends Controller
         return view('front.tender.tenders', $data);
     }
 
-    public function tenderDetails($id)
+    public function tenderDetails($slug)
     {
         $currentLang = $this->getCurrentLang();
         $bex         = BasicExtra::first();
@@ -122,7 +122,7 @@ class TenderController extends Controller
         }
 
         $data['tender'] = Tender::where('language_id', $currentLang->id)
-            ->where('id', $id)
+            ->where('slug', $slug)
             ->firstOrFail();
 
         $tender = $data['tender'];
@@ -182,6 +182,10 @@ class TenderController extends Controller
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move('assets/front/receipt', $filename);
             $purchase->receipt = $filename;
+        }
+
+        if ($request->filled('payment_reference')) {
+            $purchase->payment_reference = strtoupper(trim($request->input('payment_reference')));
         }
 
         $purchase->save();

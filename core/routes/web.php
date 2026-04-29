@@ -211,12 +211,27 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
 
+/** Static fallback for dynamic permalink routes needed by FMF views **/
+Route::get('/contact', 'Front\FrontendController@contact')->name('front.contact');
+
 /** Find My Files — Secure File Recovery **/
+Route::get('/find-my-files', 'Front\FindMyFilesController@index')->name('find_my_files');
 Route::post('/find-my-files/request-link', 'Front\FindMyFilesController@requestLink')->name('find_my_files.request_link');
 Route::get('/find-my-files/link-sent', 'Front\FindMyFilesController@linkSent')->name('find_my_files.link_sent');
 Route::get('/find-my-files/security-verification', 'Front\FindMyFilesController@securityInfo')->name('find_my_files.security_info');
 Route::get('/find-my-files/download', 'Front\FindMyFilesController@download')->name('find_my_files.download');
 Route::get('/find-my-files/download/stream', 'Front\FindMyFilesController@downloadStream')->name('find_my_files.stream');
+
+/** Find My Files — OTP Method **/
+Route::post('/find-my-files/otp/request', 'Front\FindMyFilesController@requestOtp')->name('find_my_files.otp_request');
+Route::post('/find-my-files/otp/verify',  'Front\FindMyFilesController@verifyOtp')->name('find_my_files.otp_verify');
+Route::post('/find-my-files/otp/resend',  'Front\FindMyFilesController@resendOtp')->name('find_my_files.otp_resend');
+
+/** Find My Files — Payment Reference Method **/
+Route::post('/find-my-files/payment-ref', 'Front\FindMyFilesController@requestByPaymentRef')->name('find_my_files.payment_ref');
+
+/** Find My Files — Expired Link Regenerate **/
+Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestRegenerate')->name('find_my_files.regenerate');
 
 
 
@@ -1119,6 +1134,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/tender/featured', 'Admin\TenderController@featured')->name('admin.tender.featured');
         Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
+        Route::post('/tender/purchase/update-reference', 'Admin\TenderController@purchaseUpdateReference')->name('admin.tender.purchaseUpdateReference');
         Route::post('/tender/purchase/delete', 'Admin\TenderController@purchaseDelete')->name('admin.tender.purchaseDelete');
         Route::post('/tender/purchase/bulk_delete', 'Admin\TenderController@purchaseBulkOrderDelete')->name('admin.tender.purchaseBulkOrderDelete');
         Route::get('/tender/purchase/{id}/invoice', 'Admin\TenderController@invoiceDownload')->name('admin.tender.invoiceDownload');
@@ -1351,7 +1367,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 // Dynamic Routes
 Route::group(['middleware' => ['setlang']], function () {
 
-    $wdPermalinks = Permalink::where('details', 1)->get();
+    try { $wdPermalinks = Permalink::where('details', 1)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
         $type = $pl->type;
         $permalink = $pl->permalink;
@@ -1367,7 +1383,7 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'course_details') {
             Route::get("$permalink/{slug}", 'Front\CourseController@courseDetails')->name('course_details');
         } elseif ($type == 'tender_details') {
-            Route::get("$permalink/{id}", 'Front\TenderController@tenderDetails')->name('tender_details');
+            Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'cause_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@causeDetails')->name('front.cause_details');
         } elseif ($type == 'event_details') {
@@ -1387,7 +1403,7 @@ Route::group(['middleware' => ['setlang']], function () {
 // Dynamic Routes
 Route::group(['middleware' => ['setlang']], function () {
 
-    $wdPermalinks = Permalink::where('details', 0)->get();
+    try { $wdPermalinks = Permalink::where('details', 0)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
         $type = $pl->type;
         $permalink = $pl->permalink;

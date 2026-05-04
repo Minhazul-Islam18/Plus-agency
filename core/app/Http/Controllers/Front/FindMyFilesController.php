@@ -25,7 +25,7 @@ class FindMyFilesController extends Controller
     // Rate limit thresholds
     const IP_LIMIT        = 10;  // per 15 min window
     const EMAIL_LIMIT     = 5;   // per hour
-    const BLOCK_MINUTES   = [30, 120, 1440]; // progressive blocks: 30min → 2hr → 24hr
+    const BLOCK_MINUTES   = [5, 15, 28, 1440]; // progressive blocks: 5min → 15min → 28min → 24hr
 
     // Token TTL and max downloads
     const TOKEN_TTL_HOURS    = 24;
@@ -107,13 +107,15 @@ class FindMyFilesController extends Controller
             $record->attempts++;
             $record->last_attempt_at = now();
 
-            // Progressive block escalation
-            if ($record->attempts >= 20) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[2]); // 24h
-            } elseif ($record->attempts >= 10) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[1]); // 2h
+            // Progressive block escalation (3 free attempts, then 5→15→28→1440 min)
+            if ($record->attempts >= 7) {
+                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[3]); // 24h
+            } elseif ($record->attempts >= 6) {
+                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[2]); // 28min
             } elseif ($record->attempts >= 5) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[0]); // 30min
+                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[1]); // 15min
+            } elseif ($record->attempts >= 4) {
+                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[0]); // 5min
             }
 
             $record->save();

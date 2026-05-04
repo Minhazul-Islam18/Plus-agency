@@ -554,7 +554,7 @@ public static function maskPhone(string $phone): string { ... }  // e.g. +88 0**
 |---|---|---|
 | `IP_LIMIT` | `10` | Max attempts per IP before block |
 | `EMAIL_LIMIT` | `5` | Max attempts per email before block |
-| `BLOCK_MINUTES` | `[30, 120, 1440]` | Progressive lockout: 30 min → 2 hr → 24 hr |
+| `BLOCK_MINUTES` | `[5, 15, 28, 1440]` | Progressive lockout: 5 min → 15 min → 28 min → 24 hr |
 | `TOKEN_TTL_HOURS` | `24` | Token validity window |
 | `MAX_DOWNLOADS` | `3` | Max download page visits per token |
 | `MAX_REGEN_PER_DAY` | `3` | Max Method 4 regenerations per order per 24h |
@@ -698,9 +698,11 @@ Three independent counters checked and incremented for every failed attempt:
 
 | Cumulative attempts | Lockout duration |
 |---|---|
-| ≥ 5 | 30 minutes |
-| ≥ 10 | 2 hours |
-| ≥ 20 | 24 hours |
+| 1 – 3 | No block (free attempts) |
+| ≥ 4 | 5 minutes |
+| ≥ 5 | 15 minutes |
+| ≥ 6 | 28 minutes |
+| ≥ 7 | 24 hours |
 
 A block is triggered by the **first key to cross a threshold**. All 3 keys are incremented together on every failed lookup. Blocked IPs/emails skip lookup entirely — `incrementAttempts()` is not called when already blocked.
 

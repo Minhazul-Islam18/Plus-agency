@@ -16,6 +16,8 @@ class TenderPurchase extends Model
         'phone_number',
         'country',
         'city',
+        'company_name',
+        'company_address',
         'qty',
         'technical_proposal_fee',
         'financial_proposal_fee',

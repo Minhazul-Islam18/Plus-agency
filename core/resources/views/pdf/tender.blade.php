@@ -1,357 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Invoice {{ $order->order_number }}</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <title>Payment Receipt {{ $order->order_number }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  body {
-    font-family: DejaVu Sans, sans-serif;
-    font-size: 12px;
-    color: #374151;
-    background: #ffffff;
-  }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #2d3748;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
 
-  /* ── Page wrapper ── */
-  .wrap { padding: 0; }
+        .content-wrap {
+            padding: 0 22px;
+        }
 
-  /* ── Top accent bar ── */
-  .accent-bar {
-    background: #1e3a5f;
-    height: 6px;
-    width: 100%;
-  }
+        /* ── Header (dark navy full-width banner) ────────────────────── */
+        .header-outer {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-  /* ── Header ── */
-  .header {
-    background: #1e3a5f;
-    padding: 32px 40px 28px;
-  }
-  .header-table { width: 100%; }
-  .header-logo img {
-    max-height: 48px;
-    max-width: 160px;
-  }
-  .header-logo-text {
-    font-size: 20px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.03em;
-  }
-  .header-invoice-block { text-align: right; }
-  .header-invoice-label {
-    font-size: 28px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .header-invoice-num {
-    font-size: 13px;
-    color: #93c5fd;
-    margin-top: 4px;
-  }
+        .header-outer td {
+            background-color: #1a2f45;
+            padding: 12px 22px 10px 22px;
+        }
 
-  /* ── Status ribbon ── */
-  .status-bar {
-    padding: 10px 40px;
-    background: #f0fdf4;
-    border-bottom: 1px solid #bbf7d0;
-  }
-  .status-bar-pending {
-    background: #fefce8;
-    border-bottom: 1px solid #fde68a;
-  }
-  .status-label {
-    display: inline-block;
-    padding: 3px 14px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .status-completed { background: #16a34a; color: #ffffff; }
-  .status-pending   { background: #d97706; color: #ffffff; }
-  .status-bar-date  { float: right; font-size: 11px; color: #6b7280; }
+        .header-inner {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-  /* ── Body ── */
-  .body { padding: 32px 40px; }
+        .logo-cell {
+            vertical-align: middle;
+            width: 40%;
+        }
 
-  /* ── Info grid (Billed To + Order Info) ── */
-  .info-table { width: 100%; margin-bottom: 28px; }
-  .info-cell { width: 50%; vertical-align: top; padding: 0; }
-  .info-cell-right { text-align: right; }
-  .info-heading {
-    font-size: 9px;
-    font-weight: 700;
-    color: #9ca3af;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #e5e7eb;
-  }
-  .info-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 4px;
-  }
-  .info-line { font-size: 12px; color: #4b5563; line-height: 1.7; }
-  .info-row-label { font-size: 11px; color: #9ca3af; }
-  .info-row-value { font-size: 12px; color: #111827; font-weight: 600; }
+        .logo-cell img {
+            max-height: 50px;
+            max-width: 110px;
+        }
 
-  /* ── Divider ── */
-  .divider {
-    border: none;
-    border-top: 1px solid #e5e7eb;
-    margin: 0 0 24px 0;
-  }
+        .logo-cell .site-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
 
-  /* ── Items table ── */
-  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
-  .items-head { background: #1e3a5f; }
-  .items-head th {
-    padding: 10px 14px;
-    font-size: 10px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-align: left;
-  }
-  .items-head th.right { text-align: right; }
-  .items-body td {
-    padding: 12px 14px;
-    font-size: 12px;
-    color: #374151;
-    border-bottom: 1px solid #f3f4f6;
-    vertical-align: middle;
-  }
-  .items-body tr.alt td { background: #f9fafb; }
-  .item-title { font-weight: 600; color: #111827; }
-  .item-sub   { font-size: 10px; color: #9ca3af; margin-top: 2px; }
-  .amount-cell { text-align: right; font-weight: 600; color: #111827; white-space: nowrap; }
+        .title-cell {
+            vertical-align: middle;
+            text-align: right;
+        }
 
-  /* ── Totals block ── */
-  .totals-table { width: 100%; border-collapse: collapse; margin-top: 0; }
-  .totals-spacer td { border-bottom: 2px solid #1e3a5f; padding: 0; }
-  .totals-row td { padding: 8px 14px; font-size: 12px; color: #374151; }
-  .totals-row td.right { text-align: right; }
-  .total-final { background: #1e3a5f; }
-  .total-final td {
-    padding: 13px 14px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #ffffff;
-  }
-  .total-final td.right { text-align: right; }
+        .receipt-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
 
-  /* ── Note box ── */
-  .note-box {
-    margin-top: 28px;
-    border-left: 4px solid #1e3a5f;
-    background: #f0f4ff;
-    padding: 12px 16px;
-    border-radius: 0 6px 6px 0;
-  }
-  .note-box p { font-size: 11px; color: #374151; line-height: 1.6; }
+        .receipt-order-num {
+            font-size: 13px;
+            font-weight: 700;
+            color: #38bdf8;
+            letter-spacing: 0.04em;
+            margin-top: 3px;
+        }
 
-  /* ── Footer ── */
-  .footer {
-    margin-top: 40px;
-    padding: 18px 40px;
-    background: #f9fafb;
-    border-top: 1px solid #e5e7eb;
-    text-align: center;
-  }
-  .footer p { font-size: 10px; color: #9ca3af; line-height: 1.8; }
-</style>
+        /* ── Divider ─────────────────────────────────────────────────── */
+        .hdivider {
+            border: none;
+            border-top: 1px solid #d1d5db;
+            margin: 6px 0;
+        }
+
+        /* ── Status bar ──────────────────────────────────────────────── */
+        .status-table {
+            width: 100%;
+            margin-bottom: 8px;
+            background-color: #16a34a6b;
+            padding: 4px 22px;
+        }
+
+        .paid-badge {
+            display: inline-block;
+            background: #16a34a;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 18px;
+            border-radius: 4px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .issued-label {
+            font-size: 11px;
+            color: #374151;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* ── Info section ────────────────────────────────────────────── */
+        .info-table {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .section-header {
+            font-size: 9px;
+            font-weight: 700;
+            color: #1a2f45;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding-bottom: 3px;
+            border-bottom: 1.5px solid #1a2f45;
+            margin-bottom: 6px;
+        }
+
+        .section-header-right {
+            font-size: 9px;
+            font-weight: 700;
+            color: #1a2f45;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding-bottom: 3px;
+            border-bottom: 1.5px solid #1a2f45;
+            margin-bottom: 6px;
+            text-align: right;
+        }
+
+        .billing-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .billing-company {
+            font-size: 12px;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+
+        .billing-line {
+            font-size: 11px;
+            color: #4b5563;
+            line-height: 1.85;
+        }
+
+        .order-detail-table {
+            width: 100%;
+            margin-top: 8px;
+            table-layout: fixed;
+        }
+
+        .od-label {
+            font-size: 10px;
+            color: #6b7280;
+            padding-bottom: 3px;
+            vertical-align: top;
+            padding-right: 8px;
+            width: 110px;
+        }
+
+        .od-value {
+            font-size: 10px;
+            font-weight: 700;
+            color: #111827;
+            text-align: right;
+            padding-bottom: 3px;
+            vertical-align: top;
+            word-break: break-word;
+        }
+
+        /* ── Tender title bar (full-width table — negative margins fail in dompdf) */
+        .tender-bar-outer {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .tender-bar-outer td {
+            background-color: #f3f4f6;
+            padding: 6px 22px;
+        }
+
+        .tender-bar-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #d97706;
+        }
+
+        .tender-summary {
+            font-size: 11px;
+            color: #374151;
+            line-height: 1.75;
+            margin-bottom: 5px;
+        }
+
+        .tender-code {
+            font-size: 11px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        /* ── Fees section (with watermark) ──────────────────────────── */
+        .fees-outer {
+            position: relative;
+            margin-top: 6px;
+        }
+
+        .fees-watermark {
+            position: fixed;
+            top: 30%;
+            left: 37.5%;
+            right: 37.5%;
+            width: 25%;
+            height: auto;
+            opacity: 0.07;
+            z-index: 0;
+        }
+
+        .fees-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fees-table td {
+            padding: 5px 14px;
+        }
+
+        .fee-row td {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .fee-label {
+            font-size: 11px;
+            color: #374151;
+        }
+
+        .fee-value {
+            font-size: 11px;
+            color: #374151;
+            text-align: right;
+        }
+
+        .fee-deadline-value {
+            font-size: 11px;
+            color: #e85d04;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .subtotal-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .subtotal-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: #111827;
+            text-align: right;
+        }
+
+        .vat-label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .vat-value {
+            font-size: 11px;
+            color: #6b7280;
+            text-align: right;
+        }
+
+        /* ── Total row ───────────────────────────────────────────────── */
+        .total-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-row td {
+            background: #1a2f45;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 7px 14px;
+        }
+
+        .total-row-value {
+            text-align: right;
+        }
+
+        /* ── Terms ───────────────────────────────────────────────────── */
+        .terms {
+            font-size: 9px;
+            font-style: italic;
+            font-weight: 600;
+            color: #1a2f45;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* ── Stamp area ──────────────────────────────────────────────── */
+        .stamp-area {
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .stamp-img {
+            max-width: 140px;
+            max-height: 140px;
+            width: auto;
+            height: auto;
+        }
+
+        /* ── Page number ─────────────────────────────────────────────── */
+        .pagenum-table {
+            border-collapse: collapse;
+            margin-top: 8px;
+            width: 24px;
+        }
+
+        .pagenum {
+            background: #1a2f45;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+
+        /* ── Footer wavy bg div ─────────────────────────────────────── */
+        .footer-wave-div {
+            margin-top: 10px;
+            padding: 22px 28px 19px 28px;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+
+        .footer-text {
+            font-size: 9px;
+            color: #ffffff;
+            line-height: 1.85;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .footer-logo-cell {
+            width: 60px;
+            vertical-align: middle;
+            text-align: right;
+        }
+
+        .footer-logo-cell img {
+            max-height: 44px;
+            max-width: 56px;
+        }
+
+        .footer-spacer-cell {
+            width: 60px;
+            vertical-align: middle;
+        }
+    </style>
 </head>
+
 <body>
-<div class="wrap">
 
-@php
-  $tender       = $order->tender;
-  $tenderTitle  = optional($tender)->title ?: 'Tender Document';
-  $tenderCode   = optional($tender)->tender_code ?: '';
-  $currency     = $order->currency_code ?? '';
-  $symLeft      = ($bse->base_currency_symbol_position == 'left')  ? $currency . ' ' : '';
-  $symRight     = ($bse->base_currency_symbol_position == 'right') ? ' ' . $currency : '';
-  $isCompleted  = strtolower($order->payment_status) === 'completed';
-  $siteTitle    = $bse->website_title ?? config('app.name');
+    @php
+        $tender = $order->tender;
+        $tenderTitle = optional($tender)->title ?: 'Tender Document';
+        $tenderCode = optional($tender)->tender_code ?: '';
+        $tenderSummary = optional($tender)->summary ?: '';
+        $deadline = optional($tender)->submission_deadline;
 
-  // Build line items from fee columns; fall back to tender price
-  $items = [];
-  if (!empty($order->technical_proposal_fee) && $order->technical_proposal_fee > 0) {
-      $items[] = ['desc' => 'Technical Proposal Fee', 'sub' => $tenderTitle, 'amount' => (float) $order->technical_proposal_fee];
-  }
-  if (!empty($order->financial_proposal_fee) && $order->financial_proposal_fee > 0) {
-      $items[] = ['desc' => 'Financial Proposal Fee', 'sub' => $tenderTitle, 'amount' => (float) $order->financial_proposal_fee];
-  }
-  if (!empty($order->summary_fee) && $order->summary_fee > 0) {
-      $items[] = ['desc' => 'Summary Fee', 'sub' => $tenderTitle, 'amount' => (float) $order->summary_fee];
-  }
-  if (!empty($order->tender_notice_publication_fee) && $order->tender_notice_publication_fee > 0) {
-      $items[] = ['desc' => 'Tender Notice Publication Fee', 'sub' => $tenderTitle, 'amount' => (float) $order->tender_notice_publication_fee];
-  }
-  // Fallback: use tender's current_price
-  if (empty($items)) {
-      $price = optional($tender)->current_price;
-      $items[] = ['desc' => $tenderTitle, 'sub' => $tenderCode ?: 'Tender Document', 'amount' => $price ? (float) $price : null];
-  }
+        $currency = $order->currency_code ?? '';
+        $isCompleted = strtolower($order->payment_status) === 'completed';
+        $siteTitle = optional($bse)->website_title ?? config('app.name');
 
-  $subtotal = array_sum(array_column($items, 'amount'));
+        // Currency symbol & position
+        $sym = optional($bse)->base_currency_symbol ?: $currency;
+        $symPos = optional($bse)->base_currency_symbol_position ?? 'right';
+        $symL = $symPos === 'left' ? $sym . ' ' : '';
+        $symR = $symPos === 'right' ? ' ' . $sym : '';
 
-  $fmt = function($n) use ($symLeft, $symRight) {
-      return $symLeft . number_format((float)$n, 2) . $symRight;
-  };
-@endphp
+        $fmt = function ($n) use ($symL, $symR) {
+            return $symL . number_format((float) $n, 0, ',', ' ') . $symR;
+        };
 
-  <!-- Header -->
-  <div class="header">
-    <table class="header-table" cellpadding="0" cellspacing="0">
-      <tr>
-        <td class="header-logo" style="vertical-align:middle;">
-          @if (!empty($logoSrc))
-            <img src="{{ $logoSrc }}" alt="{{ $siteTitle }}">
-          @else
-            <span class="header-logo-text">{{ $siteTitle }}</span>
-          @endif
-        </td>
-        <td class="header-invoice-block" style="vertical-align:middle;">
-          <div class="header-invoice-label">Invoice</div>
-          <div class="header-invoice-num"># {{ $order->order_number }}</div>
-        </td>
-      </tr>
-    </table>
-  </div>
+        // Purchased modules from JSON; fall back to all tender modules
+        $purchasedModules = [];
+        if (!empty($order->purchased_modules)) {
+            $purchasedModules = json_decode($order->purchased_modules, true) ?: [];
+        }
+        if (empty($purchasedModules) && $tender) {
+            foreach (\App\TenderModule::where('tender_id', $tender->id)->get() as $m) {
+                $purchasedModules[] = ['name' => $m->name, 'cost' => (float) $m->cost];
+            }
+        }
+        $subtotal = array_sum(array_column($purchasedModules, 'cost'));
 
-  <!-- Status bar -->
-  <div class="{{ $isCompleted ? 'status-bar' : 'status-bar status-bar-pending' }}">
-    <span class="status-label {{ $isCompleted ? 'status-completed' : 'status-pending' }}">
-      {{ $isCompleted ? 'Paid' : 'Pending Payment' }}
-    </span>
-    <span class="status-bar-date">Issued: {{ $order->created_at->format('d M Y') }}</span>
-  </div>
+        $_invoiceDir = base_path('../assets/admin/img/invoice/');
+        $_loadImg = function ($field, $default) use ($bse, $_invoiceDir) {
+            $paths = [];
+            $val = optional($bse)->$field ?? null;
+            if ($val) {
+                $paths[] = $_invoiceDir . $val;
+            }
+            $paths[] = base_path('../assets/admin/img/defaults/' . $default);
+            foreach ($paths as $_p) {
+                if (file_exists($_p)) {
+                    $_ext = strtolower(pathinfo($_p, PATHINFO_EXTENSION));
+                    $_mime = $_ext === 'png' ? 'image/png' : 'image/jpeg';
+                    return 'data:' . $_mime . ';base64,' . base64_encode(file_get_contents($_p));
+                }
+            }
+            return null;
+        };
 
-  <!-- Body -->
-  <div class="body">
+        $watermarkSrc = $_loadImg('invoice_watermark', 'invoice-watermark.png');
+        $signSrc = $_loadImg('invoice_sign', 'invoice-sign.png');
+        $wavySrc = $_loadImg('invoice_footer_wavy', 'footer-wavy.png');
+    @endphp
 
-    <!-- Billed To + Order Info -->
-    <table class="info-table" cellpadding="0" cellspacing="0">
-      <tr>
-        <td class="info-cell" style="padding-right:24px;">
-          <div class="info-heading">Billed To</div>
-          <div class="info-name">{{ $order->first_name }} {{ $order->last_name }}</div>
-          <div class="info-line">{{ $order->email }}</div>
-          @if (!empty($order->phone_number))
-            <div class="info-line">{{ $order->phone_number }}</div>
-          @endif
-          @if (!empty($order->country))
-            <div class="info-line">
-              {{ $order->country }}@if (!empty($order->city)), {{ $order->city }}@endif
-            </div>
-          @endif
-        </td>
-        <td class="info-cell info-cell-right">
-          <div class="info-heading">Order Details</div>
-          <table cellpadding="0" cellspacing="0" style="width:100%;">
-            <tr>
-              <td class="info-row-label" style="padding-bottom:5px;">Order No.</td>
-              <td class="info-row-value" style="text-align:right; padding-bottom:5px;">{{ $order->order_number }}</td>
-            </tr>
-            <tr>
-              <td class="info-row-label" style="padding-bottom:5px;">Payment</td>
-              <td class="info-row-value" style="text-align:right; padding-bottom:5px;">{{ $order->payment_method }}</td>
-            </tr>
-            <tr>
-              <td class="info-row-label" style="padding-bottom:5px;">Currency</td>
-              <td class="info-row-value" style="text-align:right; padding-bottom:5px;">{{ $currency ?: '—' }}</td>
-            </tr>
-            <tr>
-              <td class="info-row-label">Order Date</td>
-              <td class="info-row-value" style="text-align:right;">{{ $order->created_at->format('d M Y') }}</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-
-    <hr class="divider">
-
-    <!-- Line items -->
-    <table class="items-table" cellpadding="0" cellspacing="0">
-      <thead class="items-head">
+    {{-- ── HEADER (dark navy banner — table bg for dompdf compat) ── --}}
+    <table class="header-outer" cellpadding="0" cellspacing="0">
         <tr>
-          <th style="width:6%;">#</th>
-          <th style="width:55%;">Description</th>
-          <th style="width:13%; text-align:right;">Qty</th>
-          <th style="width:26%; text-align:right;">Amount</th>
+            <td class="header-bg-td">
+                <table class="header-inner" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="logo-cell" style="padding: 20px 28px 18px 0;">
+                            @if (!empty($logoSrc))
+                                <img src="{{ $logoSrc }}" alt="{{ $siteTitle }}">
+                            @else
+                                <span class="site-name">{{ $siteTitle }}</span>
+                            @endif
+                        </td>
+                        <td class="title-cell" style="padding: 20px 0 18px 28px;">
+                            <div class="receipt-title">Payment Receipt</div>
+                            <div class="receipt-order-num"># {{ $order->order_number }}</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
         </tr>
-      </thead>
-      <tbody class="items-body">
-        @foreach ($items as $i => $item)
-          <tr class="{{ $i % 2 === 1 ? 'alt' : '' }}">
-            <td style="color:#9ca3af;">{{ $i + 1 }}</td>
-            <td>
-              <div class="item-title">{{ $item['desc'] }}</div>
-              @if ($item['desc'] !== $item['sub'] && !empty($item['sub']))
-                <div class="item-sub">{{ $item['sub'] }}</div>
-              @endif
-            </td>
-            <td style="text-align:right; color:#6b7280;">1</td>
-            <td class="amount-cell">
-              {{ $item['amount'] !== null ? $fmt($item['amount']) : '—' }}
-            </td>
-          </tr>
-        @endforeach
-      </tbody>
     </table>
 
-    <!-- Totals -->
-    <table class="totals-table" cellpadding="0" cellspacing="0">
-      <tr class="totals-spacer"><td colspan="2"></td></tr>
-      @if ($subtotal > 0)
-        <tr class="totals-row">
-          <td>Subtotal</td>
-          <td class="right">{{ $fmt($subtotal) }}</td>
+    {{-- ── STATUS BAR ───────────────────────────────────────────────── --}}
+    <table class="status-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="vertical-align:middle;">
+                <span class="paid-badge">{{ $isCompleted ? 'Paid' : 'Pending' }}</span>
+            </td>
+            <td class="issued-label" style="vertical-align:middle;">
+                Issued : {{ $order->created_at->format('d M Y') }}
+            </td>
         </tr>
-        <tr class="totals-row">
-          <td style="color:#9ca3af; font-size:11px;">Tax / VAT</td>
-          <td class="right" style="color:#9ca3af; font-size:11px;">Included</td>
-        </tr>
-      @endif
-      <tr class="total-final">
-        <td>Total Amount</td>
-        <td class="right">{{ $subtotal > 0 ? $fmt($subtotal) : '—' }}</td>
-      </tr>
     </table>
 
-    <!-- Note -->
-    <div class="note-box">
-      <p>
-        <strong>Note:</strong> This is a system-generated invoice for order
-        <strong>{{ $order->order_number }}</strong>.
-        @if ($isCompleted)
-          Payment has been received and confirmed. Thank you for your purchase.
-        @else
-          Payment is currently pending. Please contact us with your order number if you have any queries.
-        @endif
-      </p>
+    <div class="content-wrap">
+        {{-- ── BILLING + ORDER DETAILS ─────────────────────────────────── --}}
+        <table class="info-table" cellpadding="0" cellspacing="0">
+            <tr>
+                {{-- Left: billed to --}}
+                <td style="width:50%; vertical-align:top; padding-right:24px;">
+                    <div class="section-header">Order Date</div>
+                    <div class="billing-name">{{ $order->first_name }} {{ $order->last_name }}</div>
+                    <div class="billing-line">{{ $order->email }}</div>
+                    @if (!empty($order->phone_number))
+                        <div class="billing-line">{{ $order->phone_number }}</div>
+                    @endif
+                    @if (!empty($order->company_name))
+                        <div class="billing-company">{{ $order->company_name }}</div>
+                    @endif
+                    @if (!empty($order->company_address))
+                        <div class="billing-line">{{ $order->company_address }}</div>
+                    @endif
+                </td>
+
+                {{-- Right: order details --}}
+                <td style="width:50%; vertical-align:top;">
+                    <div class="section-header-right">Order Details</div>
+                    <table class="order-detail-table" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="od-label">Order No.</td>
+                            <td class="od-value">{{ $order->order_number }}</td>
+                        </tr>
+                        @if (!empty($order->payment_reference))
+                            <tr>
+                                <td class="od-label">Payment Reference</td>
+                                <td class="od-value">
+                                    {{ \Illuminate\Support\Str::limit($order->payment_reference, 30, '...') }}</td>
+                            </tr>
+                        @endif
+                        <tr>
+                            <td class="od-label">Payment</td>
+                            <td class="od-value">{{ $order->payment_method }}</td>
+                        </tr>
+                        <tr>
+                            <td class="od-label">Currency</td>
+                            <td class="od-value">{{ $currency ?: '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="od-label">Order Date</td>
+                            <td class="od-value">{{ $order->created_at->format('d M Y') }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        {{-- close content-wrap before full-width tender bar --}}
     </div>
 
-  </div><!-- /body -->
+    {{-- ── TENDER SECTION (full-width gray bar via table) ─────────── --}}
+    <table cellpadding="0" cellspacing="0" style="width: 100%">
+        <tr class="tender-bar-outer">
+            <td><span class="tender-bar-title">Tender title</span></td>
+        </tr>
+        <tr>
+            <td style="padding: 9px 28px">
+                {{ $tenderTitle }}
+            </td>
+        </tr>
+    </table>
 
-  <!-- Footer -->
-  <div class="footer">
-    <p>
-      {{ $siteTitle }}&nbsp;&nbsp;&bull;&nbsp;&nbsp;This invoice was generated automatically.&nbsp;&nbsp;&bull;&nbsp;&nbsp;&copy; {{ date('Y') }} {{ $siteTitle }}. All rights reserved.
-    </p>
-  </div>
+    {{-- tender summary + code back inside padded wrap --}}
+    <div class="content-wrap">
+        @if (!empty($tenderSummary) || !empty($tenderCode))
+            <div style="padding: 4px 2px 12px 2px;">
+                @if (!empty($tenderSummary))
+                    <div class="tender-summary">{{ $tenderSummary }}</div>
+                @endif
+                @if (!empty($tenderCode))
+                    <div class="tender-code">{{ $tenderCode }}</div>
+                @endif
+            </div>
+        @endif
 
-</div><!-- /wrap -->
+        {{-- ── FEES TABLE (watermark behind) ──────────────────────────── --}}
+        <div class="fees-outer">
+            @if (!empty($watermarkSrc))
+                <img src="{{ $watermarkSrc }}" class="fees-watermark" alt="">
+            @endif
+
+            <table class="fees-table" cellpadding="0" cellspacing="0">
+                @if ($deadline)
+                    <tr class="fee-row">
+                        <td class="fee-label">Tender Deadline :</td>
+                        <td class="fee-deadline-value">{{ \Carbon\Carbon::parse($deadline)->format('d-m-Y H:i') }}</td>
+                    </tr>
+                @endif
+                @foreach ($purchasedModules as $mod)
+                    <tr class="fee-row">
+                        <td class="fee-label">{{ $mod['name'] }} :</td>
+                        <td class="fee-value">
+                            @if ((float) $mod['cost'] === 0.0)
+                                <span style="color:#16a34a; font-weight:600;">Free</span>
+                            @else
+                                {{ $fmt($mod['cost']) }}
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+                <tr>
+                    <td class="subtotal-label" style="padding:9px 14px;">Subtotal</td>
+                    <td class="subtotal-value" style="padding:9px 14px;">{{ $fmt($subtotal) }}</td>
+                </tr>
+                <tr>
+                    <td class="vat-label" style="padding:4px 14px 9px;">Tax / VAT</td>
+                    <td class="vat-value" style="padding:4px 14px 9px;">Included</td>
+                </tr>
+            </table>
+
+            {{-- Total row sits inside fees-outer so watermark is behind it --}}
+            <table class="total-table" cellpadding="0" cellspacing="0">
+                <tr class="total-row">
+                    <td>Total Amount :</td>
+                    <td class="total-row-value">{{ $fmt($subtotal) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {{-- ── TERMS LINK ───────────────────────────────────────────────── --}}
+        <div class="terms">
+            <em>Click on this link to read the general terms and conditions related to the purchase of tender
+                documents.</em>
+        </div>
+
+        {{-- ── SIGNATURE ─────────────────────────────────────────────────── --}}
+        <div class="stamp-area">
+            @if (!empty($signSrc))
+                <img src="{{ $signSrc }}" class="stamp-img" alt="Signature">
+            @endif
+        </div>
+
+        {{-- ── PAGE NUMBER ──────────────────────────────────────────────── --}}
+        <table class="pagenum-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="pagenum">1</td>
+            </tr>
+        </table>
+
+    </div>{{-- /content-wrap --}}
+
+    {{-- ── FOOTER (wavy bg div, address centered, logo pinned right) ── --}}
+    <div
+        class="footer-wave-div"@if (!empty($wavySrc)) style="background-image: url('{{ $wavySrc }}');" @endif>
+        <table style="width:100%;" cellpadding="0" cellspacing="0">
+            <tr>
+                {{-- spacer mirrors logo width so address is truly centered --}}
+                <td class="footer-spacer-cell"></td>
+                <td class="footer-text">
+                    @if (!empty($bse->invoice_footer_address))
+                        {!! $bse->invoice_footer_address !!}
+                    @else
+                        <strong>Adresse :</strong> Hôpital Pédiatrique Charles De Gaule, Rue 28.390, Porte N°12. -
+                        <strong>Boite Postale:</strong> 09 BP1719 Ouagadougou 09,<br>
+                        <strong>N° Identifiant Foncier Unique (IFU) :</strong> 00214837X - <strong>Compte bancaire
+                            VISTA Bank:</strong> BF023010530700010968598I<br>
+                        <strong>Tél :</strong> +226 25 44 44 79 - <strong>Mobile :</strong> +226 70 79 80 87 -
+                        <strong>Email :</strong> bandaogo@icagroupe.com - <strong>Site web :</strong>
+                        www.icagroupe.com
+                    @endif
+                </td>
+                <td class="footer-logo-cell">
+                    @if (!empty($logoSrc))
+                        <img src="{{ $logoSrc }}" alt="{{ $siteTitle }}">
+                    @endif
+                </td>
+            </tr>
+        </table>
+    </div>
+
 </body>
+
 </html>

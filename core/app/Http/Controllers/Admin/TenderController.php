@@ -627,6 +627,7 @@ class TenderController extends Controller
         PDF::loadView('pdf.tender', [
             'order'   => $purchase,
             'bse'     => $bse,
+            'bs'      => $bs,
             'logoSrc' => $logoSrc,
         ])->setPaper('a4', 'portrait')->save($directory . $fileName);
 
@@ -793,23 +794,45 @@ class TenderController extends Controller
         return 'success';
     }
 
-    public function settings()
+    public function settings(Request $request)
     {
-        $abex = BasicExtra::first();
-        return view('admin.tender.settings', compact('abex'));
+        $abex     = BasicExtra::first();
+        $language = $request->input('language', '');
+        return view('admin.tender.settings', compact('abex', 'language'));
     }
 
     public function updateSettings(Request $request)
     {
+        $uploadDir = base_path('../assets/admin/img/invoice/');
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
         $bexs = BasicExtra::all();
         foreach ($bexs as $bex) {
             $bex->is_tender = $request->is_tender;
+
+            foreach (['invoice_watermark', 'invoice_sign', 'invoice_footer_wavy'] as $field) {
+                if ($request->filled($field)) {
+                    $url      = $request->input($field);
+                    $ext      = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                    $filename = uniqid($field . '_') . '.' . $ext;
+                    // Delete old file
+                    if (!empty($bex->$field) && file_exists($uploadDir . $bex->$field)) {
+                        @unlink($uploadDir . $bex->$field);
+                    }
+                    @copy($url, $uploadDir . $filename);
+                    $bex->$field = $filename;
+                }
+            }
+
+            $bex->invoice_footer_address = $request->invoice_footer_address;
             $bex->save();
         }
 
         Session::flash('success', 'Tender Settings Updated Successfully');
 
-        return back();
+        return redirect()->route('admin.tender.settings', ['language' => $request->input('language')]);
     }
 
     public function report(Request $request)

@@ -100,8 +100,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
                     <th scope="col">Tender</th>
-                    <th scope="col">Technical Proposal Fee</th>
-                    <th scope="col">Financial Proposal Fee</th>
+                    <th scope="col">Total Amount</th>
                     <th scope="col">Gateway</th>
                     <th scope="col">Payment Status</th>
                     <th scope="col">Date</th>
@@ -120,11 +119,11 @@
                               : $enroll->tender->title)
                           : '-' }}
                     </td>
+                    @php
+                      $enrollTotal = collect(json_decode($enroll->purchased_modules ?? '[]', true) ?: [])->sum('cost');
+                    @endphp
                     <td>
-                      {{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}{{ number_format($enroll->technical_proposal_fee, 0, '.', ' ') }}{{ $bex->base_currency_symbol_position == 'right' ? ' ' . $bex->base_currency_symbol : '' }}
-                    </td>
-                    <td>
-                      {{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}{{ number_format($enroll->financial_proposal_fee, 0, '.', ' ') }}{{ $bex->base_currency_symbol_position == 'right' ? ' ' . $bex->base_currency_symbol : '' }}
+                      {{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}{{ number_format($enrollTotal, 0, '.', ' ') }}{{ $bex->base_currency_symbol_position == 'right' ? ' ' . $bex->base_currency_symbol : '' }}
                     </td>
                     <td>{{ $enroll->payment_method }}</td>
                     <td>

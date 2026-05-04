@@ -1029,6 +1029,7 @@
                                 <input type="hidden" name="tender_id" value="{{ $tender->id }}">
                                 <input type="hidden" name="selected_amount" id="selectedAmount"
                                     value="{{ $tender->current_price }}">
+                                <div id="selectedModuleInputs"></div>
 
                                 <div class="pay-section">
                                     <p class="pay-label">{{ __('Payer via') }}</p>
@@ -1105,6 +1106,14 @@
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="city" class="form-control"
                                                 placeholder="{{ __('City') }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="company_name" class="form-control"
+                                                placeholder="{{ __('Company Name') }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="company_address" class="form-control"
+                                                placeholder="{{ __('Company Address') }}">
                                         </div>
                                         <div class="col-12 mb-3">
                                             <input type="text" name="payment_reference" class="form-control"
@@ -1474,14 +1483,19 @@
 
             // Sum selected module costs; fall back to basePrice when nothing selected
             var total = 0;
-            $.each(selectedModules, function(k, v) {
-                total += v;
-            });
+            $.each(selectedModules, function(k, v) { total += v; });
             var displayTotal = Object.keys(selectedModules).length > 0 ? total : basePrice;
 
             // Update displayed price and hidden form field
             $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
             $('#selectedAmount').val(displayTotal);
+
+            // Sync selected module IDs as hidden inputs
+            var container = $('#selectedModuleInputs');
+            container.empty();
+            $.each(selectedModules, function(moduleId) {
+                container.append('<input type="hidden" name="selected_module_ids[]" value="' + moduleId + '">');
+            });
         }
     </script>
 @endsection

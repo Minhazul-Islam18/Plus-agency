@@ -171,8 +171,10 @@ class TenderController extends Controller
         $purchase->email         = $request->email;
         $purchase->phone_number  = $request->phone_number;
         $purchase->country       = $request->country;
-        $purchase->city          = $request->city ?? '';
-        $purchase->currency_code = $bse->base_currency_text;
+        $purchase->city            = $request->city ?? '';
+        $purchase->company_name    = $request->company_name ?? null;
+        $purchase->company_address = $request->company_address ?? null;
+        $purchase->currency_code   = $bse->base_currency_text;
         $purchase->payment_method = $request->gateway;
         $purchase->gateway_type  = $request->gateway_type ?? 'offline';
         $purchase->payment_status = 'Pending';
@@ -187,6 +189,19 @@ class TenderController extends Controller
         if ($request->filled('payment_reference')) {
             $purchase->payment_reference = strtoupper(trim($request->input('payment_reference')));
         }
+
+        // Save purchased modules (name + cost) as JSON
+        // No selection = full tender purchase = all modules
+        $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));
+        $moduleQuery = TenderModule::where('tender_id', $request->tender_id);
+        if (!empty($selectedIds)) {
+            $moduleQuery->whereIn('id', $selectedIds);
+        }
+        $modules = $moduleQuery->get(['id', 'name', 'cost']);
+        $purchase->purchased_modules = $modules->map(fn($m) => [
+            'name' => $m->name,
+            'cost' => (float) $m->cost,
+        ])->values()->toJson();
 
         $purchase->save();
 

@@ -31,13 +31,14 @@ class TenderEnrollExport implements FromCollection, WithHeadings, WithMapping
             ? $bex->base_currency_symbol
             : '';
 
+        $total = collect(json_decode($enroll->purchased_modules ?? '[]', true) ?: [])->sum('cost');
+
         return [
             $enroll->order_number,
             $enroll->first_name . ' ' . $enroll->last_name,
             $enroll->email,
             !empty($enroll->tender) ? $enroll->tender->title : '-',
-            $sym . number_format($enroll->technical_proposal_fee, 2) . $symR,
-            $sym . number_format($enroll->financial_proposal_fee, 2) . $symR,
+            $sym . number_format($total, 2) . $symR,
             $enroll->payment_method,
             $enroll->payment_status,
             $enroll->created_at,
@@ -51,8 +52,7 @@ class TenderEnrollExport implements FromCollection, WithHeadings, WithMapping
             'Name',
             'Email',
             'Tender',
-            'Technical Proposal Fee',
-            'Financial Proposal Fee',
+            'Total Amount',
             'Gateway',
             'Payment Status',
             'Date',

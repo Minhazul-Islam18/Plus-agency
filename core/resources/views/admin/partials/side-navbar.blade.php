@@ -721,7 +721,7 @@
                             id="tender">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->path() == 'admin/tender/settings') active @endif">
-                                    <a href="{{ route('admin.tender.settings') }}">
+                                    <a href="{{ route('admin.tender.settings') . '?language=' . $default->code }}">
                                         <span class="sub-item">Settings</span>
                                     </a>
                                 </li>

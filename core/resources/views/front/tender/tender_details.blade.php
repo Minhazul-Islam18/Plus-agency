@@ -875,6 +875,16 @@
 @section('breadcrumb-subtitle', Str::limit($tender->title, 60))
 @section('breadcrumb-link', Str::limit($tender->title, 60))
 
+@if (!empty($bse->tender_breadcrumb_bg))
+    @section('breadcrumb-bg', asset('assets/front/img/' . $bse->tender_breadcrumb_bg))
+@endif
+@if (!empty($bse->tender_breadcrumb_overlay_color))
+    @section('breadcrumb-overlay-color', $bse->tender_breadcrumb_overlay_color)
+@endif
+@if (!empty($bse->tender_breadcrumb_overlay_opacity))
+    @section('breadcrumb-overlay-opacity', $bse->tender_breadcrumb_overlay_opacity)
+@endif
+
 @section('content')
     <section class="course-details-section pt-120 pb-120">
         <div class="container">
@@ -939,9 +949,9 @@
                             @if ($daysLeft !== null)
                                 <div class="days-overlay-badge badge-{{ $iconState }}">
                                     @if ($isExpired)
-                                        <span style="font-size:9px;font-weight:800;">EXPIRED</span>
+                                        <span style="font-size:9px;font-weight:800;">{{ __('EXPIRED') }}</span>
                                     @elseif ($daysLeft === 0)
-                                        <span style="font-size:9px;font-weight:800;">TODAY</span>
+                                        <span style="font-size:9px;font-weight:800;">{{ __('TODAY') }}</span>
                                     @else
                                         <span class="days-num">{{ $daysLeft }}</span>
                                         <span>{{ __('days') }}</span>
@@ -1022,7 +1032,7 @@
                         </div>
 
                         {{-- ── Purchase form (paid tender) ── --}}
-                        @if ($tender->current_price)
+                        @if ($tender->current_price && !$isExpired)
                             <form method="POST" id="paymentGatewayForm" action="{{ route('tender.purchase.submit') }}"
                                 enctype="multipart/form-data">
                                 @csrf
@@ -1115,7 +1125,7 @@
                                             <input type="text" name="company_address" class="form-control"
                                                 placeholder="{{ __('Company Address') }}">
                                         </div>
-                                        <div class="col-12 mb-3">
+                                        <div class="col-12 mb-3" id="paymentReferenceField">
                                             <input type="text" name="payment_reference" class="form-control"
                                                 placeholder="{{ __('Payment / Transaction Reference (optional)') }}"
                                                 maxlength="100"
@@ -1125,6 +1135,24 @@
                                             </small>
                                         </div>
                                     </div>
+                                    {{-- Stripe card fields (shown only when Stripe selected) --}}
+                                    <div id="stripeTab" class="d-none mt-3">
+                                        <div class="row">
+                                            <div class="col-12 mb-2">
+                                                <input type="text" name="cardNumber" class="form-control" placeholder="{{ __('Card Number') }}" disabled>
+                                            </div>
+                                            <div class="col-4 mb-2">
+                                                <input type="text" name="cvcNumber" class="form-control" placeholder="{{ __('CVC') }}" disabled>
+                                            </div>
+                                            <div class="col-4 mb-2">
+                                                <input type="text" name="month" class="form-control" placeholder="{{ __('MM') }}" disabled>
+                                            </div>
+                                            <div class="col-4 mb-2">
+                                                <input type="text" name="year" class="form-control" placeholder="{{ __('YYYY') }}" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <button type="submit" class="main-btn">{{ __('Confirm Purchase') }}</button>
                                 </div>
                             </form>
@@ -1138,6 +1166,12 @@
                                     </a>
                                 @endif
                             </div> --}}
+                        @endif
+
+                        @if ($isExpired)
+                        <div class="alert alert-danger mt-3" style="border-radius:8px; font-size:14px;">
+                            <i class="fas fa-lock mr-1"></i> {{ __('Submission deadline has passed. This tender is no longer available for purchase.') }}
+                        </div>
                         @endif
 
                         {{-- Social share --}}
@@ -1418,11 +1452,46 @@
                 $(this).toggleClass('open');
             });
 
+            var onlineRoutes = {
+                'stripe':   '{{ route('tender.payment.stripe') }}',
+                'razorpay': '{{ route('tender.payment.razorpay') }}',
+                'moneroo':  '{{ route('tender.payment.moneroo') }}',
+            };
+            var offlineAction = '{{ route('tender.purchase.submit') }}';
+
+            function updateFormAction(gw, type) {
+                if (type === 'offline') {
+                    $('#paymentGatewayForm').attr('action', offlineAction);
+                } else if (onlineRoutes[gw]) {
+                    $('#paymentGatewayForm').attr('action', onlineRoutes[gw]);
+                } else {
+                    $('#paymentGatewayForm').attr('action', offlineAction);
+                }
+
+                // Stripe card fields
+                if (gw === 'stripe') {
+                    $('#stripeTab').removeClass('d-none');
+                    $('#stripeTab input').removeAttr('disabled');
+                } else {
+                    $('#stripeTab').addClass('d-none');
+                    $('#stripeTab input').attr('disabled', true);
+                }
+
+                // Payment reference: only for offline
+                if (type === 'offline') {
+                    $('#paymentReferenceField').show();
+                } else {
+                    $('#paymentReferenceField').hide();
+                    $('#paymentReferenceField input').val('');
+                }
+            }
+
             // Payment gateway select → show offline details / purchaser info
             $(document).on('change', '#paymentType', function() {
-                var val = $(this).val();
+                var val  = $(this).val();
                 var type = $(this).find('option:checked').data('type');
                 $('.gateway-details').hide();
+                updateFormAction(val, type);
                 if (type === 'offline') {
                     $('#tab-' + val).show();
                     $('#purchaserInfo').slideDown();
@@ -1435,11 +1504,13 @@
 
             // PAY NOW button
             $(document).on('click', '#purchaseBtn', function() {
-                var gw = $('#paymentType').val();
+                var gw   = $('#paymentType').val();
+                var type = $('#paymentType').find('option:checked').data('type');
                 if (!gw) {
                     $('.payment-warning').fadeIn().delay(2000).fadeOut();
                     return;
                 }
+                updateFormAction(gw, type);
                 $('#purchaserInfo').slideDown();
                 $('html, body').animate({
                     scrollTop: $('#purchaserInfo').offset().top - 100

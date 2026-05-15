@@ -152,6 +152,16 @@
 @section('breadcrumb-subtitle', $bex->tender_subtitle ?? __('Browse Public Tenders'))
 @section('breadcrumb-link', __('Tenders'))
 
+@if (!empty($bse->tender_breadcrumb_bg))
+    @section('breadcrumb-bg', asset('assets/front/img/' . $bse->tender_breadcrumb_bg))
+@endif
+@if (!empty($bse->tender_breadcrumb_overlay_color))
+    @section('breadcrumb-overlay-color', $bse->tender_breadcrumb_overlay_color)
+@endif
+@if (!empty($bse->tender_breadcrumb_overlay_opacity))
+    @section('breadcrumb-overlay-opacity', $bse->tender_breadcrumb_overlay_opacity)
+@endif
+
 @section('content')
 
     {{-- Featured Tenders --}}

@@ -322,7 +322,7 @@ class GatewayController extends Controller
         $moneroo->status = $request->status;
 
         $information = [];
-        $information['public_key'] = $request->public_key;
+        $information['public_key'] = $request->secret_key; // Moneroo uses single API key
         $information['secret_key'] = $request->secret_key;
         $information['text'] = "Pay via Moneroo - Multiple payment options across Africa.";
 
@@ -330,7 +330,7 @@ class GatewayController extends Controller
         $moneroo->save();
 
         // Update .env file
-        $this->updateEnvVariables($request->public_key, $request->secret_key);
+        $this->updateEnvVariables($request->secret_key, $request->secret_key);
 
         $request->session()->flash('success', "Moneroo information updated successfully!");
         return back();

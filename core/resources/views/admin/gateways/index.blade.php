@@ -181,15 +181,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Moneroo Public Key</label>
-                    <input class="form-control" name="public_key" value="{{$monerooInfo['public_key'] ?? ''}}">
-                    @if ($errors->has('public_key'))
-                        <p class="mb-0 text-danger">{{$errors->first('public_key')}}</p>
-                    @endif
-                </div>
-
-                <div class="form-group">
-                    <label>Moneroo Secret Key</label>
+                    <label>Moneroo API Key (Secret Key)</label>
                     <input class="form-control" name="secret_key" value="{{$monerooInfo['secret_key'] ?? ''}}">
                     @if ($errors->has('secret_key'))
                         <p class="mb-0 text-danger">{{$errors->first('secret_key')}}</p>

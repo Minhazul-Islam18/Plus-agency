@@ -807,7 +807,13 @@ class TenderController extends Controller
             $bex->is_tender = $request->is_tender;
 
             foreach (['invoice_watermark', 'invoice_sign', 'invoice_footer_wavy'] as $field) {
-                if ($request->filled($field)) {
+                $clearKey = 'clear_' . $field;
+                if ($request->input($clearKey) == '1') {
+                    if (!empty($bex->$field) && file_exists($invoiceDir . $bex->$field)) {
+                        @unlink($invoiceDir . $bex->$field);
+                    }
+                    $bex->$field = null;
+                } elseif ($request->filled($field)) {
                     $url      = $request->input($field);
                     $ext      = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
                     $filename = uniqid($field . '_') . '.' . $ext;

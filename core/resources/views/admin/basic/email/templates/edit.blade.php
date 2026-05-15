@@ -108,6 +108,32 @@
                         </tr>
                         @endif
 
+                        @if ($template->email_type == 'tender_purchase')
+                        <tr>
+                          <td>
+                            {tender_name}
+                          </td>
+                          <th scope="row">
+                            Tender Title
+                          </th>
+                        </tr>
+                        @endif
+
+                        @if ($template->email_type == 'tender_download_link')
+                        <tr>
+                          <td>{download_url}</td>
+                          <th scope="row">Secure Download URL</th>
+                        </tr>
+                        <tr>
+                          <td>{expires_at}</td>
+                          <th scope="row">Link Expiry Date &amp; Time</th>
+                        </tr>
+                        <tr>
+                          <td>{max_downloads}</td>
+                          <th scope="row">Max Download Opens Allowed</th>
+                        </tr>
+                        @endif
+
                         @if ($template->email_type == 'donation')
                         <tr>
                           <td>
@@ -119,8 +145,7 @@
                         </tr>
                         @endif
 
-                        @if ($template->email_type == 'product_order' || $template->email_type == 'package_order' || $template->email_type == 'course_enroll')
-
+                        @if ($template->email_type == 'product_order' || $template->email_type == 'package_order' || $template->email_type == 'course_enroll' || $template->email_type == 'tender_purchase' || $template->email_type == 'tender_download_link')
                         <tr>
                           <td>
                             {order_number}
@@ -129,6 +154,9 @@
                             Order Number
                           </th>
                         </tr>
+                        @endif
+
+                        @if ($template->email_type == 'product_order' || $template->email_type == 'package_order' || $template->email_type == 'course_enroll')
                         <tr>
                           <td>
                             {order_link}
@@ -137,7 +165,6 @@
                             Order Details Page Link (Only for Registered User)
                           </th>
                         </tr>
-
                         @endif
 
                         @if ($template->email_type == 'event_ticket')

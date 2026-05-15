@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\AccessLog;
 use App\BasicExtra;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\KreativMailer;
 use App\Language;
 use App\OtpVerification;
 use App\RateLimitAttempt;
@@ -151,42 +152,27 @@ class FindMyFilesController extends Controller
 
     private function sendDownloadEmail(TenderPurchase $purchase, string $downloadUrl, $be): bool
     {
-        $mail = new PHPMailer(true);
-
-        $subject   = 'Your Secure Download Link — Order ' . $purchase->order_number;
-        $recipient = $purchase->email;
-        $name      = trim($purchase->first_name . ' ' . $purchase->last_name);
-
-        $body = view('mail.secure_download_link', [
-            'purchase'     => $purchase,
-            'downloadUrl'  => $downloadUrl,
-            'expiresAt'    => now()->addHours(self::TOKEN_TTL_HOURS)->format('d M Y, H:i'),
-            'maxDownloads' => self::MAX_DOWNLOADS,
-            'fromName'     => $be->from_name ?: config('app.name'),
-            'appUrl'       => config('app.url'),
-        ])->render();
+        $language = Language::where('is_default', 1)->first();
+        $bs       = $language->basic_setting;
 
         try {
-            if ($be->is_smtp == 1) {
-                $mail->isSMTP();
-                $mail->Host       = $be->smtp_host;
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $be->smtp_username;
-                $mail->Password   = $be->smtp_password;
-                $mail->SMTPSecure = $be->encryption;
-                $mail->Port       = $be->smtp_port;
-            }
-
-            $mail->setFrom($be->from_mail, $be->from_name);
-            $mail->addAddress($recipient, $name);
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $body;
-            $mail->send();
+            $mailer = new KreativMailer;
+            $mailer->mailFromAdmin([
+                'toMail'        => $purchase->email,
+                'toName'        => $purchase->first_name,
+                'customer_name' => $purchase->first_name,
+                'order_number'  => $purchase->order_number,
+                'download_url'  => $downloadUrl,
+                'expires_at'    => now()->addHours(self::TOKEN_TTL_HOURS)->format('d M Y, H:i'),
+                'max_downloads' => self::MAX_DOWNLOADS,
+                'website_title' => $bs->website_title,
+                'templateType'  => 'tender_download_link',
+                'type'          => 'tenderDownloadLink',
+            ]);
 
             \Log::info('[FMF] Download email sent', [
                 'order' => $purchase->order_number,
-                'to'    => substr($recipient, 0, 4) . '***',
+                'to'    => substr($purchase->email, 0, 4) . '***',
             ]);
             return true;
         } catch (\Exception $e) {

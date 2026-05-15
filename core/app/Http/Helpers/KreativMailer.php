@@ -28,6 +28,18 @@ class KreativMailer {
         if (array_key_exists('course_name', $data)) {
             $body = preg_replace("/{course_name}/", $data['course_name'], $body);
         }
+        if (array_key_exists('tender_name', $data)) {
+            $body = preg_replace("/{tender_name}/", $data['tender_name'], $body);
+        }
+        if (array_key_exists('download_url', $data)) {
+            $body = preg_replace("/{download_url}/", $data['download_url'], $body);
+        }
+        if (array_key_exists('expires_at', $data)) {
+            $body = preg_replace("/{expires_at}/", $data['expires_at'], $body);
+        }
+        if (array_key_exists('max_downloads', $data)) {
+            $body = preg_replace("/{max_downloads}/", $data['max_downloads'], $body);
+        }
         if (array_key_exists('event_name', $data)) {
             $body = preg_replace("/{event_name}/", $data['event_name'], $body);
         }
@@ -92,6 +104,8 @@ class KreativMailer {
 
         try {
 
+            $mail->CharSet = 'UTF-8';
+
             //Recipients
             $mail->setFrom($be->from_mail, $be->from_name);
             $mail->addAddress($data['toMail'], $data['toName']);
@@ -107,6 +121,10 @@ class KreativMailer {
                 $mail->addAttachment('assets/front/invoices/course/' . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'donation') {
                 $mail->addAttachment('assets/front/invoices/' . $data['attachment']);
+            } elseif (array_key_exists('attachment', $data) && $data['type'] == 'tenderDownloadLink') {
+                if (file_exists($data['attachment'])) {
+                    $mail->addAttachment($data['attachment'], $data['attachmentName'] ?? basename($data['attachment']));
+                }
             }
 
             // Content

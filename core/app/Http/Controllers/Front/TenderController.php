@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use PHPMailer\PHPMailer\PHPMailer;
+use App\Http\Helpers\KreativMailer;
 
 class TenderController extends Controller
 {
@@ -133,6 +133,7 @@ class TenderController extends Controller
             ->get();
 
         $data['paymentGateways'] = PaymentGateway::where('status', 1)
+            ->whereIn('keyword', ['stripe', 'razorpay', 'moneroo'])
             ->orderBy('name', 'asc')
             ->get();
 
@@ -231,35 +232,21 @@ class TenderController extends Controller
     private function sendOrderReceivedEmail(TenderPurchase $purchase): void
     {
         $currentLang = $this->getCurrentLang();
-        $be          = $currentLang->basic_extended;
-        $fromName    = $be->from_name ?: config('app.name');
+        $bs          = $currentLang->basic_setting;
         $tender      = Tender::find($purchase->tender_id);
 
-        $body = view('mail.tender_order_received', [
-            'purchase'     => $purchase,
-            'tenderTitle'  => $tender ? $tender->title : 'Tender Document',
-            'fromName'     => $fromName,
-        ])->render();
-
-        $mail = new PHPMailer(true);
-
         try {
-            if ($be->is_smtp == 1) {
-                $mail->isSMTP();
-                $mail->Host       = $be->smtp_host;
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $be->smtp_username;
-                $mail->Password   = $be->smtp_password;
-                $mail->SMTPSecure = $be->encryption;
-                $mail->Port       = $be->smtp_port;
-            }
-
-            $mail->setFrom($be->from_mail, $fromName);
-            $mail->addAddress($purchase->email, trim($purchase->first_name . ' ' . $purchase->last_name));
-            $mail->isHTML(true);
-            $mail->Subject = 'Order Received — ' . $purchase->order_number;
-            $mail->Body    = $body;
-            $mail->send();
+            $mailer = new KreativMailer;
+            $mailer->mailFromAdmin([
+                'toMail'        => $purchase->email,
+                'toName'        => $purchase->first_name,
+                'customer_name' => $purchase->first_name,
+                'tender_name'   => $tender ? $tender->title : 'Tender Document',
+                'order_number'  => $purchase->order_number,
+                'website_title' => $bs->website_title,
+                'templateType'  => 'tender_purchase',
+                'type'          => 'tenderPurchase',
+            ]);
         } catch (\Exception $e) {
             Log::error('[Tender] Order received email failed', [
                 'order' => $purchase->order_number,

@@ -133,6 +133,52 @@
                 <small class="text-muted">Shown in the footer of every invoice. Leave empty to use the built-in default address.</small>
               </div>
 
+              <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">Breadcrumb Background</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">Applied to the Tenders list page and Tender Details page. Settings are per-language.</p>
+
+              {{-- Breadcrumb BG Image --}}
+              <div class="form-group">
+                <label>Background Image</label>
+                <br>
+                <div class="thumb-preview" id="thumbPreview4">
+                  @if (!empty($abex->tender_breadcrumb_bg))
+                    <img src="{{ asset('assets/front/img/' . $abex->tender_breadcrumb_bg) }}"
+                      alt="Breadcrumb BG" class="uploaded-img" style="max-height:80px;">
+                    <button type="button" class="btn btn-danger btn-sm remove-breadcrumb-btn mt-1">
+                      <i class="fas fa-times"></i> Remove
+                    </button>
+                  @else
+                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="No Image"
+                      class="uploaded-img" style="max-height:80px;">
+                  @endif
+                </div>
+                <br>
+                <input id="fileInput4" type="hidden" name="tender_breadcrumb_bg">
+                <button id="chooseImage4" class="btn btn-primary btn-sm mt-1" type="button"
+                  data-multiple="false" data-toggle="modal" data-target="#lfmModal4">
+                  Choose Image
+                </button>
+                <p class="text-warning mb-0 mt-1" style="font-size:12px;">JPG, PNG, JPEG. Recommended: 1920×350px.</p>
+              </div>
+
+              {{-- Overlay Color --}}
+              <div class="form-group">
+                <label>Overlay Color</label>
+                <input class="form-control jscolor ltr" name="tender_breadcrumb_overlay_color"
+                  value="{{ $abex->tender_breadcrumb_overlay_color ?? '000000' }}"
+                  placeholder="Enter hex color code">
+              </div>
+
+              {{-- Overlay Opacity --}}
+              <div class="form-group">
+                <label>Overlay Opacity</label>
+                <input type="number" class="form-control" name="tender_breadcrumb_overlay_opacity"
+                  value="{{ $abex->tender_breadcrumb_overlay_opacity ?? 0.5 }}"
+                  step="0.01" min="0" max="1" placeholder="0 to 1">
+                <p class="text-warning mb-0 mt-1" style="font-size:12px;">0 = fully transparent, 1 = fully opaque (e.g. 0.5 = 50%)</p>
+              </div>
+
             </form>
           </div>
         </div>
@@ -183,4 +229,49 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade lfm-modal" id="lfmModal4" tabindex="-1" role="dialog" aria-hidden="true">
+  <i class="fas fa-times-circle"></i>
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <iframe src="{{ url('laravel-filemanager') }}?serial=4"
+          style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+$(document).on('click', '.remove-breadcrumb-btn', function(e) {
+    e.preventDefault();
+    swal({
+        title: 'Are you sure?',
+        text: 'Delete this breadcrumb background image?',
+        icon: 'warning',
+        buttons: { cancel: { text: 'Cancel', visible: true }, confirm: { text: 'Yes, delete it!', closeModal: false } },
+        dangerMode: true,
+    }).then(function(willDelete) {
+        if (willDelete) {
+            $.ajax({
+                url: '{{ route('admin.tender.deleteTenderBreadcrumbBg') }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', language: '{{ $language }}' },
+                success: function(res) {
+                    swal.close();
+                    if (res.success) {
+                        $('#thumbPreview4 img').attr('src', '{{ asset('assets/admin/img/noimage.jpg') }}');
+                        $('.remove-breadcrumb-btn').remove();
+                        $('#fileInput4').val('');
+                        $.notify({ message: 'Background image deleted.' }, { type: 'success' });
+                    }
+                },
+                error: function() { swal.close(); $.notify({ message: 'Delete failed.' }, { type: 'danger' }); }
+            });
+        }
+    });
+});
+</script>
 @endsection

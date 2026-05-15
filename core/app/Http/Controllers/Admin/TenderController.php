@@ -9,6 +9,7 @@ use App\TenderCategory;
 use App\TenderPurchase;
 use App\Exports\TenderEnrollExport;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\KreativMailer;
 use App\Language;
 use App\OfflineGateway;
 use App\PaymentGateway;
@@ -719,39 +720,25 @@ class TenderController extends Controller
         ]);
 
         $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
-        $fromName    = $be->from_name ?: config('app.name');
-
-        $body = view('mail.secure_download_link', [
-            'purchase'     => $purchase,
-            'downloadUrl'  => $downloadUrl,
-            'expiresAt'    => now()->addHours(24)->format('d M Y, H:i'),
-            'maxDownloads' => 3,
-            'fromName'     => $fromName,
-            'appUrl'       => config('app.url'),
-        ])->render();
-
-        $mail = new PHPMailer(true);
+        $language    = Language::where('is_default', 1)->first();
+        $bs          = $language->basic_setting;
 
         try {
-            if ($be->is_smtp == 1) {
-                $mail->isSMTP();
-                $mail->Host       = $be->smtp_host;
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $be->smtp_username;
-                $mail->Password   = $be->smtp_password;
-                $mail->SMTPSecure = $be->encryption;
-                $mail->Port       = $be->smtp_port;
-            }
-
-            $mail->setFrom($be->from_mail, $fromName);
-            $mail->addAddress($purchase->email, trim($purchase->first_name . ' ' . $purchase->last_name));
-            if (file_exists($invoicePath)) {
-                $mail->addAttachment($invoicePath, $purchase->order_number . '_invoice.pdf');
-            }
-            $mail->isHTML(true);
-            $mail->Subject = 'Your Secure Download Link — Order ' . $purchase->order_number;
-            $mail->Body    = $body;
-            $mail->send();
+            $mailer = new KreativMailer;
+            $mailer->mailFromAdmin([
+                'toMail'         => $purchase->email,
+                'toName'         => $purchase->first_name,
+                'customer_name'  => $purchase->first_name,
+                'order_number'   => $purchase->order_number,
+                'download_url'   => $downloadUrl,
+                'expires_at'     => now()->addHours(24)->format('d M Y, H:i'),
+                'max_downloads'  => 3,
+                'website_title'  => $bs->website_title,
+                'templateType'   => 'tender_download_link',
+                'type'           => 'tenderDownloadLink',
+                'attachment'     => $invoicePath,
+                'attachmentName' => $purchase->order_number . '_invoice.pdf',
+            ]);
         } catch (\Exception $e) {
             Log::error('[Tender] Approval email failed', [
                 'order' => $purchase->order_number,
@@ -796,18 +783,25 @@ class TenderController extends Controller
 
     public function settings(Request $request)
     {
-        $abex     = BasicExtra::first();
         $language = $request->input('language', '');
+        $lang     = $language ? Language::where('code', $language)->first() : null;
+        $abex     = $lang ? $lang->basic_extra : BasicExtra::first();
         return view('admin.tender.settings', compact('abex', 'language'));
     }
 
     public function updateSettings(Request $request)
     {
-        $uploadDir = base_path('../assets/admin/img/invoice/');
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
+        $request->validate([
+            'tender_breadcrumb_overlay_color'   => 'nullable|max:20',
+            'tender_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+        ]);
+
+        $invoiceDir = base_path('../assets/admin/img/invoice/');
+        if (!is_dir($invoiceDir)) {
+            mkdir($invoiceDir, 0775, true);
         }
 
+        // Invoice images + is_tender: update all language rows (global)
         $bexs = BasicExtra::all();
         foreach ($bexs as $bex) {
             $bex->is_tender = $request->is_tender;
@@ -817,11 +811,10 @@ class TenderController extends Controller
                     $url      = $request->input($field);
                     $ext      = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
                     $filename = uniqid($field . '_') . '.' . $ext;
-                    // Delete old file
-                    if (!empty($bex->$field) && file_exists($uploadDir . $bex->$field)) {
-                        @unlink($uploadDir . $bex->$field);
+                    if (!empty($bex->$field) && file_exists($invoiceDir . $bex->$field)) {
+                        @unlink($invoiceDir . $bex->$field);
                     }
-                    @copy($url, $uploadDir . $filename);
+                    @copy($url, $invoiceDir . $filename);
                     $bex->$field = $filename;
                 }
             }
@@ -830,9 +823,51 @@ class TenderController extends Controller
             $bex->save();
         }
 
+        // Breadcrumb: update only the current language row
+        $langCode = $request->input('language', '');
+        $lang     = $langCode ? Language::where('code', $langCode)->first() : null;
+        $bex      = $lang ? $lang->basic_extra : BasicExtra::first();
+
+        if ($bex) {
+            $bex->tender_breadcrumb_overlay_color   = $request->tender_breadcrumb_overlay_color;
+            $bex->tender_breadcrumb_overlay_opacity = $request->tender_breadcrumb_overlay_opacity;
+
+            if ($request->filled('tender_breadcrumb_bg')) {
+                $url  = $request->input('tender_breadcrumb_bg');
+                $ext  = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    $bgDir = base_path('../assets/front/img/');
+                    if (!empty($bex->tender_breadcrumb_bg)) {
+                        @unlink($bgDir . $bex->tender_breadcrumb_bg);
+                    }
+                    $filename = uniqid('tender_bg_') . '.' . $ext;
+                    @copy($url, $bgDir . $filename);
+                    $bex->tender_breadcrumb_bg = $filename;
+                }
+            }
+
+            $bex->save();
+        }
+
         Session::flash('success', 'Tender Settings Updated Successfully');
 
-        return redirect()->route('admin.tender.settings', ['language' => $request->input('language')]);
+        return redirect()->route('admin.tender.settings', ['language' => $langCode]);
+    }
+
+    public function deleteTenderBreadcrumbBg(Request $request)
+    {
+        $langCode = $request->input('language', '');
+        $lang     = $langCode ? Language::where('code', $langCode)->first() : null;
+        $bex      = $lang ? $lang->basic_extra : BasicExtra::first();
+
+        if ($bex && $bex->tender_breadcrumb_bg) {
+            @unlink(base_path('../assets/front/img/' . $bex->tender_breadcrumb_bg));
+            $bex->tender_breadcrumb_bg = null;
+            $bex->save();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
     }
 
     public function report(Request $request)

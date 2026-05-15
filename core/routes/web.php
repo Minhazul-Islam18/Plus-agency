@@ -211,6 +211,15 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
 
+// Tender online payment gateways
+Route::post('/tender/payment/stripe',           'Payment\Tender\StripeController@process')->name('tender.payment.stripe');
+Route::post('/tender/payment/razorpay',         'Payment\Tender\RazorpayController@redirect')->name('tender.payment.razorpay');
+Route::post('/tender/payment/razorpay/notify',  'Payment\Tender\RazorpayController@notify')->name('tender.razorpay.notify');
+Route::get('/tender/payment/razorpay/cancel',   'Payment\Tender\RazorpayController@cancel')->name('tender.razorpay.cancel');
+Route::post('/tender/payment/moneroo',          'Payment\Tender\MonerooController@redirect')->name('tender.payment.moneroo');
+Route::get('/tender/payment/moneroo/notify',    'Payment\Tender\MonerooController@notify')->name('tender.moneroo.notify');
+Route::get('/tender/payment/moneroo/cancel',    'Payment\Tender\MonerooController@cancel')->name('tender.moneroo.cancel');
+
 /** Static fallback for dynamic permalink routes needed by FMF views **/
 Route::get('/contact', 'Front\FrontendController@contact')->name('front.contact');
 
@@ -1157,6 +1166,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
         Route::get('/tender/settings', 'Admin\TenderController@settings')->name('admin.tender.settings');
         Route::post('/tender/settings', 'Admin\TenderController@updateSettings')->name('admin.tender.updateSettings');
+        Route::post('/tender/settings/delete-breadcrumb-bg', 'Admin\TenderController@deleteTenderBreadcrumbBg')->name('admin.tender.deleteTenderBreadcrumbBg');
 
         // Admin Tender Enroll Report Routes
         Route::get('/tender/enrolls/report', 'Admin\TenderController@report')->name('admin.tender.enrolls.report');

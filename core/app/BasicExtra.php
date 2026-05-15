@@ -23,5 +23,8 @@ class BasicExtra extends Model
     'twilio_account_sid',
     'twilio_auth_token',
     'twilio_from_number',
+    'tender_breadcrumb_bg',
+    'tender_breadcrumb_overlay_color',
+    'tender_breadcrumb_overlay_opacity',
   ];
 }

@@ -26,10 +26,6 @@ class MonerooController extends Controller
         $bse   = $lang->basic_extra;
         $total = (float) $request->selected_amount;
 
-        if ($bse->base_currency_text !== 'USD') {
-            $total = $total / max(1, (float) $bse->base_currency_rate);
-        }
-
         $purchase = $this->createPendingPurchase($request, 'moneroo');
 
         try {

@@ -36,7 +36,12 @@ class RazorpayController extends Controller
         }
 
         $total    = (float) $request->selected_amount;
-        $purchase = $this->createPendingPurchase($request, 'razorpay');
+
+        try {
+            $purchase = $this->createPendingPurchase($request, 'razorpay');
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         $razorpayOrder = $this->api->order->create([
             'receipt'         => $purchase->order_number,
@@ -91,7 +96,7 @@ class RazorpayController extends Controller
         }
 
         if ($success) {
-            $purchase = $this->completePurchase($id);
+            $purchase = $this->completePurchase($id, $request->razorpay_payment_id);
             Session::forget(['tenderPurchaseId', 'tenderRazorpayOrder']);
             return $this->redirectToComplete($purchase);
         }

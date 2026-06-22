@@ -68,10 +68,14 @@ trait TenderPaymentHelper
         return $purchase;
     }
 
-    protected function completePurchase(int $purchaseId): TenderPurchase
+    protected function completePurchase(int $purchaseId, ?string $gatewayRef = null): TenderPurchase
     {
         $purchase = TenderPurchase::findOrFail($purchaseId);
         $purchase->payment_status = 'Completed';
+        $purchase->paid_at        = now();
+        if (!empty($gatewayRef)) {
+            $purchase->payment_reference = $gatewayRef;
+        }
         $purchase->save();
 
         try {

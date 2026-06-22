@@ -57,7 +57,7 @@ class StripeController extends Controller
 
             if ($charge['status'] === 'succeeded') {
                 $purchase = $this->createPendingPurchase($request, 'stripe');
-                $this->completePurchase($purchase->id);
+                $this->completePurchase($purchase->id, $charge['id'] ?? null);
                 return $this->redirectToComplete($purchase);
             }
         } catch (Exception $e) {

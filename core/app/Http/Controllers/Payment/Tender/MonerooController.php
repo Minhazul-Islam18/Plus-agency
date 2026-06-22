@@ -26,9 +26,9 @@ class MonerooController extends Controller
         $bse   = $lang->basic_extra;
         $total = (float) $request->selected_amount;
 
-        $purchase = $this->createPendingPurchase($request, 'moneroo');
-
         try {
+            $purchase = $this->createPendingPurchase($request, 'moneroo');
+
             $moneroo = new Payment();
             $payment = $moneroo->init([
                 'amount'      => round($total, 2),
@@ -65,7 +65,8 @@ class MonerooController extends Controller
             $payment = $moneroo->get($transactionId);
 
             if (in_array($payment->status, ['success', 'completed'])) {
-                $purchase = $this->completePurchase($id);
+                $gatewayRef = $this->extractMonerooReference($payment, $transactionId);
+                $purchase   = $this->completePurchase($id, $gatewayRef);
                 Session::forget(['tenderPurchaseId', 'tenderMonerooTransaction']);
                 return $this->redirectToComplete($purchase);
             }
@@ -79,5 +80,17 @@ class MonerooController extends Controller
     public function cancel()
     {
         return back()->with('error', 'Payment cancelled.');
+    }
+
+    /**
+     * Pull the Moneroo transaction reference from a payment object.
+     *
+     * The SDK returns the unwrapped `data` object (see Moneroo Traits\Request::processResponse),
+     * so the Moneroo transaction id (e.g. "py_l60v6ayer1yk") sits at the top level as `id`.
+     * Falls back to the session transaction id when absent.
+     */
+    protected function extractMonerooReference($payment, string $transactionId): string
+    {
+        return (string) (data_get($payment, 'id') ?: $transactionId);
     }
 }

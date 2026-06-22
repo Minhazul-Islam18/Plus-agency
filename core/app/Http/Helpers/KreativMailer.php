@@ -129,7 +129,16 @@ class KreativMailer {
 
             // Content
             $mail->isHTML(true);
-            $mail->Subject = $temp->email_subject;
+
+            // Replace {placeholder} tokens in the subject the same way as the body
+            $subject = $temp->email_subject;
+            foreach ($data as $key => $value) {
+                if (is_scalar($value)) {
+                    $subject = str_replace('{' . $key . '}', $value, $subject);
+                }
+            }
+
+            $mail->Subject = $subject;
             $mail->Body    = $body;
 
             $mail->send();

@@ -222,6 +222,8 @@ class TenderController extends Controller
         }
 
         $data['purchase']    = $purchase;
+        $data['downloadUrl'] = session('tender_download_url');
+        $data['streamUrl']   = session('tender_stream_url');
         $data['version']     = $this->getVersionData($currentLang);
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;

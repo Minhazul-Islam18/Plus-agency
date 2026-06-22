@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payment\Tender;
 use App\BasicExtra;
 use App\Http\Helpers\KreativMailer;
 use App\Language;
+use App\SecureToken;
 use App\Tender;
 use App\TenderModule;
 use App\TenderPurchase;
@@ -110,7 +111,90 @@ trait TenderPaymentHelper
             ]);
         }
 
+        try {
+            $downloadUrl = $this->dispatchTenderDownloadLink($purchase);
+            // Hand the link to the purchase-complete page so the download can start automatically
+            session()->flash('tender_download_url', $downloadUrl);
+        } catch (\Exception $e) {
+            Log::error('[Tender] Download link dispatch failed on payment completion', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return $purchase;
+    }
+
+    /**
+     * Issue a secure download token and email the buyer their download link with the
+     * invoice (payment receipt) attached. Mirrors the FindMyFiles token scheme so the
+     * same /find-my-files/download route validates the link.
+     */
+    protected function dispatchTenderDownloadLink(TenderPurchase $purchase): string
+    {
+        $ttlHours     = 24; // matches FindMyFilesController::TOKEN_TTL_HOURS
+        $maxDownloads = 3;  // matches FindMyFilesController::MAX_DOWNLOADS
+
+        $emailHash = hash('sha256', strtolower(trim($purchase->email)));
+
+        // Revoke any previous active tokens for this order
+        SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        // Generate & store signed token (same payload shape as FindMyFilesController)
+        $rawToken = hash_hmac('sha256', implode('|', [
+            $purchase->order_number,
+            $emailHash,
+            now()->timestamp,
+            Str::random(16),
+        ]), config('app.key'));
+
+        SecureToken::create([
+            'order_id'       => $purchase->order_number,
+            'email_hash'     => $emailHash,
+            'token_hash'     => hash('sha256', $rawToken),
+            'issued_at'      => now(),
+            'expires_at'     => now()->addHours($ttlHours),
+            'max_downloads'  => $maxDownloads,
+            'download_count' => 0,
+            'status'         => 'active',
+        ]);
+
+        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
+
+        $lang = $this->getLang();
+        $bs   = $lang->basic_setting;
+
+        $mail = [
+            'toMail'        => $purchase->email,
+            'toName'        => $purchase->first_name,
+            'customer_name' => $purchase->first_name,
+            'order_number'  => $purchase->order_number,
+            'download_url'  => $downloadUrl,
+            'expires_at'    => now()->addHours($ttlHours)->format('d M Y, H:i'),
+            'max_downloads' => $maxDownloads,
+            'website_title' => $bs->website_title,
+            'templateType'  => 'tender_download_link',
+            'type'          => 'tenderDownloadLink',
+        ];
+
+        // Attach the invoice PDF as the payment receipt when available
+        if (!empty($purchase->invoice)) {
+            $invoicePath = storage_path('app/invoices/tender/' . $purchase->invoice);
+            if (file_exists($invoicePath)) {
+                $mail['attachment']     = $invoicePath;
+                $mail['attachmentName'] = $purchase->order_number . '.pdf';
+            }
+        }
+
+        (new KreativMailer)->mailFromAdmin($mail);
+
+        // Hand both URLs to the purchase-complete page: the stream URL drives the
+        // automatic download (no download-count consumed), the landing URL is the manual link.
+        session()->flash('tender_stream_url', route('find_my_files.stream', ['t' => $rawToken]));
+
+        return $downloadUrl;
     }
 
     protected function generateTenderInvoice(TenderPurchase $purchase): string

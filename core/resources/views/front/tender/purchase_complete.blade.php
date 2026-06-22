@@ -368,14 +368,25 @@
                     {{-- /grid --}}
 
                     {{-- Notice --}}
+                    @if(!empty($downloadUrl))
+                    <div class="pc-notice" style="background:#ecfdf5; border-left-color:#16a34a; color:#065f46;">
+                        <strong>{{ __('Payment confirmed!') }}</strong>
+                        {{ __('Your download is starting automatically. We have also emailed your secure download link and payment receipt to') }}
+                        <strong>{{ $purchase->email }}</strong>.
+                    </div>
+                    @else
                     <div class="pc-notice">
                         <strong>{{ __('What happens next?') }}</strong>
                         {{ __('Our team will verify your payment and activate your order. You will receive a secure download link via email once approved.') }}
                     </div>
+                    @endif
 
                     {{-- Actions --}}
                     <div class="pc-actions">
-                        <a href="{{ route('tenders') }}" class="btn-pc-primary">{{ __('Browse More Tenders') }}</a>
+                        @if(!empty($streamUrl))
+                        <a href="{{ $streamUrl }}" id="pc-download-btn" class="btn-pc-primary">{{ __('Download Now') }}</a>
+                        @endif
+                        <a href="{{ route('tenders') }}" class="btn-pc-outline">{{ __('Browse More Tenders') }}</a>
                         <a href="{{ route('front.index') }}" class="btn-pc-outline">{{ __('Return to Home') }}</a>
                     </div>
 
@@ -421,4 +432,19 @@
         </div>
     </div>
 </section>
+
+@if(!empty($streamUrl))
+{{-- Automatic download trigger: hidden iframe fetches the ZIP without leaving this page --}}
+<iframe id="pc-auto-download" src="about:blank" style="display:none;width:0;height:0;border:0;"></iframe>
+<script>
+    (function () {
+        var streamUrl = @json($streamUrl);
+        // Kick off the download shortly after the page paints
+        setTimeout(function () {
+            var f = document.getElementById('pc-auto-download');
+            if (f) { f.src = streamUrl; }
+        }, 1200);
+    })();
+</script>
+@endif
 @endsection

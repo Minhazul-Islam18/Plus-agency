@@ -44,6 +44,15 @@ trait TenderPaymentHelper
         }
         $modules = $moduleQuery->get(['id', 'name', 'cost']);
 
+        // Duplicate-payment guard: drop modules this email already paid for
+        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
+        if (!empty($paidNames)) {
+            $modules = $modules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        }
+        if ($modules->isEmpty()) {
+            throw new \RuntimeException(__('You have already paid for the selected module(s). No further payment is required.'));
+        }
+
         $purchase                    = new TenderPurchase;
         $purchase->tender_id         = $request->tender_id;
         $purchase->user_id           = Auth::check() ? Auth::id() : null;

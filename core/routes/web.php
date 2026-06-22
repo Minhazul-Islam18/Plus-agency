@@ -210,6 +210,7 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
 /** Tender Frontend Routes **/
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
+Route::post('/tender/paid-modules', 'Front\TenderController@paidModules')->name('tender.paid_modules');
 
 // Tender online payment gateways
 Route::post('/tender/payment/stripe',           'Payment\Tender\StripeController@process')->name('tender.payment.stripe');

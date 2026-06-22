@@ -199,6 +199,16 @@ class TenderController extends Controller
             $moduleQuery->whereIn('id', $selectedIds);
         }
         $modules = $moduleQuery->get(['id', 'name', 'cost']);
+
+        // Duplicate-payment guard: drop modules this email already paid for
+        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
+        if (!empty($paidNames)) {
+            $modules = $modules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        }
+        if ($modules->isEmpty()) {
+            return back()->with('error', __('You have already paid for the selected module(s). No further payment is required.'));
+        }
+
         $purchase->purchased_modules = $modules->map(fn($m) => [
             'name' => $m->name,
             'cost' => (float) $m->cost,
@@ -210,6 +220,39 @@ class TenderController extends Controller
 
         return redirect()->route('tender.purchase.complete')
             ->with('fmf_purchase_id', $purchase->id);
+    }
+
+    /**
+     * AJAX: given an email + tender, report which paid modules the buyer already owns,
+     * so the checkout can disable them and prevent duplicate payments.
+     */
+    public function paidModules(Request $request)
+    {
+        $request->validate([
+            'tender_id' => 'required|exists:tenders,id',
+            'email'     => 'required|email',
+        ]);
+
+        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
+
+        $modules = TenderModule::where('tender_id', $request->tender_id)
+            ->where('status', 1)
+            ->get(['id', 'name', 'cost']);
+
+        // Paid module ids (matched by name)
+        $paidIds = $modules->filter(fn($m) => in_array(trim($m->name), $paidNames, true))
+            ->pluck('id')
+            ->values();
+
+        // "All paid" = every payable (non-free) module is already owned
+        $payable = $modules->whereNotNull('cost');
+        $allPaid = $payable->count() > 0
+            && $payable->every(fn($m) => in_array(trim($m->name), $paidNames, true));
+
+        return response()->json([
+            'paid_module_ids' => $paidIds,
+            'all_paid'        => $allPaid,
+        ]);
     }
 
     public function purchaseComplete()

@@ -617,6 +617,14 @@
             background: #d4ecf7;
         }
 
+        .module-badge.paid-owned {
+            background: #ecfdf5 !important;
+            border-color: #86efac !important;
+            color: #16a34a !important;
+            cursor: not-allowed;
+            opacity: .85;
+        }
+
         .module-badge.paid-badge.selected {
             background: #3498db;
             color: #fff;
@@ -1541,6 +1549,9 @@
         }
 
         function toggleModule(el) {
+            // Already-paid modules cannot be re-selected (duplicate-payment guard)
+            if ($(el).hasClass('paid-owned')) { return; }
+
             var cost = parseFloat($(el).data('cost')) || 0;
             var id = String($(el).data('module-id'));
 
@@ -1568,5 +1579,111 @@
                 container.append('<input type="hidden" name="selected_module_ids[]" value="' + moduleId + '">');
             });
         }
+
+        // ── Duplicate-payment guard ───────────────────────────────────────────
+        (function () {
+            var tenderId = {{ (int) $tender->id }};
+            var $email   = $('#paymentGatewayForm input[name="email"]');
+            var lastEmail = '';
+
+            function recomputeTotal() {
+                var total = 0;
+                $.each(selectedModules, function (k, v) { total += v; });
+                var displayTotal = Object.keys(selectedModules).length > 0 ? total : basePrice;
+                $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
+                $('#selectedAmount').val(displayTotal);
+                var c = $('#selectedModuleInputs');
+                c.empty();
+                $.each(selectedModules, function (moduleId) {
+                    c.append('<input type="hidden" name="selected_module_ids[]" value="' + moduleId + '">');
+                });
+            }
+
+            function applyPaid(paidIds, allPaid) {
+                // Reset previous paid markings
+                $('.module-badge.paid-owned').removeClass('paid-owned').find('.paid-owned-tag').remove();
+
+                $.each(paidIds, function (i, pid) {
+                    var $b = $('.module-badge[data-module-id="' + pid + '"]');
+                    if (!$b.length) return;
+                    // Deselect if currently selected
+                    if ($b.hasClass('selected')) {
+                        $b.removeClass('selected').find('i').removeClass('fa-unlock').addClass('fa-lock');
+                        delete selectedModules[String(pid)];
+                    }
+                    $b.addClass('paid-owned');
+                    if (!$b.find('.paid-owned-tag').length) {
+                        $b.find('span').first().append(' <small class="paid-owned-tag" style="color:#16a34a;font-weight:700;">✓ {{ __('Paid') }}</small>');
+                    }
+                });
+
+                recomputeTotal();
+
+                if (allPaid) {
+                    showAllPaidNotice();
+                } else {
+                    $('#dupPaidNotice').remove();
+                }
+            }
+
+            function showAllPaidNotice() {
+                if ($('#dupPaidNotice').length) return;
+                var html =
+                    '<div id="dupPaidNotice" class="alert mt-3" style="background:#ecfdf5;border:1px solid #86efac;color:#065f46;border-radius:8px;padding:14px 16px;">' +
+                    '<strong>{{ __('You have already paid for all modules of this tender.') }}</strong><br>' +
+                    '<span style="font-size:13px;">{{ __('No further payment is required. Get a fresh secure download link emailed to you.') }}</span>' +
+                    '<div class="mt-2"><button type="button" id="emailNewLinkBtn" class="btn btn-success btn-sm">{{ __('Email me a new download link') }}</button> ' +
+                    '<span id="emailNewLinkMsg" style="font-size:13px;margin-left:8px;"></span></div></div>';
+                $('#purchaserInfo').append(html);
+            }
+
+            function checkPaidModules() {
+                var email = ($email.val() || '').trim();
+                if (!email || email === lastEmail || email.indexOf('@') < 1) return;
+                lastEmail = email;
+
+                $.ajax({
+                    url: '{{ route('tender.paid_modules') }}',
+                    method: 'POST',
+                    data: {
+                        _token: $('#paymentGatewayForm input[name="_token"]').val(),
+                        tender_id: tenderId,
+                        email: email
+                    },
+                    success: function (res) {
+                        applyPaid(res.paid_module_ids || [], !!res.all_paid);
+                    }
+                });
+            }
+
+            $(document).on('blur', '#paymentGatewayForm input[name="email"]', checkPaidModules);
+
+            // Regenerate link for the all-paid case (reuses Find My Files regenerate)
+            $(document).on('click', '#emailNewLinkBtn', function () {
+                var $btn = $(this);
+                $btn.prop('disabled', true);
+                $('#emailNewLinkMsg').text('{{ __('Sending...') }}').css('color', '#065f46');
+                $.ajax({
+                    url: '{{ route('find_my_files.regenerate') }}',
+                    method: 'POST',
+                    data: {
+                        _token: $('#paymentGatewayForm input[name="_token"]').val(),
+                        email: ($email.val() || '').trim()
+                    },
+                    success: function (res) {
+                        if (res.status === 'success') {
+                            $('#emailNewLinkMsg').text('{{ __('Link sent! Check your email.') }}').css('color', '#16a34a');
+                        } else {
+                            $btn.prop('disabled', false);
+                            $('#emailNewLinkMsg').text('{{ __('Could not send. Try again shortly.') }}').css('color', '#dc2626');
+                        }
+                    },
+                    error: function () {
+                        $btn.prop('disabled', false);
+                        $('#emailNewLinkMsg').text('{{ __('Could not send. Try again shortly.') }}').css('color', '#dc2626');
+                    }
+                });
+            });
+        })();
     </script>
 @endsection

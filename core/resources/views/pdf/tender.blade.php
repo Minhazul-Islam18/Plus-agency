@@ -483,11 +483,17 @@
             <tr>
                 {{-- Left: billed to --}}
                 <td style="width:50%; vertical-align:top; padding-right:24px;">
-                    <div class="section-header">Order Date</div>
+                    <div class="section-header">Bill To</div>
                     <div class="billing-name">{{ $order->first_name }} {{ $order->last_name }}</div>
                     <div class="billing-line">{{ $order->email }}</div>
                     @if (!empty($order->phone_number))
                         <div class="billing-line">{{ $order->phone_number }}</div>
+                    @endif
+                    @php
+                        $location = trim(collect([$order->city, $order->country])->filter()->implode(', '));
+                    @endphp
+                    @if (!empty($location))
+                        <div class="billing-line">{{ $location }}</div>
                     @endif
                     @if (!empty($order->company_name))
                         <div class="billing-company">{{ $order->company_name }}</div>
@@ -523,6 +529,10 @@
                         <tr>
                             <td class="od-label">Order Date</td>
                             <td class="od-value">{{ $order->created_at->format('d M Y') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="od-label">Payment Date</td>
+                            <td class="od-value">{{ $isCompleted ? optional($order->paid_at ?? $order->updated_at)->format('d M Y') : '' }}</td>
                         </tr>
                     </table>
                 </td>

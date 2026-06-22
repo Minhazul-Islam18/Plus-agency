@@ -27,9 +27,14 @@ class TenderPurchase extends Model
         'payment_method',
         'gateway_type',
         'payment_status',
+        'paid_at',
         'receipt',
         'invoice',
         'payment_reference',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
     ];
 
     public function tender()

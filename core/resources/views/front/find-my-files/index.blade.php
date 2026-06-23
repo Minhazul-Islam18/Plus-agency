@@ -1085,8 +1085,8 @@
                                 hideOverlay();
                                 resetCaptcha();
                                 if (rateLimitMsg) {
-                                    rateLimitMsg.textContent = '{{ __('Please try again in') }} ' + data
-                                        .minutes + ' {{ __('minutes.') }}';
+                                    rateLimitMsg.textContent = '{{ __('Please try again in') }} ' + (data
+                                        .wait_text || (data.minutes + ' {{ __('minutes.') }}'));
                                 }
                                 if (submitArea) submitArea.style.display = 'none';
                                 if (errRatelimit) errRatelimit.style.display = 'flex';
@@ -1417,8 +1417,8 @@
                                 if (otpSendBtn) otpSendBtn.disabled = false;
                                 @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
                                 var msg = document.getElementById('otp-ratelimit-msg');
-                                if (msg) msg.textContent = '{{ __('Please try again in') }} ' + data
-                                    .minutes + ' {{ __('minutes.') }}';
+                                if (msg) msg.textContent = '{{ __('Please try again in') }} ' + (data
+                                    .wait_text || (data.minutes + ' {{ __('minutes.') }}'));
                                 var el = document.getElementById('otp-error-ratelimit');
                                 if (el) el.style.display = 'flex';
                             } else if (data.type === 'payment_pending') {
@@ -1653,7 +1653,7 @@
 
                         if (data.type === 'rate_limited') {
                             var msg = document.getElementById('payref-ratelimit-msg');
-                            if (msg) msg.textContent = '{{ __('Please try again in') }} ' + data.minutes + ' {{ __('minutes.') }}';
+                            if (msg) msg.textContent = '{{ __('Please try again in') }} ' + (data.wait_text || (data.minutes + ' {{ __('minutes.') }}'));
                             var el = document.getElementById('payref-error-ratelimit');
                             if (el) el.style.display = 'flex';
                         } else if (data.type === 'no_match') {
@@ -1747,7 +1747,7 @@
 
                         if (data.type === 'rate_limited') {
                             var msg = document.getElementById('regen-ratelimit-msg');
-                            if (msg) msg.textContent = '{{ __('Please try again in') }} ' + data.minutes + ' {{ __('minutes.') }}';
+                            if (msg) msg.textContent = '{{ __('Please try again in') }} ' + (data.wait_text || (data.minutes + ' {{ __('minutes.') }}'));
                             var el = document.getElementById('regen-error-ratelimit');
                             if (el) el.style.display = 'flex';
                         } else if (data.type === 'regen_limit') {

@@ -24,9 +24,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 class FindMyFilesController extends Controller
 {
     // Rate limit thresholds
-    const IP_LIMIT        = 10;  // per 15 min window
-    const EMAIL_LIMIT     = 5;   // per hour
-    const BLOCK_MINUTES   = [5, 15, 28, 1440]; // progressive blocks: 5min → 15min → 28min → 24hr
+    const FREE_ATTEMPTS         = 3;   // failed tries allowed before any cooldown kicks in
+    const ATTEMPT_DECAY_MINUTES = 30;  // sliding window: idle this long → strike counter resets
+    // Progressive cooldown (minutes) applied to the 4th, 5th, 6th, 7th, 8th+ failed attempt.
+    // Capped at 15 min — long enough to deter brute force, short enough not to punish real users.
+    const BLOCK_MINUTES   = [1, 2, 5, 10, 15];
 
     // Token TTL and max downloads
     const TOKEN_TTL_HOURS    = 24;
@@ -83,13 +85,35 @@ class FindMyFilesController extends Controller
         foreach ($keys as $key) {
             $record = RateLimitAttempt::where('key', $key)->first();
             if ($record && $record->isBlocked()) {
+                $minutes = max(1, (int) ceil(now()->diffInSeconds($record->blocked_until) / 60));
                 return [
-                    'type'    => 'rate_limited',
-                    'minutes' => max(1, (int) ceil(now()->diffInSeconds($record->blocked_until) / 60)),
+                    'type'      => 'rate_limited',
+                    'minutes'   => $minutes,
+                    'wait_text' => $this->humanWait($minutes),
                 ];
             }
         }
         return null;
+    }
+
+    /**
+     * Human-friendly cooldown string, e.g. "45 seconds", "2 minutes", "1 hour 5 minutes".
+     */
+    private function humanWait(int $minutes): string
+    {
+        if ($minutes <= 1) {
+            return __('a minute');
+        }
+        if ($minutes < 60) {
+            return $minutes . ' ' . __('minutes');
+        }
+        $h = intdiv($minutes, 60);
+        $m = $minutes % 60;
+        $out = $h . ' ' . ($h === 1 ? __('hour') : __('hours'));
+        if ($m > 0) {
+            $out .= ' ' . $m . ' ' . __('minutes');
+        }
+        return $out;
     }
 
     private function incrementAttempts(Request $request, string $emailHash): void
@@ -105,22 +129,47 @@ class FindMyFilesController extends Controller
                 ['key' => $key],
                 ['attempts' => 0]
             );
+
+            // Sliding window: if the user has been idle past the decay window and is not
+            // currently blocked, forgive the old strikes so a fresh session starts clean.
+            if (
+                $record->last_attempt_at
+                && !$record->isBlocked()
+                && $record->last_attempt_at->lt(now()->subMinutes(self::ATTEMPT_DECAY_MINUTES))
+            ) {
+                $record->attempts = 0;
+            }
+
             $record->attempts++;
             $record->last_attempt_at = now();
 
-            // Progressive block escalation (3 free attempts, then 5→15→28→1440 min)
-            if ($record->attempts >= 7) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[3]); // 24h
-            } elseif ($record->attempts >= 6) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[2]); // 28min
-            } elseif ($record->attempts >= 5) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[1]); // 15min
-            } elseif ($record->attempts >= 4) {
-                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[0]); // 5min
+            // First FREE_ATTEMPTS are free; after that apply a progressive, capped cooldown.
+            $over = $record->attempts - self::FREE_ATTEMPTS;
+            if ($over >= 1) {
+                $idx = min($over - 1, count(self::BLOCK_MINUTES) - 1);
+                $record->blocked_until = now()->addMinutes(self::BLOCK_MINUTES[$idx]);
             }
 
             $record->save();
         }
+    }
+
+    /**
+     * Clear strikes for this identity after a successful, legitimate request so honest
+     * users are never carried into a cooldown by past failures.
+     */
+    private function resetAttempts(Request $request, string $emailHash): void
+    {
+        $keys = [
+            'ip:'     . $request->ip(),
+            'email:'  . $emailHash,
+            'device:' . $this->deviceHash($request),
+        ];
+
+        RateLimitAttempt::whereIn('key', $keys)->update([
+            'attempts'      => 0,
+            'blocked_until' => null,
+        ]);
     }
 
     // ── Basic risk score (0–100) ───────────────────────────────────────────────
@@ -373,6 +422,8 @@ class FindMyFilesController extends Controller
             ]));
             return response()->json(['status' => 'error', 'type' => 'email_failed']);
         }
+
+        $this->resetAttempts($request, $emailHash);
 
         AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
             'result'     => 'OK',
@@ -714,6 +765,8 @@ class FindMyFilesController extends Controller
             return response()->json(['status' => 'error', 'type' => 'email_failed']);
         }
 
+        $this->resetAttempts($request, $emailHash);
+
         AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
             'result'     => 'REGEN_OK',
             'risk_score' => $risk,
@@ -856,6 +909,8 @@ class FindMyFilesController extends Controller
                 'type'   => 'email_failed',
             ]);
         }
+
+        $this->resetAttempts($request, $emailHash);
 
         AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
             'result'     => 'PAYREF_OK',
@@ -1138,6 +1193,8 @@ class FindMyFilesController extends Controller
             'order' => $purchase->order_number,
             'sent'  => $emailSent,
         ]);
+
+        $this->resetAttempts($request, $emailHash);
 
         AccessLog::record(AccessLog::LINK_SENT, [
             'ip'          => $request->ip(),

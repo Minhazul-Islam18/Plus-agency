@@ -524,9 +524,18 @@ class FindMyFilesController extends Controller
             abort(404);
         }
 
+        // Only the modules this buyer actually owns may be downloaded.
+        // Paid modules are matched by name (purchased_modules stores no ids); free
+        // modules (no cost) are always allowed.
+        $paidNames = TenderPurchase::paidModuleNames($purchase->email, $purchase->tender_id);
+
         $modules = TenderModule::where('tender_id', $purchase->tender_id)
             ->where('status', 1)
-            ->get();
+            ->get()
+            ->filter(function ($m) use ($paidNames) {
+                return is_null($m->cost) || in_array(trim($m->name), $paidNames, true);
+            })
+            ->values();
 
         // ── Build ZIP ─────────────────────────────────────────────────────────
         $tempDir = env('FMF_ZIP_TEMP_PATH', storage_path('app/temp'));

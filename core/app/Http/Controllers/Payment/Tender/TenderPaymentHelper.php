@@ -188,13 +188,27 @@ trait TenderPaymentHelper
             'type'          => 'tenderDownloadLink',
         ];
 
-        // Attach the invoice PDF as the payment receipt when available
-        if (!empty($purchase->invoice)) {
-            $invoicePath = storage_path('app/invoices/tender/' . $purchase->invoice);
-            if (file_exists($invoicePath)) {
-                $mail['attachment']     = $invoicePath;
-                $mail['attachmentName'] = $purchase->order_number . '.pdf';
+        // Attach the ICA invoice PDF as the payment receipt.
+        // Regenerate it if it is missing so the customer always gets the ICA receipt.
+        $invoicePath = $purchase->invoice
+            ? storage_path('app/invoices/tender/' . $purchase->invoice)
+            : null;
+
+        if (!$invoicePath || !file_exists($invoicePath)) {
+            try {
+                $invoicePath = $this->generateTenderInvoice($purchase);
+            } catch (\Exception $e) {
+                Log::error('[Tender] Receipt PDF regeneration failed for download email', [
+                    'order' => $purchase->order_number,
+                    'error' => $e->getMessage(),
+                ]);
+                $invoicePath = null;
             }
+        }
+
+        if ($invoicePath && file_exists($invoicePath)) {
+            $mail['attachment']     = $invoicePath;
+            $mail['attachmentName'] = 'Receipt-' . $purchase->order_number . '.pdf';
         }
 
         (new KreativMailer)->mailFromAdmin($mail);

@@ -142,6 +142,42 @@ class TenderController extends Controller
             ->orderBy('serial_number', 'asc')
             ->get();
 
+        // Terms & Conditions page (dynamic custom page) for the current language.
+        $termsPage = \App\Page::where('language_id', $currentLang->id)
+            ->where('status', 1)
+            ->where(function ($q) {
+                $q->where('slug', 'like', '%term%')
+                  ->orWhere('slug', 'like', '%condition%')
+                  ->orWhere('slug', 'like', '%condicao%')
+                  ->orWhere('name', 'like', '%term%')
+                  ->orWhere('name', 'like', '%condition%');
+            })
+            ->first();
+        $data['termsUrl'] = $termsPage ? route('front.dynamicPage', $termsPage->slug) : null;
+
+        // Related tenders: active (not past deadline) only. Same category first,
+        // fall back to latest active others.
+        $activeOnly = function ($q) {
+            $q->whereNull('submission_deadline')
+              ->orWhereDate('submission_deadline', '>=', now()->toDateString());
+        };
+        $related = Tender::where('language_id', $currentLang->id)
+            ->where('id', '!=', $tender->id)
+            ->where($activeOnly)
+            ->when($tender->tender_category_id, fn($q) => $q->where('tender_category_id', $tender->tender_category_id))
+            ->orderBy('id', 'desc')
+            ->take(8)
+            ->get();
+        if ($related->isEmpty()) {
+            $related = Tender::where('language_id', $currentLang->id)
+                ->where('id', '!=', $tender->id)
+                ->where($activeOnly)
+                ->orderBy('id', 'desc')
+                ->take(8)
+                ->get();
+        }
+        $data['relatedTenders'] = $related;
+
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
         $data['version']     = $this->getVersionData($currentLang);
@@ -159,6 +195,7 @@ class TenderController extends Controller
             'phone_number' => 'required|string|max:30',
             'country'      => 'required|string|max:100',
             'gateway'      => 'required',
+            'agree_terms'  => 'accepted',
         ]);
 
         $bse = BasicExtra::first();
@@ -191,23 +228,41 @@ class TenderController extends Controller
             $purchase->payment_reference = strtoupper(trim($request->input('payment_reference')));
         }
 
-        // Save purchased modules (name + cost) as JSON
-        // No selection = full tender purchase = all modules
+        // Save purchased modules (name + cost) as JSON.
+        // No selection = full tender purchase. Free modules always ship with the tender,
+        // so they are always recorded on the receipt regardless of selection.
         $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));
-        $moduleQuery = TenderModule::where('tender_id', $request->tender_id);
-        if (!empty($selectedIds)) {
-            $moduleQuery->whereIn('id', $selectedIds);
-        }
-        $modules = $moduleQuery->get(['id', 'name', 'cost']);
 
-        // Duplicate-payment guard: drop modules this email already paid for
-        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
-        if (!empty($paidNames)) {
-            $modules = $modules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        $allModules = TenderModule::where('tender_id', $request->tender_id)
+            ->where('status', 1)
+            ->get(['id', 'name', 'cost']);
+
+        $freeModules = $allModules->filter(fn($m) => is_null($m->cost))->values();
+
+        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost));
+        if (!empty($selectedIds)) {
+            $paidModules = $paidModules->whereIn('id', $selectedIds);
         }
-        if ($modules->isEmpty()) {
+        $paidModules = $paidModules->values();
+
+        // Duplicate-payment guard: drop paid modules this buyer already owns
+        // (logged-in → account id, guest → email)
+        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
+            Auth::check() ? Auth::id() : null,
+            $request->email,
+            (int) $request->tender_id
+        );
+        if (!empty($paidNames)) {
+            $paidModules = $paidModules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        }
+
+        // Nothing left to pay for → block (free items never require payment).
+        if ($paidModules->isEmpty()) {
             return back()->with('error', __('You have already paid for the selected module(s). No further payment is required.'));
         }
+
+        // Persist paid + free; free modules carry cost 0 so the receipt total is unchanged.
+        $modules = $paidModules->concat($freeModules);
 
         $purchase->purchased_modules = $modules->map(fn($m) => [
             'name' => $m->name,
@@ -233,7 +288,11 @@ class TenderController extends Controller
             'email'     => 'required|email',
         ]);
 
-        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
+        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
+            Auth::check() ? Auth::id() : null,
+            $request->email,
+            (int) $request->tender_id
+        );
 
         $modules = TenderModule::where('tender_id', $request->tender_id)
             ->where('status', 1)

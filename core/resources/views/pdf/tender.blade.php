@@ -260,7 +260,7 @@
 
         .fee-deadline-value {
             font-size: 11px;
-            color: #e85d04;
+            color: #dc2626;
             font-weight: 600;
             text-align: right;
         }
@@ -612,9 +612,30 @@
         </div>
 
         {{-- ── TERMS LINK ───────────────────────────────────────────────── --}}
+        @php
+            $tplLangId = optional($order->tender)->language_id;
+            $termsPage = \App\Page::where('status', 1)
+                ->when($tplLangId, fn($q) => $q->where('language_id', $tplLangId))
+                ->where(function ($q) {
+                    $q->where('slug', 'like', '%term%')
+                      ->orWhere('slug', 'like', '%condition%')
+                      ->orWhere('slug', 'like', '%condicao%')
+                      ->orWhere('name', 'like', '%term%')
+                      ->orWhere('name', 'like', '%condition%');
+                })
+                ->first();
+            $termsLink = $termsPage ? route('front.dynamicPage', $termsPage->slug) : null;
+        @endphp
         <div class="terms">
-            <em>Click on this link to read the general terms and conditions related to the purchase of tender
-                documents.</em>
+            <em>
+                @if ($termsLink)
+                    <a href="{{ $termsLink }}" style="color:#2c7be5;">Click on this link</a> to read the general
+                    terms and conditions related to the purchase of tender documents.
+                @else
+                    Click on this link to read the general terms and conditions related to the purchase of tender
+                    documents.
+                @endif
+            </em>
         </div>
 
         {{-- ── SIGNATURE ─────────────────────────────────────────────────── --}}

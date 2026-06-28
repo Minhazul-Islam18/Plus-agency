@@ -7,6 +7,8 @@
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/front/css/magnific-popup.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/front/css/nice-select.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/front/css/owl.theme.default.min.css') }}">
     <style>
         /* ── Expert section ── */
         .expert-wrap {
@@ -478,6 +480,153 @@
             font-weight: 600;
             color: #777;
             margin-bottom: 6px;
+        }
+
+        /* Step badges (1 · 2 · 3) in the checkout flow */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--main-color, #3498db);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        /* ── Terms & conditions agreement ── */
+        .terms-agree-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            font-size: 13.5px;
+            color: #475569;
+            cursor: pointer;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .terms-agree-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 1px;
+            flex-shrink: 0;
+            cursor: pointer;
+            accent-color: var(--main-color, #3498db);
+        }
+
+        .terms-agree-label a {
+            color: var(--main-color, #3498db);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        /* ── Payment method cards ── */
+        .pay-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .pay-method-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 16px 16px 14px;
+            border: 1.5px solid #e3e8ef;
+            border-radius: 12px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color .18s, box-shadow .18s, transform .12s;
+            outline: none;
+        }
+
+        .pay-method-card:hover {
+            border-color: var(--main-color, #3498db);
+            box-shadow: 0 6px 18px rgba(52, 152, 219, .12);
+            transform: translateY(-2px);
+        }
+
+        .pay-method-card:focus-visible {
+            border-color: var(--main-color, #3498db);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, .25);
+        }
+
+        .pay-method-card.active {
+            border-color: var(--main-color, #3498db);
+            box-shadow: 0 0 0 2px var(--main-color, #3498db) inset;
+            background: #f5fbff;
+        }
+
+        .pay-method-card .pm-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 20px;
+            color: #fff;
+            background: linear-gradient(135deg, #4aa4f8, #2c7be5);
+        }
+
+        .pay-method-card .pm-icon.pm-stripe { background: linear-gradient(135deg, #635bff, #4b45c6); }
+        .pay-method-card .pm-icon.pm-razorpay { background: linear-gradient(135deg, #2d88ff, #0b63ce); }
+        .pay-method-card .pm-icon.pm-offline { background: linear-gradient(135deg, #2c3e50, #1a2533); }
+
+        /* Moneroo wordmark logo — no gradient square, render the SVG legibly */
+        .pay-method-card .pm-icon.pm-moneroo {
+            width: auto;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 10px;
+            background: #fff;
+            border: 1px solid #e9edf3;
+        }
+
+        .pay-method-card .pm-icon.pm-moneroo .pm-logo {
+            height: 18px;
+            width: auto;
+            display: block;
+        }
+
+        .pay-method-card .pm-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2a37;
+            line-height: 1.2;
+        }
+
+        .pay-method-card .pm-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8794a6;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .pay-method-card .pm-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--main-color, #3498db);
+            color: #fff;
+            font-size: 11px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pay-method-card.active .pm-check {
+            display: inline-flex;
         }
 
         .pay-row {
@@ -1049,21 +1198,103 @@
                                     value="{{ $tender->current_price }}">
                                 <div id="selectedModuleInputs"></div>
 
-                                <div class="pay-section">
-                                    <p class="pay-label">{{ __('Payer via') }}</p>
-                                    <div class="pay-row">
-                                        <select name="gateway" id="paymentType" class="select-payment">
-                                            <option selected disabled>{{ __('Select') }}</option>
-                                            @foreach ($paymentGateways as $gw)
-                                                <option value="{{ $gw->keyword }}">{{ $gw->name }}</option>
-                                            @endforeach
-                                            @foreach ($offlineGateways as $ogw)
-                                                <option value="{{ $ogw->id }}" data-type="offline">
-                                                    {{ $ogw->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <button type="button" id="purchaseBtn"
-                                            class="main-btn">{{ __('PAY NOW') }}</button>
+                                {{-- STEP 1 · Your information — always visible so owned modules lock
+                                     the moment the buyer is identified (email entered / logged in) --}}
+                                <div id="purchaserInfo" class="mt-2">
+                                    <h6 class="mb-3 font-weight-bold">
+                                        <span class="step-badge">1</span> {{ __('Your Information') }}
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="first_name" class="form-control"
+                                                placeholder="{{ __('First Name') }} *"
+                                                value="{{ Auth::check() ? Auth::user()->fname : '' }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="last_name" class="form-control"
+                                                placeholder="{{ __('Last Name') }} *"
+                                                value="{{ Auth::check() ? Auth::user()->lname : '' }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="email" name="email" class="form-control"
+                                                placeholder="{{ __('Email Address') }} *"
+                                                value="{{ Auth::check() ? Auth::user()->email : '' }}"
+                                                {{ Auth::check() ? 'readonly' : '' }} required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="phone_number" class="form-control"
+                                                placeholder="{{ __('Phone Number') }} *"
+                                                value="{{ Auth::check() ? Auth::user()->phone : '' }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="country" class="form-control"
+                                                placeholder="{{ __('Country') }} *" value="{{ $tender->country }}"
+                                                required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="city" class="form-control"
+                                                placeholder="{{ __('City') }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="company_name" class="form-control"
+                                                placeholder="{{ __('Company Name') }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" name="company_address" class="form-control"
+                                                placeholder="{{ __('Company Address') }}">
+                                        </div>
+                                        <div class="col-12 mb-3" id="paymentReferenceField" style="display:none;">
+                                            <input type="text" name="payment_reference" class="form-control"
+                                                placeholder="{{ __('Payment / Transaction Reference (optional)') }}"
+                                                maxlength="100"
+                                                style="text-transform:uppercase;">
+                                            <small class="text-muted">
+                                                {{ __('Enter your bank transfer reference, gateway transaction ID, or any payment confirmation number. This helps recover your files later.') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- STEP 2 · Payment method (selectable cards) --}}
+                                <div class="pay-section" id="paySection">
+                                    <p class="pay-label">
+                                        <span class="step-badge">2</span> {{ __('Payment method') }}
+                                    </p>
+                                    <input type="hidden" name="gateway" id="paymentGateway" value="">
+                                    <div class="pay-methods">
+                                        @foreach ($paymentGateways as $gw)
+                                            <div class="pay-method-card" data-gw="{{ $gw->keyword }}"
+                                                data-type="online" role="button" tabindex="0"
+                                                aria-label="{{ $gw->name }}">
+                                                <span class="pm-icon pm-{{ $gw->keyword }}">
+                                                    @if ($gw->keyword === 'stripe')
+                                                        <i class="fab fa-cc-stripe"></i>
+                                                    @elseif ($gw->keyword === 'razorpay')
+                                                        <i class="fas fa-bolt"></i>
+                                                    @elseif ($gw->keyword === 'moneroo')
+                                                        <img src="{{ asset('assets/front/img/payment/moneroo.svg') }}"
+                                                            alt="Moneroo" class="pm-logo">
+                                                    @else
+                                                        <i class="far fa-credit-card"></i>
+                                                    @endif
+                                                </span>
+                                                <span class="pm-name">{{ $gw->name }}</span>
+                                                <span class="pm-badge">{{ __('Card / Online') }}</span>
+                                                <span class="pm-check"><i class="fas fa-check"></i></span>
+                                            </div>
+                                        @endforeach
+                                        @foreach ($offlineGateways as $ogw)
+                                            <div class="pay-method-card" data-gw="{{ $ogw->id }}"
+                                                data-type="offline" role="button" tabindex="0"
+                                                aria-label="{{ $ogw->name }}">
+                                                <span class="pm-icon pm-offline">
+                                                    <i class="fas fa-university"></i>
+                                                </span>
+                                                <span class="pm-name">{{ $ogw->name }}</span>
+                                                <span class="pm-badge">{{ __('Bank / Manual') }}</span>
+                                                <span class="pm-check"><i class="fas fa-check"></i></span>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </div>
 
@@ -1092,77 +1323,46 @@
                                     </div>
                                 @endforeach
 
-                                {{-- Purchaser info (revealed after gateway selected) --}}
-                                <div id="purchaserInfo" style="display:none;" class="mt-3">
-                                    <h6 class="mb-3 font-weight-bold">{{ __('Your Information') }}</h6>
+                                {{-- Stripe card fields (shown only when Stripe selected) --}}
+                                <div id="stripeTab" class="d-none mt-3">
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="first_name" class="form-control"
-                                                placeholder="{{ __('First Name') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->fname : '' }}" required>
+                                        <div class="col-12 mb-2">
+                                            <input type="text" name="cardNumber" class="form-control" placeholder="{{ __('Card Number') }}" disabled>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="last_name" class="form-control"
-                                                placeholder="{{ __('Last Name') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->lname : '' }}" required>
+                                        <div class="col-4 mb-2">
+                                            <input type="text" name="cvcNumber" class="form-control" placeholder="{{ __('CVC') }}" disabled>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="email" name="email" class="form-control"
-                                                placeholder="{{ __('Email Address') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->email : '' }}" required>
+                                        <div class="col-4 mb-2">
+                                            <input type="text" name="month" class="form-control" placeholder="{{ __('MM') }}" disabled>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="phone_number" class="form-control"
-                                                placeholder="{{ __('Phone Number') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->phone : '' }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="country" class="form-control"
-                                                placeholder="{{ __('Country') }} *" value="{{ $tender->country }}"
-                                                required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="city" class="form-control"
-                                                placeholder="{{ __('City') }}">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="company_name" class="form-control"
-                                                placeholder="{{ __('Company Name') }}">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <input type="text" name="company_address" class="form-control"
-                                                placeholder="{{ __('Company Address') }}">
-                                        </div>
-                                        <div class="col-12 mb-3" id="paymentReferenceField">
-                                            <input type="text" name="payment_reference" class="form-control"
-                                                placeholder="{{ __('Payment / Transaction Reference (optional)') }}"
-                                                maxlength="100"
-                                                style="text-transform:uppercase;">
-                                            <small class="text-muted">
-                                                {{ __('Enter your bank transfer reference, gateway transaction ID, or any payment confirmation number. This helps recover your files later.') }}
-                                            </small>
+                                        <div class="col-4 mb-2">
+                                            <input type="text" name="year" class="form-control" placeholder="{{ __('YYYY') }}" disabled>
                                         </div>
                                     </div>
-                                    {{-- Stripe card fields (shown only when Stripe selected) --}}
-                                    <div id="stripeTab" class="d-none mt-3">
-                                        <div class="row">
-                                            <div class="col-12 mb-2">
-                                                <input type="text" name="cardNumber" class="form-control" placeholder="{{ __('Card Number') }}" disabled>
-                                            </div>
-                                            <div class="col-4 mb-2">
-                                                <input type="text" name="cvcNumber" class="form-control" placeholder="{{ __('CVC') }}" disabled>
-                                            </div>
-                                            <div class="col-4 mb-2">
-                                                <input type="text" name="month" class="form-control" placeholder="{{ __('MM') }}" disabled>
-                                            </div>
-                                            <div class="col-4 mb-2">
-                                                <input type="text" name="year" class="form-control" placeholder="{{ __('YYYY') }}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="main-btn">{{ __('Confirm Purchase') }}</button>
                                 </div>
+
+                                {{-- Terms & Conditions — mandatory --}}
+                                <div class="terms-agree mt-3">
+                                    <label class="terms-agree-label">
+                                        <input type="checkbox" name="agree_terms" id="agreeTerms" value="1" required>
+                                        <span>
+                                            @if ($termsUrl ?? null)
+                                                <a href="{{ $termsUrl }}" target="_blank" rel="noopener">{{ __('Click on this link') }}</a>
+                                                {{ __('to read the general terms and conditions related to the purchase of tender documents.') }}
+                                            @else
+                                                {{ __('Click on this link to read the general terms and conditions related to the purchase of tender documents.') }}
+                                            @endif
+                                        </span>
+                                    </label>
+                                    <p class="text-danger terms-warning mt-1 mb-0" style="display:none;font-size:13px;">
+                                        * {{ __('You must accept the terms and conditions to proceed.') }}
+                                    </p>
+                                </div>
+
+                                {{-- STEP 3 · Confirm. Nothing selected = buy the whole tender (intentional). --}}
+                                <button type="submit" id="confirmPurchaseBtn" class="main-btn mt-3">
+                                    {{ __('Confirm Purchase') }}
+                                </button>
                             </form>
                         @else
                             {{-- Free tender: contact expert buttons --}}
@@ -1385,6 +1585,142 @@
                 </div>
             </div>
 
+            {{-- ═══════════════════════════════════════════
+                 RELATED TENDERS
+            ═══════════════════════════════════════════ --}}
+            @if (!empty($relatedTenders) && $relatedTenders->count() > 0)
+                <style>
+                    .related-tenders-title {
+                        font-size: 22px;
+                        font-weight: 700;
+                        color: #1f2a37;
+                        margin-bottom: 22px;
+                    }
+                    .rt-card {
+                        background: #fff;
+                        border: 1px solid #eef1f5;
+                        border-radius: 14px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 18px rgba(0, 0, 0, .05);
+                        transition: transform .18s, box-shadow .18s;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .rt-card:hover {
+                        transform: translateY(-4px);
+                        box-shadow: 0 10px 26px rgba(0, 0, 0, .1);
+                    }
+                    .rt-thumb {
+                        position: relative;
+                        display: block;
+                        height: 170px;
+                        overflow: hidden;
+                        background: #f2f4f7;
+                    }
+                    .rt-thumb img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        transition: transform .3s;
+                    }
+                    .rt-card:hover .rt-thumb img { transform: scale(1.05); }
+                    .rt-cat {
+                        position: absolute;
+                        top: 10px;
+                        left: 10px;
+                        background: #4aa4f8;
+                        color: #fff;
+                        font-size: 11px;
+                        font-weight: 700;
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                    }
+                    .rt-body {
+                        padding: 14px 16px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        flex: 1;
+                    }
+                    .rt-deadline {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #e74c3c;
+                        margin-bottom: 8px;
+                    }
+                    .rt-name {
+                        font-size: 15px;
+                        font-weight: 600;
+                        line-height: 1.45;
+                        margin: 0 0 12px;
+                        flex: 1;
+                    }
+                    .rt-name a { color: #222; text-decoration: none; }
+                    .rt-name a:hover { color: var(--main-color, #3498db); }
+                    .rt-meta {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-top: 1px solid #f0f2f5;
+                        padding-top: 10px;
+                        font-size: 13px;
+                        color: #666;
+                    }
+                    .rt-meta .rt-country i { color: var(--main-color, #3498db); margin-right: 4px; }
+                    .rt-meta .rt-price { font-weight: 800; color: var(--main-color, #3498db); }
+                    .rt-meta .rt-price.free { color: #27ae60; }
+                </style>
+                <div class="row mt-5 pt-4" style="border-top:1px solid #eef1f5;">
+                    <div class="col-12">
+                        <h3 class="related-tenders-title">{{ __('Related Tenders') }}</h3>
+                        <div class="related-tenders-carousel owl-carousel owl-theme">
+                            @foreach ($relatedTenders as $rt)
+                                <div class="rt-item">
+                                    <div class="rt-card">
+                                        <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}" class="rt-thumb">
+                                    @if (!empty($rt->tender_image))
+                                        <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
+                                            alt="{{ $rt->title }}">
+                                    @else
+                                        <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
+                                    @endif
+                                    @if ($rt->tenderCategory)
+                                        <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
+                                    @endif
+                                </a>
+                                <div class="rt-body">
+                                    @if ($rt->submission_deadline)
+                                        <div class="rt-deadline">
+                                            <i class="far fa-clock"></i>
+                                            {{ \Carbon\Carbon::parse($rt->submission_deadline)->format('d M Y') }}
+                                        </div>
+                                    @endif
+                                    <h4 class="rt-name">
+                                        <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}">
+                                            {{ Str::limit(convertUtf8($rt->title), 60) }}
+                                        </a>
+                                    </h4>
+                                    <div class="rt-meta">
+                                        <span class="rt-country">
+                                            <i class="fas fa-map-marker-alt"></i> {{ $rt->country }}
+                                        </span>
+                                        <span class="rt-price {{ is_null($rt->current_price) ? 'free' : '' }}">
+                                            @if (is_null($rt->current_price))
+                                                {{ __('Free') }}
+                                            @else
+                                                {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($rt->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                            @endif
+                                        </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
         </div>
     </section>
 @endsection
@@ -1392,7 +1728,32 @@
 @section('scripts')
     <script src="{{ asset('assets/front/js/jquery.magnific-popup.min.js') }}"></script>
     <script src="{{ asset('assets/front/js/jquery.nice-select.min.js') }}"></script>
+    <script src="{{ asset('assets/front/js/owl.carousel.min.js') }}"></script>
     <script>
+        // ── Related tenders carousel (auto-scroll) ──
+        $(function () {
+            var $rel = $('.related-tenders-carousel');
+            if ($rel.length && $.fn.owlCarousel) {
+                var count = $rel.children().length;
+                $rel.owlCarousel({
+                    margin: 24,
+                    loop: count > 3,
+                    autoplay: true,
+                    autoplayTimeout: 3000,
+                    autoplaySpeed: 800,
+                    smartSpeed: 800,
+                    autoplayHoverPause: true,
+                    dots: true,
+                    nav: false,
+                    responsive: {
+                        0:   { items: 1 },
+                        576: { items: 2 },
+                        992: { items: 3 }
+                    }
+                });
+            }
+        });
+
         // ── Mobile tab scroll arrows ──
         (function() {
             var $scroll = $('#tabNavScroll');
@@ -1494,43 +1855,43 @@
                 }
             }
 
-            // Payment gateway select → show offline details / purchaser info
-            $(document).on('change', '#paymentType', function() {
-                var val  = $(this).val();
-                var type = $(this).find('option:checked').data('type');
+            // Payment method cards → select gateway, reveal offline details
+            $(document).on('click', '.pay-method-card', function() {
+                var gw   = String($(this).data('gw'));
+                var type = $(this).data('type');
+                $('.pay-method-card').removeClass('active');
+                $(this).addClass('active');
+                $('#paymentGateway').val(gw);
+                $('.payment-warning').stop(true, true).hide();
                 $('.gateway-details').hide();
-                updateFormAction(val, type);
-                if (type === 'offline') {
-                    $('#tab-' + val).show();
-                    $('#purchaserInfo').slideDown();
-                } else if (val) {
-                    $('#purchaserInfo').slideDown();
-                } else {
-                    $('#purchaserInfo').slideUp();
-                }
-            });
-
-            // PAY NOW button
-            $(document).on('click', '#purchaseBtn', function() {
-                var gw   = $('#paymentType').val();
-                var type = $('#paymentType').find('option:checked').data('type');
-                if (!gw) {
-                    $('.payment-warning').fadeIn().delay(2000).fadeOut();
-                    return;
-                }
                 updateFormAction(gw, type);
-                $('#purchaserInfo').slideDown();
-                $('html, body').animate({
-                    scrollTop: $('#purchaserInfo').offset().top - 100
-                }, 400);
+                if (type === 'offline') {
+                    $('#tab-' + gw).show();
+                }
             });
 
-            // Form submit guard
+            // Keyboard accessibility for the cards
+            $(document).on('keydown', '.pay-method-card', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $(this).trigger('click'); }
+            });
+
+            // Form submit guard: must pick a gateway; block when buyer already owns everything
             $(document).on('submit', '#paymentGatewayForm', function(e) {
-                var gw = $('#paymentType').val();
+                var gw = $('#paymentGateway').val();
                 if (!gw) {
                     e.preventDefault();
                     $('.payment-warning').fadeIn().delay(2000).fadeOut();
+                    $('html, body').animate({ scrollTop: $('#paySection').offset().top - 120 }, 350);
+                    return;
+                }
+                if (!$('#agreeTerms').is(':checked')) {
+                    e.preventDefault();
+                    $('.terms-warning').stop(true, true).fadeIn().delay(2500).fadeOut();
+                    $('html, body').animate({ scrollTop: $('.terms-agree').offset().top - 140 }, 350);
+                    return;
+                }
+                if ($('#confirmPurchaseBtn').prop('disabled')) {
+                    e.preventDefault();
                 }
             });
 
@@ -1548,6 +1909,16 @@
             return num + ' ' + currencySymbol;
         }
 
+        // "Buy everything remaining" price = sum of paid modules the buyer does NOT yet own.
+        // Falls back to the full tender price when nothing is owned.
+        function tenderUnpaidBase() {
+            var t = 0;
+            $('.module-badge.paid-badge').each(function () {
+                if (!$(this).hasClass('paid-owned')) t += parseFloat($(this).data('cost')) || 0;
+            });
+            return t;
+        }
+
         function toggleModule(el) {
             // Already-paid modules cannot be re-selected (duplicate-payment guard)
             if ($(el).hasClass('paid-owned')) { return; }
@@ -1563,10 +1934,10 @@
                 selectedModules[id] = cost;
             }
 
-            // Sum selected module costs; fall back to basePrice when nothing selected
+            // Sum selected module costs; nothing selected = buy everything still unpaid
             var total = 0;
             $.each(selectedModules, function(k, v) { total += v; });
-            var displayTotal = Object.keys(selectedModules).length > 0 ? total : basePrice;
+            var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
 
             // Update displayed price and hidden form field
             $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
@@ -1589,7 +1960,7 @@
             function recomputeTotal() {
                 var total = 0;
                 $.each(selectedModules, function (k, v) { total += v; });
-                var displayTotal = Object.keys(selectedModules).length > 0 ? total : basePrice;
+                var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
                 $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
                 $('#selectedAmount').val(displayTotal);
                 var c = $('#selectedModuleInputs');
@@ -1620,9 +1991,16 @@
                 recomputeTotal();
 
                 if (allPaid) {
+                    // Terminal state: nothing left to buy → hide gateway + block submit
                     showAllPaidNotice();
+                    $('#paySection').hide();
+                    $('#confirmPurchaseBtn').prop('disabled', true)
+                        .css({ opacity: 0.5, cursor: 'not-allowed' });
                 } else {
                     $('#dupPaidNotice').remove();
+                    $('#paySection').show();
+                    $('#confirmPurchaseBtn').prop('disabled', false)
+                        .css({ opacity: '', cursor: '' });
                 }
             }
 
@@ -1657,6 +2035,19 @@
             }
 
             $(document).on('blur', '#paymentGatewayForm input[name="email"]', checkPaidModules);
+
+            // Re-check while typing (debounced) so owned modules lock without needing blur
+            var typeTimer = null;
+            $(document).on('input', '#paymentGatewayForm input[name="email"]', function () {
+                clearTimeout(typeTimer);
+                typeTimer = setTimeout(checkPaidModules, 600);
+            });
+
+            // Re-check when a gateway is picked, covering edits made before selecting.
+            $(document).on('click', '.pay-method-card', function () { setTimeout(checkPaidModules, 60); });
+
+            // Run once on load for pre-filled (logged-in) email
+            checkPaidModules();
 
             // Regenerate link for the all-paid case (reuses Find My Files regenerate)
             $(document).on('click', '#emailNewLinkBtn', function () {

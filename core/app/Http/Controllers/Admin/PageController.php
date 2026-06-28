@@ -59,7 +59,7 @@ class PageController extends Controller
             'language_id' => 'required',
             'name' => [
                 'required',
-                'max:25',
+                'max:150',
                 function ($attribute, $value, $fail) use ($slug) {
                     $pages = Page::all();
                     foreach ($pages as $key => $page) {
@@ -133,7 +133,7 @@ class PageController extends Controller
         $rules = [
             'name' => [
                 'required',
-                'max:25',
+                'max:150',
                 function ($attribute, $value, $fail) use ($slug, $pageID) {
                     $pages = Page::all();
                     foreach ($pages as $key => $page) {

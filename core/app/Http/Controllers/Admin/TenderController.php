@@ -584,7 +584,7 @@ class TenderController extends Controller
     public function purchaseUpdateReference(Request $request)
     {
         $purchase = TenderPurchase::findOrFail($request->purchase_id);
-        $purchase->payment_reference = strtoupper(trim($request->input('payment_reference', ''))) ?: null;
+        $purchase->payment_reference = trim($request->input('payment_reference', '')) ?: null;
         $purchase->save();
 
         Session::flash('success', 'Payment reference updated successfully!');

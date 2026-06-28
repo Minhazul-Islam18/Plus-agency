@@ -1,10 +1,9 @@
 @php
-    $moduleList = ($purchase->tender && $purchase->tender->tenderModules)
-        ? $purchase->tender->tenderModules
-        : collect([]);
-    $qty        = $moduleList->count();
+    // Modules the buyer actually purchased (paid + free), as stored at checkout.
+    $moduleList = collect(json_decode($purchase->purchased_modules, true) ?: []);
+    $qty = $moduleList->count();
     $summaryFee = $moduleList->sum('cost');
-    $currency   = $purchase->currency_code ?? '';
+    $currency = $purchase->currency_code ?? '';
 @endphp
 
 <!-- Receipt Details Modal -->
@@ -22,7 +21,8 @@
 
                     <div class="row">
                         <div class="col-lg-5"><strong>Tender Title:</strong></div>
-                        <div class="col-lg-7">{{ !empty($purchase->tender) ? convertUtf8($purchase->tender->title) : '-' }}</div>
+                        <div class="col-lg-7">
+                            {{ !empty($purchase->tender) ? convertUtf8($purchase->tender->title) : '-' }}</div>
                     </div>
                     <hr>
 
@@ -45,8 +45,32 @@
                     <hr>
 
                     <div class="row">
+                        <div class="col-lg-5"><strong>Phone Number:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->phone_number ?: '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Country:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->country ?: '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
                         <div class="col-lg-5"><strong>City:</strong></div>
-                        <div class="col-lg-7">{{ $purchase->city ?? '-' }}</div>
+                        <div class="col-lg-7">{{ $purchase->city ?: '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Company Name:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->company_name ? convertUtf8($purchase->company_name) : '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Company Address:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->company_address ? convertUtf8($purchase->company_address) : '-' }}</div>
                     </div>
                     <hr>
 
@@ -56,13 +80,13 @@
                     </div>
                     <hr>
 
-                    {{-- Dynamic module fee rows --}}
+                    {{-- Purchased module fee rows (paid + free) --}}
                     @foreach ($moduleList as $module)
                         <div class="row">
-                            <div class="col-lg-5"><strong>{{ $module->name }}:</strong></div>
+                            <div class="col-lg-5"><strong>{{ convertUtf8($module['name'] ?? '') }}:</strong></div>
                             <div class="col-lg-7">
-                                @if (!is_null($module->cost) && $module->cost > 0)
-                                    {{ number_format($module->cost, 2) }} {{ $currency }}
+                                @if (!empty($module['cost']) && $module['cost'] > 0)
+                                    {{ number_format($module['cost'], 2) }} {{ $currency }}
                                 @else
                                     Free
                                 @endif
@@ -89,6 +113,18 @@
                     </div>
                     <hr>
 
+                    @if (!empty($purchase->receipt))
+                        <div class="row">
+                            <div class="col-lg-5"><strong>Uploaded Receipt:</strong></div>
+                            <div class="col-lg-7">
+                                <a href="{{ asset('assets/front/receipt/' . $purchase->receipt) }}" target="_blank">
+                                    View receipt
+                                </a>
+                            </div>
+                        </div>
+                        <hr>
+                    @endif
+
                     <div class="row">
                         <div class="col-lg-5"><strong>Status:</strong></div>
                         <div class="col-lg-7">
@@ -103,21 +139,8 @@
 
                     <div class="row align-items-center">
                         <div class="col-lg-5"><strong>Payment Reference:</strong></div>
-                        <div class="col-lg-7">
-                            <form action="{{ route('admin.tender.purchaseUpdateReference') }}" method="POST"
-                                class="d-flex align-items-center" style="gap:6px;">
-                                @csrf
-                                <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
-                                <input type="text" name="payment_reference"
-                                    class="form-control form-control-sm"
-                                    value="{{ $purchase->payment_reference }}"
-                                    placeholder="e.g. FLW-XXXX or TRF-2026-001"
-                                    maxlength="100"
-                                    style="text-transform:uppercase; font-family:monospace;">
-                                <button type="submit" class="btn btn-sm btn-primary text-nowrap">Save</button>
-                            </form>
-                            <small class="text-muted">Gateway txn ID or bank transfer reference.</small>
-                        </div>
+                        <div class="col-lg-7">{{ $purchase->payment_reference }}</div>
+
                     </div>
                     <hr>
 

@@ -41,8 +41,8 @@ class TenderModuleController extends Controller
 
         if ($request->filled('tender_file')) {
             $filePath = $request->tender_file;
-            $ext      = pathinfo($filePath, PATHINFO_EXTENSION);
-            $filename = pathinfo($filePath, PATHINFO_FILENAME) . '.' . $ext;
+            // LFM returns a URL: keep the original filename intact (decode %20 etc.) — do not rename.
+            $filename = basename(rawurldecode(parse_url($filePath, PHP_URL_PATH) ?: $filePath));
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);
@@ -83,8 +83,8 @@ class TenderModuleController extends Controller
             }
 
             $filePath = $request->tender_file;
-            $ext      = pathinfo($filePath, PATHINFO_EXTENSION);
-            $filename = pathinfo($filePath, PATHINFO_FILENAME) . '.' . $ext;
+            // LFM returns a URL: keep the original filename intact (decode %20 etc.) — do not rename.
+            $filename = basename(rawurldecode(parse_url($filePath, PHP_URL_PATH) ?: $filePath));
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);

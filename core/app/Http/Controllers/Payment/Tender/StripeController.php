@@ -26,15 +26,19 @@ class StripeController extends Controller
     {
         $lang  = $this->getLang();
         $bse   = $lang->basic_extra;
-        $total = (float) $request->selected_amount;
-
-        if ($bse->base_currency_text !== 'USD') {
-            $total = $total / max(1, (float) $bse->base_currency_rate);
-        }
 
         $stripe = Stripe::make(Config::get('services.stripe.secret'));
 
         try {
+            // Guard + build pending purchase first so we only charge the unpaid modules
+            $purchase = $this->createPendingPurchase($request, 'stripe');
+
+            // Server-authoritative amount = sum of the (unpaid) modules being bought
+            $total = $this->tenderPayableAmount($purchase);
+            if ($bse->base_currency_text !== 'USD') {
+                $total = $total / max(1, (float) $bse->base_currency_rate);
+            }
+
             $token = $stripe->tokens()->create([
                 'card' => [
                     'number'    => $request->cardNumber,
@@ -56,10 +60,12 @@ class StripeController extends Controller
             ]);
 
             if ($charge['status'] === 'succeeded') {
-                $purchase = $this->createPendingPurchase($request, 'stripe');
                 $this->completePurchase($purchase->id, $charge['id'] ?? null);
                 return $this->redirectToComplete($purchase);
             }
+        } catch (\RuntimeException $e) {
+            // Duplicate-payment guard (already-paid modules)
+            return back()->with('error', $e->getMessage());
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }

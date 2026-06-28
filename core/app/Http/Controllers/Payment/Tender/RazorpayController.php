@@ -35,13 +35,14 @@ class RazorpayController extends Controller
             return back()->with('error', __('Invalid Currency For Razorpay Payment.'));
         }
 
-        $total    = (float) $request->selected_amount;
-
         try {
             $purchase = $this->createPendingPurchase($request, 'razorpay');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
+
+        // Server-authoritative amount = sum of the (unpaid) modules being bought
+        $total = $this->tenderPayableAmount($purchase);
 
         $razorpayOrder = $this->api->order->create([
             'receipt'         => $purchase->order_number,

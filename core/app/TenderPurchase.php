@@ -43,15 +43,24 @@ class TenderPurchase extends Model
     }
 
     /**
-     * Module names this email has already paid for on a tender.
+     * Module names a buyer has already paid for on a tender.
      * purchased_modules stores {name, cost} (no ids), so paid-state is keyed by name.
+     *
+     * Identity: a logged-in buyer is matched by account id (so editing the email
+     * field cannot dodge the guard); a guest is matched by email.
      */
-    public static function paidModuleNames(string $email, int $tenderId): array
+    public static function paidModuleNamesForBuyer(?int $userId, ?string $email, int $tenderId): array
     {
-        return static::where('tender_id', $tenderId)
-            ->where('payment_status', 'Completed')
-            ->whereRaw('LOWER(TRIM(email)) = ?', [strtolower(trim($email))])
-            ->get()
+        $query = static::where('tender_id', $tenderId)
+            ->where('payment_status', 'Completed');
+
+        if (!empty($userId)) {
+            $query->where('user_id', $userId);
+        } else {
+            $query->whereRaw('LOWER(TRIM(email)) = ?', [strtolower(trim((string) $email))]);
+        }
+
+        return $query->get()
             ->flatMap(function ($p) {
                 $mods = json_decode($p->purchased_modules, true) ?: [];
                 return collect($mods)->pluck('name');
@@ -61,6 +70,14 @@ class TenderPurchase extends Model
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Backwards-compatible email-only lookup. Prefer paidModuleNamesForBuyer().
+     */
+    public static function paidModuleNames(string $email, int $tenderId): array
+    {
+        return static::paidModuleNamesForBuyer(null, $email, $tenderId);
     }
 
     public function user()

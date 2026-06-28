@@ -24,10 +24,11 @@ class MonerooController extends Controller
     {
         $lang  = $this->getLang();
         $bse   = $lang->basic_extra;
-        $total = (float) $request->selected_amount;
 
         try {
             $purchase = $this->createPendingPurchase($request, 'moneroo');
+            // Server-authoritative amount = sum of the (unpaid) modules being bought
+            $total = $this->tenderPayableAmount($purchase);
 
             $moneroo = new Payment();
             $payment = $moneroo->init([
@@ -46,6 +47,9 @@ class MonerooController extends Controller
             Session::put('tenderMonerooTransaction', $payment->id);
 
             return redirect()->away($payment->checkout_url);
+        } catch (\RuntimeException $e) {
+            // Duplicate-payment guard (already-paid modules) — show the clean message
+            return back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
             return back()->with('error', 'Payment initialization failed: ' . $e->getMessage());
         }

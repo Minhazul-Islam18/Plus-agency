@@ -35,23 +35,47 @@ trait TenderPaymentHelper
 
     protected function createPendingPurchase(Request $request, string $gateway): TenderPurchase
     {
+        // Terms & conditions must be accepted.
+        if (!$request->boolean('agree_terms')) {
+            throw new \RuntimeException(__('You must accept the terms and conditions to proceed.'));
+        }
+
         $bse = $this->getLang()->basic_extra ?? BasicExtra::first();
 
         $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));
-        $moduleQuery = TenderModule::where('tender_id', $request->tender_id);
-        if (!empty($selectedIds)) {
-            $moduleQuery->whereIn('id', $selectedIds);
-        }
-        $modules = $moduleQuery->get(['id', 'name', 'cost']);
 
-        // Duplicate-payment guard: drop modules this email already paid for
-        $paidNames = TenderPurchase::paidModuleNames($request->email, (int) $request->tender_id);
-        if (!empty($paidNames)) {
-            $modules = $modules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        $allModules = TenderModule::where('tender_id', $request->tender_id)
+            ->where('status', 1)
+            ->get(['id', 'name', 'cost']);
+
+        // Free modules (no cost) always ship with the tender → always on the receipt.
+        $freeModules = $allModules->filter(fn($m) => is_null($m->cost))->values();
+
+        // Paid modules being purchased: explicit selection, or all when none selected.
+        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost));
+        if (!empty($selectedIds)) {
+            $paidModules = $paidModules->whereIn('id', $selectedIds);
         }
-        if ($modules->isEmpty()) {
+        $paidModules = $paidModules->values();
+
+        // Duplicate-payment guard: drop paid modules this buyer already owns
+        // (logged-in → account id, guest → email).
+        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
+            Auth::check() ? Auth::id() : null,
+            $request->email,
+            (int) $request->tender_id
+        );
+        if (!empty($paidNames)) {
+            $paidModules = $paidModules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
+        }
+
+        // Nothing left to pay for → block (free items never require payment).
+        if ($paidModules->isEmpty()) {
             throw new \RuntimeException(__('You have already paid for the selected module(s). No further payment is required.'));
         }
+
+        // Persist paid + free; free modules carry cost 0 so the receipt total is unchanged.
+        $modules = $paidModules->concat($freeModules);
 
         $purchase                    = new TenderPurchase;
         $purchase->tender_id         = $request->tender_id;
@@ -76,6 +100,18 @@ trait TenderPaymentHelper
 
         $purchase->save();
         return $purchase;
+    }
+
+    /**
+     * Authoritative amount to charge: the sum of the modules actually being purchased
+     * (already filtered to the buyer's unpaid set in createPendingPurchase). Never trust
+     * the client-sent selected_amount — it can be tampered and is wrong when some modules
+     * were dropped by the duplicate-payment guard.
+     */
+    protected function tenderPayableAmount(TenderPurchase $purchase): float
+    {
+        $mods = json_decode($purchase->purchased_modules, true) ?: [];
+        return (float) array_sum(array_column($mods, 'cost'));
     }
 
     protected function completePurchase(int $purchaseId, ?string $gatewayRef = null): TenderPurchase

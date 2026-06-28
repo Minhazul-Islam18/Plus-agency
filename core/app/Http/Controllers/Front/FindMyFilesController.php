@@ -578,7 +578,7 @@ class FindMyFilesController extends Controller
         // Only the modules this buyer actually owns may be downloaded.
         // Paid modules are matched by name (purchased_modules stores no ids); free
         // modules (no cost) are always allowed.
-        $paidNames = TenderPurchase::paidModuleNames($purchase->email, $purchase->tender_id);
+        $paidNames = TenderPurchase::paidModuleNamesForBuyer($purchase->user_id, $purchase->email, $purchase->tender_id);
 
         $modules = TenderModule::where('tender_id', $purchase->tender_id)
             ->where('status', 1)

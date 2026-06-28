@@ -745,7 +745,7 @@
                                 </li>
                                 <li class="@if (request()->path() == 'admin/tender/purchase-log') active @endif">
                                     <a href="{{ route('admin.tender.purchaseLog') }}">
-                                        <span class="sub-item">Enrolls</span>
+                                        <span class="sub-item">Purchases</span>
                                     </a>
                                 </li>
                                 <li class="@if (request()->path() == 'admin/tender/enrolls/report') active @endif">

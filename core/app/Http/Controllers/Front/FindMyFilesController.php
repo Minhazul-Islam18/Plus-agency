@@ -250,6 +250,23 @@ class FindMyFilesController extends Controller
         return $query;
     }
 
+    /**
+     * A suspended transaction is blocked from issuing links or downloading.
+     * Returns the JSON "under verification" response for AJAX entry points,
+     * or null when the order is fine to proceed.
+     */
+    private function suspendedResponse(?TenderPurchase $purchase)
+    {
+        if ($purchase && $purchase->isSuspended()) {
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'suspended',
+                'message' => __('This order is currently being verified. For any information, please contact ICA.'),
+            ]);
+        }
+        return null;
+    }
+
     // ── Controller actions ─────────────────────────────────────────────────────
 
     public function index(Request $request)
@@ -382,6 +399,15 @@ class FindMyFilesController extends Controller
             ]);
         }
 
+        // ── 6b. Suspension check — admin-blocked transactions go no further ───
+        if ($r = $this->suspendedResponse($purchase)) {
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'SUSPENDED',
+                'risk_score' => $risk,
+            ]));
+            return $r;
+        }
+
         // ── 7. Revoke any previous active tokens for this order ───────────────
         SecureToken::where('order_id', $purchase->order_number)
             ->where('status', 'active')
@@ -502,6 +528,12 @@ class FindMyFilesController extends Controller
             return $this->downloadError($currentLang);
         }
 
+        // ── Suspension check — admin may have suspended after the link was issued ─
+        $purchase = TenderPurchase::where('order_number', $token->order_id)->first();
+        if ($purchase && $purchase->isSuspended()) {
+            return $this->suspendedDownloadError($currentLang, $purchase);
+        }
+
         // Risk score for display
         $risk = $this->riskScore($request, $token->email_hash);
 
@@ -537,13 +569,35 @@ class FindMyFilesController extends Controller
         return view('front.find-my-files.download', $data);
     }
 
-    private function downloadError($currentLang)
+    private function downloadError($currentLang, array $opts = [])
     {
-        $data['bse']         = $currentLang->basic_extra;
-        $data['currentLang'] = $currentLang;
-        $data['version']     = $this->getVersion($currentLang);
-        $data['bs']          = $currentLang->basic_setting;
+        $data['bse']          = $currentLang->basic_extra;
+        $data['currentLang']  = $currentLang;
+        $data['version']      = $this->getVersion($currentLang);
+        $data['bs']           = $currentLang->basic_setting;
+        $data['errorTitle']   = $opts['title']     ?? null;
+        $data['errorMessage'] = $opts['message']   ?? null;
+        $data['suspended']    = $opts['suspended'] ?? false;
         return view('front.find-my-files.download_error', $data);
+    }
+
+    /**
+     * Suspended-transaction page for the download confirm/stream step.
+     * Also revokes any lingering active tokens so the links die immediately.
+     */
+    private function suspendedDownloadError($currentLang, ?TenderPurchase $purchase)
+    {
+        if ($purchase) {
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+        }
+
+        return $this->downloadError($currentLang, [
+            'suspended' => true,
+            'title'     => __('This link has been disabled by the administrator.'),
+            'message'   => __('This link has been disabled by the administrator. Please contact ICA support.'),
+        ]);
     }
 
     // ── Step 8 — Stream ZIP of all modules ────────────────────────────────────
@@ -575,6 +629,14 @@ class FindMyFilesController extends Controller
             abort(404);
         }
 
+        // Suspended transaction → kill its tokens and refuse the file outright.
+        if ($purchase->isSuspended()) {
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+            abort(403);
+        }
+
         // Only the modules this buyer actually owns may be downloaded.
         // Paid modules are matched by name (purchased_modules stores no ids); free
         // modules (no cost) are always allowed.
@@ -602,6 +664,57 @@ class FindMyFilesController extends Controller
             abort(500);
         }
 
+        // ── Watermark config (global) + per-buyer stamp variables ─────────────
+        $wm      = \App\BasicExtra::first();
+        $wmOn    = $wm && (int) $wm->tender_watermark_enabled === 1;
+        $encOn   = $wm && (int) $wm->tender_pdf_encrypt_enabled === 1 && trim((string) $wm->tender_pdf_password) !== '';
+        $wmSettings = [
+            'watermark' => $wmOn,
+            'template'  => $wm->tender_watermark_template ?? '',
+            'opacity'   => $wm->tender_watermark_opacity ?? 0.30,
+            'color'     => $wm->tender_watermark_color ?? 'FF0000',
+            'font_size' => $wm->tender_watermark_font_size ?? 24,
+            'rotation'  => $wm->tender_watermark_rotation ?? 45,
+            'encrypt'   => $encOn,
+            'password'  => (string) ($wm->tender_pdf_password ?? ''),
+        ];
+        $wmVars = [
+            'company'      => (string) $purchase->company_name,
+            'name'         => trim($purchase->first_name . ' ' . $purchase->last_name),
+            'first_name'   => (string) $purchase->first_name,
+            'last_name'    => (string) $purchase->last_name,
+            'tender_code'  => (string) optional($purchase->tender)->tender_code,
+            'tender_title' => (string) optional($purchase->tender)->title,
+            'order_number' => (string) $purchase->order_number,
+            'email'        => (string) $purchase->email,
+            'datetime'     => now()->utc()->format('j F Y, H:i') . ' UTC',
+            'date'         => now()->utc()->format('j F Y'),
+        ];
+
+        $processPdf = $wmOn || $encOn;
+        $stamper    = $processPdf ? new \App\Services\TenderPdfStamper() : null;
+        $stampTemps = [];
+
+        $failStamp = function ($module, $reason) use ($zip, $zipPath, &$stampTemps, $request, $token) {
+            $zip->close();
+            @unlink($zipPath);
+            foreach ($stampTemps as $t) {
+                @unlink($t);
+            }
+            \Log::error('Tender watermark failed — download blocked', [
+                'order_id' => $token->order_id,
+                'module'   => $module->name ?? null,
+                'reason'   => $reason,
+            ]);
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'WATERMARK_FAILED',
+                'risk_score' => 0,
+            ]);
+        };
+
         $added = 0;
         foreach ($modules as $module) {
             if (empty($module->tender_file)) {
@@ -609,14 +722,37 @@ class FindMyFilesController extends Controller
             }
             $modulesDir = env('FMF_MODULES_PATH', base_path('../assets/front/files/tender_modules'));
             $filePath = rtrim($modulesDir, '/') . '/' . $module->tender_file;
-            if (file_exists($filePath)) {
-                $ext      = pathinfo($module->tender_file, PATHINFO_EXTENSION);
-                $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $module->name);
-                $zip->addFile($filePath, $safeName . '.' . $ext);
-                $added++;
+            if (!file_exists($filePath)) {
+                continue;
             }
+
+            $ext      = strtolower(pathinfo($module->tender_file, PATHINFO_EXTENSION));
+            $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $module->name);
+
+            // PDFs get a personalised traceable watermark. Non-PDF files (docx,
+            // xls, images, archives) can't be stamped and pass through untouched.
+            if ($processPdf && $ext === 'pdf') {
+                $stampedPath = $tempDir . '/wm_' . $token->order_id . '_' . $module->id . '_' . uniqid() . '.pdf';
+                try {
+                    $stamper->stampFile($filePath, $stampedPath, $wmSettings, $wmVars);
+                } catch (\Throwable $e) {
+                    // Block-on-failure: never serve an un-stamped tender PDF.
+                    $failStamp($module, $e->getMessage());
+                    abort(500, 'Document could not be prepared for download. Please contact ICA support.');
+                }
+                $stampTemps[] = $stampedPath;
+                $zip->addFile($stampedPath, $safeName . '.' . $ext);
+            } else {
+                $zip->addFile($filePath, $safeName . '.' . $ext);
+            }
+            $added++;
         }
         $zip->close();
+
+        // Stamped temp PDFs are already copied into the archive; drop them.
+        foreach ($stampTemps as $t) {
+            @unlink($t);
+        }
 
         if ($added === 0) {
             @unlink($zipPath);
@@ -706,6 +842,11 @@ class FindMyFilesController extends Controller
                 'status'   => 'success',
                 'redirect' => route('find_my_files.link_sent'),
             ]);
+        }
+
+        // ── 3b. Suspension check ──────────────────────────────────────────────
+        if ($r = $this->suspendedResponse($purchase)) {
+            return $r;
         }
 
         // ── 4. Regeneration cap: max 3 new tokens per order per 24h ──────────
@@ -864,6 +1005,11 @@ class FindMyFilesController extends Controller
         }
 
         \Log::info('[PayRef] Purchase matched', ['order' => $purchase->order_number]);
+
+        // ── 4b. Suspension check ──────────────────────────────────────────────
+        if ($r = $this->suspendedResponse($purchase)) {
+            return $r;
+        }
 
         // ── 5. Revoke previous active tokens ──────────────────────────────────
         SecureToken::where('order_id', $purchase->order_number)
@@ -1031,6 +1177,11 @@ class FindMyFilesController extends Controller
 
         \Log::info('[OTP/requestOtp] Purchase matched and completed', ['order' => $purchase->order_number]);
 
+        // ── 4b. Suspension check ──────────────────────────────────────────────
+        if ($r = $this->suspendedResponse($purchase)) {
+            return $r;
+        }
+
         // ── 4. Invalidate any previous pending OTP sessions ───────────────────
         OtpVerification::where('order_id', $purchase->order_number)
             ->where('status', 'pending')
@@ -1162,6 +1313,12 @@ class FindMyFilesController extends Controller
         if (!$purchase) {
             $otp->update(['status' => 'expired']);
             return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        // Suspension check — block issuing a token even after a valid OTP.
+        if ($r = $this->suspendedResponse($purchase)) {
+            $otp->update(['status' => 'verified']);
+            return $r;
         }
 
         $otp->update(['status' => 'verified']);

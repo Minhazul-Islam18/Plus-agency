@@ -614,16 +614,7 @@
         {{-- ── TERMS LINK ───────────────────────────────────────────────── --}}
         @php
             $tplLangId = optional($order->tender)->language_id;
-            $termsPage = \App\Page::where('status', 1)
-                ->when($tplLangId, fn($q) => $q->where('language_id', $tplLangId))
-                ->where(function ($q) {
-                    $q->where('slug', 'like', '%term%')
-                      ->orWhere('slug', 'like', '%condition%')
-                      ->orWhere('slug', 'like', '%condicao%')
-                      ->orWhere('name', 'like', '%term%')
-                      ->orWhere('name', 'like', '%condition%');
-                })
-                ->first();
+            $termsPage = $tplLangId ? \App\Page::forType('terms', $tplLangId) : null;
             $termsLink = $termsPage ? route('front.dynamicPage', $termsPage->slug) : null;
         @endphp
         <div class="terms">

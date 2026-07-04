@@ -49,3 +49,6 @@
 # Ignore OS files
 .DS_Store
 Thumbs.db
+
+# SetaPDF Stamper (licensed, not redistributable)
+core/setapdf/

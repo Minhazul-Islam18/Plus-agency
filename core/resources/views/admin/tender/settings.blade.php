@@ -183,6 +183,129 @@
               </div>
 
               <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">Download Watermark</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">
+                Personalised, traceable watermark stamped on every <strong>PDF</strong> a buyer downloads.
+                Applies globally (all languages). Non-PDF files are not stamped.
+              </p>
+
+              {{-- Enable toggle --}}
+              <div class="form-group">
+                <label class="font-weight-bold">Watermark</label>
+                <div class="selectgroup w-100">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_watermark_enabled" value="1" class="selectgroup-input"
+                      {{ $abex->tender_watermark_enabled == 1 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Active</span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_watermark_enabled" value="0" class="selectgroup-input"
+                      {{ $abex->tender_watermark_enabled == 0 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Deactive</span>
+                  </label>
+                </div>
+                <p class="text-warning mb-0 mt-1" style="font-size:12px;">
+                  When active, a PDF that fails to stamp is blocked from download (buyer is asked to contact support).
+                </p>
+                <a href="{{ route('admin.tender.watermarkTest') }}" target="_blank"
+                  class="btn btn-outline-info btn-sm mt-2">
+                  <i class="fas fa-vial"></i> Run watermark test (no purchase needed)
+                </a>
+              </div>
+
+              {{-- Template --}}
+              <div class="form-group">
+                <label>Watermark Text</label>
+                <textarea name="tender_watermark_template" class="form-control ltr" rows="4"
+                  placeholder="{company}&#10;Downloaded by: {name}&#10;Tender ID: {tender_code}&#10;{datetime}">{{ old('tender_watermark_template', $abex->tender_watermark_template) }}</textarea>
+                <small class="text-muted d-block mt-1">
+                  One line each. Placeholders:
+                  <code>{company}</code> <code>{name}</code> <code>{first_name}</code> <code>{last_name}</code>
+                  <code>{tender_code}</code> <code>{tender_title}</code> <code>{order_number}</code>
+                  <code>{email}</code> <code>{datetime}</code> <code>{date}</code>.
+                  <code>{datetime}</code> is the download time in UTC. Empty lines are dropped.
+                </small>
+              </div>
+
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Text Color</label>
+                    <input class="form-control jscolor ltr" name="tender_watermark_color"
+                      value="{{ $abex->tender_watermark_color ?? 'FF0000' }}" placeholder="FF0000">
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Opacity</label>
+                    <input type="number" class="form-control ltr" name="tender_watermark_opacity"
+                      value="{{ $abex->tender_watermark_opacity ?? 0.30 }}" step="0.05" min="0.05" max="1">
+                    <small class="text-muted">0.05 – 1</small>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Font Size</label>
+                    <input type="number" class="form-control ltr" name="tender_watermark_font_size"
+                      value="{{ $abex->tender_watermark_font_size ?? 24 }}" step="1" min="6" max="96">
+                    <small class="text-muted">6 – 96 pt</small>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label>Rotation</label>
+                    <input type="number" class="form-control ltr" name="tender_watermark_rotation"
+                      value="{{ $abex->tender_watermark_rotation ?? 45 }}" step="1" min="-90" max="90">
+                    <small class="text-muted">degrees (45 = diagonal)</small>
+                  </div>
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">PDF Encryption</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">
+                Lock every downloaded <strong>PDF</strong> against editing. Buyers open the file normally (no prompt),
+                but cannot modify, annotate or fill it &mdash; those actions need the owner password below, held by admins only.
+                Applies globally (all languages). Non-PDF files are not encrypted.
+              </p>
+
+              {{-- Encryption toggle --}}
+              <div class="form-group">
+                <label class="font-weight-bold">Encryption</label>
+                <div class="selectgroup w-100">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_pdf_encrypt_enabled" value="1" class="selectgroup-input"
+                      {{ $abex->tender_pdf_encrypt_enabled == 1 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Active</span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_pdf_encrypt_enabled" value="0" class="selectgroup-input"
+                      {{ $abex->tender_pdf_encrypt_enabled == 0 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Deactive</span>
+                  </label>
+                </div>
+                <p class="text-warning mb-0 mt-1" style="font-size:12px;">
+                  When active, a PDF that fails to encrypt is blocked from download (buyer is asked to contact support).
+                </p>
+              </div>
+
+              {{-- Password --}}
+              <div class="form-group">
+                <label>Owner Password</label>
+                <div class="input-group">
+                  <input type="password" class="form-control ltr" name="tender_pdf_password" id="tenderPdfPassword"
+                    value="{{ old('tender_pdf_password', $abex->tender_pdf_password) }}"
+                    placeholder="Enter owner password" autocomplete="off">
+                  <div class="input-group-append">
+                    <button class="btn btn-secondary" type="button" id="togglePdfPassword" tabindex="-1">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+                <small class="text-muted d-block mt-1">Required when encryption is active. Admin-only &mdash; never sent to buyers. Use it to unlock editing in a PDF reader.</small>
+              </div>
+
+              <hr>
               <h6 class="font-weight-bold mb-3 mt-2">Breadcrumb Background</h6>
               <p class="text-muted mb-3" style="font-size:12px;">Applied to the Tenders list page and Tender Details page. Settings are per-language.</p>
 
@@ -262,6 +385,14 @@
 @section('scripts')
 <script>
 $(document).ready(function() {
+
+    // PDF password show / hide
+    $('#togglePdfPassword').on('click', function() {
+        var $inp = $('#tenderPdfPassword');
+        var toText = $inp.attr('type') === 'password';
+        $inp.attr('type', toText ? 'text' : 'password');
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+    });
 
     // Invoice image remove (client-side: revert to default, flag for server clear)
     $(document).on('click', '.remove-invoice-btn', function(e) {

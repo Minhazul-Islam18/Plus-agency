@@ -209,7 +209,12 @@ class TenderController extends Controller
         $language = Language::where('code', $request->language)->first();
         $language_id = $language->id;
 
+        // Client-side DataTable renders the full set, so no server paging here —
+        // but only fetch the columns the list + module modal actually use, and
+        // eager-load modules to avoid a query per row (N+1).
         $tenders = Tender::where('language_id', $language_id)
+            ->select(['id', 'language_id', 'country', 'title', 'submission_deadline', 'tender_image', 'is_featured'])
+            ->with('tenderModules:id,tender_id,name,cost')
             ->orderBy('id', 'desc')
             ->get();
 
@@ -572,6 +577,10 @@ class TenderController extends Controller
         $purchase->payment_status = $request->payment_status;
         $purchase->save();
 
+        \App\TenderAuditLog::record('payment_status_changed', $purchase,
+            "Payment status {$previousStatus} → {$purchase->payment_status}",
+            ['from' => $previousStatus, 'to' => $purchase->payment_status]);
+
         // Send secure download link email when payment is first approved
         if ($request->payment_status === 'Completed' && $previousStatus !== 'Completed') {
             $this->sendPurchaseApprovedEmail($purchase);
@@ -584,10 +593,54 @@ class TenderController extends Controller
     public function purchaseUpdateReference(Request $request)
     {
         $purchase = TenderPurchase::findOrFail($request->purchase_id);
+        $oldRef   = $purchase->payment_reference;
         $purchase->payment_reference = trim($request->input('payment_reference', '')) ?: null;
         $purchase->save();
 
+        \App\TenderAuditLog::record('payment_reference_updated', $purchase,
+            'Payment reference updated',
+            ['from' => $oldRef, 'to' => $purchase->payment_reference]);
+
         Session::flash('success', 'Payment reference updated successfully!');
+        return back();
+    }
+
+    /**
+     * Suspend / un-suspend a single transaction.
+     * Suspending immediately revokes every active download link for the order,
+     * so existing links die and the "find my downloads" lookup is blocked.
+     */
+    public function purchaseSuspend(Request $request)
+    {
+        $purchase = TenderPurchase::findOrFail($request->purchase_id);
+
+        if ($purchase->isSuspended()) {
+            $purchase->access_status  = 'active';
+            $purchase->suspend_reason = null;
+            $purchase->suspended_at   = null;
+            $purchase->save();
+
+            \App\TenderAuditLog::record('purchase_reactivated', $purchase, 'Transaction reactivated');
+
+            Session::flash('success', 'Transaction reactivated successfully!');
+            return back();
+        }
+
+        $purchase->access_status  = 'suspended';
+        $purchase->suspend_reason = trim($request->input('suspend_reason', '')) ?: null;
+        $purchase->suspended_at   = now();
+        $purchase->save();
+
+        // Kill any live download links for this order.
+        $revoked = SecureToken::where('order_id', $purchase->order_number)
+            ->where('status', 'active')
+            ->update(['status' => 'revoked']);
+
+        \App\TenderAuditLog::record('purchase_suspended', $purchase,
+            'Transaction suspended; download links revoked',
+            ['reason' => $purchase->suspend_reason, 'links_revoked' => $revoked]);
+
+        Session::flash('success', 'Transaction suspended. Download links disabled.');
         return back();
     }
 
@@ -757,6 +810,10 @@ class TenderController extends Controller
             @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
             @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
         }
+
+        \App\TenderAuditLog::record('purchase_deleted', $purchase, 'Transaction deleted',
+            ['email' => $purchase->email, 'payment_status' => $purchase->payment_status]);
+
         $purchase->delete();
 
         Session::flash('success', 'Deleted successfully!');
@@ -774,6 +831,10 @@ class TenderController extends Controller
                 @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
                 @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
             }
+
+            \App\TenderAuditLog::record('purchase_deleted', $purchase, 'Transaction deleted (bulk)',
+                ['email' => $purchase->email, 'payment_status' => $purchase->payment_status]);
+
             $purchase->delete();
         }
 
@@ -794,6 +855,15 @@ class TenderController extends Controller
         $request->validate([
             'tender_breadcrumb_overlay_color'   => 'nullable|max:20',
             'tender_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
+            'tender_watermark_opacity'          => 'nullable|numeric|min:0.05|max:1',
+            'tender_watermark_font_size'        => 'nullable|integer|min:6|max:96',
+            'tender_watermark_rotation'         => 'nullable|integer|min:-90|max:90',
+            'tender_watermark_color'            => 'nullable|max:20',
+            'tender_watermark_template'         => 'nullable|string|max:2000',
+            'tender_pdf_encrypt_enabled'        => 'nullable|in:0,1',
+            'tender_pdf_password'               => 'nullable|string|max:255|required_if:tender_pdf_encrypt_enabled,1',
+        ], [
+            'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
         ]);
 
         $invoiceDir = base_path('../assets/admin/img/invoice/');
@@ -826,6 +896,19 @@ class TenderController extends Controller
             }
 
             $bex->invoice_footer_address = $request->invoice_footer_address;
+
+            // Watermark settings (global — same on every language row)
+            $bex->tender_watermark_enabled   = $request->input('tender_watermark_enabled', 1);
+            $bex->tender_watermark_template  = $request->input('tender_watermark_template');
+            $bex->tender_watermark_opacity   = $request->filled('tender_watermark_opacity') ? $request->tender_watermark_opacity : 0.30;
+            $bex->tender_watermark_color     = $request->filled('tender_watermark_color') ? ltrim($request->tender_watermark_color, '#') : 'FF0000';
+            $bex->tender_watermark_font_size = $request->filled('tender_watermark_font_size') ? $request->tender_watermark_font_size : 24;
+            $bex->tender_watermark_rotation  = $request->filled('tender_watermark_rotation') ? $request->tender_watermark_rotation : 45;
+
+            // PDF encryption (global — same on every language row)
+            $bex->tender_pdf_encrypt_enabled = $request->input('tender_pdf_encrypt_enabled', 0);
+            $bex->tender_pdf_password        = $request->input('tender_pdf_password');
+
             $bex->save();
         }
 
@@ -874,6 +957,26 @@ class TenderController extends Controller
         }
 
         return response()->json(['success' => false], 404);
+    }
+
+    /**
+     * Browser-based watermark self-test — for hosts without terminal/SSH.
+     * Runs the seeder command server-side and renders the download links.
+     */
+    public function watermarkTest()
+    {
+        \Illuminate\Support\Facades\Artisan::call('tender:wm-test');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $mode   = 'seed';
+        return view('admin.tender.watermark-test', compact('output', 'mode'));
+    }
+
+    public function watermarkTestCleanup()
+    {
+        \Illuminate\Support\Facades\Artisan::call('tender:wm-test', ['--cleanup' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $mode   = 'cleanup';
+        return view('admin.tender.watermark-test', compact('output', 'mode'));
     }
 
     public function report(Request $request)

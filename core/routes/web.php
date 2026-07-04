@@ -207,10 +207,13 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
     Route::post('/course/review', 'Front\CourseController@giveReview')->name('course.review');
 });
 
+/** Health probe for uptime monitors / load balancers **/
+Route::get('/health', 'HealthController')->name('health')->middleware('throttle:60,1');
+
 /** Tender Frontend Routes **/
-Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit');
+Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit')->middleware('throttle:10,1');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
-Route::post('/tender/paid-modules', 'Front\TenderController@paidModules')->name('tender.paid_modules');
+Route::post('/tender/paid-modules', 'Front\TenderController@paidModules')->name('tender.paid_modules')->middleware('throttle:30,1');
 
 // Tender online payment gateways
 Route::post('/tender/payment/stripe',           'Payment\Tender\StripeController@process')->name('tender.payment.stripe');
@@ -226,22 +229,22 @@ Route::get('/contact', 'Front\FrontendController@contact')->name('front.contact'
 
 /** Find My Files — Secure File Recovery **/
 Route::get('/find-my-files', 'Front\FindMyFilesController@index')->name('find_my_files');
-Route::post('/find-my-files/request-link', 'Front\FindMyFilesController@requestLink')->name('find_my_files.request_link');
+Route::post('/find-my-files/request-link', 'Front\FindMyFilesController@requestLink')->name('find_my_files.request_link')->middleware('throttle:5,1');
 Route::get('/find-my-files/link-sent', 'Front\FindMyFilesController@linkSent')->name('find_my_files.link_sent');
 Route::get('/find-my-files/security-verification', 'Front\FindMyFilesController@securityInfo')->name('find_my_files.security_info');
-Route::get('/find-my-files/download', 'Front\FindMyFilesController@download')->name('find_my_files.download');
-Route::get('/find-my-files/download/stream', 'Front\FindMyFilesController@downloadStream')->name('find_my_files.stream');
+Route::get('/find-my-files/download', 'Front\FindMyFilesController@download')->name('find_my_files.download')->middleware('throttle:30,1');
+Route::get('/find-my-files/download/stream', 'Front\FindMyFilesController@downloadStream')->name('find_my_files.stream')->middleware('throttle:20,1');
 
-/** Find My Files — OTP Method **/
-Route::post('/find-my-files/otp/request', 'Front\FindMyFilesController@requestOtp')->name('find_my_files.otp_request');
-Route::post('/find-my-files/otp/verify',  'Front\FindMyFilesController@verifyOtp')->name('find_my_files.otp_verify');
-Route::post('/find-my-files/otp/resend',  'Front\FindMyFilesController@resendOtp')->name('find_my_files.otp_resend');
+/** Find My Files — OTP Method (brute-force + SMS/email cost sensitive) **/
+Route::post('/find-my-files/otp/request', 'Front\FindMyFilesController@requestOtp')->name('find_my_files.otp_request')->middleware('throttle:3,1');
+Route::post('/find-my-files/otp/verify',  'Front\FindMyFilesController@verifyOtp')->name('find_my_files.otp_verify')->middleware('throttle:6,1');
+Route::post('/find-my-files/otp/resend',  'Front\FindMyFilesController@resendOtp')->name('find_my_files.otp_resend')->middleware('throttle:3,1');
 
 /** Find My Files — Payment Reference Method **/
-Route::post('/find-my-files/payment-ref', 'Front\FindMyFilesController@requestByPaymentRef')->name('find_my_files.payment_ref');
+Route::post('/find-my-files/payment-ref', 'Front\FindMyFilesController@requestByPaymentRef')->name('find_my_files.payment_ref')->middleware('throttle:6,1');
 
 /** Find My Files — Expired Link Regenerate **/
-Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestRegenerate')->name('find_my_files.regenerate');
+Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestRegenerate')->name('find_my_files.regenerate')->middleware('throttle:5,1');
 
 
 
@@ -1145,10 +1148,18 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
         Route::post('/tender/purchase/update-reference', 'Admin\TenderController@purchaseUpdateReference')->name('admin.tender.purchaseUpdateReference');
+        Route::post('/tender/purchase/suspend', 'Admin\TenderController@purchaseSuspend')->name('admin.tender.purchaseSuspend');
         Route::post('/tender/purchase/delete', 'Admin\TenderController@purchaseDelete')->name('admin.tender.purchaseDelete');
         Route::post('/tender/purchase/bulk_delete', 'Admin\TenderController@purchaseBulkOrderDelete')->name('admin.tender.purchaseBulkOrderDelete');
         Route::get('/tender/purchase/{id}/invoice', 'Admin\TenderController@invoiceDownload')->name('admin.tender.invoiceDownload');
         Route::post('/tender/purchase/{id}/generate-invoice', 'Admin\TenderController@purchaseGenerateInvoice')->name('admin.tender.purchaseGenerateInvoice');
+
+        // Admin Tender Blacklist Routes
+        Route::get('/tender/blacklist', 'Admin\TenderBlacklistController@index')->name('admin.tender.blacklist');
+        Route::post('/tender/blacklist/store', 'Admin\TenderBlacklistController@store')->name('admin.tender.blacklist.store');
+        Route::post('/tender/blacklist/from-purchase', 'Admin\TenderBlacklistController@storeFromPurchase')->name('admin.tender.blacklist.fromPurchase');
+        Route::post('/tender/blacklist/update', 'Admin\TenderBlacklistController@update')->name('admin.tender.blacklist.update');
+        Route::post('/tender/blacklist/delete', 'Admin\TenderBlacklistController@destroy')->name('admin.tender.blacklist.delete');
 
         // Admin Tender Module Routes
         Route::get('/tender/{id}/modules', 'Admin\TenderModuleController@index')->name('admin.tender.module.index');
@@ -1168,6 +1179,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/tender/settings', 'Admin\TenderController@settings')->name('admin.tender.settings');
         Route::post('/tender/settings', 'Admin\TenderController@updateSettings')->name('admin.tender.updateSettings');
         Route::post('/tender/settings/delete-breadcrumb-bg', 'Admin\TenderController@deleteTenderBreadcrumbBg')->name('admin.tender.deleteTenderBreadcrumbBg');
+
+        // PDF watermark self-test (no terminal needed — runs the seeder in-browser)
+        Route::get('/tender/watermark-test', 'Admin\TenderController@watermarkTest')->name('admin.tender.watermarkTest');
+        Route::get('/tender/watermark-test/cleanup', 'Admin\TenderController@watermarkTestCleanup')->name('admin.tender.watermarkTestCleanup');
 
         // Admin Tender Enroll Report Routes
         Route::get('/tender/enrolls/report', 'Admin\TenderController@report')->name('admin.tender.enrolls.report');

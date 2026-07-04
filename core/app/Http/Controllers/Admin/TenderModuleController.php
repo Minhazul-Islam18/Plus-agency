@@ -19,6 +19,45 @@ class TenderModuleController extends Controller
         return view('admin.tender.module.index', compact('tender', 'modules'));
     }
 
+    /** Document types a tender module may carry. Executables/scripts/SVG excluded. */
+    private const ALLOWED_FILE_EXT = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip'];
+
+    /**
+     * Validate an LFM file reference before it is copied into the public assets
+     * directory, and return the safe destination filename.
+     *
+     * Blocks two attacks on the user-supplied `tender_file` field:
+     *  - a disallowed extension (e.g. .php/.phtml) that would be web-executable
+     *    once copied under assets/;
+     *  - a stream wrapper or off-site URL (file://, php://, http://other-host)
+     *    that would turn copy() into an SSRF / local-file-read primitive.
+     *
+     * @throws \RuntimeException if the reference is unsafe
+     */
+    private function safeUploadFilename(string $fileRef): string
+    {
+        $parts = parse_url($fileRef);
+        if ($parts === false) {
+            throw new \RuntimeException('Invalid file reference.');
+        }
+
+        $scheme = strtolower($parts['scheme'] ?? '');
+        if ($scheme !== '' && $scheme !== 'http' && $scheme !== 'https') {
+            throw new \RuntimeException('Unsupported file source.');
+        }
+        if (!empty($parts['host']) && strcasecmp($parts['host'], request()->getHost()) !== 0) {
+            throw new \RuntimeException('Files must be selected from this site.');
+        }
+
+        $filename = basename(rawurldecode($parts['path'] ?? $fileRef));
+        $ext      = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if ($ext === '' || !in_array($ext, self::ALLOWED_FILE_EXT, true)) {
+            throw new \RuntimeException('Only these file types are allowed: ' . implode(', ', self::ALLOWED_FILE_EXT) . '.');
+        }
+
+        return $filename;
+    }
+
     public function store(Request $request)
     {
         $rules = [
@@ -40,9 +79,12 @@ class TenderModuleController extends Controller
         $module->summary  = $request->summary;
 
         if ($request->filled('tender_file')) {
+            try {
+                $filename = $this->safeUploadFilename($request->tender_file);
+            } catch (\RuntimeException $e) {
+                return response()->json(['error' => 'true', 'tender_file' => [$e->getMessage()]]);
+            }
             $filePath = $request->tender_file;
-            // LFM returns a URL: keep the original filename intact (decode %20 etc.) — do not rename.
-            $filename = basename(rawurldecode(parse_url($filePath, PHP_URL_PATH) ?: $filePath));
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);
@@ -78,13 +120,17 @@ class TenderModuleController extends Controller
         $module->summary = $request->summary;
 
         if ($request->filled('tender_file')) {
+            try {
+                $filename = $this->safeUploadFilename($request->tender_file);
+            } catch (\RuntimeException $e) {
+                return response()->json(['error' => 'true', 'tender_file' => [$e->getMessage()]]);
+            }
+
             if (!empty($module->tender_file)) {
                 @unlink('assets/front/files/tender_modules/' . $module->tender_file);
             }
 
             $filePath = $request->tender_file;
-            // LFM returns a URL: keep the original filename intact (decode %20 etc.) — do not rename.
-            $filename = basename(rawurldecode(parse_url($filePath, PHP_URL_PATH) ?: $filePath));
             $dir      = 'assets/front/files/tender_modules/';
             @mkdir($dir, 0775, true);
             @copy($filePath, $dir . $filename);

@@ -443,5 +443,11 @@
     "WhatsApp": "WhatsApp",
     "No reviews yet.": "No reviews yet.",
     "EXPIRED": "EXPIRED",
-    "TODAY": "TODAY"
+    "TODAY": "TODAY",
+    "Page Type": "Page Type",
+    "Normal": "Normal",
+    "Terms & Conditions": "Terms & Conditions",
+    "Privacy Policy": "Privacy Policy",
+    "Legal Notice": "Legal Notice",
+    "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one.": "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one."
 }

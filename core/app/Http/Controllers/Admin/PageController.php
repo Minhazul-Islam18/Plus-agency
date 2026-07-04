@@ -71,6 +71,7 @@ class PageController extends Controller
             ],
             'status' => 'required',
             'serial_number' => 'required|integer',
+            'page_type' => ['nullable', 'in:' . implode(',', array_keys(Page::SPECIAL_TYPES))],
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -81,12 +82,22 @@ class PageController extends Controller
 
         $bex = BasicExtra::firstOrFail();
 
+        $pageType = $request->filled('page_type') ? $request->page_type : null;
+
+        // A special type may exist only once per language: demote the existing one.
+        if ($pageType) {
+            Page::where('language_id', $request->language_id)
+                ->where('page_type', $pageType)
+                ->update(['page_type' => null]);
+        }
+
         $page = new Page;
         $page->language_id = $request->language_id;
         $page->name = $request->name;
         $page->title = $request->breadcrumb_title;
         $page->subtitle = $request->breadcrumb_subtitle;
         $page->slug = $slug;
+        $page->page_type = $pageType;
         $page->status = $request->status;
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
@@ -145,6 +156,7 @@ class PageController extends Controller
             ],
             'status' => 'required',
             'serial_number' => 'required|integer',
+            'page_type' => ['nullable', 'in:' . implode(',', array_keys(Page::SPECIAL_TYPES))],
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -156,10 +168,22 @@ class PageController extends Controller
         $bex = BasicExtra::firstOrFail();
 
         $page = Page::findOrFail($pageID);
+
+        $pageType = $request->filled('page_type') ? $request->page_type : null;
+
+        // A special type may exist only once per language: demote the existing one.
+        if ($pageType) {
+            Page::where('language_id', $page->language_id)
+                ->where('page_type', $pageType)
+                ->where('id', '!=', $page->id)
+                ->update(['page_type' => null]);
+        }
+
         $page->name = $request->name;
         $page->title = $request->breadcrumb_title;
         $page->subtitle = $request->breadcrumb_subtitle;
         $page->slug = $slug;
+        $page->page_type = $pageType;
         $page->status = $request->status;
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;

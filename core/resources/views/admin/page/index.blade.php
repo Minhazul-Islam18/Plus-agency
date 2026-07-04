@@ -109,6 +109,12 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                 </span>
                                 Edit
                             </a>
+                            <a class="btn btn-info btn-sm" href="{{route('front.dynamicPage', $apage->slug)}}" target="_blank">
+                                <span class="btn-label">
+                                <i class="fas fa-external-link-alt"></i>
+                                </span>
+                                Open in frontend
+                            </a>
                             @if ($bex->custom_page_pagebuilder == 1)
 
                                 <a class="btn btn-secondary btn-sm" href="{{route('admin.pagebuilder.content', ['id' => $apage->id, 'language' => $apage->language->code, 'type' => 'page'])}}" target="_blank">

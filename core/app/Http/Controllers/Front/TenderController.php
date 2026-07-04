@@ -45,13 +45,26 @@ class TenderController extends Controller
             return back();
         }
 
+        // Only the columns the listing cards render — never the heavy
+        // longText/overview/expert_* fields. Eager-load the category name and
+        // module ids so the cards' `->tenderCategory->name` and
+        // `->tenderModules->count()` don't fire a query per row (N+1).
+        $listCols = [
+            'id', 'language_id', 'tender_category_id', 'country', 'tender_code',
+            'title', 'slug', 'submission_deadline', 'current_price', 'previous_price', 'tender_image',
+        ];
+        $listWith = ['tenderCategory:id,name', 'tenderModules:id,tender_id'];
+
         $data['featured_tenders'] = Tender::where('language_id', $currentLang->id)
             ->where('is_featured', 1)
+            ->select($listCols)
+            ->with($listWith)
             ->orderBy('id', 'desc')
             ->get();
 
         $data['tender_categories'] = TenderCategory::where('language_id', $currentLang->id)
             ->where('status', 1)
+            ->select(['id', 'name'])
             ->orderBy('id', 'desc')
             ->get();
 
@@ -74,6 +87,8 @@ class TenderController extends Controller
         $filterKey  = $request->filterValue;
 
         $data['tenders'] = Tender::where('language_id', $currentLang->id)
+            ->select($listCols)
+            ->with($listWith)
             ->when($searchKey, fn($q) => $q->where(function ($q) use ($searchKey) {
                 $q->where('title', 'like', '%' . $searchKey . '%')
                   ->orWhere('tender_code', 'like', '%' . $searchKey . '%');
@@ -104,6 +119,13 @@ class TenderController extends Controller
             })
             ->when(!$filterKey, fn($q) => $q->orderBy('id', 'desc'))
             ->paginate(9);
+
+        // Price-slider bounds — one aggregate query instead of two run in the view.
+        $bounds = Tender::where('language_id', $currentLang->id)
+            ->selectRaw('MIN(current_price) AS mn, MAX(current_price) AS mx')
+            ->first();
+        $data['minPrice'] = (float) ($bounds->mn ?? 0);
+        $data['maxPrice'] = (float) ($bounds->mx ?? 0);
 
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
@@ -142,17 +164,8 @@ class TenderController extends Controller
             ->orderBy('serial_number', 'asc')
             ->get();
 
-        // Terms & Conditions page (dynamic custom page) for the current language.
-        $termsPage = \App\Page::where('language_id', $currentLang->id)
-            ->where('status', 1)
-            ->where(function ($q) {
-                $q->where('slug', 'like', '%term%')
-                  ->orWhere('slug', 'like', '%condition%')
-                  ->orWhere('slug', 'like', '%condicao%')
-                  ->orWhere('name', 'like', '%term%')
-                  ->orWhere('name', 'like', '%condition%');
-            })
-            ->first();
+        // Terms & Conditions page for the current language (Page Type = Terms).
+        $termsPage = \App\Page::forType('terms', $currentLang->id);
         $data['termsUrl'] = $termsPage ? route('front.dynamicPage', $termsPage->slug) : null;
 
         // Related tenders: active (not past deadline) only. Same category first,
@@ -161,10 +174,18 @@ class TenderController extends Controller
             $q->whereNull('submission_deadline')
               ->orWhereDate('submission_deadline', '>=', now()->toDateString());
         };
+        $relatedCols = [
+            'id', 'language_id', 'tender_category_id', 'country', 'tender_code',
+            'title', 'slug', 'submission_deadline', 'current_price', 'previous_price', 'tender_image',
+        ];
+        $relatedWith = ['tenderCategory:id,name', 'tenderModules:id,tender_id'];
+
         $related = Tender::where('language_id', $currentLang->id)
             ->where('id', '!=', $tender->id)
             ->where($activeOnly)
             ->when($tender->tender_category_id, fn($q) => $q->where('tender_category_id', $tender->tender_category_id))
+            ->select($relatedCols)
+            ->with($relatedWith)
             ->orderBy('id', 'desc')
             ->take(8)
             ->get();
@@ -172,6 +193,8 @@ class TenderController extends Controller
             $related = Tender::where('language_id', $currentLang->id)
                 ->where('id', '!=', $tender->id)
                 ->where($activeOnly)
+                ->select($relatedCols)
+                ->with($relatedWith)
                 ->orderBy('id', 'desc')
                 ->take(8)
                 ->get();
@@ -185,18 +208,14 @@ class TenderController extends Controller
         return view('front.tender.tender_details', $data);
     }
 
-    public function purchase(Request $request)
+    public function purchase(\App\Http\Requests\Tender\PurchaseRequest $request)
     {
-        $request->validate([
-            'tender_id'    => 'required|exists:tenders,id',
-            'first_name'   => 'required|string|max:100',
-            'last_name'    => 'required|string|max:100',
-            'email'        => 'required|email|max:150',
-            'phone_number' => 'required|string|max:30',
-            'country'      => 'required|string|max:100',
-            'gateway'      => 'required',
-            'agree_terms'  => 'accepted',
-        ]);
+        // Validation handled by PurchaseRequest (buyer fields + receipt MIME).
+
+        // Blacklisted buyers (email / phone / IP) cannot place a new order.
+        if (\App\TenderBlacklist::matches($request->email, $request->phone_number, $request->ip())) {
+            return back()->with('error', __('This order cannot be processed. Please contact ICA support.'));
+        }
 
         $bse = BasicExtra::first();
 
@@ -218,8 +237,10 @@ class TenderController extends Controller
         $purchase->payment_status = 'Pending';
 
         if ($request->hasFile('receipt')) {
-            $file     = $request->file('receipt');
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $file = $request->file('receipt');
+            // Content-guessed extension, not the client-supplied string.
+            $ext      = $file->extension() ?: 'dat';
+            $filename = uniqid('receipt_') . '.' . $ext;
             $file->move('assets/front/receipt', $filename);
             $purchase->receipt = $filename;
         }

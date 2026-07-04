@@ -57,56 +57,60 @@ class AppServiceProvider extends ServiceProvider
       $langs   = collect();
     }
 
+    // This composer runs once per rendered view/partial. The data it builds is
+    // identical for every view in a request, so compute it a single time and
+    // reuse it — otherwise a page with N partials re-runs ~9 queries N times.
     view()->composer('*', function ($view) {
-      // Get current locale (set by SetLangMiddleware or manual selection)
-      $currentLocale = app()->getLocale();
-
-      if ($currentLocale) {
-        $currentLang = Language::where('code', $currentLocale)->first();
+      foreach ($this->globalViewData(app()->getLocale()) as $key => $value) {
+        $view->with($key, $value);
       }
-
-      // Fallback to default if not found
-      if (empty($currentLang)) {
-        $currentLang = Language::where('is_default', 1)->first();
-      }
-
-      $bs = $currentLang->basic_setting;
-      $be = $currentLang->basic_extended;
-      $bex = $currentLang->basic_extra;
-
-      $ulinks = $currentLang->ulinks;
-      $apopups = $currentLang->popups()->where('status', 1)->orderBy('serial_number', 'ASC')->get();
-
-      if (serviceCategory()) {
-        $scats = $currentLang->scategories()->where('status', 1)->orderBy('serial_number', 'ASC')->get();
-      }
-
-      if (Menu::where('language_id', $currentLang->id)->count() > 0) {
-        $menus = Menu::where('language_id', $currentLang->id)->first()->menus;
-      } else {
-        $menus = json_encode([]);
-      }
-
-      if ($currentLang->rtl == 1) {
-        $rtl = 1;
-      } else {
-        $rtl = 0;
-      }
-
-      $view->with('bs', $bs);
-      $view->with('be', $be);
-      $view->with('bex', $bex);
-      if (serviceCategory()) {
-        $view->with('scats', $scats);
-      }
-      $view->with('apopups', $apopups);
-      $view->with('ulinks', $ulinks);
-      $view->with('menus', $menus);
-      $view->with('currentLang', $currentLang);
-      $view->with('rtl', $rtl);
     });
 
     View::share('socials', $socials);
     View::share('langs', $langs);
+  }
+
+  /**
+   * Global data shared with every view, memoised for the current request.
+   *
+   * The provider is instantiated per request (php-fpm resets it between
+   * requests), so this cache is request-scoped: no cross-request staleness,
+   * admin edits are reflected on the next request with no cache to bust.
+   *
+   * @var array<string, array<string, mixed>>
+   */
+  private $globalViewMemo = [];
+
+  private function globalViewData(?string $locale): array
+  {
+    $key = $locale ?: 'default';
+    if (isset($this->globalViewMemo[$key])) {
+      return $this->globalViewMemo[$key];
+    }
+
+    // Current locale set by SetLangMiddleware; fall back to the default language.
+    $currentLang = $locale ? Language::where('code', $locale)->first() : null;
+    if (empty($currentLang)) {
+      $currentLang = Language::where('is_default', 1)->first();
+    }
+
+    $menuRow = Menu::where('language_id', $currentLang->id)->first();
+
+    $data = [
+      'bs'          => $currentLang->basic_setting,
+      'be'          => $currentLang->basic_extended,
+      'bex'         => $currentLang->basic_extra,
+      'ulinks'      => $currentLang->ulinks,
+      'apopups'     => $currentLang->popups()->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
+      'menus'       => $menuRow ? $menuRow->menus : json_encode([]),
+      'currentLang' => $currentLang,
+      'rtl'         => $currentLang->rtl == 1 ? 1 : 0,
+    ];
+
+    if (serviceCategory()) {
+      $data['scats'] = $currentLang->scategories()->where('status', 1)->orderBy('serial_number', 'ASC')->get();
+    }
+
+    return $this->globalViewMemo[$key] = $data;
   }
 }

@@ -428,11 +428,6 @@
         <button type="submit" id="submitBtn"></button>
     </form>
 
-    @php
-        $maxPrice = \App\Tender::where('language_id', $currentLang->id)->max('current_price') ?? 0;
-        $minPrice = \App\Tender::where('language_id', $currentLang->id)->min('current_price') ?? 0;
-    @endphp
-
 @endsection
 
 @section('scripts')

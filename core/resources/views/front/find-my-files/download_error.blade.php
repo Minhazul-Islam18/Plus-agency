@@ -25,17 +25,19 @@
                     </div>
 
                     <h2 style="font-size:22px; font-weight:700; color:#1a2a4a; margin-bottom:10px;">
-                        {{ __('This download link is no longer valid.') }}
+                        {{ $errorTitle ?? __('This download link is no longer valid.') }}
                     </h2>
 
                     <p style="font-size:14px; color:#6b7280; line-height:1.7; margin-bottom:28px;">
-                        {{ __('The link may have expired (valid for 24 hours), already reached the download limit (3 attempts), or been revoked.') }}
+                        {{ $errorMessage ?? __('The link may have expired (valid for 24 hours), already reached the download limit (3 attempts), or been revoked.') }}
                     </p>
 
-                    <a href="{{ route('find_my_files') }}#method=expired_link"
-                       style="display:inline-block; padding:12px 28px; background:#3b6cf8; color:#fff; border-radius:7px; font-size:14px; font-weight:600; text-decoration:none; margin-right:10px;">
-                        {{ __('Regenerate My Link') }}
-                    </a>
+                    @unless (!empty($suspended))
+                        <a href="{{ route('find_my_files') }}#method=expired_link"
+                           style="display:inline-block; padding:12px 28px; background:#3b6cf8; color:#fff; border-radius:7px; font-size:14px; font-weight:600; text-decoration:none; margin-right:10px;">
+                            {{ __('Regenerate My Link') }}
+                        </a>
+                    @endunless
 
                     <a href="{{ route('front.contact') }}"
                        style="display:inline-block; padding:12px 28px; border:1px solid #d1d5db; color:#374151; border-radius:7px; font-size:14px; font-weight:500; text-decoration:none;">

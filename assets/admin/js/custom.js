@@ -651,6 +651,55 @@ $(function ($) {
   /* ***************************************************
   ==========Delete Using AJAX Request End==========
   ******************************************************/
+
+  /* ===== Tender: suspend / reactivate confirm ===== */
+  $(document).on('click', '.suspendbtn', function (e) {
+    e.preventDefault();
+    var form = $(this).closest('.suspendform');
+    swal({
+      title: 'Suspend this transaction?',
+      text: 'All download links will be disabled immediately.',
+      type: 'warning',
+      buttons: {
+        confirm: { text: 'Yes, suspend it!', className: 'btn btn-warning' },
+        cancel: { visible: true, className: 'btn btn-secondary' }
+      }
+    }).then((ok) => {
+      if (ok) {
+        $(".request-loader").addClass("show");
+        form.submit();
+      } else {
+        swal.close();
+      }
+    });
+  });
+
+  /* ===== Tender: blacklist buyer confirm (with reason input) ===== */
+  $(document).on('click', '.blacklistbtn', function (e) {
+    e.preventDefault();
+    var form = $(this).closest('.blacklistform');
+    swal({
+      title: 'Blacklist this buyer?',
+      text: 'Future orders from this email and phone will be refused. Optionally add a reason:',
+      content: {
+        element: 'input',
+        attributes: { placeholder: 'Reason (optional)', type: 'text' }
+      },
+      buttons: {
+        confirm: { text: 'Yes, blacklist!', className: 'btn btn-dark' },
+        cancel: { visible: true, className: 'btn btn-secondary' }
+      }
+    }).then((reason) => {
+      // sweetalert resolves to the input string on confirm, null on cancel.
+      if (reason !== null) {
+        form.find('input[name="reason"]').val(reason || '');
+        $(".request-loader").addClass("show");
+        form.get(0).submit();
+      } else {
+        swal.close();
+      }
+    });
+  });
   
   
   /* ***************************************************

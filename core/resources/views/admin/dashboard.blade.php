@@ -541,10 +541,10 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-head-row">
-                                <h4 class="card-title">Product Orders</h4>
+                                <h4 class="card-title">Tender Purchases</h4>
                             </div>
                             <p class="card-category">
-                                Top 10 latest orders
+                                Top 10 latest tender purchases
                             </p>
                         </div>
                         <div class="card-body">
@@ -555,50 +555,52 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order</th>
-                                                    <th>Total</th>
+                                                    <th>Tender</th>
+                                                    <th>Status</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($porders as $key => $porder)
+                                                @forelse ($tpurchases as $tpurchase)
                                                     <tr>
-                                                        <td>#{{ $porder->order_number }}</td>
-                                                        <td>{{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}
-                                                            {{ round($porder->total, 2) }}
-                                                            {{ $bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '' }}
+                                                        <td>{{ $tpurchase->order_number }}</td>
+                                                        <td>
+                                                            {{ !empty($tpurchase->tender)
+                                                                ? (strlen($tpurchase->tender->title) > 25
+                                                                    ? mb_substr($tpurchase->tender->title, 0, 25, 'utf-8') . '...'
+                                                                    : $tpurchase->tender->title)
+                                                                : '-' }}
                                                         </td>
-
+                                                        <td>
+                                                            <span
+                                                                class="{{ strtolower($tpurchase->payment_status) == 'completed' ? 'badge badge-success' : 'badge badge-danger' }}">
+                                                                {{ strtolower($tpurchase->payment_status) == 'completed' ? 'Completed' : 'Pending' }}
+                                                            </span>
+                                                        </td>
                                                         <td>
                                                             <div class="dropdown">
                                                                 <button class="btn btn-info btn-sm dropdown-toggle"
-                                                                    type="button" id="dropdownMenuButton"
-                                                                    data-toggle="dropdown" aria-haspopup="true"
-                                                                    aria-expanded="false">
+                                                                    type="button" data-toggle="dropdown"
+                                                                    aria-haspopup="true" aria-expanded="false">
                                                                     Actions
                                                                 </button>
-                                                                <div class="dropdown-menu"
-                                                                    aria-labelledby="dropdownMenuButton">
+                                                                <div class="dropdown-menu">
                                                                     <a class="dropdown-item"
-                                                                        href="{{ route('admin.product.details', $porder->id) }}"
-                                                                        target="_blank">Details</a>
-                                                                    <a class="dropdown-item"
-                                                                        href="{{ asset('assets/front/invoices/product/' . $porder->invoice_number) }}"
-                                                                        target="_blank">Invoice</a>
-                                                                    <form class="deleteform d-block"
-                                                                        action="{{ route('admin.product.order.delete') }}"
-                                                                        method="post">
-                                                                        @csrf
-                                                                        <input type="hidden" name="order_id"
-                                                                            value="{{ $porder->id }}">
-                                                                        <button type="submit" class="deletebtn">
-                                                                            Delete
-                                                                        </button>
-                                                                    </form>
+                                                                        href="{{ route('admin.tender.purchaseLog') }}?order_number={{ $tpurchase->order_number }}">Details</a>
+                                                                    @if (!empty($tpurchase->invoice))
+                                                                        <a class="dropdown-item"
+                                                                            href="{{ route('admin.tender.invoiceDownload', $tpurchase->id) }}"
+                                                                            target="_blank">Invoice</a>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </td>
                                                     </tr>
-                                                @endforeach
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="4" class="text-center">No tender purchases yet.</td>
+                                                    </tr>
+                                                @endforelse
                                             </tbody>
                                         </table>
                                     </div>

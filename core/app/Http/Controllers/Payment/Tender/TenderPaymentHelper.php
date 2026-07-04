@@ -40,6 +40,11 @@ trait TenderPaymentHelper
             throw new \RuntimeException(__('You must accept the terms and conditions to proceed.'));
         }
 
+        // Blacklisted buyers (email / phone / IP) cannot place a new order.
+        if (\App\TenderBlacklist::matches($request->email, $request->phone_number, $request->ip())) {
+            throw new \RuntimeException(__('This order cannot be processed. Please contact ICA support.'));
+        }
+
         $bse = $this->getLang()->basic_extra ?? BasicExtra::first();
 
         $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));

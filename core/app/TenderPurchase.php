@@ -31,15 +31,27 @@ class TenderPurchase extends Model
         'receipt',
         'invoice',
         'payment_reference',
+        'access_status',
+        'suspend_reason',
+        'suspended_at',
     ];
 
     protected $casts = [
-        'paid_at' => 'datetime',
+        'paid_at'      => 'datetime',
+        'suspended_at' => 'datetime',
     ];
 
     public function tender()
     {
         return $this->hasOne('App\Tender', 'id', 'tender_id');
+    }
+
+    /**
+     * Admin has suspended this transaction: no link issuing, no download.
+     */
+    public function isSuspended(): bool
+    {
+        return $this->access_status === 'suspended';
     }
 
     /**

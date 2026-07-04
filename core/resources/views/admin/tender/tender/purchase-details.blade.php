@@ -126,12 +126,39 @@
                     @endif
 
                     <div class="row">
-                        <div class="col-lg-5"><strong>Status:</strong></div>
+                        <div class="col-lg-5"><strong>Payment Status:</strong></div>
                         <div class="col-lg-7">
                             @if (strtolower($purchase->payment_status) == 'completed')
                                 <span class="badge badge-success">Completed</span>
                             @else
                                 <span class="badge badge-warning">Pending</span>
+                            @endif
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Access:</strong></div>
+                        <div class="col-lg-7">
+                            @if ($purchase->isSuspended())
+                                <span class="badge badge-dark">Suspended</span>
+                                @if ($purchase->suspend_reason)
+                                    <small class="text-muted d-block mt-1">{{ $purchase->suspend_reason }}</small>
+                                @endif
+                            @else
+                                <span class="badge badge-success">Active</span>
+                            @endif
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Buyer Status:</strong></div>
+                        <div class="col-lg-7">
+                            @if (\App\TenderBlacklist::matches($purchase->email, $purchase->phone_number, null))
+                                <span class="badge badge-danger">Blacklisted</span>
+                            @else
+                                <span class="badge badge-success">Not blacklisted</span>
                             @endif
                         </div>
                     </div>

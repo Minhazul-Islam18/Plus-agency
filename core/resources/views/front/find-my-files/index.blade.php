@@ -659,6 +659,14 @@
                                                 </div>
                                             </div>
 
+                                            <div class="fmf-alert fmf-alert-warning" id="otp-error-suspended" style="display:none;">
+                                                <div class="fmf-alert-icon"><span>!</span></div>
+                                                <div class="fmf-alert-body">
+                                                    <strong>{{ __('Order under verification') }}</strong>
+                                                    <p>{{ __('This order is currently being verified. For any information, please contact ICA.') }}</p>
+                                                </div>
+                                            </div>
+
                                             @if ($bs->is_recaptcha == 1)
                                                 <div class="fmf-captcha-wrap fmf-captcha-otp">
                                                     {!! NoCaptcha::display(['data-callback' => 'fmfOtpCaptchaVerified', 'data-expired-callback' => 'fmfOtpCaptchaExpired']) !!}
@@ -802,6 +810,15 @@
                                             </div>
                                         </div>
 
+                                        {{-- Suspended (under verification) --}}
+                                        <div class="fmf-alert fmf-alert-warning" id="payref-error-suspended" style="display:none;">
+                                            <div class="fmf-alert-icon"><span>!</span></div>
+                                            <div class="fmf-alert-body">
+                                                <strong>{{ __('Order under verification') }}</strong>
+                                                <p>{{ __('This order is currently being verified. For any information, please contact ICA.') }}</p>
+                                            </div>
+                                        </div>
+
                                         {{-- Rate limit error --}}
                                         <div class="fmf-alert fmf-alert-error" id="payref-error-ratelimit">
                                             <div class="fmf-alert-icon"><span>!</span></div>
@@ -862,6 +879,14 @@
                                             <div class="fmf-alert-body">
                                                 <strong>{{ __('Email delivery failed.') }}</strong>
                                                 <p>{{ __('Your order was verified but we could not send the download link. Please contact support and quote your order number.') }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="fmf-alert fmf-alert-warning" id="regen-error-suspended" style="display:none;">
+                                            <div class="fmf-alert-icon"><span>!</span></div>
+                                            <div class="fmf-alert-body">
+                                                <strong>{{ __('Order under verification') }}</strong>
+                                                <p>{{ __('This order is currently being verified. For any information, please contact ICA.') }}</p>
                                             </div>
                                         </div>
 
@@ -1106,6 +1131,7 @@
                                     'order_not_found': '{{ __('Order not found.') }}',
                                     'email_mismatch': '{{ __('Email address does not match.') }}',
                                     'invalid_status': '{{ __('Order not eligible.') }}',
+                                    'suspended': '{{ __('Order under verification') }}',
                                 };
                                 var bodies = {
                                     'validation': '{{ __('Check your email and order number, then try again.') }}',
@@ -1226,6 +1252,7 @@
             // ── Hide all OTP alerts ───────────────────────────────────────────
             function hideOtpAlerts() {
                 ['otp-error-validation', 'otp-error-sms', 'otp-error-ratelimit', 'otp-error-payment-pending',
+                    'otp-error-suspended',
                     'otp-error-invalid', 'otp-error-exhausted', 'otp-error-expired', 'otp-error-session'
                 ]
                 .forEach(function(id) {
@@ -1431,6 +1458,11 @@
                                 @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
                                 var el = document.getElementById('otp-error-sms');
                                 if (el) el.style.display = 'flex';
+                            } else if (data.type === 'suspended') {
+                                if (otpSendBtn) otpSendBtn.disabled = false;
+                                @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
+                                var el = document.getElementById('otp-error-suspended');
+                                if (el) el.style.display = 'flex';
                             } else {
                                 if (otpSendBtn) otpSendBtn.disabled = false;
                                 @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
@@ -1606,7 +1638,7 @@
 
             // ── Hide alerts ───────────────────────────────────────────────────
             function hideAlerts() {
-                ['payref-error-validation', 'payref-error-nomatch', 'payref-error-emailfailed', 'payref-error-ratelimit'].forEach(function (id) {
+                ['payref-error-validation', 'payref-error-nomatch', 'payref-error-emailfailed', 'payref-error-ratelimit', 'payref-error-suspended'].forEach(function (id) {
                     var el = document.getElementById(id);
                     if (el) el.style.display = 'none';
                 });
@@ -1662,6 +1694,9 @@
                         } else if (data.type === 'email_failed') {
                             var el = document.getElementById('payref-error-emailfailed');
                             if (el) el.style.display = 'flex';
+                        } else if (data.type === 'suspended') {
+                            var el = document.getElementById('payref-error-suspended');
+                            if (el) el.style.display = 'flex';
                         } else {
                             var el = document.getElementById('payref-error-validation');
                             if (el) el.style.display = 'flex';
@@ -1699,7 +1734,7 @@
 
             // ── Hide alerts ───────────────────────────────────────────────────
             function hideAlerts() {
-                ['regen-error-validation', 'regen-error-ratelimit', 'regen-error-limit']
+                ['regen-error-validation', 'regen-error-ratelimit', 'regen-error-limit', 'regen-error-emailfailed', 'regen-error-suspended']
                     .forEach(function (id) {
                         var el = document.getElementById(id);
                         if (el) el.style.display = 'none';
@@ -1755,6 +1790,9 @@
                             if (el) el.style.display = 'flex';
                         } else if (data.type === 'email_failed') {
                             var el = document.getElementById('regen-error-emailfailed');
+                            if (el) el.style.display = 'flex';
+                        } else if (data.type === 'suspended') {
+                            var el = document.getElementById('regen-error-suspended');
                             if (el) el.style.display = 'flex';
                         } else {
                             var el = document.getElementById('regen-error-validation');

@@ -64,7 +64,7 @@
 </script>
 
 <!-- Custom JS -->
-<script src="{{asset('assets/admin/js/custom.js')}}"></script>
+<script src="{{asset('assets/admin/js/custom.js')}}?v={{ @filemtime(base_path('../assets/admin/js/custom.js')) ?: time() }}"></script>
 
 @yield('scripts')
 

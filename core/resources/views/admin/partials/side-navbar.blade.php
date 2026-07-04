@@ -701,6 +701,7 @@
 @if (request()->path() == 'admin/tender_categories') active
 @elseif(request()->path() == 'admin/tender/settings') active
 @elseif(request()->path() == 'admin/tender/purchase-log') active
+@elseif(request()->path() == 'admin/tender/blacklist') active
 @elseif(request()->path() == 'admin/tenders') active
 @elseif(request()->path() == 'admin/tender/create') active
 @elseif(request()->is('admin/tender/*/edit')) active
@@ -714,6 +715,7 @@
 @if (request()->path() == 'admin/tender_categories') show
 @elseif(request()->path() == 'admin/tender/settings') show
 @elseif(request()->path() == 'admin/tender/purchase-log') show
+@elseif(request()->path() == 'admin/tender/blacklist') show
 @elseif(request()->path() == 'admin/tenders') show
 @elseif(request()->path() == 'admin/tender/create') show
 @elseif(request()->is('admin/tender/*/edit')) show
@@ -746,6 +748,11 @@
                                 <li class="@if (request()->path() == 'admin/tender/purchase-log') active @endif">
                                     <a href="{{ route('admin.tender.purchaseLog') }}">
                                         <span class="sub-item">Purchases</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == 'admin/tender/blacklist') active @endif">
+                                    <a href="{{ route('admin.tender.blacklist') }}">
+                                        <span class="sub-item">Blacklist</span>
                                     </a>
                                 </li>
                                 <li class="@if (request()->path() == 'admin/tender/enrolls/report') active @endif">

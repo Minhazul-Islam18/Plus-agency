@@ -20,7 +20,10 @@ class LoginController extends Controller
       ]);
       if (Auth::guard('admin')->attempt(['username' => $request->username,'password' => $request->password]))
       {
-          return redirect()->route('admin.dashboard');
+          // Return to the page the admin was on before the session expired
+          // (stored as url.intended by the guest redirect), falling back to
+          // the dashboard on a fresh login.
+          return redirect()->intended(route('admin.dashboard'));
       }
       return redirect()->back()->with('alert','Username and Password Not Matched');
     }

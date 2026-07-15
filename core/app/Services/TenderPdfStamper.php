@@ -163,16 +163,15 @@ class TenderPdfStamper
                 // AES-256 (PDF 2.0) with an OWNER password only. The user
                 // (open) password is empty, so buyers open the file with no
                 // prompt — but editing is locked behind the owner password,
-                // which only admins hold. Print/copy/accessibility stay
-                // allowed; modify/annotate/fill/assemble are denied.
+                // which only admins hold. Print stays allowed; copy/extract,
+                // modify/annotate/fill/assemble are denied. PERM_COPY is NOT
+                // granted, so selecting/copying page text is blocked.
                 $secHandler = \SetaPDF_Core_SecHandler_Standard_Aes256::factory(
                     $document,
                     $password,   // owner password (admin-only)
                     '',          // user password (empty → opens freely)
                     \SetaPDF_Core_SecHandler::PERM_PRINT
                         | \SetaPDF_Core_SecHandler::PERM_DIGITAL_PRINT
-                        | \SetaPDF_Core_SecHandler::PERM_COPY
-                        | \SetaPDF_Core_SecHandler::PERM_ACCESSIBILITY
                 );
                 $document->setSecHandler($secHandler);
             }

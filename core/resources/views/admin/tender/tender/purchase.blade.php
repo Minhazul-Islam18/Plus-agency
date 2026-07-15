@@ -177,8 +177,8 @@
                                                                 @endif
                                                             </form>
 
-                                                            {{-- Quick blacklist this buyer --}}
-                                                            @if (\App\TenderBlacklist::matches($purchase->email, $purchase->phone_number, null))
+                                                            {{-- Quick blacklist this company (keyed on its registration no.) --}}
+                                                            @if (\App\TenderBlacklist::matches($purchase->company_registration_no))
                                                                 <a href="{{ route('admin.tender.blacklist') }}"
                                                                     class="btn btn-secondary btn-sm m-0"
                                                                     data-toggle="tooltip" title="Already blacklisted — manage on the Blacklist page">

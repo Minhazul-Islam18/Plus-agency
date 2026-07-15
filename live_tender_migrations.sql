@@ -38,6 +38,8 @@ DELIMITER ;
 -- ---- tender_purchases: columns added after the original create -------
 CALL _addcol('tender_purchases', 'company_name',      "`company_name` VARCHAR(200) NULL");
 CALL _addcol('tender_purchases', 'company_address',   "`company_address` TEXT NULL");
+CALL _addcol('tender_purchases', 'company_registration_no', "`company_registration_no` VARCHAR(100) NULL");
+CALL _addcol('tender_blacklists', 'company_registration_no', "`company_registration_no` VARCHAR(100) NULL");
 CALL _addcol('tender_purchases', 'purchased_modules', "`purchased_modules` TEXT NULL");
 CALL _addcol('tender_purchases', 'paid_at',           "`paid_at` TIMESTAMP NULL");
 CALL _addcol('tender_purchases', 'access_status',     "`access_status` VARCHAR(20) NOT NULL DEFAULT 'active'");
@@ -78,6 +80,8 @@ CALL _addidx('tender_purchases', 'idx_tpurchases_tender',       '`tender_id`');
 CALL _addidx('tender_purchases', 'idx_tpurchases_order',        '`order_number`');
 CALL _addidx('tender_purchases', 'idx_tpurchases_email',        '`email`');
 CALL _addidx('tender_purchases', 'idx_tpurchases_pstatus',      '`payment_status`');
+CALL _addidx('tender_purchases', 'idx_tpurchases_regno',        '`tender_id`, `company_registration_no`');
+CALL _addidx('tender_blacklists','tender_blacklists_regno_index','`company_registration_no`');
 CALL _addidx('tender_categories','idx_tcategories_lang_status', '`language_id`, `status`');
 CALL _addidx('pages',            'pages_page_type_index',       '`page_type`');
 

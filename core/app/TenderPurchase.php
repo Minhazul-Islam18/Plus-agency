@@ -18,6 +18,7 @@ class TenderPurchase extends Model
         'city',
         'company_name',
         'company_address',
+        'company_registration_no',
         'qty',
         'technical_proposal_fee',
         'financial_proposal_fee',
@@ -55,24 +56,32 @@ class TenderPurchase extends Model
     }
 
     /**
-     * Module names a buyer has already paid for on a tender.
-     * purchased_modules stores {name, cost} (no ids), so paid-state is keyed by name.
-     *
-     * Identity: a logged-in buyer is matched by account id (so editing the email
-     * field cannot dodge the guard); a guest is matched by email.
+     * Canonical form of a company registration number: uppercase, alphanumeric only.
+     * Duplicate detection compares canonical values, so "ab-12 " and "AB12" collide.
      */
-    public static function paidModuleNamesForBuyer(?int $userId, ?string $email, int $tenderId): array
+    public static function normalizeRegNo(?string $regNo): string
     {
-        $query = static::where('tender_id', $tenderId)
-            ->where('payment_status', 'Completed');
+        return strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string) $regNo));
+    }
 
-        if (!empty($userId)) {
-            $query->where('user_id', $userId);
-        } else {
-            $query->whereRaw('LOWER(TRIM(email)) = ?', [strtolower(trim((string) $email))]);
+    /**
+     * Module names already paid for on a tender under a given company registration
+     * number. purchased_modules stores {name, cost} (no ids), so paid-state is keyed
+     * by name. Registration number is the sole buyer identity for the duplicate guard:
+     * the same company cannot re-pay regardless of which email is used. An empty /
+     * missing registration number never matches, so it never blocks a purchase.
+     */
+    public static function paidModuleNamesForReg(int $tenderId, ?string $regNo): array
+    {
+        $regNo = static::normalizeRegNo($regNo);
+        if ($regNo === '') {
+            return [];
         }
 
-        return $query->get()
+        return static::where('tender_id', $tenderId)
+            ->where('payment_status', 'Completed')
+            ->where('company_registration_no', $regNo)
+            ->get()
             ->flatMap(function ($p) {
                 $mods = json_decode($p->purchased_modules, true) ?: [];
                 return collect($mods)->pluck('name');
@@ -82,14 +91,6 @@ class TenderPurchase extends Model
             ->unique()
             ->values()
             ->all();
-    }
-
-    /**
-     * Backwards-compatible email-only lookup. Prefer paidModuleNamesForBuyer().
-     */
-    public static function paidModuleNames(string $email, int $tenderId): array
-    {
-        return static::paidModuleNamesForBuyer(null, $email, $tenderId);
     }
 
     public function user()

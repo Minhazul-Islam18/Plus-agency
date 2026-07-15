@@ -679,8 +679,8 @@ $(function ($) {
     e.preventDefault();
     var form = $(this).closest('.blacklistform');
     swal({
-      title: 'Blacklist this buyer?',
-      text: 'Future orders from this email and phone will be refused. Optionally add a reason:',
+      title: 'Blacklist this company?',
+      text: "Future orders from this company's registration number will be refused. Optionally add a reason:",
       content: {
         element: 'input',
         attributes: { placeholder: 'Reason (optional)', type: 'text' }

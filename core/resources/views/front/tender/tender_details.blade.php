@@ -575,9 +575,17 @@
             background: linear-gradient(135deg, #4aa4f8, #2c7be5);
         }
 
-        .pay-method-card .pm-icon.pm-stripe { background: linear-gradient(135deg, #635bff, #4b45c6); }
-        .pay-method-card .pm-icon.pm-razorpay { background: linear-gradient(135deg, #2d88ff, #0b63ce); }
-        .pay-method-card .pm-icon.pm-offline { background: linear-gradient(135deg, #2c3e50, #1a2533); }
+        .pay-method-card .pm-icon.pm-stripe {
+            background: linear-gradient(135deg, #635bff, #4b45c6);
+        }
+
+        .pay-method-card .pm-icon.pm-razorpay {
+            background: linear-gradient(135deg, #2d88ff, #0b63ce);
+        }
+
+        .pay-method-card .pm-icon.pm-offline {
+            background: linear-gradient(135deg, #2c3e50, #1a2533);
+        }
 
         /* Moneroo wordmark logo — no gradient square, render the SVG legibly */
         .pay-method-card .pm-icon.pm-moneroo {
@@ -1221,15 +1229,86 @@
                                                 value="{{ Auth::check() ? Auth::user()->email : '' }}"
                                                 {{ Auth::check() ? 'readonly' : '' }} required>
                                         </div>
+                                        @php
+                                            // Pre-select the tender's country when it is on the canonical list.
+                                            $preCountry = collect($countries)->firstWhere('name', $tender->country);
+                                            $preName = $preCountry['name'] ?? '';
+                                            $preDial = $preCountry['dial'] ?? '';
+                                            $preFlag = $preCountry['flag'] ?? '';
+                                        @endphp
+
+                                        {{-- Phone: dialling code + number as one grouped control --}}
                                         <div class="col-md-6 mb-3">
-                                            <input type="text" name="phone_number" class="form-control"
-                                                placeholder="{{ __('Phone Number') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->phone : '' }}" required>
+                                            <div class="phone-group">
+                                                <div class="ss ss-dial" data-target="#phoneCodeInput">
+                                                    <button type="button" class="ss-toggle">
+                                                        <span class="ss-flag">{{ $preFlag }}</span>
+                                                        <span class="ss-label">{{ $preDial ?: __('Code') }}</span>
+                                                        <i class="ss-caret"></i>
+                                                    </button>
+                                                    <div class="ss-panel">
+                                                        <input type="text" class="ss-search"
+                                                            placeholder="{{ __('Search…') }}" autocomplete="off">
+                                                        <ul class="ss-list">
+                                                            @foreach ($countries as $c)
+                                                                <li class="ss-opt" data-value="{{ $c['dial'] }}"
+                                                                    data-label="{{ $c['dial'] }}"
+                                                                    data-flag="{{ $c['flag'] }}"
+                                                                    data-search="{{ $c['name'] }} {{ $c['dial'] }}">
+                                                                    <span class="ss-flag">{{ $c['flag'] }}</span>
+                                                                    <span class="ss-cname">{{ $c['name'] }}</span>
+                                                                    <span class="ss-dialcode">{{ $c['dial'] }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                        <div class="ss-empty">{{ __('No match') }}</div>
+                                                    </div>
+                                                </div>
+                                                <input type="text" name="phone_number" id="phoneNumber"
+                                                    class="phone-input" inputmode="numeric"
+                                                    placeholder="{{ __('Phone Number') }} *" maxlength="15" required
+                                                    value="{{ Auth::check() ? Auth::user()->phone : '' }}">
+                                            </div>
+                                            <input type="hidden" name="phone_code" id="phoneCodeInput"
+                                                value="{{ $preDial }}">
                                         </div>
+
+                                        {{-- Country: searchable picker (no free typing) --}}
                                         <div class="col-md-6 mb-3">
-                                            <input type="text" name="country" class="form-control"
-                                                placeholder="{{ __('Country') }} *" value="{{ $tender->country }}"
-                                                required>
+                                            <div class="ss ss-country" data-target="#countryInput"
+                                                data-sync-dial="#phoneCodeInput">
+                                                <button type="button" class="ss-toggle">
+                                                    <span class="ss-flag">{{ $preFlag }}</span>
+                                                    <span class="ss-label {{ $preName ? '' : 'ss-placeholder' }}">
+                                                        {{ $preName ?: __('Select Country') . ' *' }}
+                                                    </span>
+                                                    <i class="ss-caret"></i>
+                                                </button>
+                                                <div class="ss-panel">
+                                                    <input type="text" class="ss-search"
+                                                        placeholder="{{ __('Search country…') }}" autocomplete="off">
+                                                    <ul class="ss-list">
+                                                        @foreach ($countries as $c)
+                                                            <li class="ss-opt" data-value="{{ $c['name'] }}"
+                                                                data-label="{{ $c['name'] }}"
+                                                                data-flag="{{ $c['flag'] }}"
+                                                                data-dial="{{ $c['dial'] }}"
+                                                                data-search="{{ $c['name'] }}">
+                                                                <span class="ss-flag">{{ $c['flag'] }}</span>
+                                                                <span class="ss-cname">{{ $c['name'] }}</span>
+                                                                <span class="ss-dialcode">{{ $c['dial'] }}</span>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                    <div class="ss-empty">{{ __('No match') }}</div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="country" id="countryInput"
+                                                value="{{ $preName }}">
+                                            <p class="text-danger country-warning mt-1 mb-0"
+                                                style="display:none;font-size:13px;">
+                                                * {{ __('Please select a country from the list.') }}
+                                            </p>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="city" class="form-control"
@@ -1243,11 +1322,115 @@
                                             <input type="text" name="company_address" class="form-control"
                                                 placeholder="{{ __('Company Address') }}">
                                         </div>
+                                        <style>
+                                            /* ── Searchable select (country / dialling code) ── */
+                                            .ss { position: relative; }
+                                            .ss-toggle {
+                                                display: flex; align-items: center; justify-content: space-between;
+                                                gap: 8px; width: 100%; background: #fff; cursor: pointer;
+                                                border: 1px solid #ced4da; border-radius: .25rem;
+                                                padding: .375rem .75rem; min-height: 45px;
+                                                font-size: 1rem; color: #495057; text-align: left;
+                                            }
+                                            .ss-toggle:focus { outline: none; border-color: #86b7fe; }
+                                            /* Flag + label sit together on the left; the caret is pushed right. */
+                                            .ss-toggle .ss-label {
+                                                flex: 1 1 auto; overflow: hidden;
+                                                text-overflow: ellipsis; white-space: nowrap;
+                                            }
+                                            .ss-label.ss-placeholder { color: #8a94a0; }
+                                            .ss-caret {
+                                                flex: 0 0 auto; width: 0; height: 0;
+                                                border-left: 5px solid transparent; border-right: 5px solid transparent;
+                                                border-top: 5px solid #6c757d;
+                                            }
+                                            .ss-panel {
+                                                display: none; position: absolute; z-index: 60; top: calc(100% + 4px);
+                                                left: 0; right: 0; min-width: 260px; background: #fff;
+                                                border: 1px solid #e2e8f0; border-radius: 8px;
+                                                box-shadow: 0 10px 28px rgba(0, 0, 0, .12); overflow: hidden;
+                                            }
+                                            .ss.open .ss-panel { display: block; }
+                                            .ss-search {
+                                                width: 100%; border: 0; border-bottom: 1px solid #edf2f7;
+                                                padding: 10px 12px; font-size: 14px; outline: none;
+                                            }
+                                            .ss-list { max-height: 240px; overflow-y: auto; margin: 0; padding: 4px 0; list-style: none; }
+                                            .ss-opt {
+                                                display: flex; align-items: center; justify-content: space-between;
+                                                gap: 12px; padding: 8px 12px; font-size: 14px; cursor: pointer;
+                                            }
+                                            .ss-opt:hover, .ss-opt.active { background: #f1f5f9; }
+                                            .ss-opt.selected { background: #e2e8f0; font-weight: 600; }
+                                            .ss-flag {
+                                                flex: 0 0 auto; font-size: 18px; line-height: 1;
+                                                /* Emoji-capable fonts first; Windows falls back to the ISO letters. */
+                                                font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
+                                                    "Twemoji Mozilla", sans-serif;
+                                            }
+                                            .ss-opt .ss-cname { flex: 1 1 auto; }
+                                            .ss-cname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                                            .ss-dialcode { color: #64748b; font-size: 13px; flex: 0 0 auto; }
+                                            .ss-empty { display: none; padding: 10px 12px; color: #94a3b8; font-size: 14px; list-style: none; }
+                                            .ss.no-match .ss-empty { display: block; }
+
+                                            /* ── Phone: dialling code + number as one control ── */
+                                            .phone-group {
+                                                display: flex; align-items: stretch;
+                                                border: 1px solid #ced4da; border-radius: .25rem;
+                                                background: #fff; overflow: visible;
+                                            }
+                                            .phone-group:focus-within { border-color: #86b7fe; }
+                                            .phone-group .ss-dial { flex: 0 0 auto; }
+                                            .phone-group .ss-dial .ss-toggle {
+                                                border: 0; border-right: 1px solid #e2e8f0;
+                                                border-radius: .25rem 0 0 .25rem; min-width: 92px;
+                                                background: #f8fafc;
+                                            }
+                                            .phone-group .phone-input {
+                                                flex: 1 1 auto; min-width: 0; border: 0; outline: none;
+                                                padding: .375rem .75rem; font-size: 1rem; color: #495057;
+                                                border-radius: 0 .25rem .25rem 0; background: transparent;
+                                            }
+                                            .phone-group .ss-panel { left: 0; right: auto; }
+
+                                            .regno-help {
+                                                position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+                                                width: 20px; height: 20px; line-height: 20px; text-align: center;
+                                                border-radius: 50%; background: #e2e8f0; color: #475569;
+                                                font-size: 13px; font-weight: 700; cursor: help; user-select: none;
+                                            }
+                                            .regno-help .regno-tip {
+                                                visibility: hidden; opacity: 0; transition: opacity .15s ease;
+                                                position: absolute; bottom: calc(100% + 10px); right: -6px; z-index: 20;
+                                                width: 260px; max-width: 78vw; padding: 10px 12px;
+                                                background: #1e293b; color: #f1f5f9; font-size: 12.5px; font-weight: 400;
+                                                line-height: 1.5; text-align: left; border-radius: 8px;
+                                                box-shadow: 0 6px 20px rgba(0,0,0,.25); white-space: normal;
+                                            }
+                                            .regno-help .regno-tip::after {
+                                                content: ""; position: absolute; top: 100%; right: 12px;
+                                                border: 6px solid transparent; border-top-color: #1e293b;
+                                            }
+                                            .regno-help:hover .regno-tip,
+                                            .regno-help:focus .regno-tip { visibility: visible; opacity: 1; }
+                                        </style>
+                                        <div class="col-md-12 mb-3">
+                                            <div style="position:relative;">
+                                                <input type="text" name="company_registration_no" id="companyRegNo"
+                                                    class="form-control" placeholder="{{ __('Company Registration No.') }} *"
+                                                    maxlength="100" required pattern="[A-Z0-9]+"
+                                                    style="text-transform:uppercase;padding-right:38px;">
+                                                <span class="regno-help" tabindex="0" role="button"
+                                                    aria-label="{{ __('What is this?') }}">?
+                                                    <span class="regno-tip">{{ __("Your company's official registration or incorporation number (e.g. trade licence / business registration ID). Uppercase letters and numbers only — used to stop the same company buying this tender twice.") }}</span>
+                                                </span>
+                                            </div>
+                                        </div>
                                         <div class="col-12 mb-3" id="paymentReferenceField" style="display:none;">
                                             <input type="text" name="payment_reference" class="form-control"
                                                 placeholder="{{ __('Payment / Transaction Reference (optional)') }}"
-                                                maxlength="100"
-                                                style="text-transform:uppercase;">
+                                                maxlength="100" style="text-transform:uppercase;">
                                             <small class="text-muted">
                                                 {{ __('Enter your bank transfer reference, gateway transaction ID, or any payment confirmation number. This helps recover your files later.') }}
                                             </small>
@@ -1327,16 +1510,20 @@
                                 <div id="stripeTab" class="d-none mt-3">
                                     <div class="row">
                                         <div class="col-12 mb-2">
-                                            <input type="text" name="cardNumber" class="form-control" placeholder="{{ __('Card Number') }}" disabled>
+                                            <input type="text" name="cardNumber" class="form-control"
+                                                placeholder="{{ __('Card Number') }}" disabled>
                                         </div>
                                         <div class="col-4 mb-2">
-                                            <input type="text" name="cvcNumber" class="form-control" placeholder="{{ __('CVC') }}" disabled>
+                                            <input type="text" name="cvcNumber" class="form-control"
+                                                placeholder="{{ __('CVC') }}" disabled>
                                         </div>
                                         <div class="col-4 mb-2">
-                                            <input type="text" name="month" class="form-control" placeholder="{{ __('MM') }}" disabled>
+                                            <input type="text" name="month" class="form-control"
+                                                placeholder="{{ __('MM') }}" disabled>
                                         </div>
                                         <div class="col-4 mb-2">
-                                            <input type="text" name="year" class="form-control" placeholder="{{ __('YYYY') }}" disabled>
+                                            <input type="text" name="year" class="form-control"
+                                                placeholder="{{ __('YYYY') }}" disabled>
                                         </div>
                                     </div>
                                 </div>
@@ -1344,11 +1531,14 @@
                                 {{-- Terms & Conditions — mandatory --}}
                                 <div class="terms-agree mt-3">
                                     <label class="terms-agree-label">
-                                        <input type="checkbox" name="agree_terms" id="agreeTerms" value="1" required>
+                                        <input type="checkbox" name="agree_terms" id="agreeTerms" value="1"
+                                            required>
                                         <span>
                                             @if ($termsUrl ?? null)
-                                                <a href="{{ $termsUrl }}" target="_blank" rel="noopener">{{ __('Click on this link') }}</a>
-                                                {{ __('to read the general terms and conditions related to the purchase of tender documents.') }}
+                                                {{ __('Click on this link to read the general') }}
+                                                <a href="{{ $termsUrl }}" target="_blank"
+                                                    rel="noopener">{{ __('terms and conditions') }}</a>
+                                                {{ __('related to the purchase of tender documents.') }}
                                             @else
                                                 {{ __('Click on this link to read the general terms and conditions related to the purchase of tender documents.') }}
                                             @endif
@@ -1377,9 +1567,10 @@
                         @endif
 
                         @if ($isExpired)
-                        <div class="alert alert-danger mt-3" style="border-radius:8px; font-size:14px;">
-                            <i class="fas fa-lock mr-1"></i> {{ __('Submission deadline has passed. This tender is no longer available for purchase.') }}
-                        </div>
+                            <div class="alert alert-danger mt-3" style="border-radius:8px; font-size:14px;">
+                                <i class="fas fa-lock mr-1"></i>
+                                {{ __('Submission deadline has passed. This tender is no longer available for purchase.') }}
+                            </div>
                         @endif
 
                         {{-- Social share --}}
@@ -1596,6 +1787,7 @@
                         color: #1f2a37;
                         margin-bottom: 22px;
                     }
+
                     .rt-card {
                         background: #fff;
                         border: 1px solid #eef1f5;
@@ -1607,10 +1799,12 @@
                         display: flex;
                         flex-direction: column;
                     }
+
                     .rt-card:hover {
                         transform: translateY(-4px);
                         box-shadow: 0 10px 26px rgba(0, 0, 0, .1);
                     }
+
                     .rt-thumb {
                         position: relative;
                         display: block;
@@ -1618,13 +1812,18 @@
                         overflow: hidden;
                         background: #f2f4f7;
                     }
+
                     .rt-thumb img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                         transition: transform .3s;
                     }
-                    .rt-card:hover .rt-thumb img { transform: scale(1.05); }
+
+                    .rt-card:hover .rt-thumb img {
+                        transform: scale(1.05);
+                    }
+
                     .rt-cat {
                         position: absolute;
                         top: 10px;
@@ -1636,18 +1835,21 @@
                         padding: 4px 12px;
                         border-radius: 20px;
                     }
+
                     .rt-body {
                         padding: 14px 16px 16px;
                         display: flex;
                         flex-direction: column;
                         flex: 1;
                     }
+
                     .rt-deadline {
                         font-size: 12px;
                         font-weight: 600;
                         color: #e74c3c;
                         margin-bottom: 8px;
                     }
+
                     .rt-name {
                         font-size: 15px;
                         font-weight: 600;
@@ -1655,8 +1857,16 @@
                         margin: 0 0 12px;
                         flex: 1;
                     }
-                    .rt-name a { color: #222; text-decoration: none; }
-                    .rt-name a:hover { color: var(--main-color, #3498db); }
+
+                    .rt-name a {
+                        color: #222;
+                        text-decoration: none;
+                    }
+
+                    .rt-name a:hover {
+                        color: var(--main-color, #3498db);
+                    }
+
                     .rt-meta {
                         display: flex;
                         justify-content: space-between;
@@ -1666,9 +1876,20 @@
                         font-size: 13px;
                         color: #666;
                     }
-                    .rt-meta .rt-country i { color: var(--main-color, #3498db); margin-right: 4px; }
-                    .rt-meta .rt-price { font-weight: 800; color: var(--main-color, #3498db); }
-                    .rt-meta .rt-price.free { color: #27ae60; }
+
+                    .rt-meta .rt-country i {
+                        color: var(--main-color, #3498db);
+                        margin-right: 4px;
+                    }
+
+                    .rt-meta .rt-price {
+                        font-weight: 800;
+                        color: var(--main-color, #3498db);
+                    }
+
+                    .rt-meta .rt-price.free {
+                        color: #27ae60;
+                    }
                 </style>
                 <div class="row mt-5 pt-4" style="border-top:1px solid #eef1f5;">
                     <div class="col-12">
@@ -1678,39 +1899,39 @@
                                 <div class="rt-item">
                                     <div class="rt-card">
                                         <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}" class="rt-thumb">
-                                    @if (!empty($rt->tender_image))
-                                        <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
-                                            alt="{{ $rt->title }}">
-                                    @else
-                                        <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
-                                    @endif
-                                    @if ($rt->tenderCategory)
-                                        <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
-                                    @endif
-                                </a>
-                                <div class="rt-body">
-                                    @if ($rt->submission_deadline)
-                                        <div class="rt-deadline">
-                                            <i class="far fa-clock"></i>
-                                            {{ \Carbon\Carbon::parse($rt->submission_deadline)->format('d M Y') }}
-                                        </div>
-                                    @endif
-                                    <h4 class="rt-name">
-                                        <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}">
-                                            {{ Str::limit(convertUtf8($rt->title), 60) }}
-                                        </a>
-                                    </h4>
-                                    <div class="rt-meta">
-                                        <span class="rt-country">
-                                            <i class="fas fa-map-marker-alt"></i> {{ $rt->country }}
-                                        </span>
-                                        <span class="rt-price {{ is_null($rt->current_price) ? 'free' : '' }}">
-                                            @if (is_null($rt->current_price))
-                                                {{ __('Free') }}
+                                            @if (!empty($rt->tender_image))
+                                                <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
+                                                    alt="{{ $rt->title }}">
                                             @else
-                                                {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($rt->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
                                             @endif
-                                        </span>
+                                            @if ($rt->tenderCategory)
+                                                <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
+                                            @endif
+                                        </a>
+                                        <div class="rt-body">
+                                            @if ($rt->submission_deadline)
+                                                <div class="rt-deadline">
+                                                    <i class="far fa-clock"></i>
+                                                    {{ \Carbon\Carbon::parse($rt->submission_deadline)->format('d M Y') }}
+                                                </div>
+                                            @endif
+                                            <h4 class="rt-name">
+                                                <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}">
+                                                    {{ Str::limit(convertUtf8($rt->title), 60) }}
+                                                </a>
+                                            </h4>
+                                            <div class="rt-meta">
+                                                <span class="rt-country">
+                                                    <i class="fas fa-map-marker-alt"></i> {{ $rt->country }}
+                                                </span>
+                                                <span class="rt-price {{ is_null($rt->current_price) ? 'free' : '' }}">
+                                                    @if (is_null($rt->current_price))
+                                                        {{ __('Free') }}
+                                                    @else
+                                                        {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($rt->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                                    @endif
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -1731,7 +1952,7 @@
     <script src="{{ asset('assets/front/js/owl.carousel.min.js') }}"></script>
     <script>
         // ── Related tenders carousel (auto-scroll) ──
-        $(function () {
+        $(function() {
             var $rel = $('.related-tenders-carousel');
             if ($rel.length && $.fn.owlCarousel) {
                 var count = $rel.children().length;
@@ -1746,9 +1967,15 @@
                     dots: true,
                     nav: false,
                     responsive: {
-                        0:   { items: 1 },
-                        576: { items: 2 },
-                        992: { items: 3 }
+                        0: {
+                            items: 1
+                        },
+                        576: {
+                            items: 2
+                        },
+                        992: {
+                            items: 3
+                        }
                     }
                 });
             }
@@ -1822,9 +2049,9 @@
             });
 
             var onlineRoutes = {
-                'stripe':   '{{ route('tender.payment.stripe') }}',
+                'stripe': '{{ route('tender.payment.stripe') }}',
                 'razorpay': '{{ route('tender.payment.razorpay') }}',
-                'moneroo':  '{{ route('tender.payment.moneroo') }}',
+                'moneroo': '{{ route('tender.payment.moneroo') }}',
             };
             var offlineAction = '{{ route('tender.purchase.submit') }}';
 
@@ -1857,7 +2084,7 @@
 
             // Payment method cards → select gateway, reveal offline details
             $(document).on('click', '.pay-method-card', function() {
-                var gw   = String($(this).data('gw'));
+                var gw = String($(this).data('gw'));
                 var type = $(this).data('type');
                 $('.pay-method-card').removeClass('active');
                 $(this).addClass('active');
@@ -1872,7 +2099,10 @@
 
             // Keyboard accessibility for the cards
             $(document).on('keydown', '.pay-method-card', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $(this).trigger('click'); }
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    $(this).trigger('click');
+                }
             });
 
             // Form submit guard: must pick a gateway; block when buyer already owns everything
@@ -1881,13 +2111,27 @@
                 if (!gw) {
                     e.preventDefault();
                     $('.payment-warning').fadeIn().delay(2000).fadeOut();
-                    $('html, body').animate({ scrollTop: $('#paySection').offset().top - 120 }, 350);
+                    $('html, body').animate({
+                        scrollTop: $('#paySection').offset().top - 120
+                    }, 350);
+                    return;
+                }
+                // Country/phone code live in hidden inputs (custom pickers), so the
+                // browser's `required` does not cover them — check here.
+                if (!$('#countryInput').val() || !$('#phoneCodeInput').val()) {
+                    e.preventDefault();
+                    $('.country-warning').stop(true, true).fadeIn().delay(2500).fadeOut();
+                    $('html, body').animate({
+                        scrollTop: $('#countryInput').offset().top - 160
+                    }, 350);
                     return;
                 }
                 if (!$('#agreeTerms').is(':checked')) {
                     e.preventDefault();
                     $('.terms-warning').stop(true, true).fadeIn().delay(2500).fadeOut();
-                    $('html, body').animate({ scrollTop: $('.terms-agree').offset().top - 140 }, 350);
+                    $('html, body').animate({
+                        scrollTop: $('.terms-agree').offset().top - 140
+                    }, 350);
                     return;
                 }
                 if ($('#confirmPurchaseBtn').prop('disabled')) {
@@ -1913,7 +2157,7 @@
         // Falls back to the full tender price when nothing is owned.
         function tenderUnpaidBase() {
             var t = 0;
-            $('.module-badge.paid-badge').each(function () {
+            $('.module-badge.paid-badge').each(function() {
                 if (!$(this).hasClass('paid-owned')) t += parseFloat($(this).data('cost')) || 0;
             });
             return t;
@@ -1921,7 +2165,9 @@
 
         function toggleModule(el) {
             // Already-paid modules cannot be re-selected (duplicate-payment guard)
-            if ($(el).hasClass('paid-owned')) { return; }
+            if ($(el).hasClass('paid-owned')) {
+                return;
+            }
 
             var cost = parseFloat($(el).data('cost')) || 0;
             var id = String($(el).data('module-id'));
@@ -1936,7 +2182,9 @@
 
             // Sum selected module costs; nothing selected = buy everything still unpaid
             var total = 0;
-            $.each(selectedModules, function(k, v) { total += v; });
+            $.each(selectedModules, function(k, v) {
+                total += v;
+            });
             var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
 
             // Update displayed price and hidden form field
@@ -1952,20 +2200,129 @@
         }
 
         // ── Duplicate-payment guard ───────────────────────────────────────────
-        (function () {
+        (function() {
             var tenderId = {{ (int) $tender->id }};
-            var $email   = $('#paymentGatewayForm input[name="email"]');
-            var lastEmail = '';
+            var $regNo = $('#companyRegNo');
+            var lastReg = '';
+
+            // ── Searchable select (country + dialling code) ──────────────────────
+            // Native <select> is not used: the theme runs $('select').niceSelect(),
+            // which wraps every select and offers no search.
+
+            // Scoped to the toggle: `.ss-flag` also exists on every option row.
+            function ssPaintToggle($ss, flag, label) {
+                var $toggle = $ss.children('.ss-toggle');
+                $toggle.children('.ss-flag').text(flag || '');
+                $toggle.children('.ss-label').text(label).removeClass('ss-placeholder');
+            }
+
+            function ssSelect($ss, $opt) {
+                $($ss.data('target')).val($opt.data('value'));
+                ssPaintToggle($ss, $opt.data('flag'), $opt.data('label'));
+                $ss.find('.ss-opt').removeClass('selected');
+                $opt.addClass('selected');
+
+                // Picking a country switches the phone dialling code (and flag) to match.
+                var syncSel = $ss.data('sync-dial');
+                var dial = $opt.data('dial');
+                if (syncSel && dial) {
+                    var $dial = $('.ss-dial');
+                    $(syncSel).val(dial);
+                    ssPaintToggle($dial, $opt.data('flag'), dial);
+                    $dial.find('.ss-opt').removeClass('selected')
+                        .filter('[data-value="' + dial + '"]').first().addClass('selected');
+                }
+            }
+
+            function ssClose($ss) {
+                $ss.removeClass('open no-match');
+                $ss.find('.ss-search').val('');
+                $ss.find('.ss-opt').show();
+            }
+
+            $(document).on('click', '.ss-toggle', function (e) {
+                e.preventDefault();
+                var $ss = $(this).closest('.ss');
+                var wasOpen = $ss.hasClass('open');
+                $('.ss').each(function () { ssClose($(this)); });
+                if (!wasOpen) {
+                    $ss.addClass('open');
+                    $ss.find('.ss-search').focus();
+                }
+            });
+
+            $(document).on('input', '.ss-search', function () {
+                var $ss = $(this).closest('.ss');
+                var q = ($(this).val() || '').toLowerCase().trim();
+                var hits = 0;
+                $ss.find('.ss-opt').each(function () {
+                    var match = !q || String($(this).data('search')).toLowerCase().indexOf(q) > -1;
+                    $(this).toggle(match);
+                    if (match) hits++;
+                });
+                $ss.toggleClass('no-match', hits === 0);
+            });
+
+            $(document).on('click', '.ss-opt', function () {
+                var $ss = $(this).closest('.ss');
+                ssSelect($ss, $(this));
+                ssClose($ss);
+                $('.country-warning').hide();
+            });
+
+            // Click outside closes any open picker.
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.ss').length) {
+                    $('.ss').each(function () { ssClose($(this)); });
+                }
+            });
+
+            $(document).on('keydown', '.ss', function (e) {
+                if (e.key === 'Escape') { ssClose($(this)); }
+            });
+
+            // National number only — digits, no dialling code (that is the picker).
+            $(document).on('input', '#phoneNumber', function () {
+                var el = this;
+                var start = el.selectionStart;
+                var before = el.value || '';
+                var cleaned = before.replace(/\D/g, '');
+                if (cleaned !== before) {
+                    var removed = before.length - cleaned.length;
+                    el.value = cleaned;
+                    var pos = Math.max(0, (start || 0) - removed);
+                    el.setSelectionRange(pos, pos);
+                }
+            });
+
+            // Force the registration number to uppercase alphanumeric as the buyer
+            // types, matching how it is stored and matched server-side.
+            $(document).on('input', '#companyRegNo', function() {
+                var el = this;
+                var start = el.selectionStart;
+                var before = el.value || '';
+                var cleaned = before.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (cleaned !== before) {
+                    // Move the caret back only by the count of characters actually
+                    // removed; pure uppercasing (no removal) leaves it in place.
+                    var removed = before.length - cleaned.length;
+                    el.value = cleaned;
+                    var pos = Math.max(0, (start || 0) - removed);
+                    el.setSelectionRange(pos, pos);
+                }
+            });
 
             function recomputeTotal() {
                 var total = 0;
-                $.each(selectedModules, function (k, v) { total += v; });
+                $.each(selectedModules, function(k, v) {
+                    total += v;
+                });
                 var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
                 $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
                 $('#selectedAmount').val(displayTotal);
                 var c = $('#selectedModuleInputs');
                 c.empty();
-                $.each(selectedModules, function (moduleId) {
+                $.each(selectedModules, function(moduleId) {
                     c.append('<input type="hidden" name="selected_module_ids[]" value="' + moduleId + '">');
                 });
             }
@@ -1974,7 +2331,7 @@
                 // Reset previous paid markings
                 $('.module-badge.paid-owned').removeClass('paid-owned').find('.paid-owned-tag').remove();
 
-                $.each(paidIds, function (i, pid) {
+                $.each(paidIds, function(i, pid) {
                     var $b = $('.module-badge[data-module-id="' + pid + '"]');
                     if (!$b.length) return;
                     // Deselect if currently selected
@@ -1984,7 +2341,9 @@
                     }
                     $b.addClass('paid-owned');
                     if (!$b.find('.paid-owned-tag').length) {
-                        $b.find('span').first().append(' <small class="paid-owned-tag" style="color:#16a34a;font-weight:700;">✓ {{ __('Paid') }}</small>');
+                        $b.find('span').first().append(
+                            ' <small class="paid-owned-tag" style="color:#16a34a;font-weight:700;">✓ {{ __('Paid') }}</small>'
+                        );
                     }
                 });
 
@@ -1995,12 +2354,18 @@
                     showAllPaidNotice();
                     $('#paySection').hide();
                     $('#confirmPurchaseBtn').prop('disabled', true)
-                        .css({ opacity: 0.5, cursor: 'not-allowed' });
+                        .css({
+                            opacity: 0.5,
+                            cursor: 'not-allowed'
+                        });
                 } else {
                     $('#dupPaidNotice').remove();
                     $('#paySection').show();
                     $('#confirmPurchaseBtn').prop('disabled', false)
-                        .css({ opacity: '', cursor: '' });
+                        .css({
+                            opacity: '',
+                            cursor: ''
+                        });
                 }
             }
 
@@ -2016,9 +2381,9 @@
             }
 
             function checkPaidModules() {
-                var email = ($email.val() || '').trim();
-                if (!email || email === lastEmail || email.indexOf('@') < 1) return;
-                lastEmail = email;
+                var reg = ($regNo.val() || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (!reg || reg === lastReg || reg.length < 2) return;
+                lastReg = reg;
 
                 $.ajax({
                     url: '{{ route('tender.paid_modules') }}',
@@ -2026,31 +2391,33 @@
                     data: {
                         _token: $('#paymentGatewayForm input[name="_token"]').val(),
                         tender_id: tenderId,
-                        email: email
+                        company_registration_no: reg
                     },
-                    success: function (res) {
+                    success: function(res) {
                         applyPaid(res.paid_module_ids || [], !!res.all_paid);
                     }
                 });
             }
 
-            $(document).on('blur', '#paymentGatewayForm input[name="email"]', checkPaidModules);
+            $(document).on('blur', '#companyRegNo', checkPaidModules);
 
             // Re-check while typing (debounced) so owned modules lock without needing blur
             var typeTimer = null;
-            $(document).on('input', '#paymentGatewayForm input[name="email"]', function () {
+            $(document).on('input', '#companyRegNo', function() {
                 clearTimeout(typeTimer);
                 typeTimer = setTimeout(checkPaidModules, 600);
             });
 
             // Re-check when a gateway is picked, covering edits made before selecting.
-            $(document).on('click', '.pay-method-card', function () { setTimeout(checkPaidModules, 60); });
+            $(document).on('click', '.pay-method-card', function() {
+                setTimeout(checkPaidModules, 60);
+            });
 
-            // Run once on load for pre-filled (logged-in) email
+            // Run once on load in case the field is pre-filled.
             checkPaidModules();
 
             // Regenerate link for the all-paid case (reuses Find My Files regenerate)
-            $(document).on('click', '#emailNewLinkBtn', function () {
+            $(document).on('click', '#emailNewLinkBtn', function() {
                 var $btn = $(this);
                 $btn.prop('disabled', true);
                 $('#emailNewLinkMsg').text('{{ __('Sending...') }}').css('color', '#065f46');
@@ -2059,19 +2426,24 @@
                     method: 'POST',
                     data: {
                         _token: $('#paymentGatewayForm input[name="_token"]').val(),
-                        email: ($email.val() || '').trim()
+                        email: ($('#paymentGatewayForm input[name="email"]').val() || '').trim()
                     },
-                    success: function (res) {
+                    success: function(res) {
                         if (res.status === 'success') {
-                            $('#emailNewLinkMsg').text('{{ __('Link sent! Check your email.') }}').css('color', '#16a34a');
+                            $('#emailNewLinkMsg').text('{{ __('Link sent! Check your email.') }}')
+                                .css('color', '#16a34a');
                         } else {
                             $btn.prop('disabled', false);
-                            $('#emailNewLinkMsg').text('{{ __('Could not send. Try again shortly.') }}').css('color', '#dc2626');
+                            $('#emailNewLinkMsg').text(
+                                '{{ __('Could not send. Try again shortly.') }}').css('color',
+                                '#dc2626');
                         }
                     },
-                    error: function () {
+                    error: function() {
                         $btn.prop('disabled', false);
-                        $('#emailNewLinkMsg').text('{{ __('Could not send. Try again shortly.') }}').css('color', '#dc2626');
+                        $('#emailNewLinkMsg').text(
+                            '{{ __('Could not send. Try again shortly.') }}').css('color',
+                            '#dc2626');
                     }
                 });
             });

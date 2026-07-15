@@ -93,6 +93,9 @@ return new class extends Migration
                 $table->string('city')->nullable();
                 $table->string('company_name', 200)->nullable();
                 $table->text('company_address')->nullable();
+                // Sole duplicate-purchase key: a company cannot buy the same tender
+                // twice under one registration number, regardless of email used.
+                $table->string('company_registration_no', 100)->nullable();
 
                 // Order lines
                 $table->integer('qty')->default(1);
@@ -126,9 +129,11 @@ return new class extends Migration
         if (!Schema::hasTable('tender_blacklists')) {
             Schema::create('tender_blacklists', function (Blueprint $table) {
                 $table->id();
+                // Registration number is the required identifier for a rule; email and
+                // phone are optional extra identifiers a rule may also match on.
+                $table->string('company_registration_no', 100)->nullable()->index();
                 $table->string('email')->nullable()->index();
                 $table->string('phone_number')->nullable()->index();
-                $table->string('ip_address', 45)->nullable()->index();
                 $table->string('company_name')->nullable();
                 $table->string('reason')->nullable();
                 $table->timestamps();
@@ -209,6 +214,7 @@ return new class extends Migration
         $this->addIndex('tender_purchases', ['order_number'], 'idx_tpurchases_order');
         $this->addIndex('tender_purchases', ['email'], 'idx_tpurchases_email');
         $this->addIndex('tender_purchases', ['payment_status'], 'idx_tpurchases_pstatus');
+        $this->addIndex('tender_purchases', ['tender_id', 'company_registration_no'], 'idx_tpurchases_regno');
         $this->addIndex('tender_categories', ['language_id', 'status'], 'idx_tcategories_lang_status');
     }
 

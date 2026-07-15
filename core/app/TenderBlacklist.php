@@ -7,31 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class TenderBlacklist extends Model
 {
     protected $fillable = [
+        'company_registration_no',
         'email',
         'phone_number',
-        'ip_address',
         'company_name',
         'reason',
     ];
 
     /**
-     * Is this buyer blacklisted? Matches on any provided identifier
-     * (email / phone / IP), case-insensitive and trimmed.
+     * Is this company blacklisted? Keyed on the company registration number alone —
+     * email and phone are stored on a rule for reference only and are never matched
+     * on, so one person may still order for a different, unbanned company.
+     * Values are canonicalised, so "ab-12" and "AB12" hit the same rule.
      */
-    public static function matches(?string $email, ?string $phone, ?string $ip): bool
+    public static function matches(?string $regNo): bool
     {
-        $email = strtolower(trim((string) $email));
-        $phone = preg_replace('/\s+/', '', (string) $phone);
-        $ip    = trim((string) $ip);
-
-        if ($email === '' && $phone === '' && $ip === '') {
+        $regNo = TenderPurchase::normalizeRegNo($regNo);
+        if ($regNo === '') {
             return false;
         }
 
-        return static::query()
-            ->when($email !== '', fn($q) => $q->orWhereRaw('LOWER(TRIM(email)) = ?', [$email]))
-            ->when($phone !== '', fn($q) => $q->orWhereRaw("REPLACE(phone_number,' ','') = ?", [$phone]))
-            ->when($ip !== '', fn($q) => $q->orWhere('ip_address', $ip))
-            ->exists();
+        return static::where('company_registration_no', $regNo)->exists();
     }
 }

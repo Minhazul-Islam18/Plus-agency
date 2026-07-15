@@ -69,6 +69,12 @@
                     <hr>
 
                     <div class="row">
+                        <div class="col-lg-5"><strong>Company Registration No.:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->company_registration_no ?: '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
                         <div class="col-lg-5"><strong>Company Address:</strong></div>
                         <div class="col-lg-7">{{ $purchase->company_address ? convertUtf8($purchase->company_address) : '-' }}</div>
                     </div>
@@ -155,7 +161,7 @@
                     <div class="row">
                         <div class="col-lg-5"><strong>Buyer Status:</strong></div>
                         <div class="col-lg-7">
-                            @if (\App\TenderBlacklist::matches($purchase->email, $purchase->phone_number, null))
+                            @if (\App\TenderBlacklist::matches($purchase->company_registration_no))
                                 <span class="badge badge-danger">Blacklisted</span>
                             @else
                                 <span class="badge badge-success">Not blacklisted</span>

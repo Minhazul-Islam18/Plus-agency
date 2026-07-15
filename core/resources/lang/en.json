@@ -449,5 +449,11 @@
     "Terms & Conditions": "Terms & Conditions",
     "Privacy Policy": "Privacy Policy",
     "Legal Notice": "Legal Notice",
+    "Company Registration No.": "Company Registration No.",
+    "Your company's official registration or incorporation number (e.g. trade licence / business registration ID). Uppercase letters and numbers only — used to stop the same company buying this tender twice.": "Your company's official registration or incorporation number (e.g. trade licence / business registration ID). Uppercase letters and numbers only — used to stop the same company buying this tender twice.",
+    "terms and conditions": "terms and conditions",
+    "Click on this link to read the general": "Click on this link to read the general",
+    "related to the purchase of tender documents.": "related to the purchase of tender documents.",
+    "Click on this link to read the general terms and conditions related to the purchase of tender documents.": "Click on this link to read the general terms and conditions related to the purchase of tender documents.",
     "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one.": "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one."
 }

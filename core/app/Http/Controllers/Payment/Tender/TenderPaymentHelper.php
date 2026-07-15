@@ -40,8 +40,37 @@ trait TenderPaymentHelper
             throw new \RuntimeException(__('You must accept the terms and conditions to proceed.'));
         }
 
-        // Blacklisted buyers (email / phone / IP) cannot place a new order.
-        if (\App\TenderBlacklist::matches($request->email, $request->phone_number, $request->ip())) {
+        // Country and phone dialling code must come from the canonical list, and the
+        // number itself must be digits only. The online path bypasses the checkout
+        // FormRequest, so these are validated here too.
+        $country = (string) $request->country;
+        if (!in_array($country, \App\Http\Helpers\Countries::names(), true)) {
+            throw new \RuntimeException(__('Please select a country from the list.'));
+        }
+
+        $phoneCode = (string) $request->phone_code;
+        if (!in_array($phoneCode, \App\Http\Helpers\Countries::dialCodes(), true)) {
+            throw new \RuntimeException(__('Please select a valid phone country code.'));
+        }
+
+        $nationalNumber = preg_replace('/\D/', '', (string) $request->phone_number);
+        if (strlen($nationalNumber) < 4 || strlen($nationalNumber) > 14) {
+            throw new \RuntimeException(__('Enter a valid phone number (4–14 digits, without the country code).'));
+        }
+
+        // Stored as one E.164 string, matching the offline checkout path.
+        $fullPhone = $phoneCode . $nationalNumber;
+
+        // Company registration number is the sole duplicate-purchase key: required,
+        // uppercase alphanumeric only. The online path bypasses the checkout
+        // FormRequest, so it is validated here too.
+        $regNo = TenderPurchase::normalizeRegNo($request->company_registration_no);
+        if ($regNo === '' || !preg_match('/^[A-Z0-9]+$/', $regNo)) {
+            throw new \RuntimeException(__('A valid Company Registration No. (letters and numbers only) is required.'));
+        }
+
+        // Blacklisted companies (by registration no.) cannot place a new order.
+        if (\App\TenderBlacklist::matches($regNo)) {
             throw new \RuntimeException(__('This order cannot be processed. Please contact ICA support.'));
         }
 
@@ -63,12 +92,11 @@ trait TenderPaymentHelper
         }
         $paidModules = $paidModules->values();
 
-        // Duplicate-payment guard: drop paid modules this buyer already owns
-        // (logged-in → account id, guest → email).
-        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
-            Auth::check() ? Auth::id() : null,
-            $request->email,
-            (int) $request->tender_id
+        // Duplicate-payment guard: drop paid modules this company already owns,
+        // keyed solely on company registration number.
+        $paidNames = TenderPurchase::paidModuleNamesForReg(
+            (int) $request->tender_id,
+            $regNo
         );
         if (!empty($paidNames)) {
             $paidModules = $paidModules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
@@ -89,11 +117,12 @@ trait TenderPaymentHelper
         $purchase->first_name        = $request->first_name;
         $purchase->last_name         = $request->last_name;
         $purchase->email             = $request->email;
-        $purchase->phone_number      = $request->phone_number ?? '';
-        $purchase->country           = $request->country ?? '';
+        $purchase->phone_number      = $fullPhone;
+        $purchase->country           = $country;
         $purchase->city              = $request->city ?? '';
         $purchase->company_name      = $request->company_name ?? null;
         $purchase->company_address   = $request->company_address ?? null;
+        $purchase->company_registration_no = $regNo;
         $purchase->currency_code     = $bse->base_currency_text;
         $purchase->payment_method    = $gateway;
         $purchase->gateway_type      = 'online';

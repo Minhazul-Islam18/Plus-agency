@@ -50,8 +50,17 @@ class TenderController extends Controller
         // module ids so the cards' `->tenderCategory->name` and
         // `->tenderModules->count()` don't fire a query per row (N+1).
         $listCols = [
-            'id', 'language_id', 'tender_category_id', 'country', 'tender_code',
-            'title', 'slug', 'submission_deadline', 'current_price', 'previous_price', 'tender_image',
+            'id',
+            'language_id',
+            'tender_category_id',
+            'country',
+            'tender_code',
+            'title',
+            'slug',
+            'submission_deadline',
+            'current_price',
+            'previous_price',
+            'tender_image',
         ];
         $listWith = ['tenderCategory:id,name', 'tenderModules:id,tender_id'];
 
@@ -91,7 +100,7 @@ class TenderController extends Controller
             ->with($listWith)
             ->when($searchKey, fn($q) => $q->where(function ($q) use ($searchKey) {
                 $q->where('title', 'like', '%' . $searchKey . '%')
-                  ->orWhere('tender_code', 'like', '%' . $searchKey . '%');
+                    ->orWhere('tender_code', 'like', '%' . $searchKey . '%');
             }))
             ->when($categoryId, fn($q) => $q->where('tender_category_id', $categoryId))
             ->when($countryFilter, fn($q) => $q->where('country', $countryFilter))
@@ -168,15 +177,28 @@ class TenderController extends Controller
         $termsPage = \App\Page::forType('terms', $currentLang->id);
         $data['termsUrl'] = $termsPage ? route('front.dynamicPage', $termsPage->slug) : null;
 
+        // Checkout country + phone dialling-code pickers (no free typing).
+        // Static list, not a query — only the two fields the pickers render.
+        $data['countries'] = \App\Http\Helpers\Countries::forCheckout();
+
         // Related tenders: active (not past deadline) only. Same category first,
         // fall back to latest active others.
         $activeOnly = function ($q) {
             $q->whereNull('submission_deadline')
-              ->orWhereDate('submission_deadline', '>=', now()->toDateString());
+                ->orWhereDate('submission_deadline', '>=', now()->toDateString());
         };
         $relatedCols = [
-            'id', 'language_id', 'tender_category_id', 'country', 'tender_code',
-            'title', 'slug', 'submission_deadline', 'current_price', 'previous_price', 'tender_image',
+            'id',
+            'language_id',
+            'tender_category_id',
+            'country',
+            'tender_code',
+            'title',
+            'slug',
+            'submission_deadline',
+            'current_price',
+            'previous_price',
+            'tender_image',
         ];
         $relatedWith = ['tenderCategory:id,name', 'tenderModules:id,tender_id'];
 
@@ -212,8 +234,12 @@ class TenderController extends Controller
     {
         // Validation handled by PurchaseRequest (buyer fields + receipt MIME).
 
-        // Blacklisted buyers (email / phone / IP) cannot place a new order.
-        if (\App\TenderBlacklist::matches($request->email, $request->phone_number, $request->ip())) {
+        // Country code and national number are separate <select>/input; store and
+        // match the phone as one E.164 string (e.g. +880171...).
+        $fullPhone = $request->phone_code . $request->phone_number;
+
+        // Blacklisted companies (by registration no.) cannot place a new order.
+        if (\App\TenderBlacklist::matches($request->company_registration_no)) {
             return back()->with('error', __('This order cannot be processed. Please contact ICA support.'));
         }
 
@@ -226,11 +252,12 @@ class TenderController extends Controller
         $purchase->first_name    = $request->first_name;
         $purchase->last_name     = $request->last_name;
         $purchase->email         = $request->email;
-        $purchase->phone_number  = $request->phone_number;
+        $purchase->phone_number  = $fullPhone;
         $purchase->country       = $request->country;
         $purchase->city            = $request->city ?? '';
         $purchase->company_name    = $request->company_name ?? null;
         $purchase->company_address = $request->company_address ?? null;
+        $purchase->company_registration_no = TenderPurchase::normalizeRegNo($request->company_registration_no);
         $purchase->currency_code   = $bse->base_currency_text;
         $purchase->payment_method = $request->gateway;
         $purchase->gateway_type  = $request->gateway_type ?? 'offline';
@@ -266,12 +293,11 @@ class TenderController extends Controller
         }
         $paidModules = $paidModules->values();
 
-        // Duplicate-payment guard: drop paid modules this buyer already owns
-        // (logged-in → account id, guest → email)
-        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
-            Auth::check() ? Auth::id() : null,
-            $request->email,
-            (int) $request->tender_id
+        // Duplicate-payment guard: drop paid modules this company already owns,
+        // keyed solely on company registration number.
+        $paidNames = TenderPurchase::paidModuleNamesForReg(
+            (int) $request->tender_id,
+            $request->company_registration_no
         );
         if (!empty($paidNames)) {
             $paidModules = $paidModules->reject(fn($m) => in_array(trim($m->name), $paidNames, true))->values();
@@ -299,20 +325,20 @@ class TenderController extends Controller
     }
 
     /**
-     * AJAX: given an email + tender, report which paid modules the buyer already owns,
-     * so the checkout can disable them and prevent duplicate payments.
+     * AJAX: given a company registration number + tender, report which paid modules
+     * the company already owns, so the checkout can disable them and prevent
+     * duplicate payments.
      */
     public function paidModules(Request $request)
     {
         $request->validate([
-            'tender_id' => 'required|exists:tenders,id',
-            'email'     => 'required|email',
+            'tender_id'               => 'required|exists:tenders,id',
+            'company_registration_no' => 'required|string|max:100',
         ]);
 
-        $paidNames = TenderPurchase::paidModuleNamesForBuyer(
-            Auth::check() ? Auth::id() : null,
-            $request->email,
-            (int) $request->tender_id
+        $paidNames = TenderPurchase::paidModuleNamesForReg(
+            (int) $request->tender_id,
+            $request->company_registration_no
         );
 
         $modules = TenderModule::where('tender_id', $request->tender_id)

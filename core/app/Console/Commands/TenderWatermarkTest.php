@@ -7,6 +7,7 @@ use App\Tender;
 use App\TenderModule;
 use App\TenderPurchase;
 use Illuminate\Console\Command;
+use PDF;
 
 /**
  * Seeds a disposable "Completed" tender purchase with a free PDF module and a
@@ -55,7 +56,7 @@ class TenderWatermarkTest extends Command
         $destPdf = rtrim($modulesDir, '/') . '/' . self::FILE_NAME;
 
         if (!is_file($destPdf)) {
-            $src = $this->resolveSourcePdf();
+            $src = $this->resolveSourcePdf($modulesDir);
             if (!$src) {
                 $this->error('No source PDF found. Pass one with --pdf=/path/to/file.pdf');
                 return 1;
@@ -132,27 +133,75 @@ class TenderWatermarkTest extends Command
         return 0;
     }
 
-    private function resolveSourcePdf(): ?string
+    /**
+     * A PDF to stamp. Tried in order, so the test still runs on a production box
+     * where only the SetaPDF library (no demo assets) was uploaded:
+     *   1. --pdf=/path
+     *   2. a real tender module PDF already on disk — the most realistic test
+     *   3. a SetaPDF demo PDF, when the full distribution is present (dev)
+     *   4. one generated on the fly with dompdf — always available
+     */
+    private function resolveSourcePdf(string $modulesDir): ?string
     {
         if ($this->option('pdf') && is_file($this->option('pdf'))) {
             return $this->option('pdf');
         }
-        // Prefer a content-rich sample so the watermark is seen over real text.
+
+        if ($found = $this->firstPdfIn($modulesDir)) {
+            return $found;
+        }
+
+        // Content-rich sample, when the SetaPDF demos happen to be installed.
         $preferred = base_path('setapdf/demos/assets/pdfs/Brand-Guide-tagged.pdf');
         if (is_file($preferred)) {
             return $preferred;
         }
-        // Otherwise any PDF shipped with the SetaPDF demos works as a sample.
-        $root = base_path('setapdf');
-        if (is_dir($root)) {
-            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
-            foreach ($it as $file) {
-                if (strtolower($file->getExtension()) === 'pdf') {
-                    return $file->getPathname();
-                }
+        if ($found = $this->firstPdfIn(base_path('setapdf'))) {
+            return $found;
+        }
+
+        return $this->generateSamplePdf();
+    }
+
+    /** First PDF found anywhere under $dir, or null. */
+    private function firstPdfIn(string $dir): ?string
+    {
+        if (!is_dir($dir)) {
+            return null;
+        }
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($it as $file) {
+            if (strtolower($file->getExtension()) === 'pdf' && $file->getSize() > 0) {
+                return $file->getPathname();
             }
         }
         return null;
+    }
+
+    /**
+     * Last resort: render a sample PDF with dompdf, so the watermark test never
+     * depends on any file being shipped alongside the library.
+     */
+    private function generateSamplePdf(): ?string
+    {
+        try {
+            $path = storage_path('app/watermark-test-sample.pdf');
+
+            $html = '<html><body style="font-family:DejaVu Sans;padding:40px;">'
+                . '<h1>Watermark Test Document</h1>'
+                . '<p>This sample was generated so the watermark can be checked over real text.</p>'
+                . str_repeat('<p>Tender document body text used purely to give the stamp something to sit on top of.</p>', 12)
+                . '</body></html>';
+
+            PDF::loadHTML($html)->save($path);
+
+            return is_file($path) ? $path : null;
+        } catch (\Throwable $e) {
+            $this->error('Could not generate a sample PDF: ' . $e->getMessage());
+            return null;
+        }
     }
 
     private function cleanup(string $modulesDir): int

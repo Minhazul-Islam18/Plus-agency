@@ -25,13 +25,22 @@ class TenderPdfStamper
         return base_path('setapdf/library/SetaPDF/Autoload.php');
     }
 
-    /** First DejaVuSans.ttf found across known locations (Composer package or folder lib). */
+    /**
+     * Watermark font, first match wins.
+     *
+     * Noto Sans Bold is the intended face: a modern humanist sans that stays legible
+     * at watermark opacity, with full Latin-Extended coverage (French accents, €).
+     * DejaVu is kept last as a fallback so an installation that only ships the
+     * SetaPDF demo font still stamps rather than failing closed.
+     */
     private function fontPath(): ?string
     {
         $candidates = [
+            base_path('setapdf/fonts/NotoSans-Bold.ttf'),
+            resource_path('fonts/NotoSans-Bold.ttf'),
+            base_path('setapdf/fonts/NotoSans-Regular.ttf'),
+            resource_path('fonts/NotoSans-Regular.ttf'),
             base_path('setapdf/fonts/DejaVuSans.ttf'),
-            base_path('vendor/setasign/setapdf-stamper/demos/assets/fonts/DejaVu/ttf/DejaVuSans.ttf'),
-            base_path('vendor/setasign/setapdf-core/demos/assets/fonts/DejaVu/ttf/DejaVuSans.ttf'),
             resource_path('fonts/DejaVuSans.ttf'),
         ];
         foreach ($candidates as $p) {
@@ -163,7 +172,7 @@ class TenderPdfStamper
                     \SetaPDF_Core_SecHandler::PERM_PRINT
                         | \SetaPDF_Core_SecHandler::PERM_DIGITAL_PRINT
                         | \SetaPDF_Core_SecHandler::PERM_COPY
-                        | \SetaPDF_Core_SecHandler::PERM_EXTRACT
+                        | \SetaPDF_Core_SecHandler::PERM_ACCESSIBILITY
                 );
                 $document->setSecHandler($secHandler);
             }

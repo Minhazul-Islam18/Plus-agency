@@ -32,6 +32,11 @@ class TenderWatermarkTest extends Command
     private const ORDER_PREFIX = 'WMTEST-';
     private const FILE_NAME = 'wm_test_sample.pdf';
 
+    // A second module uploaded as a ZIP bundling several PDFs — exercises the
+    // in-archive watermarking path (proposals shipped as one .zip).
+    private const ZIP_MODULE_NAME = 'WM Test ZIP (bundle)';
+    private const ZIP_FILE_NAME   = 'wm_test_bundle.zip';
+
     public function handle()
     {
         $modulesDir = env('FMF_MODULES_PATH', base_path('../assets/front/files/tender_modules'));
@@ -65,7 +70,17 @@ class TenderWatermarkTest extends Command
             $this->line('Copied sample PDF -> ' . $destPdf);
         }
 
-        // ── 2. Free module (cost = null → always downloadable) ────────────────
+        // ── 1b. Ensure a ZIP module (several PDFs bundled) exists ──────────────
+        $destZip = rtrim($modulesDir, '/') . '/' . self::ZIP_FILE_NAME;
+        if (!is_file($destZip)) {
+            if (!$this->buildSampleZip($destZip)) {
+                $this->error('Could not build the sample ZIP bundle.');
+                return 1;
+            }
+            $this->line('Built sample ZIP  -> ' . $destZip);
+        }
+
+        // ── 2. Free modules (cost = null → always downloadable) ───────────────
         $module = TenderModule::firstOrNew([
             'tender_id' => $tender->id,
             'name'      => self::MODULE_NAME,
@@ -75,6 +90,16 @@ class TenderWatermarkTest extends Command
         $module->status      = 1;
         $module->summary     = 'Disposable watermark-test module.';
         $module->save();
+
+        $zipModule = TenderModule::firstOrNew([
+            'tender_id' => $tender->id,
+            'name'      => self::ZIP_MODULE_NAME,
+        ]);
+        $zipModule->tender_file = self::ZIP_FILE_NAME;
+        $zipModule->cost        = null;
+        $zipModule->status      = 1;
+        $zipModule->summary     = 'Disposable watermark-test ZIP bundle.';
+        $zipModule->save();
 
         // ── 3. Disposable Completed purchase ──────────────────────────────────
         $orderNumber = self::ORDER_PREFIX . strtoupper(substr(md5(uniqid()), 0, 8));
@@ -91,8 +116,11 @@ class TenderWatermarkTest extends Command
             'city'              => 'Test City',
             'company_name'      => 'Initiatives Consulting Africa',
             'company_address'   => 'Test Address',
-            'qty'               => 1,
-            'purchased_modules' => json_encode([['name' => self::MODULE_NAME, 'cost' => 0]]),
+            'qty'               => 2,
+            'purchased_modules' => json_encode([
+                ['name' => self::MODULE_NAME,     'cost' => 0],
+                ['name' => self::ZIP_MODULE_NAME, 'cost' => 0],
+            ]),
             'currency_code'     => 'USD',
             'payment_method'    => 'Test',
             'gateway_type'      => 'offline',
@@ -122,7 +150,8 @@ class TenderWatermarkTest extends Command
         $this->info('Watermark test data seeded.');
         $this->line('  Tender:       #' . $tender->id . ' (' . $tender->tender_code . ')');
         $this->line('  Order:        ' . $orderNumber);
-        $this->line('  Module:       ' . self::MODULE_NAME . ' (free, ' . self::FILE_NAME . ')');
+        $this->line('  Module (PDF): ' . self::MODULE_NAME . ' (free, ' . self::FILE_NAME . ')');
+        $this->line('  Module (ZIP): ' . self::ZIP_MODULE_NAME . ' (free, ' . self::ZIP_FILE_NAME . ' — PDFs inside get stamped)');
         $this->newLine();
         $this->line('Open in a BROWSER (runs under php-fpm — real web path):');
         $this->line('  Direct ZIP:   ' . $streamUrl);
@@ -204,23 +233,74 @@ class TenderWatermarkTest extends Command
         }
     }
 
+    /**
+     * Build a ZIP bundling several PDFs (one in a sub-folder) plus a non-PDF
+     * file, mirroring how a real technical/financial proposal is uploaded. The
+     * download pipeline must stamp every PDF inside and pass README.txt through.
+     */
+    private function buildSampleZip(string $destZip): bool
+    {
+        $tmpA = storage_path('app/wm_zip_a_' . uniqid() . '.pdf');
+        $tmpB = storage_path('app/wm_zip_b_' . uniqid() . '.pdf');
+
+        try {
+            $this->renderPdf('Technical Proposal', $tmpA);
+            $this->renderPdf('Financial Proposal', $tmpB);
+
+            $zip = new \ZipArchive();
+            if ($zip->open($destZip, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                return false;
+            }
+            // One PDF at the root, one in a sub-folder (checks structure is kept),
+            // and a plain-text file that must survive unstamped.
+            $zip->addFile($tmpA, 'technical_proposal.pdf');
+            $zip->addFile($tmpB, 'proposals/financial_proposal.pdf');
+            $zip->addFromString('README.txt', "Watermark-test bundle. The PDFs inside must be stamped; this file must not be.\n");
+            $zip->close();
+
+            return is_file($destZip);
+        } catch (\Throwable $e) {
+            $this->error('ZIP build failed: ' . $e->getMessage());
+            return false;
+        } finally {
+            @unlink($tmpA);
+            @unlink($tmpB);
+        }
+    }
+
+    /** Render a one-off sample PDF with dompdf. */
+    private function renderPdf(string $title, string $path): void
+    {
+        $html = '<html><body style="font-family:DejaVu Sans;padding:40px;">'
+            . '<h1>' . htmlspecialchars($title) . '</h1>'
+            . '<p>Sample PDF bundled inside a ZIP module to test in-archive watermarking.</p>'
+            . str_repeat('<p>Body text so the watermark has something to sit over.</p>', 10)
+            . '</body></html>';
+
+        PDF::loadHTML($html)->save($path);
+    }
+
     private function cleanup(string $modulesDir): int
     {
         $orders = TenderPurchase::where('order_number', 'like', self::ORDER_PREFIX . '%')->pluck('order_number');
 
         SecureToken::whereIn('order_id', $orders)->delete();
         $purchases = TenderPurchase::whereIn('order_number', $orders)->delete();
-        $modules   = TenderModule::where('name', self::MODULE_NAME)->delete();
+        $modules   = TenderModule::whereIn('name', [self::MODULE_NAME, self::ZIP_MODULE_NAME])->delete();
 
         $file = rtrim($modulesDir, '/') . '/' . self::FILE_NAME;
-        if (is_file($file)) {
-            @unlink($file);
+        $zip  = rtrim($modulesDir, '/') . '/' . self::ZIP_FILE_NAME;
+        foreach ([$file, $zip] as $f) {
+            if (is_file($f)) {
+                @unlink($f);
+            }
         }
 
         $this->info('Cleanup done.');
         $this->line("  Purchases removed: {$purchases}");
         $this->line("  Modules removed:   {$modules}");
-        $this->line('  Sample PDF removed: ' . ($file));
+        $this->line('  Sample PDF removed: ' . $file);
+        $this->line('  Sample ZIP removed: ' . $zip);
 
         return 0;
     }

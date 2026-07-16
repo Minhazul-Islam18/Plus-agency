@@ -737,8 +737,11 @@ class FindMyFilesController extends Controller
             $ext      = strtolower(pathinfo($module->tender_file, PATHINFO_EXTENSION));
             $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $module->name);
 
-            // PDFs get a personalised traceable watermark. Non-PDF files (docx,
-            // xls, images, archives) can't be stamped and pass through untouched.
+            // PDFs get a personalised traceable watermark. A module uploaded as a
+            // ZIP (e.g. a technical or financial proposal bundling several PDFs)
+            // is unpacked so every PDF inside is stamped/encrypted too, then
+            // repackaged. Other file types (docx, xls, images) can't be stamped
+            // and pass through untouched.
             if ($processPdf && $ext === 'pdf') {
                 $stampedPath = $tempDir . '/wm_' . $token->order_id . '_' . $module->id . '_' . uniqid() . '.pdf';
                 try {
@@ -750,6 +753,17 @@ class FindMyFilesController extends Controller
                 }
                 $stampTemps[] = $stampedPath;
                 $zip->addFile($stampedPath, $safeName . '.' . $ext);
+            } elseif ($processPdf && $ext === 'zip') {
+                try {
+                    $rebuilt = $this->stampPdfsInZip($filePath, $tempDir, $wmSettings, $wmVars, $stamper);
+                } catch (\Throwable $e) {
+                    // Same fail-closed rule: if any PDF inside the bundle can't be
+                    // stamped, the whole download is refused.
+                    $failStamp($module, $e->getMessage());
+                    abort(500, 'Document could not be prepared for download. Please contact ICA support.');
+                }
+                $stampTemps[] = $rebuilt;
+                $zip->addFile($rebuilt, $safeName . '.zip');
             } else {
                 $zip->addFile($filePath, $safeName . '.' . $ext);
             }
@@ -783,6 +797,116 @@ class FindMyFilesController extends Controller
             'tender_documents_' . $token->order_id . '.zip',
             ['Content-Type' => 'application/zip']
         )->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Unpack a module ZIP, stamp/encrypt EVERY PDF it contains (recursively,
+     * preserving the internal folder layout), then repackage into a fresh ZIP.
+     *
+     * Non-PDF entries are copied through unchanged. Any single PDF that fails to
+     * stamp throws — the caller then refuses the whole download (fail-closed),
+     * so a buyer can never receive an un-watermarked PDF hidden inside a bundle.
+     *
+     * @return string path to the rebuilt ZIP (caller owns cleanup)
+     * @throws \RuntimeException
+     */
+    private function stampPdfsInZip(
+        string $srcZip,
+        string $workRoot,
+        array $wmSettings,
+        array $wmVars,
+        \App\Services\TenderPdfStamper $stamper
+    ): string {
+        $extractDir = $workRoot . '/unzip_' . uniqid();
+        $outZip     = $workRoot . '/wmzip_' . uniqid() . '.zip';
+
+        try {
+            $za = new \ZipArchive();
+            if ($za->open($srcZip) !== true) {
+                throw new \RuntimeException('Could not open module archive: ' . basename($srcZip));
+            }
+
+            // Guard against Zip-Slip: reject any entry that would escape the
+            // extraction directory (path traversal or an absolute path).
+            for ($i = 0; $i < $za->numFiles; $i++) {
+                $name = $za->getNameIndex($i);
+                if ($name === false) {
+                    continue;
+                }
+                if (str_contains($name, '..') || preg_match('#^([A-Za-z]:)?[\\\\/]#', $name)) {
+                    $za->close();
+                    throw new \RuntimeException('Unsafe path in archive: ' . $name);
+                }
+            }
+
+            if (!mkdir($extractDir, 0755, true) && !is_dir($extractDir)) {
+                $za->close();
+                throw new \RuntimeException('Could not create extraction directory.');
+            }
+            if (!$za->extractTo($extractDir)) {
+                $za->close();
+                throw new \RuntimeException('Could not extract module archive.');
+            }
+            $za->close();
+
+            // Stamp every PDF found anywhere in the tree, in place.
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($extractDir, \FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($it as $file) {
+                if (!$file->isFile() || strtolower($file->getExtension()) !== 'pdf') {
+                    continue;
+                }
+                $p   = $file->getPathname();
+                $tmp = $p . '.stamped';
+                $stamper->stampFile($p, $tmp, $wmSettings, $wmVars);
+                if (!@rename($tmp, $p)) {
+                    @unlink($tmp);
+                    throw new \RuntimeException('Could not replace stamped PDF: ' . $file->getFilename());
+                }
+            }
+
+            // Repackage, preserving the original relative structure.
+            $out = new \ZipArchive();
+            if ($out->open($outZip, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                throw new \RuntimeException('Could not create processed archive.');
+            }
+            $rebuild = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($extractDir, \FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($rebuild as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+                $rel = ltrim(substr($file->getPathname(), strlen($extractDir)), '/\\');
+                $out->addFile($file->getPathname(), $rel);
+            }
+            $out->close();
+
+            return $outZip;
+        } catch (\Throwable $e) {
+            @unlink($outZip);
+            throw $e;
+        } finally {
+            // The rebuilt ZIP is self-contained; the extraction tree is disposable.
+            $this->rrmdir($extractDir);
+        }
+    }
+
+    /** Recursively delete a directory and its contents. */
+    private function rrmdir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($items as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+        }
+        @rmdir($dir);
     }
 
     // ══════════════════════════════════════════════════════════════════════════

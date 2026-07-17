@@ -698,22 +698,167 @@
         }
 
         /* ── Check plans section ── */
-        .downloads-link {
-            display: inline-block;
-            color: var(--main-color, #3498db);
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
+        /* "Already purchased" entry point — a full-width, animated CTA banner so
+           buyers returning for their files can't miss it (the old plain text link
+           did). Gradient body, a continuous shine sweep, a pulsing download icon
+           and a looping arrow nudge; hover deepens the shadow and lifts it. */
+        .downloads-cta {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
             text-decoration: none;
+            color: #fff;
+            background: var(--main-color, #3498db);
+            background-image:
+                linear-gradient(120deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 42%),
+                linear-gradient(135deg, rgba(255, 255, 255, .10) 0%, rgba(0, 0, 0, .22) 100%);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
+            transition: transform .18s ease, box-shadow .18s ease;
         }
 
-        .downloads-link i {
-            margin-right: 6px;
+        .downloads-cta:hover,
+        .downloads-cta:focus {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, .26);
+            text-decoration: none;
+            color: #fff;
         }
 
-        .downloads-link:hover {
-            text-decoration: underline;
-            color: var(--main-color, #3498db);
+        /* Diagonal light sweep travelling across the banner, forever. */
+        .downloads-cta::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .35) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-18deg);
+            animation: dl-shine 3.6s ease-in-out infinite;
+        }
+
+        @keyframes dl-shine {
+            0% {
+                left: -60%;
+            }
+            55%, 100% {
+                left: 130%;
+            }
+        }
+
+        .downloads-cta-icon {
+            position: relative;
+            z-index: 1;
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .18);
+            color: #fff;
+            font-size: 22px;
+            animation: dl-pulse 2.2s ease-out infinite;
+        }
+
+        /* Expanding ring around the icon. */
+        @keyframes dl-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, .55);
+            }
+            70% {
+                box-shadow: 0 0 0 14px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        .downloads-cta-icon i {
+            animation: dl-bob 2.2s ease-in-out infinite;
+        }
+
+        @keyframes dl-bob {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(3px);
+            }
+        }
+
+        .downloads-cta-text {
+            position: relative;
+            z-index: 1;
+            flex: 1 1 auto;
+            line-height: 1.4;
+        }
+
+        .downloads-cta-text strong {
+            display: block;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .downloads-cta-text small {
+            display: block;
+            color: rgba(255, 255, 255, .9);
+            font-size: 13px;
+        }
+
+        .downloads-cta-arrow {
+            position: relative;
+            z-index: 1;
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .18);
+            color: #fff;
+            font-size: 15px;
+            animation: dl-nudge 1.6s ease-in-out infinite;
+        }
+
+        @keyframes dl-nudge {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(5px);
+            }
+        }
+
+        .downloads-cta:hover .downloads-cta-arrow {
+            background: rgba(255, 255, 255, .3);
+        }
+
+        @media (max-width: 480px) {
+            .downloads-cta-arrow {
+                display: none;
+            }
+        }
+
+        /* Respect users who ask for less motion. */
+        @media (prefers-reduced-motion: reduce) {
+
+            .downloads-cta::before,
+            .downloads-cta-icon,
+            .downloads-cta-icon i,
+            .downloads-cta-arrow {
+                animation: none;
+            }
         }
 
         .check-plans-bar {
@@ -1615,8 +1760,13 @@
             @if ($modules->count() > 0)
                 <div class="row mt-5">
                     <div class="col-12">
-                        <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-link">
-                            <i class="fas fa-download"></i> {{ __('Click here to find your downloads') }}
+                        <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-cta">
+                            <span class="downloads-cta-icon"><i class="fas fa-cloud-download-alt"></i></span>
+                            <span class="downloads-cta-text">
+                                <strong>{{ __('Already purchased this tender?') }}</strong>
+                                <small>{{ __('Access and download your files here') }}</small>
+                            </span>
+                            <span class="downloads-cta-arrow"><i class="fas fa-arrow-right"></i></span>
                         </a>
                         {{-- The badges now live in the checkout form (step 1). They are only
                              repeated here when there is no form to hold them — an expired or

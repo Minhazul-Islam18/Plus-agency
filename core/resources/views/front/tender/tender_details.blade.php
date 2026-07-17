@@ -689,8 +689,8 @@
             background: #1da1f2;
         }
 
-        .share-pt {
-            background: #bd081c;
+        .share-wa {
+            background: #25d366;
         }
 
         .share-li {
@@ -699,9 +699,9 @@
 
         /* ── Check plans section ── */
         /* "Already purchased" entry point — a full-width, animated CTA banner so
-           buyers returning for their files can't miss it (the old plain text link
-           did). Gradient body, a continuous shine sweep, a pulsing download icon
-           and a looping arrow nudge; hover deepens the shadow and lifts it. */
+               buyers returning for their files can't miss it (the old plain text link
+               did). Gradient body, a continuous shine sweep, a pulsing download icon
+               and a looping arrow nudge; hover deepens the shadow and lifts it. */
         .downloads-cta {
             position: relative;
             display: flex;
@@ -747,7 +747,9 @@
             0% {
                 left: -60%;
             }
-            55%, 100% {
+
+            55%,
+            100% {
                 left: 130%;
             }
         }
@@ -773,9 +775,11 @@
             0% {
                 box-shadow: 0 0 0 0 rgba(255, 255, 255, .55);
             }
+
             70% {
                 box-shadow: 0 0 0 14px rgba(255, 255, 255, 0);
             }
+
             100% {
                 box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
             }
@@ -786,9 +790,12 @@
         }
 
         @keyframes dl-bob {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(3px);
             }
@@ -832,9 +839,12 @@
         }
 
         @keyframes dl-nudge {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateX(0);
             }
+
             50% {
                 transform: translateX(5px);
             }
@@ -1314,16 +1324,6 @@
                 {{-- RIGHT: Tender Info & Purchase --}}
                 <div class="col-lg-6">
                     <div class="tender-info-wrap">
-
-                        {{-- Stars (placeholder – no reviews system yet) --}}
-                        <div class="tender-rating">
-                            <span class="stars">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i>
-                            </span>
-                            <span class="count">0 (0)</span>
-                        </div>
-
                         {{-- Price — the amount payable *now*. It starts at 0 and only
                              rises as modules are selected; the tender's own total is
                              shown on the card above and is not touched by this. --}}
@@ -1395,10 +1395,10 @@
                                         </div>
                                         @php
                                             // Pre-select the tender's country when it is on the canonical list.
-                                            $preCountry = collect($countries)->firstWhere('name', $tender->country);
-                                            $preName = $preCountry['name'] ?? '';
-                                            $preDial = $preCountry['dial'] ?? '';
-                                            $preFlag = $preCountry['flag'] ?? '';
+$preCountry = collect($countries)->firstWhere('name', $tender->country);
+$preName = $preCountry['name'] ?? '';
+$preDial = $preCountry['dial'] ?? '';
+$preFlag = $preCountry['flag'] ?? '';
                                         @endphp
 
                                         {{-- Phone: dialling code + number as one grouped control --}}
@@ -1488,106 +1488,255 @@
                                         </div>
                                         <style>
                                             /* ── Searchable select (country / dialling code) ── */
-                                            .ss { position: relative; }
-                                            .ss-toggle {
-                                                display: flex; align-items: center; justify-content: space-between;
-                                                gap: 8px; width: 100%; background: #fff; cursor: pointer;
-                                                border: 1px solid #ced4da; border-radius: .25rem;
-                                                padding: .375rem .75rem; min-height: 45px;
-                                                font-size: 1rem; color: #495057; text-align: left;
+                                            .ss {
+                                                position: relative;
                                             }
-                                            .ss-toggle:focus { outline: none; border-color: #86b7fe; }
+
+                                            .ss-toggle {
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: space-between;
+                                                gap: 8px;
+                                                width: 100%;
+                                                background: #fff;
+                                                cursor: pointer;
+                                                border: 1px solid #ced4da;
+                                                border-radius: .25rem;
+                                                padding: .375rem .75rem;
+                                                min-height: 45px;
+                                                font-size: 1rem;
+                                                color: #495057;
+                                                text-align: left;
+                                            }
+
+                                            .ss-toggle:focus {
+                                                outline: none;
+                                                border-color: #86b7fe;
+                                            }
+
                                             /* Flag + label sit together on the left; the caret is pushed right. */
                                             .ss-toggle .ss-label {
-                                                flex: 1 1 auto; overflow: hidden;
-                                                text-overflow: ellipsis; white-space: nowrap;
+                                                flex: 1 1 auto;
+                                                overflow: hidden;
+                                                text-overflow: ellipsis;
+                                                white-space: nowrap;
                                             }
-                                            .ss-label.ss-placeholder { color: #8a94a0; }
+
+                                            .ss-label.ss-placeholder {
+                                                color: #8a94a0;
+                                            }
+
                                             .ss-caret {
-                                                flex: 0 0 auto; width: 0; height: 0;
-                                                border-left: 5px solid transparent; border-right: 5px solid transparent;
+                                                flex: 0 0 auto;
+                                                width: 0;
+                                                height: 0;
+                                                border-left: 5px solid transparent;
+                                                border-right: 5px solid transparent;
                                                 border-top: 5px solid #6c757d;
                                             }
+
                                             .ss-panel {
-                                                display: none; position: absolute; z-index: 60; top: calc(100% + 4px);
-                                                left: 0; right: 0; min-width: 260px; background: #fff;
-                                                border: 1px solid #e2e8f0; border-radius: 8px;
-                                                box-shadow: 0 10px 28px rgba(0, 0, 0, .12); overflow: hidden;
+                                                display: none;
+                                                position: absolute;
+                                                z-index: 60;
+                                                top: calc(100% + 4px);
+                                                left: 0;
+                                                right: 0;
+                                                min-width: 260px;
+                                                background: #fff;
+                                                border: 1px solid #e2e8f0;
+                                                border-radius: 8px;
+                                                box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
+                                                overflow: hidden;
                                             }
-                                            .ss.open .ss-panel { display: block; }
+
+                                            .ss.open .ss-panel {
+                                                display: block;
+                                            }
+
                                             .ss-search {
-                                                width: 100%; border: 0; border-bottom: 1px solid #edf2f7;
-                                                padding: 10px 12px; font-size: 14px; outline: none;
+                                                width: 100%;
+                                                border: 0;
+                                                border-bottom: 1px solid #edf2f7;
+                                                padding: 10px 12px;
+                                                font-size: 14px;
+                                                outline: none;
                                             }
-                                            .ss-list { max-height: 240px; overflow-y: auto; margin: 0; padding: 4px 0; list-style: none; }
+
+                                            .ss-list {
+                                                max-height: 240px;
+                                                overflow-y: auto;
+                                                margin: 0;
+                                                padding: 4px 0;
+                                                list-style: none;
+                                            }
+
                                             .ss-opt {
-                                                display: flex; align-items: center; justify-content: space-between;
-                                                gap: 12px; padding: 8px 12px; font-size: 14px; cursor: pointer;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: space-between;
+                                                gap: 12px;
+                                                padding: 8px 12px;
+                                                font-size: 14px;
+                                                cursor: pointer;
                                             }
-                                            .ss-opt:hover, .ss-opt.active { background: #f1f5f9; }
-                                            .ss-opt.selected { background: #e2e8f0; font-weight: 600; }
+
+                                            .ss-opt:hover,
+                                            .ss-opt.active {
+                                                background: #f1f5f9;
+                                            }
+
+                                            .ss-opt.selected {
+                                                background: #e2e8f0;
+                                                font-weight: 600;
+                                            }
+
                                             .ss-flag {
-                                                flex: 0 0 auto; font-size: 18px; line-height: 1;
+                                                flex: 0 0 auto;
+                                                font-size: 18px;
+                                                line-height: 1;
                                                 /* Emoji-capable fonts first; Windows falls back to the ISO letters. */
                                                 font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji",
                                                     "Twemoji Mozilla", sans-serif;
                                             }
-                                            .ss-opt .ss-cname { flex: 1 1 auto; }
-                                            .ss-cname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-                                            .ss-dialcode { color: #64748b; font-size: 13px; flex: 0 0 auto; }
-                                            .ss-empty { display: none; padding: 10px 12px; color: #94a3b8; font-size: 14px; list-style: none; }
-                                            .ss.no-match .ss-empty { display: block; }
+
+                                            .ss-opt .ss-cname {
+                                                flex: 1 1 auto;
+                                            }
+
+                                            .ss-cname {
+                                                overflow: hidden;
+                                                text-overflow: ellipsis;
+                                                white-space: nowrap;
+                                            }
+
+                                            .ss-dialcode {
+                                                color: #64748b;
+                                                font-size: 13px;
+                                                flex: 0 0 auto;
+                                            }
+
+                                            .ss-empty {
+                                                display: none;
+                                                padding: 10px 12px;
+                                                color: #94a3b8;
+                                                font-size: 14px;
+                                                list-style: none;
+                                            }
+
+                                            .ss.no-match .ss-empty {
+                                                display: block;
+                                            }
 
                                             /* ── Phone: dialling code + number as one control ── */
                                             .phone-group {
-                                                display: flex; align-items: stretch;
-                                                border: 1px solid #ced4da; border-radius: .25rem;
-                                                background: #fff; overflow: visible;
+                                                display: flex;
+                                                align-items: stretch;
+                                                border: 1px solid #ced4da;
+                                                border-radius: .25rem;
+                                                background: #fff;
+                                                overflow: visible;
                                             }
-                                            .phone-group:focus-within { border-color: #86b7fe; }
-                                            .phone-group .ss-dial { flex: 0 0 auto; }
+
+                                            .phone-group:focus-within {
+                                                border-color: #86b7fe;
+                                            }
+
+                                            .phone-group .ss-dial {
+                                                flex: 0 0 auto;
+                                            }
+
                                             .phone-group .ss-dial .ss-toggle {
-                                                border: 0; border-right: 1px solid #e2e8f0;
-                                                border-radius: .25rem 0 0 .25rem; min-width: 92px;
+                                                border: 0;
+                                                border-right: 1px solid #e2e8f0;
+                                                border-radius: .25rem 0 0 .25rem;
+                                                min-width: 92px;
                                                 background: #f8fafc;
                                             }
+
                                             .phone-group .phone-input {
-                                                flex: 1 1 auto; min-width: 0; border: 0; outline: none;
-                                                padding: .375rem .75rem; font-size: 1rem; color: #495057;
-                                                border-radius: 0 .25rem .25rem 0; background: transparent;
+                                                flex: 1 1 auto;
+                                                min-width: 0;
+                                                border: 0;
+                                                outline: none;
+                                                padding: .375rem .75rem;
+                                                font-size: 1rem;
+                                                color: #495057;
+                                                border-radius: 0 .25rem .25rem 0;
+                                                background: transparent;
                                             }
-                                            .phone-group .ss-panel { left: 0; right: auto; }
+
+                                            .phone-group .ss-panel {
+                                                left: 0;
+                                                right: auto;
+                                            }
 
                                             .regno-help {
-                                                position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
-                                                width: 20px; height: 20px; line-height: 20px; text-align: center;
-                                                border-radius: 50%; background: #e2e8f0; color: #475569;
-                                                font-size: 13px; font-weight: 700; cursor: help; user-select: none;
+                                                position: absolute;
+                                                top: 50%;
+                                                right: 10px;
+                                                transform: translateY(-50%);
+                                                width: 20px;
+                                                height: 20px;
+                                                line-height: 20px;
+                                                text-align: center;
+                                                border-radius: 50%;
+                                                background: #e2e8f0;
+                                                color: #475569;
+                                                font-size: 13px;
+                                                font-weight: 700;
+                                                cursor: help;
+                                                user-select: none;
                                             }
+
                                             .regno-help .regno-tip {
-                                                visibility: hidden; opacity: 0; transition: opacity .15s ease;
-                                                position: absolute; bottom: calc(100% + 10px); right: -6px; z-index: 20;
-                                                width: 260px; max-width: 78vw; padding: 10px 12px;
-                                                background: #1e293b; color: #f1f5f9; font-size: 12.5px; font-weight: 400;
-                                                line-height: 1.5; text-align: left; border-radius: 8px;
-                                                box-shadow: 0 6px 20px rgba(0,0,0,.25); white-space: normal;
+                                                visibility: hidden;
+                                                opacity: 0;
+                                                transition: opacity .15s ease;
+                                                position: absolute;
+                                                bottom: calc(100% + 10px);
+                                                right: -6px;
+                                                z-index: 20;
+                                                width: 260px;
+                                                max-width: 78vw;
+                                                padding: 10px 12px;
+                                                background: #1e293b;
+                                                color: #f1f5f9;
+                                                font-size: 12.5px;
+                                                font-weight: 400;
+                                                line-height: 1.5;
+                                                text-align: left;
+                                                border-radius: 8px;
+                                                box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+                                                white-space: normal;
                                             }
+
                                             .regno-help .regno-tip::after {
-                                                content: ""; position: absolute; top: 100%; right: 12px;
-                                                border: 6px solid transparent; border-top-color: #1e293b;
+                                                content: "";
+                                                position: absolute;
+                                                top: 100%;
+                                                right: 12px;
+                                                border: 6px solid transparent;
+                                                border-top-color: #1e293b;
                                             }
+
                                             .regno-help:hover .regno-tip,
-                                            .regno-help:focus .regno-tip { visibility: visible; opacity: 1; }
+                                            .regno-help:focus .regno-tip {
+                                                visibility: visible;
+                                                opacity: 1;
+                                            }
                                         </style>
                                         <div class="col-md-12 mb-3">
                                             <div style="position:relative;">
                                                 <input type="text" name="company_registration_no" id="companyRegNo"
-                                                    class="form-control" placeholder="{{ __('Company Registration No.') }} *"
-                                                    maxlength="100" required pattern="[A-Z0-9]+"
+                                                    class="form-control"
+                                                    placeholder="{{ __('Company Registration No.') }} *" maxlength="100"
+                                                    required pattern="[A-Z0-9]+"
                                                     style="text-transform:uppercase;padding-right:38px;">
                                                 <span class="regno-help" tabindex="0" role="button"
                                                     aria-label="{{ __('What is this?') }}">?
-                                                    <span class="regno-tip">{{ __("Your company's official registration or incorporation number (e.g. trade licence / business registration ID). Uppercase letters and numbers only — used to stop the same company buying this tender twice.") }}</span>
+                                                    <span
+                                                        class="regno-tip">{{ __("Your company's official registration or incorporation number (e.g. trade licence / business registration ID). Uppercase letters and numbers only — used to stop the same company buying this tender twice.") }}</span>
                                                 </span>
                                             </div>
                                         </div>
@@ -1743,9 +1892,9 @@
                                 class="share-fb" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
                             <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode($tender->title) }}"
                                 class="share-tw" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
-                            <a href="https://pinterest.com/pin/create/button/?url={{ urlencode(request()->url()) }}"
-                                class="share-pt" target="_blank" title="Pinterest"><i
-                                    class="fab fa-pinterest-p"></i></a>
+                            <a href="https://wa.me/?text={{ urlencode($tender->title . ' ' . request()->url()) }}"
+                                class="share-wa" target="_blank" rel="noopener" title="WhatsApp"><i
+                                    class="fab fa-whatsapp"></i></a>
                             <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(request()->url()) }}"
                                 class="share-li" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                         </div>
@@ -1782,7 +1931,7 @@
             @endif
 
             {{-- ═══════════════════════════════════════════
-         TABS: Overview / Tender Fees / Expert / Reviews
+         TABS: Overview / Tender Fees / Expert
     ═══════════════════════════════════════════ --}}
             <div class="row mt-5">
                 <div class="col-lg-12">
@@ -1806,10 +1955,6 @@
                                         <li class="nav-item">
                                             <a class="nav-link" data-toggle="tab"
                                                 href="#expert">{{ __('Tendering Expert') }}</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab"
-                                                href="#reviews">{{ __('Reviews') }}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -1910,14 +2055,6 @@
                                     @else
                                         <p class="text-muted">{{ __('No expert information available.') }}</p>
                                     @endif
-                                </div>
-                            </div>
-
-                            {{-- Reviews --}}
-                            <div id="reviews" class="tab-pane fade">
-                                <div class="content-box">
-                                    <h4>{{ __('Reviews') }}</h4>
-                                    <p class="text-muted">{{ __('No reviews yet.') }}</p>
                                 </div>
                             </div>
 
@@ -2398,22 +2535,24 @@
                 $ss.find('.ss-opt').show();
             }
 
-            $(document).on('click', '.ss-toggle', function (e) {
+            $(document).on('click', '.ss-toggle', function(e) {
                 e.preventDefault();
                 var $ss = $(this).closest('.ss');
                 var wasOpen = $ss.hasClass('open');
-                $('.ss').each(function () { ssClose($(this)); });
+                $('.ss').each(function() {
+                    ssClose($(this));
+                });
                 if (!wasOpen) {
                     $ss.addClass('open');
                     $ss.find('.ss-search').focus();
                 }
             });
 
-            $(document).on('input', '.ss-search', function () {
+            $(document).on('input', '.ss-search', function() {
                 var $ss = $(this).closest('.ss');
                 var q = ($(this).val() || '').toLowerCase().trim();
                 var hits = 0;
-                $ss.find('.ss-opt').each(function () {
+                $ss.find('.ss-opt').each(function() {
                     var match = !q || String($(this).data('search')).toLowerCase().indexOf(q) > -1;
                     $(this).toggle(match);
                     if (match) hits++;
@@ -2421,7 +2560,7 @@
                 $ss.toggleClass('no-match', hits === 0);
             });
 
-            $(document).on('click', '.ss-opt', function () {
+            $(document).on('click', '.ss-opt', function() {
                 var $ss = $(this).closest('.ss');
                 ssSelect($ss, $(this));
                 ssClose($ss);
@@ -2429,18 +2568,22 @@
             });
 
             // Click outside closes any open picker.
-            $(document).on('click', function (e) {
+            $(document).on('click', function(e) {
                 if (!$(e.target).closest('.ss').length) {
-                    $('.ss').each(function () { ssClose($(this)); });
+                    $('.ss').each(function() {
+                        ssClose($(this));
+                    });
                 }
             });
 
-            $(document).on('keydown', '.ss', function (e) {
-                if (e.key === 'Escape') { ssClose($(this)); }
+            $(document).on('keydown', '.ss', function(e) {
+                if (e.key === 'Escape') {
+                    ssClose($(this));
+                }
             });
 
             // National number only — digits, no dialling code (that is the picker).
-            $(document).on('input', '#phoneNumber', function () {
+            $(document).on('input', '#phoneNumber', function() {
                 var el = this;
                 var start = el.selectionStart;
                 var before = el.value || '';

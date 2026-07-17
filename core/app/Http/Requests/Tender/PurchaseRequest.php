@@ -86,7 +86,10 @@ class PurchaseRequest extends FormRequest
             'company_address'       => 'nullable|string|max:1000',
             'payment_reference'     => 'nullable|string|max:100',
             'gateway_type'          => 'nullable|string|max:50',
-            'selected_module_ids'   => 'nullable|array',
+
+            // At least one module must be chosen: the buyer pays per module, so an
+            // empty selection has nothing to charge for.
+            'selected_module_ids'   => 'required|array|min:1',
             'selected_module_ids.*' => 'integer',
         ];
     }
@@ -99,6 +102,8 @@ class PurchaseRequest extends FormRequest
             'country.in'                       => __('Please select a country from the list.'),
             'phone_code.required'              => __('Please select a phone country code.'),
             'phone_number.digits_between'      => __('Enter a valid phone number (4–14 digits, without the country code).'),
+            'selected_module_ids.required'     => __('Please select at least one module to continue.'),
+            'selected_module_ids.min'          => __('Please select at least one module to continue.'),
         ];
     }
 }

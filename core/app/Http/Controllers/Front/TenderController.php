@@ -276,10 +276,14 @@ class TenderController extends Controller
             $purchase->payment_reference = strtoupper(trim($request->input('payment_reference')));
         }
 
-        // Save purchased modules (name + cost) as JSON.
-        // No selection = full tender purchase. Free modules always ship with the tender,
-        // so they are always recorded on the receipt regardless of selection.
+        // Save purchased modules (name + cost) as JSON. The buyer pays per module, so
+        // the selection is required — an empty one is never read as "buy everything".
+        // Free modules always ship with the tender, so they are always recorded on the
+        // receipt regardless of selection.
         $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));
+        if (empty($selectedIds)) {
+            return back()->with('error', __('Please select at least one module to continue.'))->withInput();
+        }
 
         $allModules = TenderModule::where('tender_id', $request->tender_id)
             ->where('status', 1)
@@ -287,11 +291,9 @@ class TenderController extends Controller
 
         $freeModules = $allModules->filter(fn($m) => is_null($m->cost))->values();
 
-        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost));
-        if (!empty($selectedIds)) {
-            $paidModules = $paidModules->whereIn('id', $selectedIds);
-        }
-        $paidModules = $paidModules->values();
+        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost))
+            ->whereIn('id', $selectedIds)
+            ->values();
 
         // Duplicate-payment guard: drop paid modules this company already owns,
         // keyed solely on company registration number.

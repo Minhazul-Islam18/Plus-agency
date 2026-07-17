@@ -1179,20 +1179,20 @@
                             <span class="count">0 (0)</span>
                         </div>
 
-                        {{-- Price --}}
+                        {{-- Price — the amount payable *now*. It starts at 0 and only
+                             rises as modules are selected; the tender's own total is
+                             shown on the card above and is not touched by this. --}}
                         <div class="tender-price-wrap">
                             @if (!$tender->current_price)
                                 <span class="price-current free-price" id="displayedPrice">{{ __('Free') }}</span>
                             @else
+                                {{-- No struck-through previous_price here: this figure is a
+                                     running total of selected modules (starts at 0), so a
+                                     "was" price beside it would imply a discount off nothing. --}}
                                 <span class="price-current" id="displayedPrice">
                                     {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}<span
-                                        id="priceAmount">{{ number_format($tender->current_price, 0) }}</span>{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                        id="priceAmount">0</span>{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
                                 </span>
-                                @if (!is_null($tender->previous_price))
-                                    <span class="price-prev">
-                                        {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($tender->previous_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
-                                    </span>
-                                @endif
                             @endif
                         </div>
 
@@ -1202,15 +1202,34 @@
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="tender_id" value="{{ $tender->id }}">
-                                <input type="hidden" name="selected_amount" id="selectedAmount"
-                                    value="{{ $tender->current_price }}">
+                                {{-- Payable amount: 0 until modules are picked (see toggleModule) --}}
+                                <input type="hidden" name="selected_amount" id="selectedAmount" value="0">
                                 <div id="selectedModuleInputs"></div>
 
-                                {{-- STEP 1 · Your information — always visible so owned modules lock
+                                {{-- STEP 1 · Modules to pay — the buyer picks what to buy first,
+                                     because nothing is payable until at least one is selected. --}}
+                                @if ($modules->count() > 0)
+                                    <div id="modulesToPay" class="mt-2 mb-4">
+                                        <h6 class="mb-3 font-weight-bold">
+                                            <span class="step-badge">1</span> {{ __('Modules to Pay') }}
+                                        </h6>
+                                        <div class="check-plans-bar">
+                                            {{ __('Select the modules you want to purchase') }}
+                                        </div>
+                                        <div class="module-badges-row">
+                                            @include('front.tender.partials.module_badges')
+                                        </div>
+                                        <p class="text-danger modules-warning mt-2" style="display:none;">
+                                            * {{ __('Please select at least one module to continue.') }}
+                                        </p>
+                                    </div>
+                                @endif
+
+                                {{-- STEP 2 · Your information — always visible so owned modules lock
                                      the moment the buyer is identified (email entered / logged in) --}}
                                 <div id="purchaserInfo" class="mt-2">
                                     <h6 class="mb-3 font-weight-bold">
-                                        <span class="step-badge">1</span> {{ __('Your Information') }}
+                                        <span class="step-badge">2</span> {{ __('Your Information') }}
                                     </h6>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -1438,10 +1457,10 @@
                                     </div>
                                 </div>
 
-                                {{-- STEP 2 · Payment method (selectable cards) --}}
+                                {{-- STEP 3 · Payment method (selectable cards) --}}
                                 <div class="pay-section" id="paySection">
                                     <p class="pay-label">
-                                        <span class="step-badge">2</span> {{ __('Payment method') }}
+                                        <span class="step-badge">3</span> {{ __('Payment method') }}
                                     </p>
                                     <input type="hidden" name="gateway" id="paymentGateway" value="">
                                     <div class="pay-methods">
@@ -1599,34 +1618,15 @@
                         <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-link">
                             <i class="fas fa-download"></i> {{ __('Click here to find your downloads') }}
                         </a>
-                        <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>
-                        <div class="module-badges-row">
-                            @foreach ($modules as $module)
-                                @if (is_null($module->cost))
-                                    {{-- Free module → click to download --}}
-                                    <a @if (!empty($module->tender_file)) href="{{ asset('assets/front/files/tender_modules/' . $module->tender_file) }}" download
-                 @else
-                   href="#" @endif
-                                        class="module-badge free-badge" title="{{ __('Free – click to download') }}">
-                                        <i class="fas fa-download"></i>
-                                        <span>{{ convertUtf8($module->name) }}
-                                            <small style="font-weight:400;">({{ __('Free of charge') }})</small>
-                                        </span>
-                                    </a>
-                                @else
-                                    {{-- Paid module → toggle selection, adds cost to total --}}
-                                    <div class="module-badge paid-badge" data-cost="{{ $module->cost }}"
-                                        data-module-id="{{ $module->id }}" onclick="toggleModule(this)"
-                                        title="{{ __('Click to select / deselect') }}">
-                                        <i class="fas fa-lock"></i>
-                                        <span>{{ convertUtf8($module->name) }}
-                                            <small
-                                                style="font-weight:400;">({{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($module->cost, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }})</small>
-                                        </span>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
+                        {{-- The badges now live in the checkout form (step 1). They are only
+                             repeated here when there is no form to hold them — an expired or
+                             free tender — so free modules stay downloadable. --}}
+                        @unless ($tender->current_price && !$isExpired)
+                            <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>
+                            <div class="module-badges-row">
+                                @include('front.tender.partials.module_badges')
+                            </div>
+                        @endunless
                     </div>
                 </div>
             @endif
@@ -2107,6 +2107,16 @@
 
             // Form submit guard: must pick a gateway; block when buyer already owns everything
             $(document).on('submit', '#paymentGatewayForm', function(e) {
+                // Step 1 first: there is nothing to pay for until a module is picked.
+                if ($('.module-badge.paid-badge').length && !$('#selectedModuleInputs input').length) {
+                    e.preventDefault();
+                    $('.modules-warning').stop(true, true).fadeIn().delay(2500).fadeOut();
+                    $('html, body').animate({
+                        scrollTop: $('#modulesToPay').offset().top - 120
+                    }, 350);
+                    return;
+                }
+
                 var gw = $('#paymentGateway').val();
                 if (!gw) {
                     e.preventDefault();
@@ -2153,14 +2163,14 @@
             return num + ' ' + currencySymbol;
         }
 
-        // "Buy everything remaining" price = sum of paid modules the buyer does NOT yet own.
-        // Falls back to the full tender price when nothing is owned.
-        function tenderUnpaidBase() {
-            var t = 0;
-            $('.module-badge.paid-badge').each(function() {
-                if (!$(this).hasClass('paid-owned')) t += parseFloat($(this).data('cost')) || 0;
+        // Payable amount = sum of the selected modules only. Nothing selected means
+        // nothing to pay, so the total reads 0 and the submit guard blocks checkout.
+        function selectedTotal() {
+            var total = 0;
+            $.each(selectedModules, function(k, v) {
+                total += v;
             });
-            return t;
+            return total;
         }
 
         function toggleModule(el) {
@@ -2180,14 +2190,8 @@
                 selectedModules[id] = cost;
             }
 
-            // Sum selected module costs; nothing selected = buy everything still unpaid
-            var total = 0;
-            $.each(selectedModules, function(k, v) {
-                total += v;
-            });
-            var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
-
             // Update displayed price and hidden form field
+            var displayTotal = selectedTotal();
             $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
             $('#selectedAmount').val(displayTotal);
 
@@ -2197,6 +2201,10 @@
             $.each(selectedModules, function(moduleId) {
                 container.append('<input type="hidden" name="selected_module_ids[]" value="' + moduleId + '">');
             });
+
+            if (Object.keys(selectedModules).length > 0) {
+                $('.modules-warning').stop(true, true).hide();
+            }
         }
 
         // ── Duplicate-payment guard ───────────────────────────────────────────
@@ -2313,11 +2321,7 @@
             });
 
             function recomputeTotal() {
-                var total = 0;
-                $.each(selectedModules, function(k, v) {
-                    total += v;
-                });
-                var displayTotal = Object.keys(selectedModules).length > 0 ? total : tenderUnpaidBase();
+                var displayTotal = selectedTotal();
                 $('#priceAmount').text(displayTotal.toLocaleString('fr-FR'));
                 $('#selectedAmount').val(displayTotal);
                 var c = $('#selectedModuleInputs');

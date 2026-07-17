@@ -76,7 +76,12 @@ trait TenderPaymentHelper
 
         $bse = $this->getLang()->basic_extra ?? BasicExtra::first();
 
+        // The buyer pays per module, so at least one must be selected. The online path
+        // bypasses the checkout FormRequest, so this is enforced here too.
         $selectedIds = array_filter(array_map('intval', (array) $request->input('selected_module_ids', [])));
+        if (empty($selectedIds)) {
+            throw new \RuntimeException(__('Please select at least one module to continue.'));
+        }
 
         $allModules = TenderModule::where('tender_id', $request->tender_id)
             ->where('status', 1)
@@ -85,12 +90,10 @@ trait TenderPaymentHelper
         // Free modules (no cost) always ship with the tender → always on the receipt.
         $freeModules = $allModules->filter(fn($m) => is_null($m->cost))->values();
 
-        // Paid modules being purchased: explicit selection, or all when none selected.
-        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost));
-        if (!empty($selectedIds)) {
-            $paidModules = $paidModules->whereIn('id', $selectedIds);
-        }
-        $paidModules = $paidModules->values();
+        // Paid modules being purchased — only the ones explicitly selected.
+        $paidModules = $allModules->filter(fn($m) => !is_null($m->cost))
+            ->whereIn('id', $selectedIds)
+            ->values();
 
         // Duplicate-payment guard: drop paid modules this company already owns,
         // keyed solely on company registration number.

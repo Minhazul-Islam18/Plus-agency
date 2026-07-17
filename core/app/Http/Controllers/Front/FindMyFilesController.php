@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Front;
 
 use App\AccessLog;
-use App\BasicExtra;
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\KreativMailer;
 use App\Language;
@@ -1341,7 +1340,7 @@ class FindMyFilesController extends Controller
 
         \Log::info('[OTP/requestOtp] OTP record created', [
             'order'       => $purchase->order_number,
-            'masked_phone'=> $maskedPhone,
+            'masked_phone' => $maskedPhone,
         ]);
 
         // ── 6. Send SMS ───────────────────────────────────────────────────────

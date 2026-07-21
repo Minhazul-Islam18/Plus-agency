@@ -406,6 +406,331 @@
             cursor: default;
         }
 
+        .otp-resend-btn.loading {
+            text-decoration: none;
+            color: #3b6cf8;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .otp-resend-spin {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(59, 108, 248, 0.35);
+            border-top-color: #3b6cf8;
+            border-radius: 50%;
+            animation: otpResendSpin 0.6s linear infinite;
+        }
+
+        @keyframes otpResendSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Phone code + national grouped input ── */
+        .otp-phone-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .otp-phone-group .otp-phone-national {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /* ── Searchable country-code picker ── */
+        .otp-cc {
+            position: relative;
+            flex: 0 0 42%;
+            max-width: 210px;
+            min-width: 108px;
+        }
+
+        .otp-cc-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 10px;
+            background: #fff;
+            border: 1px solid #d7dce5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .otp-cc-toggle:focus {
+            outline: none;
+            border-color: #93b4f5;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .otp-cc-flag { flex: 0 0 auto; }
+        .otp-cc-dial { flex: 1 1 auto; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .otp-cc-caret { flex: 0 0 auto; font-style: normal; color: #94a3b8; transition: transform 0.15s ease; }
+        .otp-cc.open .otp-cc-caret { transform: rotate(180deg); }
+
+        .otp-cc-panel {
+            display: none;
+            position: absolute;
+            z-index: 40;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 300px;
+            max-width: 78vw;
+            background: #fff;
+            border: 1px solid #d7dce5;
+            border-radius: 8px;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.16);
+            overflow: hidden;
+        }
+
+        .otp-cc.open .otp-cc-panel { display: block; }
+
+        .otp-cc-search {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #e5e9f0;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .otp-cc-search:focus { outline: none; box-shadow: none; }
+
+        .otp-cc-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .otp-cc-opt {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f4f9;
+        }
+
+        .otp-cc-opt:hover { background: #f6f9ff; }
+        .otp-cc-name { flex: 1 1 auto; min-width: 0; }
+        .otp-cc-code { flex: 0 0 auto; color: #64748b; font-variant-numeric: tabular-nums; }
+
+        .otp-cc-empty {
+            padding: 14px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        /* ── Tender picker: custom multi-select dropdown ── */
+        .otp-tender-picker {
+            position: relative;
+        }
+
+        .otp-tender-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1px solid #d7dce5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .otp-tender-toggle:focus {
+            outline: none;
+            border-color: #93b4f5;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .otp-tender-toggle-label {
+            flex: 1 1 auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .otp-tender-toggle-label.is-placeholder {
+            color: #94a3b8;
+        }
+
+        .otp-tender-caret {
+            flex: 0 0 auto;
+            font-style: normal;
+            color: #94a3b8;
+            transition: transform 0.15s ease;
+        }
+
+        .otp-tender-picker.open .otp-tender-caret {
+            transform: rotate(180deg);
+        }
+
+        .otp-tender-panel {
+            display: none;
+            position: absolute;
+            z-index: 30;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #d7dce5;
+            border-radius: 8px;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
+        }
+
+        .otp-tender-picker.open .otp-tender-panel {
+            display: block;
+        }
+
+        .otp-tender-search {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #e5e9f0;
+            border-radius: 0;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .otp-tender-search:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .otp-tender-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .otp-tender-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #334155;
+            border-bottom: 1px solid #f1f4f9;
+        }
+
+        .otp-tender-all-row {
+            font-weight: 600;
+            color: #1d4ed8;
+            background: #f8fafc;
+        }
+
+        .otp-tender-list .otp-tender-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .otp-tender-item:hover {
+            background: #f6f9ff;
+        }
+
+        .otp-tender-item input {
+            margin-top: 3px;
+            flex: 0 0 auto;
+        }
+
+        .otp-tender-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .otp-tender-code {
+            font-size: 11px;
+            color: #94a3b8;
+            letter-spacing: 0.02em;
+        }
+
+        .otp-tender-empty {
+            padding: 14px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        /* ── Downloads-ready step ── */
+        .otp-dl-head {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .otp-dl-check {
+            width: 52px;
+            height: 52px;
+            line-height: 52px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: #16a34a;
+            color: #fff;
+            font-size: 26px;
+        }
+
+        .otp-dl-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .otp-dl-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .otp-dl-text {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .otp-dl-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            word-break: break-word;
+        }
+
+        .otp-dl-sub {
+            margin-top: 3px;
+            font-size: 12px;
+            color: #64748b;
+            word-break: break-word;
+        }
+
+        .otp-dl-btn {
+            flex: 0 0 auto;
+            display: inline-block;
+            padding: 9px 18px;
+            border-radius: 7px;
+            background: #2563eb;
+            color: #fff !important;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .otp-dl-btn:hover {
+            background: #1d4ed8;
+        }
+
         /* ── Masked phone hint ── */
         .otp-hint {
             font-size: 13px;
@@ -593,24 +918,46 @@
 
                                         <form id="otp-request-form" autocomplete="off">
                                             @csrf
-                                            <input type="hidden" name="tender_slug" id="otp-tender-slug-input" value="{{ $tender->slug ?? '' }}">
 
-                                            {{-- Tender selector (only for OTP method) --}}
+                                            {{-- Tender selector: searchable checkbox list (single or multiple) --}}
                                             <div class="form-group mb-3" id="otp-tender-wrap">
-                                                <label class="form-label">{{ __('Which tender did you purchase?') }}</label>
-                                                @if($tender)
-                                                    <div style="background:#e8f0fe; border:1px solid #b4caf9; border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:14px;">
-                                                        <span style="color:#3b6cf8; font-weight:600;">{{ $tender->title }}</span>
-                                                        <a href="{{ route('find_my_files') }}#phone_otp" style="margin-left:auto; font-size:12px; color:#6b7a99; text-decoration:underline;">{{ __('Change') }}</a>
+                                                <label class="form-label">{{ __('Which tender(s) did you purchase?') }}</label>
+                                                <div class="otp-tender-picker" id="otp-tender-picker"
+                                                    data-placeholder="{{ __('Select tender(s)…') }}"
+                                                    data-count-suffix="{{ __('tenders selected') }}"
+                                                    data-count-suffix-one="{{ __('tender selected') }}">
+                                                    <button type="button" class="otp-tender-toggle" id="otp-tender-toggle"
+                                                        aria-haspopup="listbox" aria-expanded="false">
+                                                        <span class="otp-tender-toggle-label" id="otp-tender-toggle-label">{{ __('Select tender(s)…') }}</span>
+                                                        <i class="otp-tender-caret">&#9662;</i>
+                                                    </button>
+                                                    <div class="otp-tender-panel" id="otp-tender-panel" role="listbox">
+                                                        <input type="text" id="otp-tender-search" class="otp-tender-search"
+                                                            placeholder="{{ __('Search tenders…') }}" autocomplete="off">
+                                                        <label class="otp-tender-item otp-tender-all-row">
+                                                            <input type="checkbox" id="otp-tender-all" class="otp-tender-allcb">
+                                                            <span>{{ __('Select all') }}</span>
+                                                        </label>
+                                                        <div class="otp-tender-list" id="otp-tender-list">
+                                                            @foreach($tenders as $t)
+                                                                <label class="otp-tender-item"
+                                                                    data-search="{{ \Illuminate\Support\Str::lower(trim($t->title . ' ' . $t->tender_code . ' ' . $t->id)) }}">
+                                                                    <input type="checkbox" name="tender_slugs[]" value="{{ $t->slug }}"
+                                                                        class="otp-tender-cb"
+                                                                        {{ (isset($tender) && $tender && $tender->id === $t->id) ? 'checked' : '' }}>
+                                                                    <span class="otp-tender-text">
+                                                                        <span class="otp-tender-title">{{ $t->title }}</span>
+                                                                        @if($t->tender_code)
+                                                                            <small class="otp-tender-code">{{ $t->tender_code }}</small>
+                                                                        @endif
+                                                                    </span>
+                                                                </label>
+                                                            @endforeach
+                                                            <div class="otp-tender-empty" id="otp-tender-empty" style="display:none;">{{ __('No tender matches your search.') }}</div>
+                                                        </div>
                                                     </div>
-                                                @else
-                                                    <select id="otp-tender-select" class="form-control">
-                                                        <option value="">— {{ __('Select a tender') }} —</option>
-                                                        @foreach($tenders as $t)
-                                                            <option value="{{ $t->slug }}">{{ $t->title }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @endif
+                                                </div>
+                                                <small class="text-muted d-block mt-1">{{ __('Tick every tender you paid for — one code unlocks them all.') }}</small>
                                             </div>
 
                                             <div class="form-group mb-3">
@@ -621,8 +968,46 @@
 
                                             <div class="form-group mb-2">
                                                 <label class="form-label">{{ __('Phone Number') }}</label>
-                                                <input type="tel" name="phone" id="otp-phone" class="form-control"
-                                                    placeholder="{{ __('e.g., +1 234 567 8900') }}" autocomplete="off">
+                                                @php
+                                                    $otpPreDial = $tender ? \App\Http\Helpers\Countries::dialFor($tender->country) : null;
+                                                    $preCC   = $otpPreDial ? collect($countries)->firstWhere('dial', $otpPreDial) : null;
+                                                    $preFlag = $preCC['flag'] ?? '';
+                                                    $preDial = $preCC['dial'] ?? '';
+                                                @endphp
+                                                <div class="otp-phone-group">
+                                                    {{-- Searchable country-code picker --}}
+                                                    <div class="otp-cc" id="otp-cc">
+                                                        <button type="button" class="otp-cc-toggle" id="otp-cc-toggle"
+                                                            aria-haspopup="listbox" aria-expanded="false">
+                                                            <span class="otp-cc-flag" id="otp-cc-flag">{{ $preFlag }}</span>
+                                                            <span class="otp-cc-dial" id="otp-cc-dial-label">{{ $preDial ?: __('Code') }}</span>
+                                                            <i class="otp-cc-caret">&#9662;</i>
+                                                        </button>
+                                                        <div class="otp-cc-panel" id="otp-cc-panel" role="listbox">
+                                                            <input type="text" class="otp-cc-search" id="otp-cc-search"
+                                                                placeholder="{{ __('Search country or code…') }}" autocomplete="off">
+                                                            <div class="otp-cc-list" id="otp-cc-list">
+                                                                @foreach ($countries as $c)
+                                                                    <div class="otp-cc-opt" role="option"
+                                                                        data-dial="{{ $c['dial'] }}" data-flag="{{ $c['flag'] }}"
+                                                                        data-search="{{ \Illuminate\Support\Str::lower($c['name'] . ' ' . $c['dial']) }}">
+                                                                        <span class="otp-cc-flag">{{ $c['flag'] }}</span>
+                                                                        <span class="otp-cc-name">{{ $c['name'] }}</span>
+                                                                        <span class="otp-cc-code">{{ $c['dial'] }}</span>
+                                                                    </div>
+                                                                @endforeach
+                                                                <div class="otp-cc-empty" id="otp-cc-empty" style="display:none;">{{ __('No country matches your search.') }}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {{-- Hidden dial value read by the phone-combining logic --}}
+                                                    <input type="hidden" id="otp-phone-code" value="{{ $preDial }}">
+                                                    <input type="tel" id="otp-phone" class="form-control otp-phone-national"
+                                                        inputmode="numeric" placeholder="{{ __('Phone Number') }}"
+                                                        autocomplete="off">
+                                                </div>
+                                                {{-- Combined E.164 value actually submitted to the server. --}}
+                                                <input type="hidden" name="phone" id="otp-phone-full">
                                             </div>
 
                                             {{-- Inline error alerts --}}
@@ -664,6 +1049,14 @@
                                                 <div class="fmf-alert-body">
                                                     <strong>{{ __('Order under verification') }}</strong>
                                                     <p>{{ __('This order is currently being verified. For any information, please contact ICA.') }}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="fmf-alert fmf-alert-error" id="otp-error-nomatch" style="display:none;">
+                                                <div class="fmf-alert-icon"><span>!</span></div>
+                                                <div class="fmf-alert-body">
+                                                    <strong>{{ __('No matching purchase found') }}</strong>
+                                                    <p>{{ __('We could not find a purchase for that email and phone number on the selected tender(s). Please re-check your details, or contact support if you believe this is an error.') }}</p>
                                                 </div>
                                             </div>
 
@@ -737,6 +1130,15 @@
                                             </div>
                                         </div>
 
+                                        {{-- Shown briefly when a resend succeeds --}}
+                                        <div class="fmf-alert fmf-alert-success" id="otp-resend-success" style="display:none;">
+                                            <div class="fmf-alert-icon"><span>&#10003;</span></div>
+                                            <div class="fmf-alert-body">
+                                                <strong>{{ __('New code sent.') }}</strong>
+                                                <p>{{ __('A fresh 6-digit code was just sent to your phone.') }}</p>
+                                            </div>
+                                        </div>
+
                                         <div class="otp-resend-wrap">
                                             {{ __('Didn\'t receive it?') }}
                                             <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
@@ -755,6 +1157,16 @@
                                                 {{ __('← Start over') }}
                                             </button>
                                         </div>
+                                    </div>
+
+                                    {{-- Step C: Downloads ready (one row per selected tender) --}}
+                                    <div id="otp-step-downloads" style="display:none;">
+                                        <div class="otp-dl-head">
+                                            <div class="otp-dl-check">&#10003;</div>
+                                            <h6 class="mb-1">{{ __('Verified — your downloads are ready') }}</h6>
+                                            <p class="otp-hint">{{ __('We also emailed these links to you. Each link can be opened a limited number of times.') }}</p>
+                                        </div>
+                                        <div class="otp-dl-list" id="otp-dl-list"></div>
                                     </div>
 
                                 </div>
@@ -973,26 +1385,162 @@
         window.fmfRegenCaptchaExpired   = function() { window._fmfRegenCaptcha  = false; var e = document.getElementById('regen-email');   if (e) e.dispatchEvent(new Event('input')); };
         @endif
 
-        // ── OTP tender selector (Method 2 only) ──────────────────────────────────
+        // ── OTP tender picker: custom multi-select dropdown (Method 2 only) ──────
         (function() {
-            var select    = document.getElementById('otp-tender-select');
-            var slugInput = document.getElementById('otp-tender-slug-input');
-            var sendBtn   = document.getElementById('otp-send-btn');
+            var picker = document.getElementById('otp-tender-picker');
+            var toggle = document.getElementById('otp-tender-toggle');
+            var labelEl= document.getElementById('otp-tender-toggle-label');
+            var panel  = document.getElementById('otp-tender-panel');
+            var search = document.getElementById('otp-tender-search');
+            var list   = document.getElementById('otp-tender-list');
+            var empty  = document.getElementById('otp-tender-empty');
+            var allCb  = document.getElementById('otp-tender-all');
+            if (!picker || !toggle || !list) return;
 
-            function updateTenderSlug(slug) {
-                if (slugInput) slugInput.value = slug;
-                // Send button readiness is re-evaluated by checkOtpSendReady below
-            }
+            var items = Array.prototype.slice.call(list.querySelectorAll('.otp-tender-item'));
+            var boxes = Array.prototype.slice.call(list.querySelectorAll('.otp-tender-cb'));
 
-            if (select) {
-                select.addEventListener('change', function() {
-                    updateTenderSlug(this.value);
-                    // Trigger OTP send-button readiness check
-                    var evt = new Event('input');
-                    var emailEl = document.getElementById('otp-email');
-                    if (emailEl) emailEl.dispatchEvent(evt);
+            var placeholder = picker.getAttribute('data-placeholder') || 'Select…';
+            var suffix      = picker.getAttribute('data-count-suffix') || 'selected';
+            var suffixOne   = picker.getAttribute('data-count-suffix-one') || suffix;
+
+            function visibleBoxes() {
+                return boxes.filter(function(cb) {
+                    return cb.closest('.otp-tender-item').style.display !== 'none';
                 });
             }
+
+            function notifyReady() {
+                var emailEl = document.getElementById('otp-email');
+                if (emailEl) emailEl.dispatchEvent(new Event('input'));
+            }
+
+            // Toggle-button label reflects current selection.
+            function refreshLabel() {
+                var checked = boxes.filter(function(cb) { return cb.checked; });
+                if (checked.length === 0) {
+                    labelEl.textContent = placeholder;
+                    labelEl.classList.add('is-placeholder');
+                } else if (checked.length === 1) {
+                    var titleEl = checked[0].closest('.otp-tender-item').querySelector('.otp-tender-title');
+                    labelEl.textContent = titleEl ? titleEl.textContent.trim() : '';
+                    labelEl.classList.remove('is-placeholder');
+                } else {
+                    labelEl.textContent = checked.length + ' ' + suffix;
+                    labelEl.classList.remove('is-placeholder');
+                }
+            }
+
+            // "Select all" tri-state, scoped to the currently visible (searched) rows.
+            function refreshAll() {
+                if (!allCb) return;
+                var vis = visibleBoxes();
+                var on  = vis.filter(function(cb) { return cb.checked; }).length;
+                allCb.checked = vis.length > 0 && on === vis.length;
+                allCb.indeterminate = on > 0 && on < vis.length;
+            }
+
+            function applySearch() {
+                var q = (search ? search.value : '').trim().toLowerCase();
+                var shown = 0;
+                items.forEach(function(it) {
+                    if (it === empty) return;
+                    var match = !q || (it.getAttribute('data-search') || '').indexOf(q) !== -1;
+                    it.style.display = match ? '' : 'none';
+                    if (match) shown++;
+                });
+                if (empty) empty.style.display = shown ? 'none' : 'block';
+                refreshAll();
+            }
+
+            function open()  { picker.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); if (search) { search.value = ''; applySearch(); search.focus(); } }
+            function close() { picker.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+
+            toggle.addEventListener('click', function() {
+                picker.classList.contains('open') ? close() : open();
+            });
+
+            // Close when clicking outside.
+            document.addEventListener('click', function(e) {
+                if (!picker.contains(e.target)) close();
+            });
+
+            if (search) search.addEventListener('input', applySearch);
+
+            if (allCb) {
+                allCb.addEventListener('change', function() {
+                    var target = this.checked;
+                    visibleBoxes().forEach(function(cb) { cb.checked = target; });
+                    refreshLabel();
+                    refreshAll();
+                    notifyReady();
+                });
+            }
+
+            list.addEventListener('change', function(e) {
+                if (!e.target.classList.contains('otp-tender-cb')) return;
+                refreshLabel();
+                refreshAll();
+                notifyReady();
+            });
+
+            // Initial state (honours a pre-checked ?tender= slug).
+            refreshLabel();
+            refreshAll();
+        })();
+
+        // ── OTP phone country-code: searchable single-select dropdown ────────────
+        (function() {
+            var cc      = document.getElementById('otp-cc');
+            var toggle  = document.getElementById('otp-cc-toggle');
+            var panel   = document.getElementById('otp-cc-panel');
+            var search  = document.getElementById('otp-cc-search');
+            var list    = document.getElementById('otp-cc-list');
+            var empty   = document.getElementById('otp-cc-empty');
+            var flagEl  = document.getElementById('otp-cc-flag');
+            var dialEl  = document.getElementById('otp-cc-dial-label');
+            var hidden  = document.getElementById('otp-phone-code');
+            if (!cc || !toggle || !list || !hidden) return;
+
+            var opts = Array.prototype.slice.call(list.querySelectorAll('.otp-cc-opt'));
+
+            function open()  { cc.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); if (search) { search.value = ''; applySearch(); search.focus(); } }
+            function close() { cc.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+
+            function applySearch() {
+                var q = (search ? search.value : '').trim().toLowerCase();
+                var shown = 0;
+                opts.forEach(function(o) {
+                    var match = !q || (o.getAttribute('data-search') || '').indexOf(q) !== -1;
+                    o.style.display = match ? '' : 'none';
+                    if (match) shown++;
+                });
+                if (empty) empty.style.display = shown ? 'none' : 'block';
+            }
+
+            function select(dial, flag) {
+                hidden.value = dial;
+                if (dialEl) dialEl.textContent = dial;
+                if (flagEl) flagEl.textContent = flag;
+                hidden.dispatchEvent(new Event('change')); // triggers sync + readiness
+                close();
+            }
+
+            toggle.addEventListener('click', function() {
+                cc.classList.contains('open') ? close() : open();
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!cc.contains(e.target)) close();
+            });
+
+            if (search) search.addEventListener('input', applySearch);
+
+            list.addEventListener('click', function(e) {
+                var opt = e.target.closest('.otp-cc-opt');
+                if (!opt) return;
+                select(opt.getAttribute('data-dial'), opt.getAttribute('data-flag'));
+            });
         })();
 
         (function() {
@@ -1236,24 +1784,38 @@
             var resendInterval = null;
             var expireAt = null; // JS Date
 
+            var otpPhoneCode = document.getElementById('otp-phone-code');
+            var otpPhoneFull = document.getElementById('otp-phone-full');
+
+            // Combine dial code + national number into the hidden E.164 field that
+            // is actually submitted (e.g. "+226" + "76642050" -> "+22676642050").
+            function syncOtpPhone() {
+                if (!otpPhoneFull) return;
+                var code = otpPhoneCode ? otpPhoneCode.value : '';
+                var national = otpPhoneInput ? otpPhoneInput.value.replace(/\D/g, '') : '';
+                otpPhoneFull.value = national ? (code + national) : '';
+            }
+
             // ── Form ready check ──────────────────────────────────────────────
             function checkOtpSendReady() {
+                syncOtpPhone();
                 var emailOk   = otpEmailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(otpEmailInput.value.trim());
-                var phoneOk   = otpPhoneInput && otpPhoneInput.value.trim().length >= 6;
-                var slugEl    = document.getElementById('otp-tender-slug-input');
-                var tenderOk  = slugEl && slugEl.value.trim() !== '';
+                var phoneOk   = otpPhoneInput && otpPhoneInput.value.replace(/\D/g, '').length >= 6;
+                var tenderOk  = document.querySelectorAll('.otp-tender-cb:checked').length > 0;
                 var captchaOk = {{ $bs->is_recaptcha == 1 ? '!!(window._fmfOtpCaptcha)' : 'true' }};
                 if (otpSendBtn) otpSendBtn.disabled = !(emailOk && phoneOk && tenderOk && captchaOk);
             }
 
             if (otpEmailInput) otpEmailInput.addEventListener('input', checkOtpSendReady);
             if (otpPhoneInput) otpPhoneInput.addEventListener('input', checkOtpSendReady);
+            if (otpPhoneCode)  otpPhoneCode.addEventListener('change', checkOtpSendReady);
 
             // ── Hide all OTP alerts ───────────────────────────────────────────
             function hideOtpAlerts() {
                 ['otp-error-validation', 'otp-error-sms', 'otp-error-ratelimit', 'otp-error-payment-pending',
-                    'otp-error-suspended',
-                    'otp-error-invalid', 'otp-error-exhausted', 'otp-error-expired', 'otp-error-session'
+                    'otp-error-suspended', 'otp-error-nomatch',
+                    'otp-error-invalid', 'otp-error-exhausted', 'otp-error-expired', 'otp-error-session',
+                    'otp-resend-success'
                 ]
                 .forEach(function(id) {
                     var el = document.getElementById(id);
@@ -1394,6 +1956,58 @@
                 startResendCooldown(resendAfter || {{ \App\OtpVerification::RESEND_DELAY }});
             }
 
+            // ── Show downloads-ready step (one row per selected tender) ────────
+            function showDownloads(downloads) {
+                clearInterval(countdownInterval);
+                clearInterval(resendInterval);
+                hideOtpAlerts();
+                if (otpStepInput) otpStepInput.style.display = 'none';
+                if (otpStepVerify) otpStepVerify.style.display = 'none';
+
+                var list = document.getElementById('otp-dl-list');
+                var step = document.getElementById('otp-step-downloads');
+                if (!list || !step) return;
+
+                list.innerHTML = '';
+                (downloads || []).forEach(function(d) {
+                    var row = document.createElement('div');
+                    row.className = 'otp-dl-item';
+
+                    var textWrap = document.createElement('div');
+                    textWrap.className = 'otp-dl-text';
+
+                    var title = document.createElement('div');
+                    title.className = 'otp-dl-title';
+                    title.textContent = d.title || '';
+                    textWrap.appendChild(title);
+
+                    // Sub-line: "Order XXXX · Name · Company" (only present parts).
+                    var meta = [];
+                    if (d.order)   meta.push('{{ __('Order') }} ' + d.order);
+                    if (d.name)    meta.push(d.name);
+                    if (d.company) meta.push(d.company);
+                    if (meta.length) {
+                        var sub = document.createElement('div');
+                        sub.className = 'otp-dl-sub';
+                        sub.textContent = meta.join(' · ');
+                        textWrap.appendChild(sub);
+                    }
+
+                    var btn = document.createElement('a');
+                    btn.className = 'otp-dl-btn';
+                    btn.href = d.url;
+                    btn.target = '_blank';
+                    btn.rel = 'noopener';
+                    btn.textContent = '{{ __('Download') }}';
+
+                    row.appendChild(textWrap);
+                    row.appendChild(btn);
+                    list.appendChild(row);
+                });
+
+                step.style.display = 'block';
+            }
+
             // ── Back button ───────────────────────────────────────────────────
             if (otpBackBtn) {
                 otpBackBtn.addEventListener('click', function() {
@@ -1411,6 +2025,7 @@
                 otpRequestForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     hideOtpAlerts();
+                    syncOtpPhone();
 
                     var overlay = document.getElementById('fmf-overlay');
                     var procHeading = document.getElementById('fmf-processing-heading');
@@ -1463,6 +2078,11 @@
                                 @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
                                 var el = document.getElementById('otp-error-suspended');
                                 if (el) el.style.display = 'flex';
+                            } else if (data.type === 'no_match') {
+                                if (otpSendBtn) otpSendBtn.disabled = false;
+                                @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
+                                var el = document.getElementById('otp-error-nomatch');
+                                if (el) el.style.display = 'flex';
                             } else {
                                 if (otpSendBtn) otpSendBtn.disabled = false;
                                 @if ($bs->is_recaptcha == 1) window._fmfOtpCaptcha = false; if (typeof grecaptcha !== 'undefined') { try { grecaptcha.reset(); } catch(e){} } @endif
@@ -1514,6 +2134,10 @@
                         if (overlay) overlay.classList.remove('active');
                         if (procHeading) procHeading.style.display = 'none';
 
+                        if (data.status === 'success' && data.downloads) {
+                            showDownloads(data.downloads);
+                            return;
+                        }
                         if (data.status === 'success' && data.redirect) {
                             window.location.href = data.redirect;
                             return;
@@ -1557,12 +2181,28 @@
             }
 
             // ── Resend OTP ────────────────────────────────────────────────────
+            var otpResendLabel = otpResendBtn ? otpResendBtn.textContent.trim() : '';
+
+            // Show/hide a spinner + "Sending…" state on the resend button.
+            function setResendLoading(on) {
+                if (!otpResendBtn) return;
+                if (on) {
+                    otpResendBtn.disabled = true;
+                    otpResendBtn.classList.add('loading');
+                    otpResendBtn.innerHTML =
+                        '<span class="otp-resend-spin"></span>' + @json(__('Sending…'));
+                } else {
+                    otpResendBtn.classList.remove('loading');
+                    otpResendBtn.textContent = otpResendLabel;
+                }
+            }
+
             if (otpResendBtn) {
                 otpResendBtn.addEventListener('click', function() {
-                    if (!sessionToken) return;
+                    if (!sessionToken || otpResendBtn.disabled) return;
 
                     hideOtpAlerts();
-                    otpResendBtn.disabled = true;
+                    setResendLoading(true);
                     if (otpResendTimer) otpResendTimer.textContent = '';
 
                     var body = new FormData();
@@ -1581,9 +2221,29 @@
                             return res.json();
                         })
                         .then(function(data) {
+                            setResendLoading(false);
                             if (data.status === 'success') {
+                                // New code issued → fully reset the verify UI for it:
+                                // clear old digits/alerts, restart the 10-min expiry
+                                // countdown and the resend cooldown from scratch.
+                                hideOtpAlerts();
                                 clearDigits();
+                                if (otpVerifyBtn) otpVerifyBtn.disabled = true;
                                 startCountdown({{ \App\OtpVerification::OTP_TTL_MIN }} * 60);
+                                startResendCooldown(data.resend_after ||
+                                    {{ \App\OtpVerification::RESEND_DELAY }});
+                                // Visible confirmation that a new code went out.
+                                var okEl = document.getElementById('otp-resend-success');
+                                if (okEl) {
+                                    okEl.style.display = 'flex';
+                                    clearTimeout(window.__fmfResendOkTimer);
+                                    window.__fmfResendOkTimer = setTimeout(function () {
+                                        okEl.style.display = 'none';
+                                    }, 5000);
+                                }
+                            } else if (data.type === 'resend_too_soon') {
+                                // Too soon: keep the button locked and show the real
+                                // remaining cooldown instead of silently unlocking.
                                 startResendCooldown(data.resend_after ||
                                     {{ \App\OtpVerification::RESEND_DELAY }});
                             } else if (data.type === 'session_invalid') {
@@ -1598,6 +2258,7 @@
                             }
                         })
                         .catch(function() {
+                            setResendLoading(false);
                             otpResendBtn.disabled = false;
                         });
                 });

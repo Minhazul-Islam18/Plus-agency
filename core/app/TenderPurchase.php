@@ -65,6 +65,69 @@ class TenderPurchase extends Model
     }
 
     /**
+     * Canonical phone digits: strip every non-digit, then strip leading zeros so
+     * international ("00226…"), plus ("+226…") and national-trunk ("0…") prefixes
+     * all collapse to the same significant digits. "+226 76 64 20 50",
+     * "0022676642050" and "22676642050" all normalise to "22676642050".
+     */
+    public static function normalizePhone(?string $phone): string
+    {
+        return ltrim(preg_replace('/\D/', '', (string) $phone), '0');
+    }
+
+    /**
+     * The stored phone as an E.164 string (e.g. "+22676642050") for the SMS
+     * gateway — Twilio rejects a bare national number like "76642050". Uses this
+     * order's country to supply the dialling code when the stored number lacks it.
+     * Returns "" when it can't be built.
+     */
+    public function e164Phone(): string
+    {
+        $digits = static::normalizePhone($this->phone_number); // significant digits, no trunk 0
+        if ($digits === '') {
+            return '';
+        }
+
+        $dial = \App\Http\Helpers\Countries::dialFor($this->country); // "+226" or null
+        if ($dial) {
+            $cc = ltrim($dial, '+');
+            // Already carries the country code → just add "+"; otherwise prepend it.
+            return strpos($digits, $cc) === 0 ? '+' . $digits : '+' . $cc . $digits;
+        }
+
+        return '+' . $digits;
+    }
+
+    /**
+     * Robust phone equality for buyer lookup. True when the two numbers are the
+     * same canonical digits, OR when one is a national-length suffix of the other
+     * (>= 8 significant digits). This tolerates a buyer who stored the full
+     * country-code form ("22676642050") but later types only the national number
+     * ("76642050"), and vice-versa. 8-digit floor avoids short-number collisions;
+     * the OTP is always sent to the stored number, never the typed one, so a
+     * suffix collision cannot leak a code to the wrong person.
+     */
+    public static function phoneMatches(?string $a, ?string $b): bool
+    {
+        $na = static::normalizePhone($a);
+        $nb = static::normalizePhone($b);
+
+        if ($na === '' || $nb === '') {
+            return false;
+        }
+        if ($na === $nb) {
+            return true;
+        }
+
+        $min = min(strlen($na), strlen($nb));
+        if ($min < 8) {
+            return false;
+        }
+
+        return substr($na, -$min) === substr($nb, -$min);
+    }
+
+    /**
      * Module names already paid for on a tender under a given company registration
      * number. purchased_modules stores {name, cost} (no ids), so paid-state is keyed
      * by name. Registration number is the sole buyer identity for the duplicate guard:

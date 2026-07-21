@@ -12,6 +12,7 @@ class OtpVerification extends Model
         'phone_hash',
         'otp_hash',
         'order_id',
+        'order_ids',
         'expires_at',
         'attempts',
         'last_resend_at',
@@ -24,6 +25,7 @@ class OtpVerification extends Model
     protected $casts = [
         'expires_at'     => 'datetime',
         'last_resend_at' => 'datetime',
+        'order_ids'      => 'array',
     ];
 
     const MAX_ATTEMPTS  = 3;
@@ -52,21 +54,28 @@ class OtpVerification extends Model
         return true;
     }
 
-    public function canResend(): bool
+    /**
+     * Seconds elapsed since the last (re)send. Uses raw timestamps because
+     * Carbon 3's diffInSeconds() is signed — now()->diffInSeconds($past) returns
+     * a NEGATIVE value, which previously broke both the cooldown gate and the
+     * remaining-seconds figure (e.g. showed "168s").
+     */
+    private function secondsSinceLastResend(): int
     {
         if (!$this->last_resend_at) {
-            return true;
+            return PHP_INT_MAX;
         }
-        return now()->diffInSeconds($this->last_resend_at) >= self::RESEND_DELAY;
+        return now()->getTimestamp() - $this->last_resend_at->getTimestamp();
+    }
+
+    public function canResend(): bool
+    {
+        return $this->secondsSinceLastResend() >= self::RESEND_DELAY;
     }
 
     public function resendCooldownSeconds(): int
     {
-        if (!$this->last_resend_at) {
-            return 0;
-        }
-        $elapsed = now()->diffInSeconds($this->last_resend_at);
-        return max(0, self::RESEND_DELAY - $elapsed);
+        return max(0, self::RESEND_DELAY - $this->secondsSinceLastResend());
     }
 
     public function verifyOtp(string $rawOtp): bool

@@ -15,6 +15,9 @@ class CreateOtpVerificationsTable extends Migration
             $table->string('phone_hash', 64)->index();
             $table->string('otp_hash', 64);
             $table->string('order_id', 50)->nullable()->index();
+            // All order numbers a single OTP verification covers (multi-tender).
+            // order_id stays = the first, for logging / back-compat.
+            $table->json('order_ids')->nullable();
             $table->timestamp('expires_at');
             $table->tinyInteger('attempts')->default(0);
             $table->timestamp('last_resend_at')->nullable();

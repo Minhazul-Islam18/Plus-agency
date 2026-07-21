@@ -14,6 +14,7 @@ yarn-error.log
 .env
 storage/app/invoices/
 storage/app/temp/
+storage/app/tender_modules/
 ../assets/front/invoices/
 *.pdf
 *.zip

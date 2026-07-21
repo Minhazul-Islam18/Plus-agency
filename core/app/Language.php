@@ -23,11 +23,6 @@ class Language extends Model
     return $this->hasOne('App\BasicExtra', 'language_id');
   }
 
-  public function packages()
-  {
-    return $this->hasMany('App\Package');
-  }
-
   public function sliders()
   {
     return $this->hasMany('App\Slider');
@@ -108,80 +103,18 @@ class Language extends Model
     return $this->hasMany('App\Blog');
   }
 
-  public function jcategories()
-  {
-    return $this->hasMany('App\Jcategory');
-  }
-
-  public function jobs()
-  {
-    return $this->hasMany('App\Job');
-  }
-
-  public function quote_inputs()
-  {
-    return $this->hasMany('App\QuoteInput');
-  }
-
-  public function package_inputs()
-  {
-    return $this->hasMany('App\PackageInput');
-  }
-
-  public function calendars()
-  {
-    return $this->hasMany('App\CalendarEvent');
-  }
-
   public function menus()
   {
     return $this->hasMany('App\Menu');
-  }
-
-  public function feed()
-  {
-    return $this->hasMany('App\RssFeed');
   }
 
   public function sitemaps()
   {
     return $this->hasMany('App\Sitemap');
   }
-  public function products()
-  {
-    return $this->hasMany('App\Product');
-  }
-  public function event_categories()
-  {
-    return $this->hasMany('App\EventCategory', 'lang_id');
-  }
-  public function events()
-  {
-    return $this->hasMany('App\Event', 'lang_id');
-  }
-  public function causes()
-  {
-    return $this->hasMany('App\Donation', 'lang_id');
-  }
-  public function course_categories()
-  {
-    return $this->hasMany('App\CourseCategory');
-  }
   public function tender_categories()
   {
     return $this->hasMany('App\TenderCategory');
-  }
-  public function courses()
-  {
-    return $this->hasMany('App\Course');
-  }
-  public function shippings()
-  {
-    return $this->hasMany('App\ShippingCharge');
-  }
-  public function pcategories()
-  {
-    return $this->hasMany('App\Pcategory');
   }
 
   public function offline_gateways()
@@ -192,16 +125,6 @@ class Language extends Model
   public function homes()
   {
     return $this->hasMany('App\Home');
-  }
-
-  public function articleCategories()
-  {
-    return $this->hasMany('App\ArticleCategory');
-  }
-
-  public function articles()
-  {
-    return $this->hasMany('App\Article');
   }
 
   public function megamenus()
@@ -217,11 +140,6 @@ class Language extends Model
   public function galleryCategory()
   {
     return $this->hasMany('App\GalleryCategory');
-  }
-
-  public function packageCategory()
-  {
-    return $this->hasMany('App\PackageCategory');
   }
 
   public function popups() {

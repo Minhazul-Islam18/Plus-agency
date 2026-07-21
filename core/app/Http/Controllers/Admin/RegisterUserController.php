@@ -23,8 +23,7 @@ class RegisterUserController extends Controller
     public function view($id)
     {
         $user = User::findOrFail($id);
-        $orders = $user->orders()->paginate(10);
-        return view('admin.register_user.details',compact('user', 'orders'));
+        return view('admin.register_user.details',compact('user'));
 
     }
 
@@ -56,84 +55,6 @@ class RegisterUserController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
-        if ($user->conversations()->count() > 0) {
-            $convs = $user->conversations()->get();
-            foreach ($convs as $key => $conv) {
-                @unlink('assets/front/user-suppor-file/' . $conv->file);
-                $conv->delete();
-            }
-        }
-
-        if ($user->courseOrder()->count() > 0) {
-            $coursePurchases = $user->courseOrder()->get();
-            foreach ($coursePurchases as $key => $cp) {
-                @unlink('assets/front/receipt/' . $cp->receipt);
-                @unlink('assets/front/invoices/course/' . $cp->invoice);
-                $cp->delete();
-            }
-        }
-
-        if ($user->course_reviews()->count() > 0) {
-            $user->course_reviews()->delete();
-        }
-
-        if ($user->donation_details()->count() > 0) {
-            $donations = $user->donation_details()->get();
-            foreach ($donations as $key => $donation) {
-                @unlink('assets/front/receipt/' . $donation->receipt);
-                $donation->delete();
-            }
-        }
-
-        if ($user->event_details()->count() > 0) {
-            $bookings = $user->event_details()->get();
-            foreach ($bookings as $key => $booking) {
-                @unlink('assets/front/receipt/' . $booking->receipt);
-                @unlink('assets/front/invoices/' . $booking->invoice);
-                $booking->delete();
-            }
-        }
-
-        if ($user->order_items()->count() > 0) {
-            $user->order_items()->delete();
-        }
-
-        if ($user->package_orders()->count() > 0) {
-            $pos = $user->package_orders()->get();
-            foreach ($pos as $key => $po) {
-                @unlink('assets/front/receipt/' . $po->receipt);
-                @unlink('assets/front/invoices/' . $po->invoice);
-                $po->delete();
-            }
-        }
-
-        if ($user->orders()->count() > 0) {
-            $orders = $user->orders()->get();
-            foreach ($orders as $key => $order) {
-                @unlink('assets/front/receipt/' . $order->receipt);
-                @unlink('assets/front/invoices/product/' . $order->invoice_number);
-                $order->delete();
-            }
-        }
-
-        if ($user->product_reviews()->count() > 0) {
-            $user->product_reviews()->delete();
-        }
-
-        if ($user->subscription()->count() > 0) {
-            @unlink('assets/front/receipt/' . $user->subscription->receipt);
-            @unlink('assets/front/invoices/' . $user->subscription->invoice);
-            $user->subscription()->delete();
-        }
-
-        if ($user->tickets()->count() > 0) {
-            $tickets = $user->tickets()->get();
-            foreach ($tickets as $key => $ticket) {
-                @unlink('assets/front/user-suppor-file/' . $ticket->zip_file);
-                $ticket->delete();
-            }
-        }
-
         @unlink('assets/front/img/user/' . $user->photo);
         $user->delete();
 
@@ -147,84 +68,6 @@ class RegisterUserController extends Controller
 
         foreach ($ids as $id) {
             $user = User::findOrFail($id);
-
-            if ($user->conversations()->count() > 0) {
-                $convs = $user->conversations()->get();
-                foreach ($convs as $key => $conv) {
-                    @unlink('assets/front/user-suppor-file/' . $conv->file);
-                    $conv->delete();
-                }
-            }
-
-            if ($user->courseOrder()->count() > 0) {
-                $coursePurchases = $user->courseOrder()->get();
-                foreach ($coursePurchases as $key => $cp) {
-                    @unlink('assets/front/receipt/' . $cp->receipt);
-                    @unlink('assets/front/invoices/course/' . $cp->invoice);
-                    $cp->delete();
-                }
-            }
-
-            if ($user->course_reviews()->count() > 0) {
-                $user->course_reviews()->delete();
-            }
-
-            if ($user->donation_details()->count() > 0) {
-                $donations = $user->donation_details()->get();
-                foreach ($donations as $key => $donation) {
-                    @unlink('assets/front/receipt/' . $donation->receipt);
-                    $donation->delete();
-                }
-            }
-
-            if ($user->event_details()->count() > 0) {
-                $bookings = $user->event_details()->get();
-                foreach ($bookings as $key => $booking) {
-                    @unlink('assets/front/receipt/' . $booking->receipt);
-                    @unlink('assets/front/invoices/' . $booking->invoice);
-                    $booking->delete();
-                }
-            }
-
-            if ($user->order_items()->count() > 0) {
-                $user->order_items()->delete();
-            }
-
-            if ($user->package_orders()->count() > 0) {
-                $pos = $user->package_orders()->get();
-                foreach ($pos as $key => $po) {
-                    @unlink('assets/front/receipt/' . $po->receipt);
-                    @unlink('assets/front/invoices/' . $po->invoice);
-                    $po->delete();
-                }
-            }
-
-            if ($user->orders()->count() > 0) {
-                $orders = $user->orders()->get();
-                foreach ($orders as $key => $order) {
-                    @unlink('assets/front/receipt/' . $order->receipt);
-                    @unlink('assets/front/invoices/product/' . $order->invoice_number);
-                    $order->delete();
-                }
-            }
-
-            if ($user->product_reviews()->count() > 0) {
-                $user->product_reviews()->delete();
-            }
-
-            if ($user->subscription()->count() > 0) {
-                @unlink('assets/front/receipt/' . $user->subscription->receipt);
-                @unlink('assets/front/invoices/' . $user->subscription->invoice);
-                $user->subscription()->delete();
-            }
-
-            if ($user->tickets()->count() > 0) {
-                $tickets = $user->tickets()->get();
-                foreach ($tickets as $key => $ticket) {
-                    @unlink('assets/front/user-suppor-file/' . $ticket->zip_file);
-                    $ticket->delete();
-                }
-            }
 
             @unlink('assets/front/img/user/' . $user->photo);
             $user->delete();

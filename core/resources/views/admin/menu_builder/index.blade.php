@@ -80,7 +80,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         <a data-text="{{__('Services')}}" data-type="services-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
                                     </li>
 
-                                    <li class="list-group-item">{{__('Packages')}} <a data-text="{{__('Packages')}}" data-type="packages" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">
                                         {{__('Portfolios')}}
                                         <span class="badge badge-dark">Non Mega Menu</span>
@@ -103,19 +102,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                     <li class="list-group-item">{{__('Team Members')}} <a data-text="{{__('Team Members')}}" data-type="team" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Career')}} <a data-text="{{__('Career')}}" data-type="career" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
 
-                                    @if ($bex->is_donation == 1)
-                                        <li class="list-group-item">
-                                            {{__('Courses')}}
-                                            <span class="badge badge-dark">Non Mega Menu</span>
-                                            <a data-text="{{__('Courses')}}" data-type="courses" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                        <li class="list-group-item">
-                                            {{__('Courses')}}
-                                            <span class="badge badge-danger">Mega Menu</span>
-                                            <a data-text="{{__('Courses')}}" data-type="courses-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                    @endif
-
                                     @if ($bex->is_tender == 1)
                                         <li class="list-group-item">
                                             {{__('Tenders')}}
@@ -129,58 +115,9 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         </li>
                                     @endif
 
-                                    @if ($bex->is_donation == 1)
-                                        <li class="list-group-item">
-                                            {{__('Causes')}}
-                                            <span class="badge badge-dark">Non Mega Menu</span>
-                                            <a data-text="{{__('Causes')}}" data-type="causes" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                        <li class="list-group-item">
-                                            {{__('Causes')}}
-                                            <span class="badge badge-danger">Mega Menu</span>
-                                            <a data-text="{{__('Causes')}}" data-type="causes-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                    @endif
-
-                                    @if ($bex->is_event == 1)
-
-                                        <li class="list-group-item">
-                                            {{__('Events')}}
-                                            <span class="badge badge-dark">Non Mega Menu</span>
-                                            <a data-text="{{__('Events')}}" data-type="events" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                        <li class="list-group-item">
-                                            {{__('Events')}}
-                                            <span class="badge badge-danger">Mega Menu</span>
-                                            <a data-text="{{__('Events')}}" data-type="events-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                    @endif
-
-                                    <li class="list-group-item">{{__('Knowledgebase')}} <a data-text="{{__('Knowledgebase')}}" data-type="knowledgebase" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Event Calendar')}} <a data-text="{{__('Event Calendar')}}" data-type="calendar" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Gallery')}} <a data-text="{{__('Gallery')}}" data-type="gallery" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('FAQ')}} <a data-text="{{__('FAQ')}}" data-type="faq" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
-
-
-                                    @if ($bex->is_shop == 1)
-
-                                        <li class="list-group-item">
-                                            {{__('Products')}}
-                                            <span class="badge badge-danger">Mega Menu</span>
-                                            <a data-text="{{__('Products')}}" data-type="products-megamenu" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                        <li class="list-group-item">
-                                            {{__('Products')}}
-                                            <span class="badge badge-dark">Non Mega Menu</span>
-                                            <a data-text="{{__('Products')}}" data-type="products" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a>
-                                        </li>
-                                    @endif
-
-
-                                    @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                                        <li class="list-group-item">{{__('Cart')}} <a data-text="{{__('Cart')}}" data-type="cart" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
-                                        <li class="list-group-item">{{__('Checkout')}} <a data-text="{{__('Checkout')}}" data-type="checkout" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
-                                    @endif
 
                                     <li class="list-group-item">
                                         {{__('Blogs')}}
@@ -194,7 +131,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                     </li>
 
 
-                                    <li class="list-group-item">{{__('RSS News')}} <a data-text="{{__('RSS News')}}" data-type="rss" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Feedback')}} <a data-text="{{__('Feedback')}}" data-type="feedback" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Contact')}} <a data-text="{{__('Contact')}}" data-type="contact" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                 </ul>

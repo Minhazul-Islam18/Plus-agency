@@ -43,7 +43,6 @@
                </div>
                <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
                   <a href="#" class="btn btn-primary float-lg-right float-left btn-sm" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Add Gateway</a>
-                  <button class="btn btn-danger float-right btn-sm mr-2 d-none bulk-delete" data-href="{{route('admin.package.bulk.delete')}}"><i class="flaticon-interface-5"></i> Delete</button>
                </div>
             </div>
          </div>
@@ -58,13 +57,7 @@
                         <thead>
                            <tr>
                               <th scope="col">Name</th>
-                              @if ($bex->catalog_mode == 0)
-                              <th scope="col">Product Checkout</th>
-                              @endif
-                              <th scope="col">Package Checkout</th>
                               <th scope="col">Course Checkout</th>
-                              <th scope="col">Donation Checkout</th>
-                              <th scope="col">Event Checkout</th>
                               <th scope="col">Actions</th>
                            </tr>
                         </thead>
@@ -75,31 +68,6 @@
                                 {{convertUtf8($ogateway->name)}}
                               </td>
 
-                              @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                              <td>
-                                <form id="productForm{{$ogateway->id}}" class="d-inline-block" action="{{route('admin.offline.status')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="ogateway_id" value="{{$ogateway->id}}">
-                                <input type="hidden" name="type" value="product">
-                                <select class="form-control form-control-sm {{$ogateway->product_checkout_status == 1 ? 'bg-success' : 'bg-danger'}}" name="product_checkout_status" onchange="document.getElementById('productForm{{$ogateway->id}}').submit();">
-                                    <option value="1" {{$ogateway->product_checkout_status == 1 ? 'selected' : ''}}>Active</option>
-                                    <option value="0" {{$ogateway->product_checkout_status == 0 ? 'selected' : ''}}>Deactive</option>
-                                </select>
-                                </form>
-                              </td>
-                              @endif
-
-                              <td>
-                                <form id="packageForm{{$ogateway->id}}" class="d-inline-block" action="{{route('admin.offline.status')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="ogateway_id" value="{{$ogateway->id}}">
-                                <input type="hidden" name="type" value="package">
-                                <select class="form-control form-control-sm {{$ogateway->package_order_status == 1 ? 'bg-success' : 'bg-danger'}}" name="package_order_status" onchange="document.getElementById('packageForm{{$ogateway->id}}').submit();">
-                                    <option value="1" {{$ogateway->package_order_status == 1 ? 'selected' : ''}}>Active</option>
-                                    <option value="0" {{$ogateway->package_order_status == 0 ? 'selected' : ''}}>Deactive</option>
-                                </select>
-                                </form>
-                              </td>
                               <td>
                                 <form id="courseForm{{$ogateway->id}}" class="d-inline-block" action="{{route('admin.offline.status')}}" method="post">
                                 @csrf
@@ -108,28 +76,6 @@
                                 <select class="form-control form-control-sm {{$ogateway->course_checkout_status == 1 ? 'bg-success' : 'bg-danger'}}" name="course_checkout_status" onchange="document.getElementById('courseForm{{$ogateway->id}}').submit();">
                                     <option value="1" {{$ogateway->course_checkout_status == 1 ? 'selected' : ''}}>Active</option>
                                     <option value="0" {{$ogateway->course_checkout_status == 0 ? 'selected' : ''}}>Deactive</option>
-                                </select>
-                                </form>
-                              </td>
-                              <td>
-                                <form id="donationForm{{$ogateway->id}}" class="d-inline-block" action="{{route('admin.offline.status')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="ogateway_id" value="{{$ogateway->id}}">
-                                <input type="hidden" name="type" value="donation">
-                                <select class="form-control form-control-sm {{$ogateway->donation_checkout_status == 1 ? 'bg-success' : 'bg-danger'}}" name="donation_checkout_status" onchange="document.getElementById('donationForm{{$ogateway->id}}').submit();">
-                                    <option value="1" {{$ogateway->donation_checkout_status == 1 ? 'selected' : ''}}>Active</option>
-                                    <option value="0" {{$ogateway->donation_checkout_status == 0 ? 'selected' : ''}}>Deactive</option>
-                                </select>
-                                </form>
-                              </td>
-                              <td>
-                                <form id="eventForm{{$ogateway->id}}" class="d-inline-block" action="{{route('admin.offline.status')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="ogateway_id" value="{{$ogateway->id}}">
-                                <input type="hidden" name="type" value="event">
-                                <select class="form-control form-control-sm {{$ogateway->event_checkout_status == 1 ? 'bg-success' : 'bg-danger'}}" name="event_checkout_status" onchange="document.getElementById('eventForm{{$ogateway->id}}').submit();">
-                                    <option value="1" {{$ogateway->event_checkout_status == 1 ? 'selected' : ''}}>Active</option>
-                                    <option value="0" {{$ogateway->event_checkout_status == 0 ? 'selected' : ''}}>Deactive</option>
                                 </select>
                                 </form>
                               </td>

@@ -974,28 +974,6 @@
     @endif
 
 
-    //   Package Section
-    @if(!empty($packageSec))
-    var blockManager = editor.BlockManager;
-        blockManager.add('package', {
-            label: 'Featured Packages',
-            attributes: {class:'fa fa-usd'},
-            content: {
-                components: `{!! $packageSec !!}`
-            },
-            category: 'Theme Sections',
-            render: ({ el }) => {
-                const btn = document.createElement('a');
-                btn.setAttribute('class', 'block-btn');
-                btn.setAttribute('href', '{{route("admin.package.index", ["language" => $lang->code])}}');
-                btn.setAttribute('target', '_blank');
-                btn.innerHTML = 'Manage';
-                el.appendChild(btn);
-            }
-    });
-    @endif
-
-
     //   Blogs Section
     @if(!empty($blogSec))
     var blockManager = editor.BlockManager;

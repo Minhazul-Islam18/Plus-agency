@@ -453,50 +453,6 @@
     @endif
 
 
-    @if ($be->pricing_section == 1)
-        <!-- pricing begin -->
-        <div class="pricing-tables section-padding responsive-section-padding-large"
-            @if (!empty($be->pricing_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->pricing_bg) }}'); background-size:cover; background-position: center; position: relative; overflow: hidden;" @endif>
-            @if (!empty($be->pricing_bg))
-                <div class="pricing-overlay"
-                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->pricing_overlay_color ?? '000000' }}; opacity: {{ $be->pricing_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
-                </div>
-            @endif
-            <div class="container" style="position: relative; z-index: 2;">
-                <div class="row text-center">
-                    <div class="col-lg-6 offset-lg-3">
-                        <span class="section-title">{{ convertUtf8($be->pricing_title) }}</span>
-                        <h2 class="section-summary">{{ convertUtf8($be->pricing_subtitle) }}</h2>
-                    </div>
-                </div>
-                <div class="pricing-carousel common-carousel owl-carousel owl-theme">
-                    @foreach ($packages as $key => $package)
-                        <div class="single-pricing-table">
-                            <span class="title">{{ convertUtf8($package->title) }}</span>
-                            <div class="price">
-                                <h1>
-                                    {{ $bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '' }}{{ $package->price }}{{ $bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '' }}
-                                </h1>
-                            </div>
-                            <div class="features">
-                                {!! replaceBaseUrl(convertUtf8($package->description)) !!}
-                            </div>
-
-                            @if ($package->order_status == 1)
-                                <a href="{{ route('front.packageorder.index', $package->id) }}"
-                                    class="pricing-btn">{{ __('Place Order') }}</a>
-                            @endif
-
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        <!-- pricing end -->
-    @endif
-
-
-
     @if ($bs->news_section == 1)
         <!--    blog section start   -->
         <div class="blog-section section-padding"

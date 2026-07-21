@@ -185,58 +185,13 @@
                             <a href="{{route('user-dashboard')}}">{{__('Dashboard')}}</a>
                         </li>
 
-                        @if ($bex->recurring_billing == 1)
-                            <li><a href="{{route('user-packages')}}">{{__('Packages')}}</a></li>
-                        @endif
-
-                        @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                            <li><a href="{{route('user-orders')}}">{{__('Product Orders')}} </a></li>
-                        @endif
-
-                        @if ($bex->recurring_billing == 0)
-                            <li><a href="{{route('user-package-orders')}}">{{__('Package Orders')}} </a></li>
-                        @endif
-
-                        @if ($bex->is_course == 1)
-                        <li>
-                            <a href="{{route('user.course_orders')}}" >{{__('Courses')}}</a>
-                        </li>
-                        @endif
-
-                        @if ($bex->is_event == 1)
-                        <li>
-                            <a href="{{route('user-events')}}">{{__('Event Bookings')}}</a>
-                        </li>
-                        @endif
-
-
-                        @if ($bex->is_donation == 1)
-                        <li>
-                            <a href="{{route('user-donations')}}" >{{__('Donations')}}</a>
-                        </li>
-                        @endif
-
-                        @if ($bex->is_ticket == 1)
-                        <li>
-                            <a href="{{route('user-tickets')}}">{{__('Support Tickets')}}</a>
-                        </li>
-                        @endif
-
                         <li>
                             <a href="{{route('user-profile')}}">{{__('Edit Profile')}}</a>
                         </li>
 
-                        @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                            <li>
-                                <a href="{{route('shpping-details')}}">{{__('Shipping Details')}}</a>
-                            </li>
-                            <li>
-                                <a href="{{route('billing-details')}}">{{__('Billing Details')}}</a>
-                            </li>
-                            <li>
-                                <a href="{{route('user-reset')}}">{{__('Change Password')}}</a>
-                            </li>
-                        @endif
+                        <li>
+                            <a href="{{route('user-reset')}}">{{__('Change Password')}}</a>
+                        </li>
                         <li>
                             <a href="{{route('user-logout')}}" target="_self">{{__('Logout')}}</a>
                         </li>
@@ -252,24 +207,6 @@
     <!--   header area end   -->
 
     @yield('content')
-
-    @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-        <div id="cartIconWrapper">
-            <a class="d-block" id="cartIcon" href="{{route('front.cart')}}">
-                <div class="cart-length">
-                    <i class="fas fa-cart-plus"></i>
-                    <span class="length">{{cartLength()}} {{__('ITEMS')}}</span>
-                </div>
-                <div class="cart-total">
-                    {{$bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : ''}}
-                    {{cartTotal()}}
-                    {{$bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : ''}}
-                </div>
-            </a>
-        </div>
-    @endif
-
-
 
     <!-- back to top area start -->
     <div class="back-to-top">

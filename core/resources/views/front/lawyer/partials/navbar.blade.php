@@ -81,7 +81,7 @@
                             @if ($bs->is_quote == 1)
                                 <div class="col-lg-2">
                                     <div class="button_box">
-                                        <a href="{{route('front.quote')}}" class="lawyer_btn">{{__('Consultation')}}</a>
+                                        <a href="{{route('front.contact')}}" class="lawyer_btn">{{__('Consultation')}}</a>
                                     </div>
                                 </div>
                             @endif

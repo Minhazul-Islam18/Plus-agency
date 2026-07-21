@@ -2,12 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Donation;
-use App\DonationDetail;
-use App\Event;
-use App\EventCategory;
-use App\EventDetail;
-use Illuminate\Support\Facades\DB;
 use App\BasicExtended as BE;
 use App\BasicExtra;
 use App\BasicSetting as BS;
@@ -348,29 +342,16 @@ class LanguageController extends Controller
 
         // Define language-specific text fields for basic_settings_extended
         $extendedLanguageSpecificFields = [
-            'pricing_title',
-            'pricing_subtitle',
             'cookie_alert_text',
             'cookie_alert_button_text',
-            'career_title',
-            'career_subtitle',
-            'event_calendar_title',
-            'event_calendar_subtitle',
-            'rss_title',
-            'rss_subtitle',
-            'rss_details_title',
             'home_meta_keywords',
             'home_meta_description',
             'services_meta_keywords',
             'services_meta_description',
-            'packages_meta_keywords',
-            'packages_meta_description',
             'portfolios_meta_keywords',
             'portfolios_meta_description',
             'team_meta_keywords',
             'team_meta_description',
-            'career_meta_keywords',
-            'career_meta_description',
             'calendar_meta_keywords',
             'calendar_meta_description',
             'gallery_meta_keywords',
@@ -379,15 +360,10 @@ class LanguageController extends Controller
             'faq_meta_description',
             'blogs_meta_keywords',
             'blogs_meta_description',
-            'rss_meta_keywords',
-            'rss_meta_description',
             'contact_meta_keywords',
             'contact_meta_description',
             'quote_meta_keywords',
             'quote_meta_description',
-            'product_title',
-            'product_subtitle',
-            'product_details_title',
             'cart_title',
             'cart_subtitle',
             'checkout_title',
@@ -398,8 +374,6 @@ class LanguageController extends Controller
             'about_summary',
             'about_signature',
             'about_phone',
-            'products_meta_keywords',
-            'products_meta_description',
             'cart_meta_keywords',
             'cart_meta_description',
             'checkout_meta_keywords',
@@ -410,10 +384,6 @@ class LanguageController extends Controller
             'register_meta_description',
             'forgot_meta_keywords',
             'forgot_meta_description',
-            'events_meta_keywords',
-            'events_meta_description',
-            'causes_meta_keywords',
-            'causes_meta_description'
         ];
 
         foreach ($cols as $key => $value) {
@@ -441,12 +411,6 @@ class LanguageController extends Controller
 
         // Define language-specific text fields for basic_settings_extra
         $extraLanguageSpecificFields = [
-            'course_title',
-            'course_subtitle',
-            'course_details_title',
-            'knowledgebase_title',
-            'knowledgebase_subtitle',
-            'knowledgebase_details_title',
             'client_feedback_title',
             'client_feedback_subtitle',
             'whatsapp_header_title',
@@ -595,16 +559,6 @@ class LanguageController extends Controller
             $bex->delete();
         }
 
-        // deleting package categories for corresponding language
-        if (!empty($la->packageCategory)) {
-            $la->packageCategory()->delete();
-        }
-
-        // deleting packages for corresponding language
-        if (!empty($la->packages)) {
-            $la->packages()->delete();
-        }
-
         // deleting pages for corresponding language
         if (!empty($la->pages)) {
             $la->pages()->delete();
@@ -725,59 +679,6 @@ class LanguageController extends Controller
         }
 
 
-        // deleting product category for corresponding language
-        if (!empty($la->pcategories)) {
-            $pcat = $la->pcategories;
-            foreach ($pcat as $cat) {
-                $cat->delete();
-            }
-        }
-
-        // deleting shipping charge for corresponding language
-        if (!empty($la->shippings)) {
-            $shippings = $la->shippings;
-            foreach ($shippings as $shipping) {
-                $shipping->delete();
-            }
-        }
-        // deleting product for corresponding language
-        if (!empty($la->products)) {
-            $products = $la->products;
-            foreach ($products as $product) {
-                @unlink('assets/front/img/product/featured/' . $product->feature_image);
-
-                // deleting slider images of the specific portfolio
-                $product_images = $product->product_images;
-                foreach ($product_images as $pimg) {
-                    @unlink('assets/front/img/product/sliders/' . $pimg->image);
-                    $pimg->delete();
-                }
-                $product->delete();
-            }
-        }
-        // deleting courses for corresponding language
-        if (!empty($la->courses)) {
-            $courses = $la->courses;
-            foreach ($courses as $course) {
-                $modules = $course->modules;
-                foreach ($modules as $key => $module) {
-                    $lessons = $module->lessons;
-                    foreach ($lessons as $key => $lesson) {
-                        @unlink('assets/front/video/lesson_videos/' . $lesson->video_file);
-                        $lesson->delete();
-                    }
-                    $module->delete();
-                }
-                $course->review()->delete();
-                $course->coursePurchase()->delete();
-
-                @unlink('assets/front/img/courses/' . $course->feature_image);
-                @unlink('assets/front/img/instructors/' . $course->instructor_image);
-                $course->delete();
-            }
-        }
-
-
         // deleting services for corresponding language
         if (!empty($la->blogs)) {
             $blogs = $la->blogs;
@@ -824,17 +725,6 @@ class LanguageController extends Controller
             $la->faqs()->delete();
         }
 
-        // deleting inputs for corresponding language
-        if (!empty($la->quote_inputs)) {
-            $ins = $la->quote_inputs;
-            foreach ($ins as $in) {
-                if ($in->quote_input_options()->count() > 0) {
-                    $in->quote_input_options()->delete();
-                }
-                $in->delete();
-            }
-        }
-
         // deleting event calendars for corresponding language
         if (!empty($la->calendars)) {
             $la->calendars()->delete();
@@ -850,57 +740,6 @@ class LanguageController extends Controller
             $la->offline_gateways()->delete();
         }
 
-
-        //event
-        $events = Event::query()->where('lang_id', $id)->get();
-        DB::transaction(function () use ($events, $id) {
-            foreach ($events as $event) {
-                $event_details = EventDetail::query()->where('event_id', $event->id)->get();
-                foreach ($event_details as $event_detail) {
-                    if (!is_null($event_detail->receipt)) {
-                        $directory = "assets/front/img/events/receipt/" . $event_detail->receipt;
-                        if (file_exists($directory)) {
-                            @unlink($directory);
-                        }
-                    }
-                    $event_detail->delete();
-                }
-                $images = json_decode($event->image);
-                if (count($images) > 0) {
-                    foreach ($images as $image) {
-                        $directory = 'assets/front/img/events/sliders/' . $image;
-                        if (file_exists($directory)) {
-                            @unlink($directory);
-                        }
-                    }
-                }
-                if (!is_null($event->video)) {
-                    $directory = "assets/front/img/events/videos/" . $event->video;
-                    if (file_exists($directory)) {
-                        @unlink($directory);
-                    }
-                }
-                $event->delete();
-                EventCategory::query()->where('lang_id', $id)->delete();
-            }
-        });
-        //donation
-        $donations = Donation::query()->where('lang_id', $id)->get();
-        DB::transaction(function () use ($donations, $id) {
-            foreach ($donations as $donation) {
-                $donation_details = DonationDetail::query()->where('donation_id', $donation->id)->get();
-                foreach ($donation_details as $donation_detail) {
-                    if (!is_null($donation_detail->receipt)) {
-                        $directory = "assets/front/img/donations/receipt/" . $donation_detail->receipt;
-                        if (file_exists($directory)) {
-                            @unlink($directory);
-                        }
-                    }
-                    $donation_detail->delete();
-                }
-                $donation->delete();
-            }
-        });
 
         $la->delete();
         return back()->with('success', 'Delete Successfully');

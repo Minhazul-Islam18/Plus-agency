@@ -87,17 +87,6 @@
 
               <div class="col-lg-6">
                   <div class="form-group">
-                    <label>Meta Keywords for Packages</label>
-                    <input class="form-control" name="packages_meta_keywords" value="{{$abe->packages_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
-                  </div>
-                  <div class="form-group">
-                    <label>Meta Description for Packages</label>
-                    <textarea class="form-control" name="packages_meta_description" rows="5" placeholder="Enter meta description">{{$abe->packages_meta_description}}</textarea>
-                  </div>
-              </div>
-
-              <div class="col-lg-6">
-                  <div class="form-group">
                     <label>Meta Keywords for Portfolios</label>
                     <input class="form-control" name="portfolios_meta_keywords" value="{{$abe->portfolios_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
                   </div>
@@ -115,17 +104,6 @@
                   <div class="form-group">
                     <label>Meta Description for Team Page</label>
                     <textarea class="form-control" name="team_meta_description" rows="5" placeholder="Enter meta description">{{$abe->team_meta_description}}</textarea>
-                  </div>
-              </div>
-
-              <div class="col-lg-6">
-                  <div class="form-group">
-                    <label>Meta Keywords for Career Page</label>
-                    <input class="form-control" name="career_meta_keywords" value="{{$abe->career_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
-                  </div>
-                  <div class="form-group">
-                    <label>Meta Description for Career Page</label>
-                    <textarea class="form-control" name="career_meta_description" rows="5" placeholder="Enter meta description">{{$abe->career_meta_description}}</textarea>
                   </div>
               </div>
 
@@ -175,17 +153,6 @@
 
               <div class="col-lg-6">
                 <div class="form-group">
-                    <label>Meta Keywords for RSS Feeds Page</label>
-                    <input class="form-control" name="rss_meta_keywords" value="{{$abe->rss_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
-                  </div>
-                  <div class="form-group">
-                    <label>Meta Description for RSS Feeds Page</label>
-                    <textarea class="form-control" name="rss_meta_description" rows="5" placeholder="Enter meta description">{{$abe->rss_meta_description}}</textarea>
-                  </div>
-              </div>
-
-              <div class="col-lg-6">
-                <div class="form-group">
                     <label>Meta Keywords for Contact Page</label>
                     <input class="form-control" name="contact_meta_keywords" value="{{$abe->contact_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
                   </div>
@@ -203,17 +170,6 @@
                   <div class="form-group">
                     <label>Meta Description for Quote Page</label>
                     <textarea class="form-control" name="quote_meta_description" rows="5" placeholder="Enter meta description">{{$abe->quote_meta_description}}</textarea>
-                  </div>
-              </div>
-
-              <div class="col-lg-6">
-                <div class="form-group">
-                    <label>Meta Keywords for Products Page</label>
-                    <input class="form-control" name="products_meta_keywords" value="{{$abe->products_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
-                  </div>
-                  <div class="form-group">
-                    <label>Meta Description for Products Page</label>
-                    <textarea class="form-control" name="products_meta_description" rows="5" placeholder="Enter meta description">{{$abe->products_meta_description}}</textarea>
                   </div>
               </div>
 
@@ -271,31 +227,6 @@
                     <textarea class="form-control" name="forgot_meta_description" rows="5" placeholder="Enter meta description">{{$abe->forgot_meta_description}}</textarea>
                   </div>
               </div>
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label>Meta Keywords for Events Page</label>
-                        <input class="form-control" name="events_meta_keywords" value="{{$abe->events_meta_keywords}}"
-                               placeholder="Enter meta keywords" data-role="tagsinput">
-                    </div>
-                    <div class="form-group">
-                        <label>Meta Description for Events Page</label>
-                        <textarea class="form-control" name="events_meta_description" rows="5"
-                                  placeholder="Enter meta description">{{$abe->events_meta_description}}</textarea>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label>Meta Keywords for Causes Page</label>
-                        <input class="form-control" name="causes_meta_keywords" value="{{$abe->causes_meta_keywords}}"
-                               placeholder="Enter meta keywords" data-role="tagsinput">
-                    </div>
-                    <div class="form-group">
-                        <label>Meta Description for Causes Page</label>
-                        <textarea class="form-control" name="causes_meta_description" rows="5"
-                                  placeholder="Enter meta description">{{$abe->causes_meta_description}}</textarea>
-                    </div>
-                </div>
-
 
 
             </div>

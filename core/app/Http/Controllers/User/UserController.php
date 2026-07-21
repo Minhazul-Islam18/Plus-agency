@@ -9,8 +9,6 @@ use Auth;
 use Illuminate\Support\Facades\Hash;
 use App\BasicExtra;
 use App\Language;
-use App\ProductOrder;
-use App\Subscription;
 use Session;
 
 class UserController extends Controller
@@ -23,25 +21,9 @@ class UserController extends Controller
     public function index()
     {
         $data['user'] = Auth::user();
-        $data['orders'] = ProductOrder::where('user_id', Auth::user()->id)->orderby('id', 'desc')->limit(10)->get();
 
         return view('user.dashboard', $data);
     }
-
-
-    public function packages() {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
-
-        $data['packages'] = $currentLang->packages;
-        $data['activeSub'] = Subscription::where('user_id', Auth::user()->id)->where('status', 1);
-
-        return view('user.packages', $data);
-    }
-
 
 
     public function profile()
@@ -131,70 +113,4 @@ class UserController extends Controller
     }
 
 
-    public function shippingdetails()
-    {
-        $bex = BasicExtra::first();
-
-        if ($bex->is_shop == 0) {
-            return back();
-        }
-
-        $user = Auth::user();
-
-        return view('user.shipping_details', compact('user'));
-
-    }
-
-    public function shippingupdate(Request $request)
-    {
-        $request->validate([
-            "shpping_fname" => 'required',
-            "shpping_lname" => 'required',
-            "shpping_email" => 'required',
-            "shpping_number" => 'required',
-            "shpping_city" => 'required',
-            "shpping_state" => 'required',
-            "shpping_address" => 'required',
-            "shpping_country" => 'required',
-        ]);
-
-
-        Auth::user()->update($request->all());
-
-        Session::flash('success', 'Shipping Details Update Successfully.');
-        return back();
-    }
-
-    public function billingdetails()
-    {
-        $bex = BasicExtra::first();
-
-        if ($bex->is_shop == 0) {
-            return back();
-        }
-
-        $user = Auth::user();
-
-        return view('user.billing_details', compact('user'));
-
-    }
-
-    public function billingupdate(Request $request)
-    {
-        $request->validate([
-            "billing_fname" => 'required',
-            "billing_lname" => 'required',
-            "billing_email" => 'required',
-            "billing_number" => 'required',
-            "billing_city" => 'required',
-            "billing_state" => 'required',
-            "billing_address" => 'required',
-            "billing_country" => 'required',
-        ]);
-
-        Auth::user()->update($request->all());
-
-        Session::flash('success', 'Billing Details Update Successfully.');
-        return back();
-    }
 }

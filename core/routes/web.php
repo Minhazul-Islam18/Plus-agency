@@ -36,93 +36,11 @@ Route::post('/push', 'Front\PushController@store');
 Route::group(['middleware' => 'setlang'], function () {
     Route::get('/', 'Front\FrontendController@index')->name('front.index');
 
-    Route::group(['prefix' => 'donation'], function () {
-        Route::get('/paystack/success', 'Payment\causes\PaystackController@successPayment')->name('donation.paystack.success');
-    });
-
-    //causes donation payment
-    Route::post('/cause/payment', 'Front\CausesController@makePayment')->name('front.causes.payment');
-    //event tickets payment
-    Route::post('/event/payment', 'Front\EventController@makePayment')->name('front.event.payment');
-    //causes donation payment via Paypal
-    Route::get('/cause/paypal/payment/success', 'Payment\causes\PaypalController@successPayment')->name('donation.paypal.success');
-    Route::get('/cause/paypal/payment/cancel', 'Payment\causes\PaypalController@cancelPayment')->name('donation.paypal.cancel');
-
-    //causes donation payment via Paytm
-    Route::post('/cause/paytm/payment/success', 'Payment\causes\PaytmController@paymentStatus')->name('donation.paytm.paymentStatus');
-
-    //causes donation payment via Razorpay
-    Route::post('/cause/razorpay/payment/success', 'Payment\causes\RazorpayController@successPayment')->name('donation.razorpay.success');
-    Route::post('/cause/razorpay/payment/cancel', 'Payment\causes\RazorpayController@cancelPayment')->name('donation.razorpay.cancel');
-
-    //causes donation payment via Payumoney
-    Route::post('/cause/payumoney/payment', 'Payment\causes\PayumoneyController@payment')->name('donation.payumoney.payment');
-
-    //causes donation payment via Flutterwave
-    Route::post('/cause/flutterwave/success', 'Payment\causes\FlutterWaveController@successPayment')->name('donation.flutterwave.success');
-    Route::post('/cause/flutterwave/cancel', 'Payment\causes\FlutterWaveController@cancelPayment')->name('donation.flutterwave.cancel');
-    Route::get('/cause/flutterwave/success', 'Payment\causes\FlutterWaveController@successPage')->name('donation.flutterwave.successPage');
-
-    //causes donation payment via Instamojo
-    Route::get('/cause/instamojo/success', 'Payment\causes\InstamojoController@successPayment')->name('donation.instamojo.success');
-    Route::post('/cause/instamojo/cancel', 'Payment\causes\InstamojoController@cancelPayment')->name('donation.instamojo.cancel');
-
-    //causes donation payment via Mollie
-    Route::get('/cause/mollie/success', 'Payment\causes\MollieController@successPayment')->name('donation.mollie.success');
-    Route::post('/cause/mollie/cancel', 'Payment\causes\MollieController@cancelPayment')->name('donation.mollie.cancel');
-    // Mercado Pago
-    Route::post('/cause/mercadopago/cancel', 'Payment\causes\MercadopagoController@cancelPayment')->name('donation.mercadopago.cancel');
-    Route::post('/cause/mercadopago/success', 'Payment\causes\MercadopagoController@successPayment')->name('donation.mercadopago.success');
     Route::post('/payment/instructions', 'Front\FrontendController@paymentInstruction')->name('front.payment.instructions');
 
 
     Route::post('/sendmail', 'Front\FrontendController@sendmail')->name('front.sendmail');
     Route::post('/subscribe', 'Front\FrontendController@subscribe')->name('front.subscribe');
-    Route::get('/quote', 'Front\FrontendController@quote')->name('front.quote');
-    Route::post('/sendquote', 'Front\FrontendController@sendquote')->name('front.sendquote');
-
-
-    Route::get('/checkout/payment/{slug1}/{slug2}', 'Front\FrontendController@loadpayment')->name('front.load.payment');
-
-
-    // Package Order Routes
-    Route::post('/package-order', 'Front\FrontendController@submitorder')->name('front.packageorder.submit');
-    Route::get('/order-confirmation/{packageid}/{packageOrderId}', 'Front\FrontendController@orderConfirmation')->name('front.packageorder.confirmation');
-    Route::get('/payment/{packageid}/cancle', 'Payment\PaymentController@paycancle')->name('front.payment.cancle');
-    //Paypal Routes
-    Route::post('/paypal/submit', 'Payment\PaypalController@store')->name('front.paypal.submit');
-    Route::get('/paypal/{packageid}/notify', 'Payment\PaypalController@notify')->name('front.paypal.notify');
-    //Stripe Routes
-    Route::post('/stripe/submit', 'Payment\StripeController@store')->name('front.stripe.submit');
-    //Paystack Routes
-    Route::post('/paystack/submit', 'Payment\PaystackController@store')->name('front.paystack.submit');
-    //PayTM Routes
-    Route::post('/paytm/submit', 'Payment\PaytmController@store')->name('front.paytm.submit');
-    Route::post('/paytm/notify', 'Payment\PaytmController@notify')->name('front.paytm.notify');
-    //Flutterwave Routes
-    Route::post('/flutterwave/submit', 'Payment\FlutterWaveController@store')->name('front.flutterwave.submit');
-    Route::post('/flutterwave/notify', 'Payment\FlutterWaveController@notify')->name('front.flutterwave.notify');
-    //   Route::get('/flutterwave/notify', 'Payment\FlutterWaveController@success')->name('front.flutterwave.success');
-    //Instamojo Routes
-    Route::post('/instamojo/submit', 'Payment\InstamojoController@store')->name('front.instamojo.submit');
-    Route::get('/instamojo/notify', 'Payment\InstamojoController@notify')->name('front.instamojo.notify');
-    //Mollie Routes
-    Route::post('/mollie/submit', 'Payment\MollieController@store')->name('front.mollie.submit');
-    Route::get('/mollie/notify', 'Payment\MollieController@notify')->name('front.mollie.notify');
-    // RazorPay
-    Route::post('razorpay/submit', 'Payment\RazorpayController@store')->name('front.razorpay.submit');
-    Route::post('razorpay/notify', 'Payment\RazorpayController@notify')->name('front.razorpay.notify');
-    // Mercado Pago
-    Route::post('mercadopago/submit', 'Payment\MercadopagoController@store')->name('front.mercadopago.submit');
-    Route::post('mercadopago/notify', 'Payment\MercadopagoController@notify')->name('front.mercadopago.notify');
-    // Payu
-    Route::post('/payumoney/submit', 'Payment\PayumoneyController@store')->name('front.payumoney.submit');
-    Route::post('/payumoney/notify', 'Payment\PayumoneyController@notify')->name('front.payumoney.notify');
-    // Moneroo Routes
-    Route::post('/moneroo/submit', 'Payment\MonerooController@store')->name('front.moneroo.submit');
-    Route::get('/moneroo/notify', 'Payment\MonerooController@notify')->name('front.moneroo.notify');
-    //Offline Routes
-    Route::post('/offline/{oid}/submit', 'Payment\OfflineController@store')->name('front.offline.submit');
 
 
     Route::get('/team', 'Front\FrontendController@team')->name('front.team');
@@ -131,57 +49,6 @@ Route::group(['middleware' => 'setlang'], function () {
 
     // change language routes
     Route::get('/changelanguage/{lang}', 'Front\FrontendController@changeLanguage')->name('changeLanguage');
-
-    // Product
-    Route::get('/cart', 'Front\ProductController@cart')->name('front.cart');
-    Route::get('/add-to-cart/{id}', 'Front\ProductController@addToCart')->name('add.cart');
-    Route::post('/cart/update', 'Front\ProductController@updatecart')->name('cart.update');
-    Route::get('/cart/item/remove/{id}', 'Front\ProductController@cartitemremove')->name('cart.item.remove');
-    Route::get('/checkout', 'Front\ProductController@checkout')->name('front.checkout');
-    Route::get('/checkout/{slug}', 'Front\ProductController@Prdouctcheckout')->name('front.product.checkout');
-    Route::post('/coupon', 'Front\ProductController@coupon')->name('front.coupon');
-
-    // review
-    Route::post('product/review/submit', 'Front\ReviewController@reviewsubmit')->name('product.review.submit');
-
-
-    // CHECKOUT SECTION
-    Route::get('/product/payment/return', 'Payment\product\PaymentController@payreturn')->name('product.payment.return');
-    Route::get('/product/payment/cancle', 'Payment\product\PaymentController@paycancle')->name('product.payment.cancle');
-    Route::get('/product/paypal/notify', 'Payment\product\PaypalController@notify')->name('product.paypal.notify');
-    // paypal routes
-    Route::post('/product/paypal/submit', 'Payment\product\PaypalController@store')->name('product.paypal.submit');
-    // stripe routes
-    Route::post('/product/stripe/submit', 'Payment\product\StripeController@store')->name('product.stripe.submit');
-    Route::post('/product/offline/{gatewayid}/submit', 'Payment\product\OfflineController@store')->name('product.offline.submit');
-    //Flutterwave Routes
-    Route::post('/product/flutterwave/submit', 'Payment\product\FlutterWaveController@store')->name('product.flutterwave.submit');
-    Route::post('/product/flutterwave/notify', 'Payment\product\FlutterWaveController@notify')->name('product.flutterwave.notify');
-    Route::get('/product/flutterwave/notify', 'Payment\product\FlutterWaveController@success')->name('product.flutterwave.success');
-    //Paystack Routes
-    Route::post('/product/paystack/submit', 'Payment\product\PaystackController@store')->name('product.paystack.submit');
-    // RazorPay
-    Route::post('/product/razorpay/submit', 'Payment\product\RazorpayController@store')->name('product.razorpay.submit');
-    Route::post('/product/razorpay/notify', 'Payment\product\RazorpayController@notify')->name('product.razorpay.notify');
-    //Instamojo Routes
-    Route::post('/product/instamojo/submit', 'Payment\product\InstamojoController@store')->name('product.instamojo.submit');
-    Route::get('/product/instamojo/notify', 'Payment\product\InstamojoController@notify')->name('product.instamojo.notify');
-    //PayTM Routes
-    Route::post('/product/paytm/submit', 'Payment\product\PaytmController@store')->name('product.paytm.submit');
-    Route::post('/product/paytm/notify', 'Payment\product\PaytmController@notify')->name('product.paytm.notify');
-    //Mollie Routes
-    Route::post('/product/mollie/submit', 'Payment\product\MollieController@store')->name('product.mollie.submit');
-    Route::get('/product/mollie/notify', 'Payment\product\MollieController@notify')->name('product.mollie.notify');
-    // Mercado Pago
-    Route::post('/product/mercadopago/submit', 'Payment\product\MercadopagoController@store')->name('product.mercadopago.submit');
-    Route::post('/product/mercadopago/notify', 'Payment\product\MercadopagoController@notify')->name('product.mercadopago.notify');
-    // PayUmoney
-    Route::post('/product/payumoney/submit', 'Payment\product\PayumoneyController@store')->name('product.payumoney.submit');
-    Route::post('/product/payumoney/notify', 'Payment\product\PayumoneyController@notify')->name('product.payumoney.notify');
-    // Moneroo Routes
-    Route::post('/product/moneroo/submit', 'Payment\product\MonerooController@store')->name('product.moneroo.submit');
-    Route::get('/product/moneroo/notify', 'Payment\product\MonerooController@notify')->name('product.moneroo.notify');
-    // CHECKOUT SECTION ENDS
 
     // client feedback route
     Route::get('/feedback', 'Front\FeedbackController@feedback')->name('feedback');
@@ -202,9 +69,6 @@ Route::group(['middleware' => ['web', 'setlang']], function () {
     Route::get('/register/verify/{token}', 'User\RegisterController@token')->name('user-register-token');
     Route::get('/forgot', 'User\ForgotController@showforgotform')->name('user-forgot');
     Route::post('/forgot', 'User\ForgotController@forgot')->name('user-forgot-submit');
-
-    // Course Route For Front-End
-    Route::post('/course/review', 'Front\CourseController@giveReview')->name('course.review');
 });
 
 /** Health probe for uptime monitors / load balancers **/
@@ -249,126 +113,6 @@ Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestReg
 
 
 
-/** Route For Enroll In Free Courses **/
-Route::post('/free_course/enroll', 'Front\FreeCourseEnrollController@enroll')->name('free_course.enroll');
-
-Route::get('/free_course/enroll/complete', 'Front\FreeCourseEnrollController@complete')->name('course.enroll.complete');
-/** End Of Route For Enroll In Free Courses **/
-
-/** Route For PayPal Payment To Sell The Courses **/
-Route::post('/course/payment/paypal', 'Payment\Course\PayPalGatewayController@redirectToPayPal')->name('course.payment.paypal');
-
-Route::get('/course/payment/paypal/notify', 'Payment\Course\PayPalGatewayController@notify')->name('course.paypal.notify');
-
-Route::get('/course/payment/paypal/complete', 'Payment\Course\PayPalGatewayController@complete')->name('course.paypal.complete');
-
-Route::get('/course/payment/paypal/cancel', 'Payment\Course\PayPalGatewayController@cancel')->name('course.paypal.cancel');
-/** End Of Route For PayPal Payment To Sell The Courses **/
-
-/** Route For Stripe Payment To Sell The Courses **/
-Route::post('/course/payment/stripe', 'Payment\Course\StripeGatewayController@redirectToStripe')->name('course.payment.stripe');
-
-Route::get('/course/payment/stripe/complete', 'Payment\Course\StripeGatewayController@complete')->name('course.stripe.complete');
-/** End Of Route For Stripe Payment To Sell The Courses **/
-
-/** Route For Paytm Payment To Sell The Courses **/
-Route::post('/course/payment/paytm', 'Payment\Course\PaytmGatewayController@redirectToPaytm')->name('course.payment.paytm');
-
-Route::post('/course/payment/paytm/notify', 'Payment\Course\PaytmGatewayController@notify')->name('course.paytm.notify');
-
-Route::get('/course/payment/paytm/complete', 'Payment\Course\PaytmGatewayController@complete')->name('course.paytm.complete');
-
-Route::get('/course/payment/paytm/cancel', 'Payment\Course\PaytmGatewayController@cancel')->name('course.paytm.cancel');
-/** End Of Route For Paytm Payment To Sell The Courses **/
-
-/** Route For Razorpay Payment To Sell The Courses **/
-Route::post('/course/payment/razorpay', 'Payment\Course\RazorpayGatewayController@redirectToRazorpay')->name('course.payment.razorpay');
-
-Route::post('/course/payment/razorpay/notify', 'Payment\Course\RazorpayGatewayController@notify')->name('course.razorpay.notify');
-
-Route::get('/course/payment/razorpay/complete', 'Payment\Course\RazorpayGatewayController@complete')->name('course.razorpay.complete');
-
-Route::get('/course/payment/razorpay/cancel', 'Payment\Course\RazorpayGatewayController@cancel')->name('course.razorpay.cancel');
-/** End Of Route For Razorpay Payment To Sell The Courses **/
-
-/** Route For Instamojo Payment To Sell The Courses **/
-Route::post('/course/payment/instamojo', 'Payment\Course\InstamojoGatewayController@redirectToInstamojo')->name('course.payment.instamojo');
-
-Route::get('/course/payment/instamojo/notify', 'Payment\Course\InstamojoGatewayController@notify')->name('course.instamojo.notify');
-
-Route::get('/course/payment/instamojo/complete', 'Payment\Course\InstamojoGatewayController@complete')->name('course.instamojo.complete');
-
-Route::get('/course/payment/instamojo/cancel', 'Payment\Course\InstamojoGatewayController@cancel')->name('course.instamojo.cancel');
-/** End Of Route For Instamojo Payment To Sell The Courses **/
-
-/** Route For Mollie Payment To Sell The Courses **/
-Route::post('/course/payment/mollie', 'Payment\Course\MollieGatewayController@redirectToMollie')->name('course.payment.mollie');
-
-Route::get('/course/payment/mollie/notify', 'Payment\Course\MollieGatewayController@notify')->name('course.mollie.notify');
-
-Route::get('/course/payment/mollie/complete', 'Payment\Course\MollieGatewayController@complete')->name('course.mollie.complete');
-
-
-Route::get('/course/payment/mollie/cancel', 'Payment\Course\MollieGatewayController@cancel')->name('course.mollie.cancel');
-/** End Of Route For Mollie Payment To Sell The Courses **/
-
-
-/** Route For Mollie Payment To Sell The Courses **/
-Route::post('/course/payment/payumoney', 'Payment\Course\PayuMoneyController@redirectToPayumoney')->name('course.payment.payumoney');
-
-Route::post('/course/payment/payumoney/notify', 'Payment\Course\PayuMoneyController@notify')->name('course.payumoney.notify');
-
-Route::get('/course/payment/payumoney/complete', 'Payment\Course\PayuMoneyController@complete')->name('course.payumoney.complete');
-
-
-Route::get('/course/payment/payumoney/cancel', 'Payment\Course\PayuMoneyController@cancel')->name('course.payumoney.cancel');
-/** End Of Route For Mollie Payment To Sell The Courses **/
-
-
-/** Route For Flutterwave Payment To Sell The Courses **/
-Route::post('/course/payment/flutterwave', 'Payment\Course\FlutterwaveGatewayController@redirectToFlutterwave')->name('course.payment.flutterwave');
-
-Route::post('/course/payment/flutterwave/notify', 'Payment\Course\FlutterwaveGatewayController@notify')->name('course.flutterwave.notify'); // this route have to be post method
-
-// in Flutterwave the complete url have to be same as the notify url, otherwise it will not work
-Route::get('/course/payment/flutterwave/notify', 'Payment\Course\FlutterwaveGatewayController@complete')->name('course.flutterwave.complete');
-
-Route::get('/course/payment/flutterwave/notify_cancel', 'Payment\Course\FlutterwaveGatewayController@cancel')->name('course.flutterwave.cancel');
-/** End Of Route For Flutterwave Payment To Sell The Courses **/
-
-/** Route For MercadoPago Payment To Sell The Courses **/
-Route::post('/course/payment/mercadopago', 'Payment\Course\MercadoPagoGatewayController@redirectToMercadoPago')->name('course.payment.mercadopago');
-
-Route::post('/course/payment/mercadopago/notify', 'Payment\Course\MercadoPagoGatewayController@notify')->name('course.mercadopago.notify');
-
-Route::get('/course/payment/mercadopago/complete', 'Payment\Course\MercadoPagoGatewayController@complete')->name('course.mercadopago.complete');
-
-Route::get('/course/payment/mercadopago/cancel', 'Payment\Course\MercadoPagoGatewayController@cancel')->name('course.mercadopago.cancel');
-/** End Of Route For MercadoPago Payment To Sell The Courses **/
-
-/** Route For Moneroo Payment To Sell The Courses **/
-Route::post('/course/payment/moneroo', 'Payment\Course\MonerooGatewayController@redirectToMoneroo')->name('course.payment.moneroo');
-
-Route::get('/course/payment/moneroo/notify', 'Payment\Course\MonerooGatewayController@notify')->name('course.moneroo.notify');
-
-Route::get('/course/payment/moneroo/complete', 'Payment\Course\MonerooGatewayController@complete')->name('course.moneroo.complete');
-
-Route::get('/course/payment/moneroo/cancel', 'Payment\Course\MonerooGatewayController@cancel')->name('course.moneroo.cancel');
-/** End Of Route For Moneroo Payment To Sell The Courses **/
-
-/** Route For Paystack Payment To Sell The Courses **/
-Route::post('/course/payment/paystack', 'Payment\Course\PaystackGatewayController@redirectToPaystack')->name('course.payment.paystack');
-
-Route::get('/course/payment/paystack/notify', 'Payment\Course\PaystackGatewayController@notify')->name('course.paystack.notify');
-
-Route::get('/course/payment/paystack/complete', 'Payment\Course\PaystackGatewayController@complete')->name('course.paystack.complete');
-
-Route::get('/course/payment/paystack/cancel', 'Payment\Course\PaystackGatewayController@cancel')->name('course.paystack.cancel');
-/** End Of Route For Paystack Payment To Sell The Courses **/
-
-/** Route For Offline Payment To Sell The Courses **/
-Route::post('/course/offline/{gatewayid}/submit', 'Payment\Course\OfflineController@store')->name('course.offline.submit');
-/** End Of Route For Offline Payment To Sell The Courses **/
 
 
 
@@ -394,27 +138,6 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'setlan
     Route::get('/profile', 'User\UserController@profile')->name('user-profile');
     Route::post('/profile', 'User\UserController@profileupdate')->name('user-profile-update');
     Route::get('/logout', 'User\LoginController@logout')->name('user-logout');
-    Route::get('/shipping/details', 'User\UserController@shippingdetails')->name('shpping-details');
-    Route::post('/shipping/details/update', 'User\UserController@shippingupdate')->name('user-shipping-update');
-    Route::get('/billing/details', 'User\UserController@billingdetails')->name('billing-details');
-    Route::post('/billing/details/update', 'User\UserController@billingupdate')->name('billing-update');
-    Route::get('/orders', 'User\OrderController@index')->name('user-orders');
-    Route::get('/order/{id}', 'User\OrderController@orderdetails')->name('user-orders-details');
-    Route::get('/events', 'User\EventController@index')->name('user-events');
-    Route::get('/event/{id}', 'User\EventController@eventdetails')->name('user-event-details');
-    Route::get('/donations', 'User\DonationController@index')->name('user-donations');
-    Route::get('/course_orders', 'User\CourseOrderController@index')->name('user.course_orders');
-    Route::get('/course/{id}/lessons', 'User\CourseOrderController@courseLessons')->name('user.course.lessons');
-    Route::get('/tickets', 'User\TicketController@index')->name('user-tickets');
-    Route::get('/ticket/create', 'User\TicketController@create')->name('user-ticket-create');
-    Route::get('/ticket/messages/{id}', 'User\TicketController@messages')->name('user-ticket-messages');
-    Route::post('/ticket/store/', 'User\TicketController@ticketstore')->name('user.ticket.store');
-    Route::post('/ticket/reply/{id}', 'User\TicketController@ticketreply')->name('user.ticket.reply');
-    Route::post('/zip-file/upload', 'User\TicketController@zip_upload')->name('zip.upload');
-    Route::get('/packages', 'User\UserController@packages')->name('user-packages');
-    Route::post('/digital/download', 'User\OrderController@digitalDownload')->name('user-digital-download');
-    Route::get('/package/orders', 'User\PackageController@index')->name('user-package-orders');
-    Route::get('/package/order/{id}', 'User\PackageController@orderdetails')->name('user-package-order-details');
 });
 
 /*=======================================================
@@ -707,11 +430,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/member/feature', 'Admin\MemberController@feature')->name('admin.member.feature');
 
 
-        // Admin Package Background Routes
-        Route::get('/package/background', 'Admin\PackageController@background')->name('admin.package.background');
-        Route::post('/package/{langid}/background-upload', 'Admin\PackageController@uploadBackground')->name('admin.package.background.upload');
-
-
 
         // Admin Footer Logo Text Routes
         Route::get('/footers', 'Admin\FooterController@index')->name('admin.footer.index');
@@ -849,24 +567,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/faq/bulk-delete', 'Admin\FaqController@bulkDelete')->name('admin.faq.bulk.delete');
         Route::post('/faq/status', 'Admin\FaqController@status')->name('admin.faq.status');
 
-        // Admin Job Category Routes
-        Route::get('/jcategorys', 'Admin\JcategoryController@index')->name('admin.jcategory.index');
-        Route::post('/jcategory/store', 'Admin\JcategoryController@store')->name('admin.jcategory.store');
-        Route::get('/jcategory/{id}/edit', 'Admin\JcategoryController@edit')->name('admin.jcategory.edit');
-        Route::post('/jcategory/update', 'Admin\JcategoryController@update')->name('admin.jcategory.update');
-        Route::post('/jcategory/delete', 'Admin\JcategoryController@delete')->name('admin.jcategory.delete');
-        Route::post('/jcategory/bulk-delete', 'Admin\JcategoryController@bulkDelete')->name('admin.jcategory.bulk.delete');
-
-        // Admin Jobs Routes
-        Route::get('/jobs', 'Admin\JobController@index')->name('admin.job.index');
-        Route::get('/job/create', 'Admin\JobController@create')->name('admin.job.create');
-        Route::post('/job/store', 'Admin\JobController@store')->name('admin.job.store');
-        Route::get('/job/{id}/edit', 'Admin\JobController@edit')->name('admin.job.edit');
-        Route::post('/job/update', 'Admin\JobController@update')->name('admin.job.update');
-        Route::post('/job/delete', 'Admin\JobController@delete')->name('admin.job.delete');
-        Route::post('/job/bulk-delete', 'Admin\JobController@bulkDelete')->name('admin.job.bulk.delete');
-        Route::get('/job/{langid}/getcats', 'Admin\JobController@getcats')->name('admin.job.getcats');
-
 
         // Admin Contact Routes
         Route::get('/contact', 'Admin\ContactController@index')->name('admin.contact.index');
@@ -934,197 +634,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
 
 
 
-    Route::group(['middleware' => 'checkpermission:Shop Management'], function () {
-        Route::get('/category', 'Admin\ProductCategory@index')->name('admin.category.index');
-        Route::post('/category/store', 'Admin\ProductCategory@store')->name('admin.category.store');
-        Route::get('/category/{id}/edit', 'Admin\ProductCategory@edit')->name('admin.category.edit');
-        Route::post('/category/update', 'Admin\ProductCategory@update')->name('admin.category.update');
-        Route::post('/category/feature', 'Admin\ProductCategory@feature')->name('admin.category.feature');
-        Route::post('/category/home', 'Admin\ProductCategory@home')->name('admin.category.home');
-        Route::post('/category/delete', 'Admin\ProductCategory@delete')->name('admin.category.delete');
-        Route::post('/category/bulk-delete', 'Admin\ProductCategory@bulkDelete')->name('admin.pcategory.bulk.delete');
-
-        Route::get('/shipping', 'Admin\ShopSettingController@index')->name('admin.shipping.index');
-        Route::post('/shipping/store', 'Admin\ShopSettingController@store')->name('admin.shipping.store');
-        Route::get('/shipping/{id}/edit', 'Admin\ShopSettingController@edit')->name('admin.shipping.edit');
-        Route::post('/shipping/update', 'Admin\ShopSettingController@update')->name('admin.shipping.update');
-        Route::post('/shipping/delete', 'Admin\ShopSettingController@delete')->name('admin.shipping.delete');
-
-
-        Route::get('/product', 'Admin\ProductController@index')->name('admin.product.index');
-        Route::get('/product/type', 'Admin\ProductController@type')->name('admin.product.type');
-        Route::get('/product/create', 'Admin\ProductController@create')->name('admin.product.create');
-        Route::post('/product/store', 'Admin\ProductController@store')->name('admin.product.store');
-        Route::get('/product/{id}/edit', 'Admin\ProductController@edit')->name('admin.product.edit');
-        Route::post('/product/update', 'Admin\ProductController@update')->name('admin.product.update');
-        Route::post('/product/feature', 'Admin\ProductController@feature')->name('admin.product.feature');
-        Route::post('/product/delete', 'Admin\ProductController@delete')->name('admin.product.delete');
-        Route::get('/product/populer/tags/', 'Admin\ProductController@populerTag')->name('admin.product.tags');
-        Route::post('/product/populer/tags/update', 'Admin\ProductController@populerTagupdate')->name('admin.popular-tag.update');
-        Route::post('/product/paymentStatus', 'Admin\ProductController@paymentStatus')->name('admin.product.paymentStatus');
-
-        Route::get('product/{id}/getcategory', 'Admin\ProductController@getCategory')->name('admin.product.getcategory');
-        Route::post('/product/delete', 'Admin\ProductController@delete')->name('admin.product.delete');
-        Route::post('/product/bulk-delete', 'Admin\ProductController@bulkDelete')->name('admin.product.bulk.delete');
-        Route::post('/product/sliderupdate', 'Admin\ProductController@sliderupdate')->name('admin.product.sliderupdate');
-        Route::post('/product/{id}/uploadUpdate', 'Admin\ProductController@uploadUpdate')->name('admin.product.uploadUpdate');
-        Route::post('/product/update', 'Admin\ProductController@update')->name('admin.product.update');
-        Route::get('/product/{id}/images', 'Admin\ProductController@images')->name('admin.product.images');
-
-
-        Route::get('/product/settings', 'Admin\ProductController@settings')->name('admin.product.settings');
-        Route::post('/product/settings', 'Admin\ProductController@updateSettings')->name('admin.product.settings');
-
-
-        // Admin Coupon Routes
-        Route::get('/coupon', 'Admin\CouponController@index')->name('admin.coupon.index');
-        Route::post('/coupon/store', 'Admin\CouponController@store')->name('admin.coupon.store');
-        Route::get('/coupon/{id}/edit', 'Admin\CouponController@edit')->name('admin.coupon.edit');
-        Route::post('/coupon/update', 'Admin\CouponController@update')->name('admin.coupon.update');
-        Route::post('/coupon/delete', 'Admin\CouponController@delete')->name('admin.coupon.delete');
-        // Admin Coupon Routes End
-
-
-        // Product Order
-        Route::get('/product/all/orders', 'Admin\ProductOrderController@all')->name('admin.all.product.orders');
-        Route::get('/product/pending/orders', 'Admin\ProductOrderController@pending')->name('admin.pending.product.orders');
-        Route::get('/product/processing/orders', 'Admin\ProductOrderController@processing')->name('admin.processing.product.orders');
-        Route::get('/product/completed/orders', 'Admin\ProductOrderController@completed')->name('admin.completed.product.orders');
-        Route::get('/product/rejected/orders', 'Admin\ProductOrderController@rejected')->name('admin.rejected.product.orders');
-        Route::post('/product/orders/status', 'Admin\ProductOrderController@status')->name('admin.product.orders.status');
-        Route::get('/product/orders/detais/{id}', 'Admin\ProductOrderController@details')->name('admin.product.details');
-        Route::post('/product/order/delete', 'Admin\ProductOrderController@orderDelete')->name('admin.product.order.delete');
-        Route::post('/product/order/bulk-delete', 'Admin\ProductOrderController@bulkOrderDelete')->name('admin.product.order.bulk.delete');
-        Route::get('/product/orders/report', 'Admin\ProductOrderController@report')->name('admin.orders.report');
-        Route::get('/product/export/report', 'Admin\ProductOrderController@exportReport')->name('admin.orders.export');
-        // Product Order end
-    });
-
-
-    //Event Manage Routes
-    Route::group(['middleware' => 'checkpermission:Events Management'], function () {
-        Route::get('/event/categories', 'Admin\EventCategoryController@index')->name('admin.event.category.index');
-        Route::post('/event/category/store', 'Admin\EventCategoryController@store')->name('admin.event.category.store');
-        Route::post('/event/category/update', 'Admin\EventCategoryController@update')->name('admin.event.category.update');
-        Route::post('/event/category/delete', 'Admin\EventCategoryController@delete')->name('admin.event.category.delete');
-        Route::post('/event/categories/bulk-delete', 'Admin\EventCategoryController@bulkDelete')->name('admin.event.category.bulk.delete');
-
-
-        // Admin Event Routes
-        Route::get('/event/settings', 'Admin\EventController@settings')->name('admin.event.settings');
-        Route::post('/event/settings', 'Admin\EventController@updateSettings')->name('admin.event.settings');
-        Route::get('/events', 'Admin\EventController@index')->name('admin.event.index');
-        Route::post('/event/upload', 'Admin\EventController@upload')->name('admin.event.upload');
-        Route::post('/event/slider/remove', 'Admin\EventController@sliderRemove')->name('admin.event.slider-remove');
-        Route::post('/event/store', 'Admin\EventController@store')->name('admin.event.store');
-        Route::get('/event/{id}/edit', 'Admin\EventController@edit')->name('admin.event.edit');
-        Route::get('/event/{id}/images', 'Admin\EventController@images')->name('admin.event.images');
-        Route::post('/event/update', 'Admin\EventController@update')->name('admin.event.update');
-        Route::post('/event/{id}/uploadUpdate', 'Admin\EventController@uploadUpdate')->name('admin.event.uploadUpdate');
-        Route::post('/event/delete', 'Admin\EventController@delete')->name('admin.event.delete');
-        Route::post('/event/bulk-delete', 'Admin\EventController@bulkDelete')->name('admin.event.bulk.delete');
-        Route::get('/event/{lang_id}/get-categories', 'Admin\EventController@getCategories')->name('admin.event.get-categories');
-        Route::get('/events/payment-log', 'Admin\EventController@paymentLog')->name('admin.event.payment.log');
-        Route::post('/events/payment-log/delete', 'Admin\EventController@paymentLogDelete')->name('admin.event.payment.delete');
-        Route::post('/events/payment/bulk-delete', 'Admin\EventController@paymentLogBulkDelete')->name('admin.event.payment.bulk.delete');
-        Route::post('/events/payment-log-update', 'Admin\EventController@paymentLogUpdate')->name('admin.event.payment.log.update');
-        Route::get('/events/report', 'Admin\EventController@report')->name('admin.event.report');
-        Route::get('/events/export', 'Admin\EventController@exportReport')->name('admin.event.export');
-    });
-    //Donation Manage Routes
-    Route::group(['middleware' => 'checkpermission:Donation Management'], function () {
-        Route::get('/donations', 'Admin\DonationController@index')->name('admin.donation.index');
-        Route::get('/donation/settings', 'Admin\DonationController@settings')->name('admin.donation.settings');
-        Route::post('/donation/settings', 'Admin\DonationController@updateSettings')->name('admin.donation.settings');
-        Route::post('/donation/store', 'Admin\DonationController@store')->name('admin.donation.store');
-        Route::get('/donation/{id}/edit', 'Admin\DonationController@edit')->name('admin.donation.edit');
-        Route::post('/donation/update', 'Admin\DonationController@update')->name('admin.donation.update');
-        Route::post('/donation/{id}/uploadUpdate', 'Admin\DonationController@uploadUpdate')->name('admin.donation.uploadUpdate');
-        Route::post('/donation/delete', 'Admin\DonationController@delete')->name('admin.donation.delete');
-        Route::post('/donation/bulk-delete', 'Admin\DonationController@bulkDelete')->name('admin.donation.bulk.delete');
-        Route::get('/donations/payment-log', 'Admin\DonationController@paymentLog')->name('admin.donation.payment.log');
-        Route::post('/donations/payment/delete', 'Admin\DonationController@paymentDelete')->name('admin.donation.payment.delete');
-        Route::post('/donations/bulk/delete', 'Admin\DonationController@bulkPaymentDelete')->name('admin.donation.payment.bulk.delete');
-        Route::post('/donations/payment-log-update', 'Admin\DonationController@paymentLogUpdate')->name('admin.donation.payment.log.update');
-        Route::get('/donation/report', 'Admin\DonationController@report')->name('admin.donation.report');
-        Route::get('/donation/export', 'Admin\DonationController@exportReport')->name('admin.donation.export');
-    });
-
-
-    // Admin Event Calendar Routes
-    Route::group(['middleware' => 'checkpermission:Event Calendar'], function () {
-        Route::get('/calendars', 'Admin\CalendarController@index')->name('admin.calendar.index');
-        Route::post('/calendar/store', 'Admin\CalendarController@store')->name('admin.calendar.store');
-        Route::post('/calendar/update', 'Admin\CalendarController@update')->name('admin.calendar.update');
-        Route::post('/calendar/delete', 'Admin\CalendarController@delete')->name('admin.calendar.delete');
-        Route::post('/calendar/bulk-delete', 'Admin\CalendarController@bulkDelete')->name('admin.calendar.bulk.delete');
-    });
-
-
-    Route::group(['middleware' => 'checkpermission:Knowledgebase'], function () {
-        // Admin Article Category Routes
-        Route::get('/article_categories', 'Admin\ArticleCategoryController@index')->name('admin.article_category.index');
-        Route::post('/article_category/store', 'Admin\ArticleCategoryController@store')->name('admin.article_category.store');
-        Route::post('/article_category/update', 'Admin\ArticleCategoryController@update')->name('admin.article_category.update');
-        Route::post('/article_category/delete', 'Admin\ArticleCategoryController@delete')->name('admin.article_category.delete');
-        Route::post('/article_category/bulk_delete', 'Admin\ArticleCategoryController@bulkDelete')->name('admin.article_category.bulk_delete');
-
-        // Admin Article Routes
-        Route::get('/articles', 'Admin\ArticleController@index')->name('admin.article.index');
-        Route::get('/article/{langId}/get_categories', 'Admin\ArticleController@getCategories');
-        Route::post('/article/store', 'Admin\ArticleController@store')->name('admin.article.store');
-        Route::get('/article/{id}/edit', 'Admin\ArticleController@edit')->name('admin.article.edit');
-        Route::post('/article/update', 'Admin\ArticleController@update')->name('admin.article.update');
-        Route::post('/article/delete', 'Admin\ArticleController@delete')->name('admin.article.delete');
-        Route::post('/article/bulk_delete', 'Admin\ArticleController@bulkDelete')->name('admin.article.bulk_delete');
-    });
-
-
-    Route::group(['middleware' => 'checkpermission:Course Management'], function () {
-        // Admin Course Category Routes
-        Route::get('/course_categories', 'Admin\CourseCategoryController@index')->name('admin.course_category.index');
-        Route::post('/course_category/store', 'Admin\CourseCategoryController@store')->name('admin.course_category.store');
-        Route::post('/course_category/update', 'Admin\CourseCategoryController@update')->name('admin.course_category.update');
-        Route::post('/course_category/delete', 'Admin\CourseCategoryController@delete')->name('admin.course_category.delete');
-        Route::post('/course_category/bulk_delete', 'Admin\CourseCategoryController@bulkDelete')->name('admin.course_category.bulk_delete');
-
-        // Admin Course Routes
-        Route::get('/courses', 'Admin\CourseController@index')->name('admin.course.index');
-        Route::get('/course/create', 'Admin\CourseController@create')->name('admin.course.create');
-        Route::get('/course/{langId}/get_categories', 'Admin\CourseController@getCategories');
-        Route::post('/course/store', 'Admin\CourseController@store')->name('admin.course.store');
-        Route::get('/course/{id}/edit', 'Admin\CourseController@edit')->name('admin.course.edit');
-        Route::post('/course/update', 'Admin\CourseController@update')->name('admin.course.update');
-        Route::post('/course/delete', 'Admin\CourseController@delete')->name('admin.course.delete');
-        Route::post('/course/bulk_delete', 'Admin\CourseController@bulkDelete')->name('admin.course.bulk_delete');
-        Route::post('/course/featured', 'Admin\CourseController@featured')->name('admin.course.featured');
-        Route::get('/course/purchase-log', 'Admin\CourseController@purchaseLog')->name('admin.course.purchaseLog');
-        Route::post('/course/purchase/payment-status', 'Admin\CourseController@purchasePaymentStatus')->name('admin.course.purchasePaymentStatus');
-        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchase.delete');
-        Route::post('/course/purchase/delete', 'Admin\CourseController@purchaseDelete')->name('admin.course.purchaseDelete');
-        Route::post('/course/purchase/bulk_delete', 'Admin\CourseController@purchaseBulkOrderDelete')->name('admin.course.purchaseBulkOrderDelete');
-
-        // Admin Course Modules Routes
-        Route::get('/course/{id?}/modules', 'Admin\ModuleController@index')->name('admin.course.module.index');
-        Route::post('/course/module/store', 'Admin\ModuleController@store')->name('admin.course.module.store');
-        Route::post('/course/module/update', 'Admin\ModuleController@update')->name('admin.course.module.update');
-        Route::post('/course/module/delete', 'Admin\ModuleController@delete')->name('admin.course.module.delete');
-        Route::post('/course/module/bulk_delete', 'Admin\ModuleController@bulkDelete')->name('admin.course.module.bulk_delete');
-
-        // Admin Module Lessons Routes
-        Route::get('/module/{id}/lessons', 'Admin\LessonController@index')->name('admin.module.lesson.index');
-        Route::post('/module/lesson/store', 'Admin\LessonController@store')->name('admin.module.lesson.store');
-        Route::post('module/lesson/update', 'Admin\LessonController@update')->name('admin.module.lesson.update');
-        Route::post('/module/lesson/delete', 'Admin\LessonController@delete')->name('admin.module.lesson.delete');
-        Route::post('/module/lesson/bulk_delete', 'Admin\LessonController@bulkDelete')->name('admin.module.lesson.bulk_delete');
-
-        Route::get('/course/settings', 'Admin\CourseController@settings')->name('admin.course.settings');
-        Route::post('/course/settings', 'Admin\CourseController@updateSettings')->name('admin.course.settings');
-
-        // Admin Course Enroll Report Routes
-        Route::get('/course/enrolls/report', 'Admin\CourseController@report')->name('admin.enrolls.report');
-        Route::get('/course/export/report', 'Admin\CourseController@exportReport')->name('admin.enrolls.export');
-    });
 
 
     Route::group(['middleware' => 'checkpermission:Tender Management'], function () {
@@ -1195,22 +704,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
     });
 
 
-    Route::group(['middleware' => 'checkpermission:RSS Feeds'], function () {
-        // Admin RSS feed Routes
-        Route::get('/rss', 'Admin\RssFeedsController@index')->name('admin.rss.index');
-        Route::get('/rss/feeds', 'Admin\RssFeedsController@feed')->name('admin.rss.feed');
-        Route::get('/rss/create', 'Admin\RssFeedsController@create')->name('admin.rss.create');
-        Route::post('/rss', 'Admin\RssFeedsController@store')->name('admin.rss.store');
-        Route::get('/rss/edit/{id}', 'Admin\RssFeedsController@edit')->name('admin.rss.edit');
-        Route::post('/rss/update', 'Admin\RssFeedsController@update')->name('admin.rss.update');
-        Route::post('/rss/delete', 'Admin\RssFeedsController@rssdelete')->name('admin.rssfeed.delete');
-        Route::post('/rss/feed/delete', 'Admin\RssFeedsController@delete')->name('admin.rss.delete');
-        Route::post('/rss-posts/bulk/delete', 'Admin\RssFeedsController@bulkDelete')->name('admin.rss.bulk.delete');
-
-        Route::get('rss-feed/update/{id}', 'Admin\RssFeedsController@feedUpdate')->name('admin.rss.feedUpdate');
-        Route::get('rss-feed/cronJobUpdate', 'Admin\RssFeedsController@cronJobUpdate')->name('rss.cronJobUpdate');
-    });
-
 
     Route::group(['middleware' => 'checkpermission:Users Management'], function () {
         // Register User start
@@ -1240,128 +733,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
     });
 
 
-    Route::group(['middleware' => 'checkpermission:Tickets'], function () {
-        // Admin Support Ticket Routes
-        Route::get('/all/tickets', 'Admin\TicketController@all')->name('admin.tickets.all');
-        Route::get('/pending/tickets', 'Admin\TicketController@pending')->name('admin.tickets.pending');
-        Route::get('/open/tickets', 'Admin\TicketController@open')->name('admin.tickets.open');
-        Route::get('/closed/tickets', 'Admin\TicketController@closed')->name('admin.tickets.closed');
-        Route::get('/ticket/messages/{id}', 'Admin\TicketController@messages')->name('admin.ticket.messages');
-        Route::post('/zip-file/upload/', 'Admin\TicketController@zip_file_upload')->name('admin.zip_file.upload');
-        Route::post('/ticket/reply/{id}', 'Admin\TicketController@ticketReply')->name('admin.ticket.reply');
-        Route::get('/ticket/close/{id}', 'Admin\TicketController@ticketclose')->name('admin.ticket.close');
-        Route::post('/ticket/assign/staff', 'Admin\TicketController@ticketAssign')->name('ticket.assign.staff');
-        Route::get('/ticket/settings', 'Admin\TicketController@settings')->name('admin.ticket.settings');
-        Route::post('/ticket/settings', 'Admin\TicketController@updateSettings')->name('admin.ticket.settings');
-    });
-
-
-    Route::group(['middleware' => 'checkpermission:Package Management'], function () {
-
-        // Admin Package Form Builder Routes
-        Route::get('/package/settings', 'Admin\PackageController@settings')->name('admin.package.settings');
-        Route::post('/package/settings', 'Admin\PackageController@updateSettings')->name('admin.package.settings');
-
-        // Admin Package Category Routes
-        Route::get('/package/categories', 'Admin\PackageCategoryController@index')->name('admin.package.categories');
-        Route::post('/package/store_category', 'Admin\PackageCategoryController@store')->name('admin.package.store_category');
-        Route::post('/package/update_category', 'Admin\PackageCategoryController@update')->name('admin.package.update_category');
-        Route::post('/package/delete_category', 'Admin\PackageCategoryController@delete')->name('admin.package.delete_category');
-        Route::post('/package/bulk_delete_category', 'Admin\PackageCategoryController@bulkDelete')->name('admin.package.bulk_delete_category');
-
-        Route::get('/package/form', 'Admin\PackageController@form')->name('admin.package.form');
-        Route::post('/package/form/store', 'Admin\PackageController@formstore')->name('admin.package.form.store');
-        Route::post('/package/inputDelete', 'Admin\PackageController@inputDelete')->name('admin.package.inputDelete');
-        Route::get('/package/{id}/inputEdit', 'Admin\PackageController@inputEdit')->name('admin.package.inputEdit');
-        Route::get('/package/{id}/options', 'Admin\PackageController@options')->name('admin.package.options');
-        Route::post('/package/inputUpdate', 'Admin\PackageController@inputUpdate')->name('admin.package.inputUpdate');
-        Route::post('/package/feature', 'Admin\PackageController@feature')->name('admin.package.feature');
 
 
 
-        // Admin Packages Routes
-        Route::get('/packages', 'Admin\PackageController@index')->name('admin.package.index');
-        Route::get('/package/{langId}/get_categories', 'Admin\PackageController@getCategories');
-        Route::post('/package/store', 'Admin\PackageController@store')->name('admin.package.store');
-        Route::get('/package/{id}/edit', 'Admin\PackageController@edit')->name('admin.package.edit');
-        Route::post('/package/update', 'Admin\PackageController@update')->name('admin.package.update');
-        Route::post('/package/delete', 'Admin\PackageController@delete')->name('admin.package.delete');
-        Route::post('/package/bulk-delete', 'Admin\PackageController@bulkDelete')->name('admin.package.bulk.delete');
-        Route::post('/package/payment-status', 'Admin\PackageController@paymentStatus')->name('admin.package.paymentStatus');
-
-        // Admin Package Orders Routes
-        Route::get('/all/orders', 'Admin\PackageController@all')->name('admin.all.orders');
-        Route::get('/pending/orders', 'Admin\PackageController@pending')->name('admin.pending.orders');
-        Route::get('/processing/orders', 'Admin\PackageController@processing')->name('admin.processing.orders');
-        Route::get('/completed/orders', 'Admin\PackageController@completed')->name('admin.completed.orders');
-        Route::get('/rejected/orders', 'Admin\PackageController@rejected')->name('admin.rejected.orders');
-        Route::post('/orders/status', 'Admin\PackageController@status')->name('admin.orders.status');
-        Route::post('/orders/mail', 'Admin\PackageController@mail')->name('admin.orders.mail');
-        Route::post('/package/order/delete', 'Admin\PackageController@orderDelete')->name('admin.package.order.delete');
-        Route::post('/order/bulk-delete', 'Admin\PackageController@bulkOrderDelete')->name('admin.order.bulk.delete');
-        Route::get('/package/order/report', 'Admin\PackageController@report')->name('admin.package.report');
-        Route::get('/package/order/export', 'Admin\PackageController@exportReport')->name('admin.package.export');
-
-        // Admin Subscription Routes
-        Route::get('/subscriptions', 'Admin\SubscriptionController@subscriptions')->name('admin.subscriptions');
-        Route::get('/subscription/requests', 'Admin\SubscriptionController@requests')->name('admin.requests.subscriptions');
-        Route::post('/subscription/mail', 'Admin\SubscriptionController@mail')->name('admin.subscription.mail');
-        Route::post('/package/subscription/delete', 'Admin\SubscriptionController@subDelete')->name('admin.package.subDelete');
-        Route::post('/package/subscription/status', 'Admin\SubscriptionController@status')->name('admin.subscription.status');
-        Route::post('/sub/bulk-delete', 'Admin\SubscriptionController@bulkSubDelete')->name('admin.sub.bulk.delete');
-    });
-
-
-
-    Route::group(['middleware' => 'checkpermission:Quote Management'], function () {
-
-        // Admin Quote Form Builder Routes
-        Route::get('/quote/visibility', 'Admin\QuoteController@visibility')->name('admin.quote.visibility');
-        Route::post('/quote/visibility/update', 'Admin\QuoteController@updateVisibility')->name('admin.quote.visibility.update');
-        Route::get('/quote/form', 'Admin\QuoteController@form')->name('admin.quote.form');
-        Route::post('/quote/form/store', 'Admin\QuoteController@formstore')->name('admin.quote.form.store');
-        Route::post('/quote/inputDelete', 'Admin\QuoteController@inputDelete')->name('admin.quote.inputDelete');
-        Route::get('/quote/{id}/inputEdit', 'Admin\QuoteController@inputEdit')->name('admin.quote.inputEdit');
-        Route::get('/quote/{id}/options', 'Admin\QuoteController@options')->name('admin.quote.options');
-        Route::post('/quote/inputUpdate', 'Admin\QuoteController@inputUpdate')->name('admin.quote.inputUpdate');
-        Route::post('/quote/delete', 'Admin\QuoteController@delete')->name('admin.quote.delete');
-        Route::post('/quote/bulk-delete', 'Admin\QuoteController@bulkDelete')->name('admin.quote.bulk.delete');
-
-
-        // Admin Quote Routes
-        Route::get('/all/quotes', 'Admin\QuoteController@all')->name('admin.all.quotes');
-        Route::get('/pending/quotes', 'Admin\QuoteController@pending')->name('admin.pending.quotes');
-        Route::get('/processing/quotes', 'Admin\QuoteController@processing')->name('admin.processing.quotes');
-        Route::get('/completed/quotes', 'Admin\QuoteController@completed')->name('admin.completed.quotes');
-        Route::get('/rejected/quotes', 'Admin\QuoteController@rejected')->name('admin.rejected.quotes');
-        Route::post('/quotes/status', 'Admin\QuoteController@status')->name('admin.quotes.status');
-        Route::post('/quote/mail', 'Admin\QuoteController@mail')->name('admin.quotes.mail');
-    });
-
-    Route::group(['middleware' => 'checkpermission:Quote Management'], function () {
-
-        // Admin Quote Form Builder Routes
-        Route::get('/quote/visibility', 'Admin\QuoteController@visibility')->name('admin.quote.visibility');
-        Route::post('/quote/visibility/update', 'Admin\QuoteController@updateVisibility')->name('admin.quote.visibility.update');
-        Route::get('/quote/form', 'Admin\QuoteController@form')->name('admin.quote.form');
-        Route::post('/quote/form/store', 'Admin\QuoteController@formstore')->name('admin.quote.form.store');
-        Route::post('/quote/inputDelete', 'Admin\QuoteController@inputDelete')->name('admin.quote.inputDelete');
-        Route::get('/quote/{id}/inputEdit', 'Admin\QuoteController@inputEdit')->name('admin.quote.inputEdit');
-        Route::get('/quote/{id}/options', 'Admin\QuoteController@options')->name('admin.quote.options');
-        Route::post('/quote/inputUpdate', 'Admin\QuoteController@inputUpdate')->name('admin.quote.inputUpdate');
-        Route::post('/quote/delete', 'Admin\QuoteController@delete')->name('admin.quote.delete');
-        Route::post('/quote/bulk-delete', 'Admin\QuoteController@bulkDelete')->name('admin.quote.bulk.delete');
-
-
-        // Admin Quote Routes
-        Route::get('/all/quotes', 'Admin\QuoteController@all')->name('admin.all.quotes');
-        Route::get('/pending/quotes', 'Admin\QuoteController@pending')->name('admin.pending.quotes');
-        Route::get('/processing/quotes', 'Admin\QuoteController@processing')->name('admin.processing.quotes');
-        Route::get('/completed/quotes', 'Admin\QuoteController@completed')->name('admin.completed.quotes');
-        Route::get('/rejected/quotes', 'Admin\QuoteController@rejected')->name('admin.rejected.quotes');
-        Route::post('/quotes/status', 'Admin\QuoteController@status')->name('admin.quotes.status');
-        Route::post('/quote/mail', 'Admin\QuoteController@mail')->name('admin.quotes.mail');
-    });
 
 
     Route::group(['middleware' => 'checkpermission:Role Management'], function () {
@@ -1403,30 +777,14 @@ Route::group(['middleware' => ['setlang']], function () {
         $type = $pl->type;
         $permalink = $pl->permalink;
 
-        if ($type == 'package_order') {
-            Route::get("$permalink/{id}", 'Front\FrontendController@packageorder')->name('front.packageorder.index');
-        } elseif ($type == 'service_details') {
+        if ($type == 'service_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@servicedetails')->name('front.servicedetails');
         } elseif ($type == 'portfolio_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@portfoliodetails')->name('front.portfoliodetails');
-        } elseif ($type == 'product_details') {
-            Route::get("$permalink/{slug}", 'Front\ProductController@productDetails')->name('front.product.details');
-        } elseif ($type == 'course_details') {
-            Route::get("$permalink/{slug}", 'Front\CourseController@courseDetails')->name('course_details');
         } elseif ($type == 'tender_details') {
             Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
-        } elseif ($type == 'cause_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@causeDetails')->name('front.cause_details');
-        } elseif ($type == 'event_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@eventDetails')->name('front.event_details');
-        } elseif ($type == 'career_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@careerdetails')->name('front.careerdetails');
-        } elseif ($type == 'knowledgebase_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@knowledgebase_details')->name('front.knowledgebase_details');
         } elseif ($type == 'blog_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@blogdetails')->name('front.blogdetails');
-        } elseif ($type == 'rss_details') {
-            Route::get("$permalink/{slug}/{id}", 'Front\FrontendController@rssdetails')->name('front.rssdetails');
         }
     }
 });
@@ -1440,51 +798,21 @@ Route::group(['middleware' => ['setlang']], function () {
         $permalink = $pl->permalink;
 
 
-        if ($type == 'packages') {
-            $action = 'Front\FrontendController@packages';
-            $routeName = 'front.packages';
-        } elseif ($type == 'services') {
+        if ($type == 'services') {
             $action = 'Front\FrontendController@services';
             $routeName = 'front.services';
         } elseif ($type == 'portfolios') {
             $action = 'Front\FrontendController@portfolios';
             $routeName = 'front.portfolios';
-        } elseif ($type == 'products') {
-            $action = 'Front\ProductController@product';
-            $routeName = 'front.product';
-        } elseif ($type == 'cart') {
-            $action = 'Front\ProductController@cart';
-            $routeName = 'front.cart';
-        } elseif ($type == 'product_checkout') {
-            $action = 'Front\ProductController@checkout';
-            $routeName = 'front.checkout';
         } elseif ($type == 'team') {
             $action = 'Front\FrontendController@team';
             $routeName = 'front.team';
-        } elseif ($type == 'courses') {
-            $action = 'Front\CourseController@courses';
-            $routeName = 'courses';
         } elseif ($type == 'tenders') {
             $action = 'Front\TenderController@tenders';
             $routeName = 'tenders';
         } elseif ($type == 'find_my_files') {
             $action = 'Front\FindMyFilesController@index';
             $routeName = 'find_my_files';
-        } elseif ($type == 'causes') {
-            $action = 'Front\FrontendController@causes';
-            $routeName = 'front.causes';
-        } elseif ($type == 'events') {
-            $action = 'Front\FrontendController@events';
-            $routeName = 'front.events';
-        } elseif ($type == 'career') {
-            $action = 'Front\FrontendController@career';
-            $routeName = 'front.career';
-        } elseif ($type == 'event_calendar') {
-            $action = 'Front\FrontendController@calendar';
-            $routeName = 'front.calendar';
-        } elseif ($type == 'knowledgebase') {
-            $action = 'Front\FrontendController@knowledgebase';
-            $routeName = 'front.knowledgebase';
         } elseif ($type == 'gallery') {
             $action = 'Front\FrontendController@gallery';
             $routeName = 'front.gallery';
@@ -1494,15 +822,9 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'blogs') {
             $action = 'Front\FrontendController@blogs';
             $routeName = 'front.blogs';
-        } elseif ($type == 'rss') {
-            $action = 'Front\FrontendController@rss';
-            $routeName = 'front.rss';
         } elseif ($type == 'contact') {
             $action = 'Front\FrontendController@contact';
             $routeName = 'front.contact';
-        } elseif ($type == 'quote') {
-            $action = 'Front\FrontendController@quote';
-            $routeName = 'front.quote';
         } elseif ($type == 'login') {
             $action = 'User\LoginController@showLoginForm';
             $routeName = 'user.login';

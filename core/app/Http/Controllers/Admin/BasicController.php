@@ -349,14 +349,10 @@ class BasicController extends Controller
         $be->home_meta_description = $request->home_meta_description;
         $be->services_meta_keywords = $request->services_meta_keywords;
         $be->services_meta_description = $request->services_meta_description;
-        $be->packages_meta_keywords = $request->packages_meta_keywords;
-        $be->packages_meta_description = $request->packages_meta_description;
         $be->portfolios_meta_keywords = $request->portfolios_meta_keywords;
         $be->portfolios_meta_description = $request->portfolios_meta_description;
         $be->team_meta_keywords = $request->team_meta_keywords;
         $be->team_meta_description = $request->team_meta_description;
-        $be->career_meta_keywords = $request->career_meta_keywords;
-        $be->career_meta_description = $request->career_meta_description;
         $be->calendar_meta_keywords = $request->calendar_meta_keywords;
         $be->calendar_meta_description = $request->calendar_meta_description;
         $be->gallery_meta_keywords = $request->gallery_meta_keywords;
@@ -365,14 +361,10 @@ class BasicController extends Controller
         $be->faq_meta_description = $request->faq_meta_description;
         $be->blogs_meta_keywords = $request->blogs_meta_keywords;
         $be->blogs_meta_description = $request->blogs_meta_description;
-        $be->rss_meta_keywords = $request->rss_meta_keywords;
-        $be->rss_meta_description = $request->rss_meta_description;
         $be->contact_meta_keywords = $request->contact_meta_keywords;
         $be->contact_meta_description = $request->contact_meta_description;
         $be->quote_meta_keywords = $request->quote_meta_keywords;
         $be->quote_meta_description = $request->quote_meta_description;
-        $be->products_meta_keywords = $request->products_meta_keywords;
-        $be->products_meta_description = $request->products_meta_description;
         $be->cart_meta_keywords = $request->cart_meta_keywords;
         $be->cart_meta_description = $request->cart_meta_description;
         $be->checkout_meta_keywords = $request->checkout_meta_keywords;
@@ -383,10 +375,6 @@ class BasicController extends Controller
         $be->register_meta_description = $request->register_meta_description;
         $be->forgot_meta_keywords = $request->forgot_meta_keywords;
         $be->forgot_meta_description = $request->forgot_meta_description;
-        $be->events_meta_keywords = $request->events_meta_keywords;
-        $be->events_meta_description = $request->events_meta_description;
-        $be->causes_meta_keywords = $request->causes_meta_keywords;
-        $be->causes_meta_description = $request->causes_meta_description;
         $be->save();
 
         Session::flash('success', 'SEO informations updated successfully!');
@@ -434,16 +422,11 @@ class BasicController extends Controller
         $request->validate([
             'service_title' => 'nullable|max:70',
             'service_subtitle' => 'nullable|max:80',
-            'career_title' => 'nullable|max:70',
-            'career_subtitle' => 'nullable|max:80',
-            'event_calendar_title' => 'nullable|max:70',
-            'event_calendar_subtitle' => 'nullable|max:80',
             'service_details_title' => 'nullable|max:70',
             'portfolio_title' => 'nullable|max:70',
             'portfolio_subtitle' => 'nullable|max:80',
             'portfolio_details_title' => 'nullable|max:80',
             'blog_details_title' => 'nullable|max:70',
-            'rss_details_title' => 'nullable|max:70',
             'contact_title' => 'nullable|max:70',
             'contact_subtitle' => 'nullable|max:80',
             'gallery_title' => 'nullable|max:70',
@@ -452,20 +435,10 @@ class BasicController extends Controller
             'team_subtitle' => 'nullable|max:80',
             'faq_title' => 'nullable|max:70',
             'faq_subtitle' => 'nullable|max:80',
-            'pricing_title' => 'nullable|max:70',
-            'pricing_subtitle' => 'nullable|max:80',
             'blog_title' => 'nullable|max:70',
             'blog_subtitle' => 'nullable|max:80',
-            'rss_title' => 'nullable|max:70',
-            'rss_subtitle' => 'nullable|max:80',
-            'quote_title' => 'nullable|max:70',
-            'quote_subtitle' => 'nullable|max:80',
             'error_title' => 'nullable|max:70',
             'error_subtitle' => 'nullable|max:80',
-            'product_title' => 'nullable|max:70',
-            'product_subtitle' => 'nullable|max:80',
-            'product_details_title' => 'nullable|max:70',
-            // 'product_details_subtitle' => 'nullable|max:80',
             'cart_title' => 'nullable|max:70',
             'cart_subtitle' => 'nullable|max:80',
             'checkout_title' => 'nullable|max:70',
@@ -474,9 +447,6 @@ class BasicController extends Controller
             'event_subtitle' => 'nullable|max:80',
             'cause_title' => 'nullable|max:70',
             'cause_subtitle' => 'nullable|max:80',
-            'knowledgebase_title' => 'nullable|max:70',
-            'knowledgebase_subtitle' => 'nullable|max:70',
-            'knowledgebase_details_title' => 'nullable|max:70',
             'client_feedback_title' => 'nullable|max:70',
             'client_feedback_subtitle' => 'nullable|max:70'
         ]);
@@ -502,8 +472,6 @@ class BasicController extends Controller
         $bs->faq_subtitle = $request->faq_subtitle;
         $bs->blog_title = $request->blog_title;
         $bs->blog_subtitle = $request->blog_subtitle;
-        $bs->quote_title = $request->quote_title;
-        $bs->quote_subtitle = $request->quote_subtitle;
         $bs->error_title = $request->error_title;
         $bs->error_subtitle = $request->error_subtitle;
         $bs->event_title = $request->event_title;
@@ -515,31 +483,12 @@ class BasicController extends Controller
         $bs->save();
 
 
-        $be->pricing_title = $request->pricing_title;
-        $be->pricing_subtitle = $request->pricing_subtitle;
-        $be->career_title = $request->career_title;
-        $be->career_subtitle = $request->career_subtitle;
-        $be->event_calendar_title = $request->event_calendar_title;
-        $be->event_calendar_subtitle = $request->event_calendar_subtitle;
-        $be->rss_title = $request->rss_title;
-        $be->rss_subtitle = $request->rss_subtitle;
-        $be->rss_details_title = $request->blog_details_title;
-        $be->product_title = $request->product_title;
-        $be->product_subtitle = $request->product_subtitle;
-        $be->product_details_title = $request->product_details_title;
-        // $be->product_details_subtitle = $request->product_details_subtitle;
         $be->cart_title = $request->cart_title;
         $be->cart_subtitle = $request->cart_subtitle;
         $be->checkout_title = $request->checkout_title;
         $be->checkout_subtitle = $request->checkout_subtitle;
         $be->save();
 
-        $bex->course_title = $request->course_title;
-        $bex->course_subtitle = $request->course_subtitle;
-        $bex->course_details_title = $request->course_details_title;
-        $bex->knowledgebase_title = $request->knowledgebase_title;
-        $bex->knowledgebase_subtitle = $request->knowledgebase_subtitle;
-        $bex->knowledgebase_details_title = $request->knowledgebase_details_title;
         $bex->client_feedback_title = $request->client_feedback_title;
         $bex->client_feedback_subtitle = $request->client_feedback_subtitle;
         $bex->save();
@@ -723,9 +672,6 @@ class BasicController extends Controller
 
         $bes = BasicExtended::all();
         foreach ($bes as $key => $be) {
-            if ($be->theme_version != 'ecommerce') {
-                $be->pricing_section = $request->pricing_section;
-            }
             if ($be->theme_version == 'ecommerce') {
                 $be->categories_section = $request->categories_section;
                 $be->featured_products_section = $request->featured_products_section;

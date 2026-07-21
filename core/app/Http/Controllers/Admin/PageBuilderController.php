@@ -68,8 +68,6 @@ class PageBuilderController extends Controller
         $html = $this->replace_content_inside_delimiters("<statistics-section>", "</statistics-section>", '[pagebuilder-statistics][/pagebuilder-statistics]', $html);
         // replace HTML with 'Testimonial' short code
         $html = $this->replace_content_inside_delimiters("<testimonial-section>", "</testimonial-section>", '[pagebuilder-testimonial][/pagebuilder-testimonial]', $html);
-        // replace HTML with 'Packages' short code
-        $html = $this->replace_content_inside_delimiters("<packages-section>", "</packages-section>", '[pagebuilder-packages][/pagebuilder-packages]', $html);
         // replace HTML with 'Blogs' short code
         $html = $this->replace_content_inside_delimiters("<blogs-section>", "</blogs-section>", '[pagebuilder-blogs][/pagebuilder-blogs]', $html);
         // replace HTML with 'Approach' short code
@@ -179,12 +177,6 @@ class PageBuilderController extends Controller
             $testimonialsLimit = false;
         }
 
-        if ($version == 'lawyer' || $version == 'default' || $version == 'dark' || $version == 'gym' || $version == 'car' || $version == 'construction' || $version == 'logistic' || $version == 'cleaning') {
-            $packagesLimit = 3;
-        } else {
-            $packagesLimit = false;
-        }
-
         if ($version == 'lawyer' || $version == 'default' || $version == 'dark' || $version == 'gym' || $version == 'construction' || $version == 'logistic' || $version == 'cleaning') {
             $blogsLimit = 3;
         } elseif ($version == 'car') {
@@ -257,16 +249,6 @@ class PageBuilderController extends Controller
             })->get();
         } else {
             $testimonials = [];
-        }
-
-        if (!empty($lang->packages)) {
-            $packages = $lang->packages()->orderBy('serial_number', 'ASC')
-            ->where('feature', 1)
-            ->when($packagesLimit, function ($query, $packagesLimit) {
-                return $query->limit($packagesLimit);
-            })->get();
-        } else {
-            $packages = [];
         }
 
         if (!empty($lang->blogs)) {
@@ -685,49 +667,6 @@ class PageBuilderController extends Controller
                             </testimonial-section>
                         </div>
                     </div>
-                </div>
-            </div>";
-
-
-
-
-            // Featured Package Section (Default Version)
-            $packageSec = "<div class='pricing-tables pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                <div class='row justify-content-center text-center'>
-                    <div class='col-lg-6'>
-                        <span class='section-title'>" . convertUtf8($be->pricing_title) . "</span>
-                        <h2 class='section-summary'>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                    </div>
-                </div>
-                <packages-section>
-                    <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                        <div class='non-editable-notice'>
-                            <h3>Non-Editable Area</h3>
-                            Manage From <br><strong>Package Management > Packages</strong>
-                        </div>
-
-                        <div class='pricing-carousel common-carousel row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='single-pricing-table col-lg-4 mx-0'>
-                                    <span class='title'>" . convertUtf8($package->title) . "</span>";
-                                    if($bex->recurring_billing == 1) {
-                                        $packageSec .= "<small>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</small>";
-                                    }
-                                    $packageSec .= "<div class='price'>
-                                        <h1>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . $package->price . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h1>
-                                    </div>
-                                    <div class='features'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>";
-
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='pricing-btn'>" . __('Place Order') . "</a>";
-                        }
-
-                        $packageSec .= "</div>";
-                    }
-                    $packageSec .= "</div>
-                    </div>
-                </packages-section>
                 </div>
             </div>";
 
@@ -1208,50 +1147,6 @@ class PageBuilderController extends Controller
 
 
 
-            // Featured Package Section (Gym Version)
-            $packageSec = "<section class='logistics_pricing pricing_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                    <div class='row justify-content-center'>
-                        <div class='col-lg-6'>
-                            <div class='section_title text-center'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h2>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='pricing_slide pricing_slick row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='pricing_box text-center col-4 mx-0'>
-                                        <div class='pricing_title'>
-                                            <h3>" . convertUtf8($package->title) . "</h3>";
-                                            if($bex->recurring_billing == 1) {
-                                                $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                            }
-                                        $packageSec .= "</div>
-                                        <div class='pricing_price'>
-                                            <h3>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . $package->price . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h3>
-                                        </div>
-                                        <div class='pricing_body'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>
-                                        <div class='pricing_button'>";
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='finlance_btn'>" . __('Place Order') . "</a>";
-                        }
-                        $packageSec .= "</div>
-                                    </div>";
-                    }
-                    $packageSec .= "</div>
-                        </div>
-                    </packages-section>
-                </div>
-            </section>";
-
             // Latest Blogs Section (Gym Version)
             $blogSec = "<section class='finlance_blog blog_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
                 <div class='container'>
@@ -1718,52 +1613,6 @@ class PageBuilderController extends Controller
 
 
 
-            // Featured Package Section (Car Version)
-            $packageSec = "<section class='finlance_pricing pricing_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='pricing-bg' style='background-image: url(" . url('assets/front/img/' . $be->package_background) . "); background-size: cover;'>
-                </div>
-                <div class='container'>
-                    <div class='row justify-content-center'>
-                        <div class='col-lg-6'>
-                            <div class='section_title text-center' style='margin-bottom: 60px;'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h2>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='pricing_slide pricing_slick row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='pricing_box text-center col-4 mx-0'>
-                                        <div class='pricing_title'>
-                                            <h3>" . convertUtf8($package->title) . "</h3>
-                                        </div>
-                                        <div class='pricing_price'>
-                                            <h2>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . $package->price . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h2>";
-                                            if($bex->recurring_billing == 1) {
-                                                $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                            }
-                                        $packageSec .= "</div>
-                                        <div class='pricing_body'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>
-                                        <div class='pricing_button'>";
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='finlance_btn'>" . __('Place Order') . "</a>";
-                        }
-                        $packageSec .= "</div>
-                                    </div>";
-                    }
-                    $packageSec .= "</div>
-                        </div>
-                    </packages-section>
-                </div>
-            </section>";
-
 
             // Latest Blogs Section (Car Version)
             $blogSec = "<section class='finlance_blog blog_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
@@ -2202,45 +2051,6 @@ class PageBuilderController extends Controller
                 </div>
             </section>";
 
-            // Featured Package Section (Cleaning Version)
-            $packageSec = "<section class='price-area pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                    <div class='row justify-content-center'>
-                        <div class='col-lg-8'>
-                            <div class='section-title-one text-center'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h1>" . convertUtf8($be->pricing_subtitle) . "</h1>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='price-carousel-active pricing-slick row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='single-price-item text-center col-4 mx-0'>
-                                        <div class='price-heading'>
-                                            <h3>" . convertUtf8($package->title) . "</h3>";
-                                            if($bex->recurring_billing == 1) {
-                                                $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                            }
-                                        $packageSec .= "</div>
-                                        <h1 class='bg-1' style='background: #" . $package->color . ";'>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . $package->price . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h1>
-                                        <div class='price-cata mb-4'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>";
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='main-btn price-btn'>" . __('Place Order') . "</a>";
-                        }
-                        $packageSec .= "</div>";
-                    }
-                    $packageSec .= "</div>
-                        </div>
-                    </packages-section>
-                </div>
-            </section>";
 
             // Latest Blogs Section (Cleaning Version)
             $blogSec = "<section class='blog-area pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
@@ -2697,48 +2507,6 @@ class PageBuilderController extends Controller
             </section>";
 
 
-            $packageSec = "<section class='finlance_pricing pricing_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                    <div class='row'>
-                        <div class='col-lg-12'>
-                            <div class='section_title text-center'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h2>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='pricing_slide pricing-slick row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='pricing_box text-center col-4 mx-0'>
-                                        <div class='pricing_title'>
-                                            <h3>" . convertUtf8($package->title) . "</h3>";
-                                            if($bex->recurring_billing == 1) {
-                                                $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                            }
-                                        $packageSec .= "</div>
-                                        <div class='pricing_price'>
-                                            <h3>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . " " . $package->price . " " . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h3>
-                                        </div>
-                                        <div class='pricing_body'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>
-                                        <div class='pricing_button'>";
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='finlance_btn'>" . __('Place Order') . "</a>";
-                        }
-                        $packageSec .= "</div>
-                                    </div>";
-                    }
-                    $packageSec .= "</div>
-                        </div>
-                    </packages-section>
-                </div>
-            </section>";
 
 
             $blogSec = "<section class='finlance_blog blog_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
@@ -3192,48 +2960,6 @@ class PageBuilderController extends Controller
             </section>";
 
 
-            $packageSec = "<section class='logistics_pricing pricing_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                    <div class='row'>
-                        <div class='col-lg-12'>
-                            <div class='section_title text-center'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h2>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='pricing_slide pricing-slick row'>";
-                    foreach ($packages as $key => $package) {
-                        $packageSec .= "<div class='pricing_box text-center col-4 mx-0'>
-                                        <div class='pricing_title'>
-                                            <h3>" . convertUtf8($package->title) . "</h3>";
-                                            if($bex->recurring_billing == 1) {
-                                                $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                            }
-                                        $packageSec .= "</div>
-                                        <div class='pricing_price'>
-                                            <h3>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . " " . $package->price . " " . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h3>
-                                        </div>
-                                        <div class='pricing_body'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>
-                                        <div class='pricing_button'>";
-                        if ($package->order_status == 1) {
-                            $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='logistics_btn'>" . __('Place Order') . "</a>";
-                        }
-                        $packageSec .= "</div>
-                                    </div>";
-                    }
-                    $packageSec .= "</div>
-                        </div>
-                    </packages-section>
-                </div>
-            </section>";
 
 
             $blogSec = "<section class='logistics_blog blog_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
@@ -3673,52 +3399,6 @@ class PageBuilderController extends Controller
             </section>";
 
 
-            $packageSec = "<section class='lawyer_pricing pricing_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>
-                <div class='container'>
-                    <div class='row'>
-                        <div class='col-lg-12'>
-                            <div class='section_title text-center'>
-                                <span>" . convertUtf8($be->pricing_title) . "</span>
-                                <h2>" . convertUtf8($be->pricing_subtitle) . "</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <packages-section>
-                        <div class='non-editable-area' data-gjs-stylable='false' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable","stylable"]' . ">
-                            <div class='non-editable-notice'>
-                                <h3>Non-Editable Area</h3>
-                                Manage From <br><strong>Package Management > Packages</strong>
-                            </div>
-
-                            <div class='pricing_slide pricing-slick row'>";
-                            foreach ($packages as $key => $package) {
-                                $packageSec .= "<div class='col-lg-4 mx-0 pricing_box text-center' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable"]' . ">
-                                                <div class='pricing_title'>";
-                                if (!empty($package->image)) {
-                                    $packageSec .= "<img class='lazy' data-src='" . url('assets/front/img/packages/' . $package->image) . "' alt=''>";
-                                }
-                                $packageSec .= "<h3>" . convertUtf8($package->title) . "</h3>";
-                                if($bex->recurring_billing == 1) {
-                                    $packageSec .= "<p>" . ($package->duration == 'monthly' ? __('Monthly') : __('Yearly')) . "</p>";
-                                }
-                                $packageSec .= "</div>
-                                <div class='pricing_price'>
-                                    <h3>" . ($bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : '') . " " . $package->price . " " . ($bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : '') . "</h3>
-                                </div>
-                                <div class='pricing_body'>" . replaceBaseUrl(convertUtf8($package->description)) . "</div>
-                                <div class='pricing_button'>";
-                                if ($package->order_status == 1) {
-                                    $packageSec .= "<a href='" . route('front.packageorder.index', $package->id) . "' class='lawyer_btn'>" . __('Place Order') . "</a>";
-                                }
-                                $packageSec .= "</div>
-                                </div>";
-                            }
-                            $packageSec .= "</div>
-                        </div>
-
-                    </packages-section>
-                </div>
-            </section>";
 
 
             $blogSec = "<section class='lawyer_blog blog_v1 pb-mb30 " . ($rtl == 1 ? 'pb-rtl' : '') . "'>

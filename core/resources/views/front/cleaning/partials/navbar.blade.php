@@ -51,60 +51,13 @@
                                             <a href="{{route('user-dashboard')}}">{{__('Dashboard')}}</a>
                                         </li>
 
-                                        @if ($bex->recurring_billing == 1)
-                                            <li><a href="{{route('user-packages')}}">{{__('Packages')}}</a></li>
-                                        @endif
-
-                                        @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                                            <li><a href="{{route('user-orders')}}">{{__('Product Orders')}} </a></li>
-                                        @endif
-
-                                        @if ($bex->recurring_billing == 0)
-                                            <li><a href="{{route('user-package-orders')}}">{{__('Package Orders')}} </a></li>
-                                        @endif
-
-
-                                        @if ($bex->is_course == 1)
-                                        <li>
-                                            <a href="{{route('user.course_orders')}}" >{{__('Courses')}}</a>
-                                        </li>
-                                        @endif
-
-
-                                        @if ($bex->is_event == 1)
-                                        <li>
-                                            <a href="{{route('user-events')}}" >{{__('Event Bookings')}}</a>
-                                        </li>
-                                        @endif
-
-
-                                        @if ($bex->is_donation == 1)
-                                        <li>
-                                            <a href="{{route('user-donations')}}" >{{__('Donations')}}</a>
-                                        </li>
-                                        @endif
-
-                                        @if ($bex->is_ticket == 1)
-                                        <li>
-                                            <a href="{{route('user-tickets')}}">{{__('Support Tickets')}}</a>
-                                        </li>
-                                        @endif
-
                                         <li>
                                             <a href="{{route('user-profile')}}">{{__('Edit Profile')}}</a>
                                         </li>
 
-                                        @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                                            <li>
-                                                <a href="{{route('shpping-details')}}">{{__('Shipping Details')}}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{route('billing-details')}}">{{__('Billing Details')}}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{route('user-reset')}}">{{__('Change Password')}}</a>
-                                            </li>
-                                        @endif
+                                        <li>
+                                            <a href="{{route('user-reset')}}">{{__('Change Password')}}</a>
+                                        </li>
                                         <li>
                                             <a href="{{route('user-logout')}}" target="_self">{{__('Logout')}}</a>
                                         </li>
@@ -194,14 +147,14 @@
                                         @endforeach
 
                                         @if ($bs->is_quote == 1)
-                                            <li class="d-block d-lg-none"><a href="{{route('front.quote')}}">{{__('Get Quote')}}</a></li>
+                                            <li class="d-block d-lg-none"><a href="{{route('front.contact')}}">{{__('Get Quote')}}</a></li>
                                         @endif
                                     </ul>
                                 </nav>
                             </div>
 
                             @if ($bs->is_quote == 1)
-                                <a href="{{route('front.quote')}}" class="cleaning-main-btn header-bgn d-none d-lg-inline-block">{{__('Get Quote')}}</a>
+                                <a href="{{route('front.contact')}}" class="cleaning-main-btn header-bgn d-none d-lg-inline-block">{{__('Get Quote')}}</a>
                             @endif
                         </div>
                     </div>

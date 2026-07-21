@@ -286,20 +286,10 @@ class GatewayController extends Controller
     public function status(Request $request)
     {
         $og = OfflineGateway::find($request->ogateway_id);
-        if (!empty($request->type) && $request->type == 'product') {
-            $og->product_checkout_status = $request->product_checkout_status;
-        }
-        elseif (!empty($request->type) && $request->type == 'package') {
-            $og->package_order_status = $request->package_order_status;
-        }
-        elseif (!empty($request->type) && $request->type == 'course') {
+        if (!empty($request->type) && $request->type == 'course') {
+            // Also gates offline-gateway availability on the Tender checkout page
+            // (Front\TenderController reuses this column) — do not remove.
             $og->course_checkout_status = $request->course_checkout_status;
-        }
-        elseif (!empty($request->type) && $request->type == 'donation') {
-            $og->donation_checkout_status = $request->donation_checkout_status;
-        }
-        elseif (!empty($request->type) && $request->type == 'event') {
-            $og->event_checkout_status = $request->event_checkout_status;
         }
         $og->save();
 

@@ -80,50 +80,6 @@
                           </td>
                         </tr>
                         <tr>
-                          <td>Products</td>
-                          <td>
-                            <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'products'])}}">
-                              <span class="btn-label">
-                                <i class="fas fa-edit"></i>
-                              </span>
-                              Edit
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Courses</td>
-                          <td>
-                            <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'courses'])}}">
-                              <span class="btn-label">
-                                <i class="fas fa-edit"></i>
-                              </span>
-                              Edit
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Causes</td>
-                          <td>
-                            <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'causes'])}}">
-                              <span class="btn-label">
-                                <i class="fas fa-edit"></i>
-                              </span>
-                              Edit
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Events</td>
-                          <td>
-                            <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'events'])}}">
-                              <span class="btn-label">
-                                <i class="fas fa-edit"></i>
-                              </span>
-                              Edit
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
                           <td>Blogs</td>
                           <td>
                             <a class="btn btn-secondary btn-sm" href="{{route('admin.megamenu.edit', ['language' => request()->input('language'), 'type' => 'blogs'])}}">

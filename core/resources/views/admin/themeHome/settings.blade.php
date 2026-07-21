@@ -64,7 +64,6 @@
                                             <option value="construction" {{$abe->theme_version == 'construction' ? 'selected' : ''}}>Construction</option>
                                             <option value="logistic" {{$abe->theme_version == 'logistic' ? 'selected' : ''}}>Logistic</option>
                                             <option value="lawyer" {{$abe->theme_version == 'lawyer' ? 'selected' : ''}}>Lawyer</option>
-                                            <option value="ecommerce" {{$abe->theme_version == 'ecommerce' ? 'selected' : ''}}>Ecommerce</option>
                                         </select>
                                     </div>
                                 </div>

@@ -24,7 +24,6 @@
 @elseif(request()->path() == 'admin/portfoliosection') active
 @elseif(request()->path() == 'admin/blogsection') active
 @elseif(request()->path() == 'admin/member/create') active
-@elseif(request()->path() == 'admin/package/background') active
 @elseif(request()->path() == 'admin/sections') active
 
 @elseif(request()->path() == 'admin/scategorys') active
@@ -57,12 +56,6 @@
 @elseif(request()->path() == 'admin/faq/categories') active
 @elseif(request()->path() == 'admin/faqs') active
 
-@elseif(request()->path() == 'admin/jcategorys') active
-@elseif(request()->path() == 'admin/job/create') active
-@elseif(request()->is('admin/jcategory/*/edit')) active
-@elseif(request()->path() == 'admin/jobs') active
-@elseif(request()->is('admin/job/*/edit')) active
-
 @elseif(request()->path() == 'admin/contact') active @endif">
     <a data-toggle="collapse" href="#webContents">
         <i class="la flaticon-imac"></i>
@@ -94,7 +87,6 @@
     @elseif(request()->path() == 'admin/portfoliosection') show
     @elseif(request()->path() == 'admin/blogsection') show
     @elseif(request()->path() == 'admin/member/create') show
-    @elseif(request()->path() == 'admin/package/background') show
     @elseif(request()->path() == 'admin/sections') show
 
     @elseif(request()->path() == 'admin/scategorys') show
@@ -127,12 +119,6 @@
     @elseif(request()->path() == 'admin/faq/categories') show
     @elseif(request()->path() == 'admin/faqs') show
 
-    @elseif(request()->path() == 'admin/jcategorys') show
-    @elseif(request()->path() == 'admin/job/create') show
-    @elseif(request()->is('admin/jcategory/*/edit')) show
-    @elseif(request()->path() == 'admin/jobs') show
-    @elseif(request()->is('admin/job/*/edit')) show
-
     @elseif(request()->path() == 'admin/contact') show @endif"
         id="webContents">
         <ul class="nav nav-collapse">
@@ -164,7 +150,6 @@
             @elseif(request()->path() == 'admin/portfoliosection') selected
             @elseif(request()->path() == 'admin/blogsection') selected
             @elseif(request()->path() == 'admin/member/create') selected
-            @elseif(request()->path() == 'admin/package/background') selected
             @elseif(request()->path() == 'admin/sections') selected @endif">
                 <a data-toggle="collapse" href="#home">
                     <span class="sub-item">Home Page Sections</span>
@@ -195,7 +180,6 @@
                 @elseif(request()->path() == 'admin/portfoliosection') show
                 @elseif(request()->path() == 'admin/blogsection') show
                 @elseif(request()->path() == 'admin/member/create') show
-                @elseif(request()->path() == 'admin/package/background') show
                 @elseif(request()->path() == 'admin/sections') show @endif"
                     id="home">
                     <ul class="nav nav-collapse subnav">
@@ -313,15 +297,6 @@
                                 <span class="sub-item">Team Section</span>
                             </a>
                         </li>
-
-                        @if ($bex?->home_page_pagebuilder == 0)
-                            <li class="
-                    @if (request()->path() == 'admin/package/background') active @endif">
-                                <a href="{{ route('admin.package.background') . '?language=' . $default->code }}">
-                                    <span class="sub-item">Pricing Section</span>
-                                </a>
-                            </li>
-                        @endif
 
                         @if ($bex?->home_page_pagebuilder == 0)
                             <li class="@if (request()->path() == 'admin/blogsection') active @endif">
@@ -597,53 +572,6 @@
                         <li class="@if (request()->path() == 'admin/faqs') active @endif">
                             <a href="{{ route('admin.faq.index') . '?language=' . $default->code }}">
                                 <span class="sub-item">FAQs</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-
-            {{-- Career Page --}}
-            <li
-                class="
-            @if (request()->path() == 'admin/jcategorys') selected
-            @elseif(request()->path() == 'admin/job/create') selected
-            @elseif(request()->is('admin/jcategory/*/edit')) selected
-            @elseif(request()->path() == 'admin/jobs') selected
-            @elseif(request()->is('admin/job/*/edit')) selected @endif">
-                <a data-toggle="collapse" href="#career">
-                    <span class="sub-item">Career</span>
-                    <span class="caret"></span>
-                </a>
-                <div class="collapse
-                @if (request()->path() == 'admin/jcategorys') show
-                @elseif(request()->path() == 'admin/job/create') show
-                @elseif(request()->is('admin/jcategory/*/edit')) show
-                @elseif(request()->path() == 'admin/jobs') show
-                @elseif(request()->is('admin/job/*/edit')) show @endif"
-                    id="career">
-                    <ul class="nav nav-collapse subnav">
-                        <li
-                            class="
-                            @if (request()->path() == 'admin/jcategorys') active
-                            @elseif(request()->is('admin/jcategory/*/edit')) active @endif">
-                            <a href="{{ route('admin.jcategory.index') . '?language=' . $default->code }}">
-                                <span class="sub-item">Category</span>
-                            </a>
-                        </li>
-                        <li class="
-                        @if (request()->is('admin/job/create')) active @endif">
-                            <a href="{{ route('admin.job.create') }}">
-                                <span class="sub-item">Post Job</span>
-                            </a>
-                        </li>
-                        <li
-                            class="
-                        @if (request()->path() == 'admin/jobs') active
-                        @elseif(request()->is('admin/job/*/edit')) active @endif">
-                            <a href="{{ route('admin.job.index') . '?language=' . $default->code }}">
-                                <span class="sub-item">Job Management</span>
                             </a>
                         </li>
                     </ul>

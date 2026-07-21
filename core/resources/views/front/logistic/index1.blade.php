@@ -295,44 +295,6 @@
     @endif
     <!-- End logistics_project section -->
 
-    <!-- Start logistics_pricing section -->
-    @if ($be->pricing_section == 1)
-    <section class="logistics_pricing pricing_v1 pt-120 pb-120">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section_title text-center">
-                        <span>{{convertUtf8($be->pricing_title)}}</span>
-                        <h2>{{convertUtf8($be->pricing_subtitle)}}</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="pricing_slide pricing-slick">
-                @foreach ($packages as $key => $package)
-                    <div class="pricing_box text-center">
-                        <div class="pricing_title">
-                            <h3>{{convertUtf8($package->title)}}</h3>
-                            <p>{{__('Featured Package')}}</p>
-                        </div>
-                        <div class="pricing_price">
-                            <h3>{{$bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : ''}} {{$package->price}} {{$bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : ''}}</h3>
-                        </div>
-                        <div class="pricing_body">
-                            {!! replaceBaseUrl(convertUtf8($package->description)) !!}
-                        </div>
-                        <div class="pricing_button">
-                            @if ($package->order_status == 1)
-                                <a href="{{route('front.packageorder.index', $package->id)}}" class="logistics_btn">{{__('Place Order')}}</a>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-    <!-- End logistics_pricing section -->
-
     <!-- Start logistics_team section -->
     @if ($bs->team_section == 1)
     <section class="logistics_team team_v1 gray_bg pt-100 pb-75">

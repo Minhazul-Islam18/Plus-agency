@@ -75,47 +75,6 @@
                 			<span class="selectgroup-button">Custom Pages</span>
                 		</label>
                 		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Event Calendar" class="selectgroup-input" @if(is_array($permissions) && in_array('Event Calendar', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Event Calendar</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Package Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Package Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Package Management</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Quote Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Quote Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Quote Management</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Shop Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Shop Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Shop Management</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Course Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Course Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Course Management</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Events Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Events Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Events Management</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Donation Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Donation Management', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Donations & Causes</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Knowledgebase" class="selectgroup-input" @if(is_array($permissions) && in_array('Knowledgebase', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Knowledgebase</span>
-                		</label>
-                		<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="Tickets" class="selectgroup-input" @if(is_array($permissions) && in_array('Tickets', $permissions)) checked @endif>
-                			<span class="selectgroup-button">Support Tickets</span>
-                		</label>
-
-						<label class="selectgroup-item">
-                			<input type="checkbox" name="permissions[]" value="RSS Feeds" class="selectgroup-input" @if(is_array($permissions) && in_array('RSS Feeds', $permissions)) checked @endif>
-                			<span class="selectgroup-button">RSS Feeds</span>
-						</label>
-                		<label class="selectgroup-item">
                 			<input type="checkbox" name="permissions[]" value="Users Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Users Management', $permissions)) checked @endif>
                 			<span class="selectgroup-button">Users Management</span>
                 		</label>

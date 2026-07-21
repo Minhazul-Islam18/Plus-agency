@@ -87,13 +87,6 @@ class MenuBuilderController extends Controller
             }
         }
 
-        // for 'products' mega menu
-        if ($request->type == 'products') {
-            $data['cats'] = $lang->pcategories()->where('status', 1)->get();
-            $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'products')->where('category', 1);
-            $catStatus = 1;
-        }
-
         // for 'portfolios' mega menu
         if ($request->type == 'portfolios') {
             if (serviceCategory()) {
@@ -105,27 +98,6 @@ class MenuBuilderController extends Controller
                 $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'portfolios')->where('category', 0);
                 $catStatus = 0;
             }
-        }
-
-        // for 'courses' mega menu
-        if ($request->type == 'courses') {
-            $data['cats'] = $lang->course_categories()->get();
-            $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'courses')->where('category', 1);
-            $catStatus = 1;
-        }
-
-        // for 'causes' mega menu
-        if ($request->type == 'causes') {
-            $data['items'] = $lang->causes()->get();
-            $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'causes')->where('category', 0);
-            $catStatus = 0;
-        }
-
-        // for 'events' mega menu
-        if ($request->type == 'events') {
-            $data['cats'] = $lang->event_categories()->get();
-            $megamenu = Megamenu::where('language_id', $lang->id)->where('type', 'events')->where('category', 1);
-            $catStatus = 1;
         }
 
         // for 'blogs' mega menu

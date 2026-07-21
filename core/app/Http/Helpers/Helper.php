@@ -93,40 +93,18 @@ if (!function_exists('getHref')) {
             $href = route('front.index');
         } else if ($link["type"] == 'services' || $link["type"] == 'services-megamenu') {
             $href = route('front.services');
-        } else if ($link["type"] == 'packages') {
-            $href = route('front.packages');
         } else if ($link["type"] == 'portfolios' || $link["type"] == 'portfolios-megamenu') {
             $href = route('front.portfolios');
         } else if ($link["type"] == 'team') {
             $href = route('front.team');
-        } else if ($link["type"] == 'career') {
-            $href = route('front.career');
         } else if ($link["type"] == 'tenders' || $link["type"] == 'tenders-megamenu') {
             $href = route('tenders');
-        } else if ($link["type"] == 'courses' || $link["type"] == 'courses-megamenu') {
-            $href = route('courses');
-        } else if ($link["type"] == 'events' || $link["type"] == 'events-megamenu') {
-            $href = route('front.events');
-        } else if ($link["type"] == 'causes' || $link["type"] == 'causes-megamenu') {
-            $href = route('front.causes');
-        } else if ($link["type"] == 'knowledgebase') {
-            $href = route('front.knowledgebase');
-        } else if ($link["type"] == 'calendar') {
-            $href = route('front.calendar');
         } else if ($link["type"] == 'gallery') {
             $href = route('front.gallery');
         } else if ($link["type"] == 'faq') {
             $href = route('front.faq');
-        } else if ($link["type"] == 'products' || $link["type"] == 'products-megamenu') {
-            $href = route('front.product');
-        } else if ($link["type"] == 'cart') {
-            $href = route('front.cart');
-        } else if ($link["type"] == 'checkout') {
-            $href = route('front.checkout');
         } else if ($link["type"] == 'blogs' || $link["type"] == 'blogs-megamenu') {
             $href = route('front.blogs');
-        } else if ($link["type"] == 'rss') {
-            $href = route('front.rss');
         } else if ($link["type"] == 'feedback') {
             $href = route('feedback');
         } else if ($link["type"] == 'contact') {

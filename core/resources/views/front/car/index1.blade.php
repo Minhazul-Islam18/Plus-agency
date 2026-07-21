@@ -363,46 +363,6 @@
         @endif
         <!-- End finlance_partner section -->
 
-        <!-- Start finlance_pricing section -->
-        @if ($be->pricing_section == 1)
-		<section class="finlance_pricing pricing_v1 pt-115 pb-120">
-			<div class="pricing-bg" style="background-image: url('{{asset('assets/front/img/'.$be->package_background)}}'); background-size: cover; @if($bs->home_version == 'parallax') background-attachment: fixed; @endif">
-			</div>
-			<div class="container">
-				<div class="row justify-content-center">
-					<div class="col-lg-6">
-						<div class="section_title text-center mb-60">
-                            <span>{{convertUtf8($be->pricing_title)}}</span>
-                            <h2>{{convertUtf8($be->pricing_subtitle)}}</h2>
-						</div>
-					</div>
-				</div>
-				<div class="pricing_slide pricing_slick">
-                    @foreach ($packages as $key => $package)
-                        <div class="pricing_box text-center">
-                            <div class="pricing_title">
-                                <h3>{{convertUtf8($package->title)}}</h3>
-                                <p>{{__('Featured Package')}}</p>
-                            </div>
-                            <div class="pricing_price">
-                                <h2 style="margin-bottom: 0px;">{{$bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : ''}} {{$package->price}} {{$bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : ''}}</h2>
-                            </div>
-                            <div class="pricing_body">
-                                {!! replaceBaseUrl(convertUtf8($package->description)) !!}
-                            </div>
-                            <div class="pricing_button">
-                                @if ($package->order_status == 1)
-                                    <a href="{{route('front.packageorder.index', $package->id)}}" class="finlance_btn">{{__('Place Order')}}</a>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-				</div>
-			</div>
-		</section>
-        @endif
-        <!-- End finlance_pricing section -->
-
 		<!-- Start finlance_blog section -->
         @if ($bs->news_section == 1)
 		<section class="finlance_blog blog_v1 pt-115 pb-120">

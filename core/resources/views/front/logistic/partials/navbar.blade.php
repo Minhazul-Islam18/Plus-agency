@@ -47,36 +47,8 @@
                                         </button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="{{route('user-dashboard')}}">{{__('Dashboard')}}</a>
-                                            @if ($bex->recurring_billing == 1)
-                                                <a class="dropdown-item" href="{{route('user-packages')}}">{{__('Packages')}}</a>
-                                            @endif
-                                            @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                                                <a class="dropdown-item" href="{{route('user-orders')}}">{{__('Product Orders')}} </a>
-                                            @endif
-                                            @if ($bex->recurring_billing == 0)
-                                                <a class="dropdown-item" href="{{route('user-package-orders')}}">{{__('Package Orders')}} </a>
-                                            @endif
-
-                                            @if ($bex->is_course == 1)
-                                            <a class="dropdown-item" href="{{route('user.course_orders')}}" >{{__('Courses')}}</a>
-                                            @endif
-
-                                            @if ($bex->is_event == 1)
-                                            <a class="dropdown-item" href="{{route('user-events')}}" >{{__('Event Bookings')}}</a>
-                                            @endif
-
-                                            @if ($bex->is_donation == 1)
-                                            <a class="dropdown-item" href="{{route('user-donations')}}" >{{__('Donations')}}</a>
-                                            @endif
-                                            @if ($bex->is_ticket == 1)
-                                                <a class="dropdown-item" href="{{route('user-tickets')}}">{{__('Support Tickets')}}</a>
-                                            @endif
                                             <a class="dropdown-item" href="{{route('user-profile')}}">{{__('Edit Profile')}}</a>
-                                            @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                                                <a class="dropdown-item" href="{{route('shpping-details')}}">{{__('Shipping Details')}}</a>
-                                                <a class="dropdown-item" href="{{route('billing-details')}}">{{__('Billing Details')}}</a>
-                                                <a class="dropdown-item" href="{{route('user-reset')}}">{{__('Change Password')}}</a>
-                                            @endif
+                                            <a class="dropdown-item" href="{{route('user-reset')}}">{{__('Change Password')}}</a>
                                             <a class="dropdown-item" href="{{route('user-logout')}}" target="_self">{{__('Logout')}}</a>
                                         </div>
                                     </div>
@@ -166,7 +138,7 @@
                             @if ($bs->is_quote == 1)
                                 <div class="col-lg-2">
                                     <div class="button_box">
-                                        <a href="{{route('front.quote')}}" class="logistics_btn">{{__('Get Quote')}}</a>
+                                        <a href="{{route('front.contact')}}" class="logistics_btn">{{__('Get Quote')}}</a>
                                     </div>
                                 </div>
                             @endif

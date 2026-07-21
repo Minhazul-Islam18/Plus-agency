@@ -134,51 +134,6 @@
                     @endif
                   </div>
 
-                  <div class="form-group col-lg-6">
-                    <label>Pricing Title **</label>
-                    <input class="form-control" name="pricing_title"
-                      value="{{empty(old('pricing_title')) ? $abe->pricing_title : old('pricing_title')}}">
-                    @if ($errors->has('pricing_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('pricing_title')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Pricing Subtitle **</label>
-                    <input class="form-control" name="pricing_subtitle"
-                      value="{{empty(old('pricing_subtitle')) ? $abe->pricing_subtitle : old('pricing_subtitle')}}">
-                    @if ($errors->has('pricing_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('pricing_subtitle')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Product Title **</label>
-                    <input class="form-control" name="product_title"
-                      value="{{empty(old('product_title')) ? $abe->product_title : old('product_title')}}">
-                    @if ($errors->has('product_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('product_title')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Product Subtitle **</label>
-                    <input class="form-control" name="product_subtitle"
-                      value="{{empty(old('product_subtitle')) ? $abe->product_subtitle : old('product_subtitle')}}">
-                    @if ($errors->has('product_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('product_subtitle')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Product Details Title **</label>
-                    <input class="form-control" name="product_details_title"
-                      value="{{empty(old('product_details_title')) ? $abe->product_details_title : old('product_details_title')}}">
-                    @if ($errors->has('product_details_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('product_details_title')}}</p>
-                    @endif
-                  </div>
-
 
                   <div class="form-group col-lg-6">
                     <label>Cart Title **</label>
@@ -216,32 +171,6 @@
                     @endif
                   </div>
                   <div class="form-group col-lg-6">
-                    <label>Knowledgebase Title **</label>
-                    <input class="form-control" name="knowledgebase_title"
-                      value="{{empty(old('knowledgebase_title')) ? $abex->knowledgebase_title : old('knowledgebase_title')}}">
-                    @if ($errors->has('knowledgebase_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('knowledgebase_title')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Knowledgebase Subtitle **</label>
-                    <input class="form-control" name="knowledgebase_subtitle"
-                      value="{{empty(old('knowledgebase_subtitle')) ? $abex->knowledgebase_subtitle : old('knowledgebase_subtitle')}}">
-                    @if ($errors->has('knowledgebase_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('knowledgebase_subtitle')}}</p>
-                    @endif
-                  </div>
-
-                  <div class="form-group col-lg-6">
-                    <label>Knowledgebase Details Title **</label>
-                    <input class="form-control" name="knowledgebase_details_title"
-                      value="{{empty(old('knowledgebase_details_title')) ? $abex->knowledgebase_details_title : old('knowledgebase_details_title')}}">
-                    @if ($errors->has('knowledgebase_details_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('knowledgebase_details_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
                     <label>Blog Title **</label>
                     <input class="form-control" name="blog_title"
                       value="{{empty(old('blog_title')) ? $abs->blog_title : old('blog_title')}}">
@@ -266,30 +195,6 @@
                     @endif
                   </div>
                   <div class="form-group col-lg-6">
-                    <label>RSS Title **</label>
-                    <input class="form-control" name="rss_title"
-                      value="{{empty(old('rss_title')) ? $abe->rss_title : old('rss_title')}}">
-                    @if ($errors->has('rss_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('rss_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>RSS Subtitle **</label>
-                    <input class="form-control" name="rss_subtitle"
-                      value="{{empty(old('rss_subtitle')) ? $abe->rss_subtitle : old('rss_subtitle')}}">
-                    @if ($errors->has('rss_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('rss_subtitle')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>RSS Details Title **</label>
-                    <input class="form-control" name="rss_details_title"
-                      value="{{empty(old('rss_details_title')) ? $abe->rss_details_title : old('rss_details_title')}}">
-                    @if ($errors->has('rss_details_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('rss_details_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
                     <label>Gallery Title **</label>
                     <input class="form-control" name="gallery_title"
                       value="{{empty(old('gallery_title')) ? $abs->gallery_title : old('gallery_title')}}">
@@ -303,62 +208,6 @@
                       value="{{empty(old('gallery_subtitle')) ? $abs->gallery_subtitle : old('gallery_subtitle')}}">
                     @if ($errors->has('gallery_subtitle'))
                     <p class="mb-0 text-danger">{{$errors->first('gallery_subtitle')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Career Title **</label>
-                    <input class="form-control" name="career_title"
-                      value="{{empty(old('career_title')) ? $abe->career_title : old('career_title')}}">
-                    @if ($errors->has('career_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('career_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Career Subtitle **</label>
-                    <input class="form-control" name="career_subtitle"
-                      value="{{empty(old('career_subtitle')) ? $abe->career_subtitle : old('career_subtitle')}}">
-                    @if ($errors->has('career_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('career_subtitle')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Course Title **</label>
-                    <input class="form-control" name="course_title"
-                      value="{{empty(old('course_title')) ? $abex->course_title : old('course_title')}}">
-                    @if ($errors->has('course_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('course_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Course Subtitle **</label>
-                    <input class="form-control" name="course_subtitle"
-                      value="{{empty(old('course_subtitle')) ? $abex->course_subtitle : old('course_subtitle')}}">
-                    @if ($errors->has('course_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('course_subtitle')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Course Details Title **</label>
-                    <input class="form-control" name="course_details_title"
-                      value="{{empty(old('course_details_title')) ? $abex->course_details_title : old('course_details_title')}}">
-                    @if ($errors->has('course_details_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('course_details_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Event Calendar Title **</label>
-                    <input class="form-control" name="event_calendar_title"
-                      value="{{empty(old('event_calendar_title')) ? $abe->event_calendar_title : old('event_calendar_title')}}">
-                    @if ($errors->has('event_calendar_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('event_calendar_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Event Calendar Subtitle **</label>
-                    <input class="form-control" name="event_calendar_subtitle"
-                      value="{{empty(old('event_calendar_subtitle')) ? $abe->event_calendar_subtitle : old('event_calendar_subtitle')}}">
-                    @if ($errors->has('event_calendar_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('event_calendar_subtitle')}}</p>
                     @endif
                   </div>
                   <div class="form-group col-lg-6">
@@ -391,22 +240,6 @@
                       value="{{empty(old('contact_subtitle')) ? $abs->contact_subtitle : old('contact_subtitle')}}">
                     @if ($errors->has('contact_subtitle'))
                     <p class="mb-0 text-danger">{{$errors->first('contact_subtitle')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Quote Title **</label>
-                    <input class="form-control" name="quote_title"
-                      value="{{empty(old('quote_title')) ? $abs->quote_title : old('quote_title')}}">
-                    @if ($errors->has('quote_title'))
-                    <p class="mb-0 text-danger">{{$errors->first('quote_title')}}</p>
-                    @endif
-                  </div>
-                  <div class="form-group col-lg-6">
-                    <label>Quote Subtitle **</label>
-                    <input class="form-control" name="quote_subtitle"
-                      value="{{empty(old('quote_subtitle')) ? $abs->quote_subtitle : old('quote_subtitle')}}">
-                    @if ($errors->has('quote_subtitle'))
-                    <p class="mb-0 text-danger">{{$errors->first('quote_subtitle')}}</p>
                     @endif
                   </div>
                   <div class="form-group col-lg-6">

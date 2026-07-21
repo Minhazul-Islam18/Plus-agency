@@ -63,7 +63,7 @@
                 @endforeach
 
                 @if ($bs->is_quote == 1)
-                    <li><a href="{{ route('front.quote') }}" class="boxed-btn">{{ __('Request A Quote') }}</a></li>
+                    <li><a href="{{ route('front.contact') }}" class="boxed-btn">{{ __('Request A Quote') }}</a></li>
                 @endif
             </ul>
             <div id="mobileMenu"></div>

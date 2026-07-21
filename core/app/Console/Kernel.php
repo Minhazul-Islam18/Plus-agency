@@ -2,8 +2,6 @@
 
 namespace App\Console;
 
-use App\BasicExtra;
-use App\Console\Commands\SubscriptionChecker;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -28,11 +26,6 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $bex = BasicExtra::first();
-        if ($bex->recurring_billing == 1) {
-            $schedule->command('subscription:check')->daily();
-        }
-
         $schedule->call(function () {
             \App\SecureToken::where('expires_at', '<', now()->subDays(30))->delete();
         })->weekly();

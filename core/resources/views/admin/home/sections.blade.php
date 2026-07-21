@@ -145,19 +145,6 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Pricing Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="pricing_section" value="1" class="selectgroup-input" {{$abe->pricing_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="pricing_section" value="0" class="selectgroup-input" {{$abe->pricing_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
                                     <label>Call to Action Section **</label>
                                     <div class="selectgroup w-100">
                                         <label class="selectgroup-item">

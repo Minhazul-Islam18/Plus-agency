@@ -332,41 +332,6 @@
     @endif
     <!-- CTA PART END -->
 
-    <!-- PRICING PART START -->
-    @if ($be->pricing_section == 1)
-    <section class="price-area pt-100 pb-100">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="section-title-one text-center">
-                        <span>{{convertUtf8($be->pricing_title)}}</span>
-                        <h1>{{convertUtf8($be->pricing_subtitle)}}</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="price-carousel-active pricing-slick">
-                @foreach ($packages as $key => $package)
-                    <div class="single-price-item text-center">
-                        <div class="price-heading">
-                            <h3>{{convertUtf8($package->title)}}</h3>
-                            <span>{{__('Featured Package')}}</span>
-                        </div>
-                        <h1 class="bg-1" style="background: #{{$package->color}};">{{$bex->base_currency_symbol_position == 'left' ? $bex->base_currency_symbol : ''}}{{$package->price}}{{$bex->base_currency_symbol_position == 'right' ? $bex->base_currency_symbol : ''}}</h1>
-                        <div class="price-cata mb-4">
-                            {!! replaceBaseUrl(convertUtf8($package->description)) !!}
-                        </div>
-                        @if ($package->order_status == 1)
-                            <a href="{{route('front.packageorder.index', $package->id)}}" class="main-btn price-btn">{{__('Place Order')}}</a>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-    <!-- PRICING PART END -->
-
-
     <!-- BLOG PART START -->
     @if ($bs->news_section == 1)
     <section class="blog-area pb-120">

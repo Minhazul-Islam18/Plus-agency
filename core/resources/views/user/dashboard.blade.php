@@ -32,49 +32,6 @@
                 <div class="row mb-5">
                     <div class="col-lg-12">
                         <div class="row">
-                            @if ($bex->is_shop == 1 && $bex->catalog_mode == 0)
-                            <div class="col-md-6">
-                                <a class="card card-box box-1 mb-4 product" href="{{route('user-orders')}}">
-                                    <div class="card-info">
-                                        <h4>{{__('Product Orders')}}</h4>
-                                        <p>{{App\ProductOrder::where('user_id',Auth::user()->id)->count()}}</p>
-                                    </div>
-                                </a>
-                            </div>
-                            @endif
-
-                            @if ($bex->is_course == 1)
-                            <div class="col-md-6">
-                                <a class="card card-box box-2 course" href="{{route('user.course_orders')}}">
-                                    <div class="card-info">
-                                        <h4>{{__('Enrolled Courses')}}</h4>
-                                        <p>{{App\CoursePurchase::where('user_id',Auth::user()->id)->where('payment_status', 'Completed')->count()}}</p>
-                                    </div>
-                                </a>
-                            </div>
-                            @endif
-
-                            @if ($bex->is_event == 1)
-                            <div class="col-md-6 mb-4">
-                                <a class="card card-box box-3 event" href="{{route('user-events')}}">
-                                    <div class="card-info">
-                                        <h4>{{__('Event Bookings')}}</h4>
-                                        <p>{{App\EventDetail::where('user_id',Auth::user()->id)->count()}}</p>
-                                    </div>
-                                </a>
-                            </div>
-                            @endif
-
-                            @if ($bex->is_ticket == 1)
-                            <div class="col-md-6 mb-4">
-                                <a class="card card-box box-1 support" href="{{route('user-tickets')}}">
-                                    <div class="card-info">
-                                        <h4>{{__('Support Tickets')}}</h4>
-                                        <p>{{App\Ticket::where('user_id',Auth::user()->id)->count()}}</p>
-                                    </div>
-                                </a>
-                            </div>
-                            @endif
                         </div>
                     </div>
                     <div class="col-lg-12">

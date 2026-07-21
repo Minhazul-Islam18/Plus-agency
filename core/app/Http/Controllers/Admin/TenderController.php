@@ -862,6 +862,7 @@ class TenderController extends Controller
             'tender_watermark_template'         => 'nullable|string|max:2000',
             'tender_pdf_encrypt_enabled'        => 'nullable|in:0,1',
             'tender_pdf_password'               => 'nullable|string|max:255|required_if:tender_pdf_encrypt_enabled,1',
+            'tender_max_downloads'              => 'nullable|integer|min:1|max:20',
         ], [
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
         ]);
@@ -908,6 +909,11 @@ class TenderController extends Controller
             // PDF encryption (global — same on every language row)
             $bex->tender_pdf_encrypt_enabled = $request->input('tender_pdf_encrypt_enabled', 0);
             $bex->tender_pdf_password        = $request->input('tender_pdf_password');
+
+            // Secure download link open-limit (global)
+            $bex->tender_max_downloads = $request->filled('tender_max_downloads')
+                ? (int) $request->tender_max_downloads
+                : 3;
 
             $bex->save();
         }

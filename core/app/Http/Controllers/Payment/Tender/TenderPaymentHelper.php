@@ -215,7 +215,11 @@ trait TenderPaymentHelper
     protected function dispatchTenderDownloadLink(TenderPurchase $purchase): string
     {
         $ttlHours     = 24; // matches FindMyFilesController::TOKEN_TTL_HOURS
-        $maxDownloads = 3;  // matches FindMyFilesController::MAX_DOWNLOADS
+        // Admin-configurable open-limit (admin/tender/settings), falls back to 3.
+        $maxDownloads = (int) optional(BasicExtra::first())->tender_max_downloads;
+        if ($maxDownloads < 1) {
+            $maxDownloads = 3;
+        }
 
         $emailHash = hash('sha256', strtolower(trim($purchase->email)));
 

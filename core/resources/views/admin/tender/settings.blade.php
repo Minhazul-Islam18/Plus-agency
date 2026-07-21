@@ -306,6 +306,21 @@
               </div>
 
               <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">Secure Download Links</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">
+                How many times each secure download link may be opened before it expires. Applies to every
+                tender download link (email &amp; on-screen). Global (all languages).
+              </p>
+
+              {{-- Max downloads per link --}}
+              <div class="form-group">
+                <label>Opens Allowed Per Link</label>
+                <input type="number" class="form-control ltr" name="tender_max_downloads"
+                  value="{{ $abex->tender_max_downloads ?? 3 }}" step="1" min="1" max="20">
+                <small class="text-muted d-block mt-1">Default 3. Each selected tender gets its own link with its own counter.</small>
+              </div>
+
+              <hr>
               <h6 class="font-weight-bold mb-3 mt-2">Breadcrumb Background</h6>
               <p class="text-muted mb-3" style="font-size:12px;">Applied to the Tenders list page and Tender Details page. Settings are per-language.</p>
 

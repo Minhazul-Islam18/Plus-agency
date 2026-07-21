@@ -29,7 +29,7 @@
                     </h2>
 
                     <p style="font-size:14px; color:#6b7280; line-height:1.7; margin-bottom:28px;">
-                        {{ $errorMessage ?? __('The link may have expired (valid for 24 hours), already reached the download limit (3 attempts), or been revoked.') }}
+                        {{ $errorMessage ?? __('The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.', ['count' => $maxDownloads ?? 3]) }}
                     </p>
 
                     @unless (!empty($suspended))

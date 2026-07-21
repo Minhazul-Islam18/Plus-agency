@@ -19,7 +19,7 @@ class AddTwilioFieldsToBasicExtrasTable extends Migration
                 $table->string('twilio_auth_token', 100)->nullable();
             }
             if (!Schema::hasColumn('basic_settings_extra', 'twilio_from_number')) {
-                $table->string('twilio_from_number', 30)->nullable();
+                $table->string('twilio_from_number', 64)->nullable();
             }
         });
     }

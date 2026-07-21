@@ -498,10 +498,14 @@
                                         value="{{ $bex->twilio_auth_token }}" placeholder="Your Auth Token">
                                 </div>
                                 <div class="form-group">
-                                    <label>From Number</label>
-                                    <input class="form-control" name="twilio_from_number"
-                                        value="{{ $bex->twilio_from_number }}" placeholder="+1xxxxxxxxxx">
-                                    <small class="text-muted">Must be a Twilio-verified number in E.164 format.</small>
+                                    <label>Sender (From)</label>
+                                    <input class="form-control" name="twilio_from_number" maxlength="64"
+                                        value="{{ $bex->twilio_from_number }}" placeholder="MGxxxxxxxx… or ICAGROUPE or +1xxxxxxxxxx">
+                                    <small class="text-muted">
+                                        Accepts any one of: a <strong>Messaging Service SID</strong> (MG… — recommended, picks the best sender per country),
+                                        an <strong>Alphanumeric Sender ID</strong> (e.g. ICAGROUPE — shows your name, ≤11 chars, not US/Canada, registration may be required),
+                                        or a <strong>phone number</strong> in E.164 format.
+                                    </small>
                                 </div>
                             </div>
                         </div>

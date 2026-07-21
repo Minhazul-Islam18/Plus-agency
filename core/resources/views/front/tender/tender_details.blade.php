@@ -2716,6 +2716,24 @@ $preFlag = $preCountry['flag'] ?? '';
             // Regenerate link for the all-paid case (reuses Find My Files regenerate)
             $(document).on('click', '#emailNewLinkBtn', function() {
                 var $btn = $(this);
+                var email = ($('#paymentGatewayForm input[name="email"]').val() || '').trim();
+
+                // Need the buyer's email to send the link.
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    $('#emailNewLinkMsg').text('{{ __('Please enter your email address above first.') }}')
+                        .css('color', '#dc2626');
+                    return;
+                }
+
+                var errMsg = {
+                    'validation':     '{{ __('Please enter a valid email address.') }}',
+                    'email_mismatch': '{{ __('This email does not match the order for this registration number. Enter the email used for the purchase.') }}',
+                    'rate_limited':   '{{ __('Too many requests. Please wait a few minutes and try again.') }}',
+                    'regen_limit':    '{{ __('You have reached the limit of new links for today. Please try again tomorrow.') }}',
+                    'email_failed':   '{{ __('The email could not be sent right now. Please try again shortly or contact support.') }}',
+                    'suspended':      '{{ __('This order is under verification. Please contact ICA.') }}'
+                };
+
                 $btn.prop('disabled', true);
                 $('#emailNewLinkMsg').text('{{ __('Sending...') }}').css('color', '#065f46');
                 $.ajax({
@@ -2723,7 +2741,9 @@ $preFlag = $preCountry['flag'] ?? '';
                     method: 'POST',
                     data: {
                         _token: $('#paymentGatewayForm input[name="_token"]').val(),
-                        email: ($('#paymentGatewayForm input[name="email"]').val() || '').trim()
+                        email: email,
+                        tender_id: tenderId,
+                        company_registration_no: (($('#companyRegNo').val() || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
                     },
                     success: function(res) {
                         if (res.status === 'success') {
@@ -2731,9 +2751,9 @@ $preFlag = $preCountry['flag'] ?? '';
                                 .css('color', '#16a34a');
                         } else {
                             $btn.prop('disabled', false);
-                            $('#emailNewLinkMsg').text(
-                                '{{ __('Could not send. Try again shortly.') }}').css('color',
-                                '#dc2626');
+                            $('#emailNewLinkMsg')
+                                .text(errMsg[res.type] || '{{ __('Could not send. Try again shortly.') }}')
+                                .css('color', '#dc2626');
                         }
                     },
                     error: function() {

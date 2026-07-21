@@ -158,8 +158,8 @@
                     <div class="fmf-sv-item">
                         <span class="fmf-sv-check">✓</span>
                         <div class="fmf-sv-item-text">
-                            {{ __('Low-risk profile detected') }}
-                            <span style="color:#6b7280; font-size:13px;">({{ __('IP address, device, session integrity') }})</span>
+                            {{ __('Rate-limit & abuse checks passed') }}
+                            <span style="color:#6b7280; font-size:13px;">({{ __('per-IP and per-email request throttling') }})</span>
                         </div>
                     </div>
 

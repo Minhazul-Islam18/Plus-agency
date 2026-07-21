@@ -20,6 +20,9 @@ class CreateSecureTokensTable extends Migration
             $table->enum('status', ['active', 'expired', 'revoked'])->default('active');
             $table->string('device_hash')->nullable();
             $table->string('ip')->nullable();
+            // Session/browser binding for OTP-recovery links (SHA-256 of the cookie
+            // secret). NULL on portable post-payment auto-delivery links.
+            $table->string('session_secret', 64)->nullable();
             $table->timestamps();
 
             $table->index('token_hash');

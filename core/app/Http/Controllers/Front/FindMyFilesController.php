@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\AccessLog;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\Countries;
 use App\Http\Helpers\KreativMailer;
 use App\Language;
 use App\OtpVerification;
@@ -58,6 +59,59 @@ class FindMyFilesController extends Controller
     private function deviceHash(Request $request): string
     {
         return hash('sha256', $request->userAgent() . $request->ip());
+    }
+
+    /**
+     * User-agent-only fingerprint, used to bind an OTP-recovery download link to
+     * the exact browser that verified. Kept separate from deviceHash (which mixes
+     * in the IP) so the device and IP signals are checked independently.
+     */
+    private function uaHash(Request $request): string
+    {
+        return hash('sha256', (string) $request->userAgent());
+    }
+
+    /**
+     * True when a token is session/device/IP-bound (OTP recovery) and the current
+     * request does not match all three. Unbound tokens (session_secret NULL — e.g.
+     * post-payment auto-delivery links, which are emailed and portable) are never
+     * blocked here. Bound links lock to the browser+device+network that verified;
+     * a mismatch means the buyer must re-run OTP on this device for a fresh link.
+     */
+    private function bindingFails(SecureToken $token, Request $request): bool
+    {
+        if (empty($token->session_secret)) {
+            return false; // not a bound link
+        }
+        if ((string) $token->ip !== (string) $request->ip()) {
+            return true;
+        }
+        if (!hash_equals((string) $token->device_hash, $this->uaHash($request))) {
+            return true;
+        }
+        $cookie = (string) $request->cookie('fmf_dl', '');
+        return $cookie === '' || !hash_equals((string) $token->session_secret, hash('sha256', $cookie));
+    }
+
+    /**
+     * How many times each secure download link may be opened. Editable at
+     * admin/tender/settings (basic_settings_extra.tender_max_downloads); falls
+     * back to the MAX_DOWNLOADS constant when unset or invalid.
+     */
+    private function maxDownloads(): int
+    {
+        $n = (int) optional(\App\BasicExtra::first())->tender_max_downloads;
+        return $n > 0 ? $n : self::MAX_DOWNLOADS;
+    }
+
+    /**
+     * Brand name for the OTP SMS body — the configured site title, falling back to
+     * the app name. Avoids the default "Laravel" showing in messages.
+     */
+    private function brandName(): string
+    {
+        $title = optional(optional(Language::where('is_default', 1)->first())->basic_setting)->website_title;
+        return trim((string) $title) !== '' ? $title : config('app.name');
     }
 
     private function generateToken(TenderPurchase $purchase, string $emailHash, Request $request): string
@@ -198,10 +252,26 @@ class FindMyFilesController extends Controller
 
     // ── Send email via PHPMailer (matching project pattern) ───────────────────
 
-    private function sendDownloadEmail(TenderPurchase $purchase, string $downloadUrl, $be): bool
+    /**
+     * $downloads may be a single URL string (legacy single-order callers) or a
+     * list of ['title' => tender title, 'url' => download page URL] (multi-tender
+     * OTP flow). Renders one titled button per tender into {download_list}.
+     */
+    private function sendDownloadEmail(TenderPurchase $purchase, $downloads, $be): bool
     {
         $language = Language::where('is_default', 1)->first();
         $bs       = $language->basic_setting;
+
+        // Normalise a bare URL to a one-item list titled with the order's tender.
+        if (is_string($downloads)) {
+            $downloads = [[
+                'title' => optional($purchase->tender)->title ?: $purchase->order_number,
+                'url'   => $downloads,
+            ]];
+        }
+
+        $downloadList = $this->buildDownloadButtons($downloads);
+        $firstUrl     = $downloads[0]['url'] ?? '#';
 
         try {
             $mailer = new KreativMailer;
@@ -210,12 +280,13 @@ class FindMyFilesController extends Controller
                 'toName'        => $purchase->first_name,
                 'customer_name' => $purchase->first_name,
                 'order_number'  => $purchase->order_number,
-                'download_url'  => $downloadUrl,
+                'download_url'  => $firstUrl,
+                'download_list' => $downloadList,
                 'expires_at'    => now()->addHours(self::TOKEN_TTL_HOURS)->format('d M Y, H:i'),
-                'max_downloads' => self::MAX_DOWNLOADS,
+                'max_downloads' => $this->maxDownloads(),
                 'website_title' => $bs->website_title,
-                'templateType'  => 'tender_download_link',
-                'type'          => 'tenderDownloadLink',
+                'templateType'  => 'tender_recovery_link',
+                'type'          => 'tenderRecoveryLink',
             ]);
 
             \Log::info('[FMF] Download email sent', [
@@ -232,6 +303,115 @@ class FindMyFilesController extends Controller
         }
     }
 
+    /**
+     * Email-safe (inline-styled, table-based) stack of titled download buttons —
+     * one per tender — injected into the {download_list} placeholder.
+     */
+    private function buildDownloadButtons(array $downloads): string
+    {
+        $rows = '';
+        foreach ($downloads as $d) {
+            $title = htmlspecialchars((string) ($d['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $url   = htmlspecialchars((string) ($d['url'] ?? '#'), ENT_QUOTES, 'UTF-8');
+
+            // Sub-line: "Order XXXX · Buyer Name · Company" — only the parts present.
+            $meta = array_filter([
+                ($d['order']   ?? '') !== '' ? 'Order ' . $d['order'] : '',
+                $d['name']    ?? '',
+                $d['company'] ?? '',
+            ], fn ($v) => trim((string) $v) !== '');
+            $sub = $meta
+                ? '<p style="margin:0 0 12px 0; font-size:12px; color:#64748b; line-height:1.5; word-break:break-word;">'
+                    . htmlspecialchars(implode(' · ', $meta), ENT_QUOTES, 'UTF-8') . '</p>'
+                : '';
+
+            // Each tender = a self-contained white card: dark title on white, then
+            // its own blue button. Title never sits on a coloured background.
+            $rows .= '
+              <tr>
+                <td style="padding-bottom:12px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e2e8f0; border-radius:8px; background-color:#ffffff;">
+                    <tr>
+                      <td style="padding:16px 18px;">
+                        <p style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#0f172a; line-height:1.45; word-break:break-word;">' . $title . '</p>
+                        ' . $sub . '
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td align="center" style="background-color:#2563eb; border-radius:6px;">
+                              <a href="' . $url . '" target="_blank" style="display:block; padding:13px 24px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:6px; text-align:center; background-color:#2563eb; letter-spacing:0.01em; line-height:1;">&#8659;&nbsp; Download Secure Files</a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>';
+        }
+
+        return '<table width="100%" cellpadding="0" cellspacing="0" border="0">' . $rows . '</table>';
+    }
+
+    /**
+     * Absolute path to the buyer's payment-receipt PDF, generating it if the
+     * stored file is missing (older orders / cleared storage). Mirrors the
+     * post-payment invoice generation. Returns null if it can't be produced.
+     */
+    private function receiptPath(TenderPurchase $purchase): ?string
+    {
+        $dir = storage_path('app/invoices/tender/');
+
+        if (!empty($purchase->invoice) && file_exists($dir . $purchase->invoice)) {
+            return $dir . $purchase->invoice;
+        }
+
+        try {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+
+            $lang = Language::where('is_default', 1)->first();
+            $bse  = optional($lang)->basic_extra ?? \App\BasicExtra::first();
+            $bs   = optional($lang)->basic_setting;
+
+            $logoSrc = null;
+            if ($bs && !empty($bs->logo)) {
+                foreach ([
+                    storage_path('app/public/front/img/' . $bs->logo),
+                    base_path('public/assets/front/img/' . $bs->logo),
+                    base_path('../assets/front/img/' . $bs->logo),
+                ] as $p) {
+                    if (file_exists($p)) {
+                        $ext     = strtolower(pathinfo($p, PATHINFO_EXTENSION));
+                        $mime    = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
+                        $logoSrc = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($p));
+                        break;
+                    }
+                }
+            }
+
+            $purchase->load('tender');
+            $fileName = $purchase->order_number . '.pdf';
+
+            \PDF::loadView('pdf.tender', [
+                'order'   => $purchase,
+                'bse'     => $bse,
+                'bs'      => $bs,
+                'logoSrc' => $logoSrc,
+            ])->setPaper('a4', 'portrait')->save($dir . $fileName);
+
+            $purchase->update(['invoice' => $fileName]);
+
+            return $dir . $fileName;
+        } catch (\Throwable $e) {
+            \Log::error('[FMF] Receipt generation failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private function resolveTender(Request $request): ?Tender
@@ -239,6 +419,27 @@ class FindMyFilesController extends Controller
         $slug = trim($request->input('tender_slug', ''));
         if (!$slug) return null;
         return Tender::where('slug', $slug)->first();
+    }
+
+    /**
+     * Tenders the buyer ticked on the OTP form. Accepts the multi-select
+     * tender_slugs[] and falls back to the single tender_slug. Returns an empty
+     * collection when nothing was chosen.
+     */
+    private function resolveTenders(Request $request)
+    {
+        $slugs = collect((array) $request->input('tender_slugs', []))
+            ->merge([$request->input('tender_slug')])
+            ->map(fn ($s) => trim((string) $s))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($slugs->isEmpty()) {
+            return collect();
+        }
+
+        return Tender::whereIn('slug', $slugs)->get();
     }
 
     private function scopeToPurchase(object $query, ?Tender $tender): object
@@ -278,7 +479,7 @@ class FindMyFilesController extends Controller
 
         $slug    = trim($request->query('tender', ''));
         $tender  = $slug ? Tender::where('slug', $slug)->first() : null;
-        $tenders = Tender::orderBy('title')->get(['id', 'title', 'slug']);
+        $tenders = Tender::orderBy('title')->get(['id', 'title', 'slug', 'tender_code']);
 
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
@@ -286,6 +487,7 @@ class FindMyFilesController extends Controller
         $data['bs']          = $bs;
         $data['tender']      = $tender;
         $data['tenders']     = $tenders;
+        $data['countries']   = Countries::forCheckout();
 
         return view('front.find-my-files.index', $data);
     }
@@ -422,7 +624,7 @@ class FindMyFilesController extends Controller
             'token_hash'     => $tokenHash,
             'issued_at'      => now(),
             'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
-            'max_downloads'  => self::MAX_DOWNLOADS,
+            'max_downloads'  => $this->maxDownloads(),
             'download_count' => 0,
             'status'         => 'active',
             'device_hash'    => $deviceHash,
@@ -533,15 +735,26 @@ class FindMyFilesController extends Controller
             return $this->suspendedDownloadError($currentLang, $purchase);
         }
 
-        // Risk score for display
+        // ── Binding check — link is locked to the browser+device+IP that verified ─
+        if ($this->bindingFails($token, $request)) {
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'BINDING_MISMATCH',
+                'risk_score' => 0,
+            ]);
+            return $this->downloadError($currentLang, [
+                'message' => __('This link is locked to the device, browser and network that requested it. Please repeat the verification on this device to get a new link.'),
+            ]);
+        }
+
+        // Risk score for logging
         $risk = $this->riskScore($request, $token->email_hash);
 
-        // ── Count this link open and expire if exhausted ─────────────────────
-        $token->increment('download_count');
-
-        if ($token->download_count >= $token->max_downloads) {
-            $token->update(['status' => 'expired']);
-        }
+        // NOTE: opening this confirmation page no longer consumes a download. The
+        // count is charged in downloadStream() only when the file is actually
+        // served, so an email-link click that never transfers a file is free.
 
         AccessLog::record(AccessLog::LINK_CLICKED, [
             'ip'          => $request->ip(),
@@ -555,9 +768,6 @@ class FindMyFilesController extends Controller
 
         $data['token']       = $token;
         $data['rawToken']    = $raw;
-        $data['riskScore']   = $risk;
-        $data['riskLabel']   = $risk < 30 ? 'Low' : ($risk < 70 ? 'Medium' : 'High');
-        $data['riskColor']   = $risk < 30 ? '#16a34a' : ($risk < 70 ? '#d97706' : '#dc2626');
         $data['streamUrl']   = route('find_my_files.stream', ['t' => $raw]);
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
@@ -577,6 +787,7 @@ class FindMyFilesController extends Controller
         $data['errorTitle']   = $opts['title']     ?? null;
         $data['errorMessage'] = $opts['message']   ?? null;
         $data['suspended']    = $opts['suspended'] ?? false;
+        $data['maxDownloads'] = $this->maxDownloads();
         return view('front.find-my-files.download_error', $data);
     }
 
@@ -616,6 +827,18 @@ class FindMyFilesController extends Controller
                 'ip'         => $request->ip(),
                 'user_agent' => substr($request->userAgent(), 0, 255),
                 'result'     => 'TOKEN_INVALID_AT_STREAM',
+                'risk_score' => 0,
+            ]);
+            abort(403);
+        }
+
+        // Enforce the browser+device+IP binding on the actual file transfer too.
+        if ($this->bindingFails($token, $request)) {
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'BINDING_MISMATCH_AT_STREAM',
                 'risk_score' => 0,
             ]);
             abort(403);
@@ -727,7 +950,7 @@ class FindMyFilesController extends Controller
             if (empty($module->tender_file)) {
                 continue;
             }
-            $modulesDir = env('FMF_MODULES_PATH', base_path('../assets/front/files/tender_modules'));
+            $modulesDir = env('FMF_MODULES_PATH', storage_path('app/tender_modules'));
             $filePath = rtrim($modulesDir, '/') . '/' . $module->tender_file;
             if (!file_exists($filePath)) {
                 continue;
@@ -768,6 +991,14 @@ class FindMyFilesController extends Controller
             }
             $added++;
         }
+
+        // Always include the buyer's payment receipt PDF in the archive.
+        $receipt = $this->receiptPath($purchase);
+        if ($receipt && file_exists($receipt)) {
+            $zip->addFile($receipt, 'Payment_Receipt_' . $purchase->order_number . '.pdf');
+            $added++;
+        }
+
         $zip->close();
 
         // Stamped temp PDFs are already copied into the archive; drop them.
@@ -778,6 +1009,14 @@ class FindMyFilesController extends Controller
         if ($added === 0) {
             @unlink($zipPath);
             abort(404);
+        }
+
+        // ── Charge one download now that the file is actually being served ────
+        // (page-open no longer counts — only a real file transfer does). Expire
+        // the token once the allowance is spent.
+        $token->increment('download_count');
+        if ($token->download_count >= $token->max_downloads) {
+            $token->update(['status' => 'expired']);
         }
 
         AccessLog::record(AccessLog::DOWNLOAD_SUCCESS, [
@@ -791,10 +1030,17 @@ class FindMyFilesController extends Controller
         ]);
 
         // ── Stream + delete ───────────────────────────────────────────────────
+        // no-store so repeat downloads always hit the server (and get counted)
+        // instead of being replayed from the browser cache for the same URL.
         return response()->download(
             $zipPath,
             'tender_documents_' . $token->order_id . '.zip',
-            ['Content-Type' => 'application/zip']
+            [
+                'Content-Type'  => 'application/zip',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma'        => 'no-cache',
+                'Expires'       => '0',
+            ]
         )->deleteFileAfterSend(true);
     }
 
@@ -953,26 +1199,55 @@ class FindMyFilesController extends Controller
 
         $risk = $this->riskScore($request, $emailHash);
 
-        // ── 3. Find most recent completed purchase for this email (any tender) ──
-        $purchase = TenderPurchase::where('payment_status', 'Completed')
-            ->get()
-            ->filter(function ($p) use ($request) {
-                return strtolower(trim($p->email)) === strtolower(trim($request->input('email')));
-            })
-            ->sortByDesc('created_at')
-            ->first();
+        // ── 3. Find the order to re-issue a link for ──────────────────────────
+        $email    = strtolower(trim($request->input('email')));
+        $regNo    = TenderPurchase::normalizeRegNo($request->input('company_registration_no', ''));
+        $tenderId = (int) $request->input('tender_id', 0);
 
-        if (!$purchase) {
-            $this->incrementAttempts($request, $emailHash);
-            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
-                'result'     => 'REGEN_NO_MATCH',
-                'risk_score' => $risk,
-            ]));
-            // Neutral — same response as success
-            return response()->json([
-                'status'   => 'success',
-                'redirect' => route('find_my_files.link_sent'),
-            ]);
+        if ($regNo !== '' && $tenderId > 0) {
+            // Checkout "already paid" context: the entered email MUST be the one
+            // that paid under this registration number on this tender. Otherwise
+            // anyone knowing a registration number could mail themselves the link.
+            $regOrders = TenderPurchase::where('payment_status', 'Completed')
+                ->where('tender_id', $tenderId)
+                ->get()
+                ->filter(fn ($p) => TenderPurchase::normalizeRegNo($p->company_registration_no) === $regNo);
+
+            $purchase = $regOrders->first(fn ($p) => strtolower(trim($p->email)) === $email);
+
+            if (!$purchase) {
+                // Email does not match this registration number's order → refuse.
+                $this->incrementAttempts($request, $emailHash);
+                AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                    'result'     => 'REGEN_EMAIL_MISMATCH',
+                    'risk_score' => $risk,
+                ]));
+                return response()->json([
+                    'status' => 'error',
+                    'type'   => 'email_mismatch',
+                ]);
+            }
+        } else {
+            // Email-only recovery (Method 4): the link is only ever sent to the
+            // address that placed the order, so it can't be redirected elsewhere.
+            $purchase = TenderPurchase::where('payment_status', 'Completed')
+                ->get()
+                ->filter(fn ($p) => strtolower(trim($p->email)) === $email)
+                ->sortByDesc('created_at')
+                ->first();
+
+            if (!$purchase) {
+                $this->incrementAttempts($request, $emailHash);
+                AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                    'result'     => 'REGEN_NO_MATCH',
+                    'risk_score' => $risk,
+                ]));
+                // Neutral — same response as success (no account enumeration)
+                return response()->json([
+                    'status'   => 'success',
+                    'redirect' => route('find_my_files.link_sent'),
+                ]);
+            }
         }
 
         // ── 3b. Suspension check ──────────────────────────────────────────────
@@ -1003,6 +1278,11 @@ class FindMyFilesController extends Controller
             ->where('status', 'active')
             ->update(['status' => 'revoked']);
 
+        // Bind the link to this browser + device + IP (same as OTP / payref), so
+        // the emailed link only works in the browser that requested it.
+        $sessionSecret = Str::random(40);
+        $sessionHash   = hash('sha256', $sessionSecret);
+
         // ── 6. Issue new SecureToken ──────────────────────────────────────────
         $rawToken  = $this->generateToken($purchase, $emailHash, $request);
         $tokenHash = hash('sha256', $rawToken);
@@ -1013,11 +1293,12 @@ class FindMyFilesController extends Controller
             'token_hash'     => $tokenHash,
             'issued_at'      => now(),
             'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
-            'max_downloads'  => self::MAX_DOWNLOADS,
+            'max_downloads'  => $this->maxDownloads(),
             'download_count' => 0,
             'status'         => 'active',
-            'device_hash'    => $deviceHash,
+            'device_hash'    => $this->uaHash($request), // UA only (IP checked separately)
             'ip'             => $request->ip(),
+            'session_secret' => $sessionHash,
         ]);
 
         // ── 7. Email the new download link ────────────────────────────────────
@@ -1045,10 +1326,22 @@ class FindMyFilesController extends Controller
             'order_id'   => $purchase->order_number,
         ]));
 
+        // Drop the binding cookie on this browser so the emailed link is locked
+        // to it (+ device + IP), matching the OTP and payment-reference flows.
         return response()->json([
             'status'   => 'success',
             'redirect' => route('find_my_files.link_sent'),
-        ]);
+        ])->cookie(
+            'fmf_dl',
+            $sessionSecret,
+            self::TOKEN_TTL_HOURS * 60,
+            '/',
+            null,
+            $request->secure(),
+            true,
+            false,
+            'Lax'
+        );
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1147,6 +1440,11 @@ class FindMyFilesController extends Controller
             ->where('status', 'active')
             ->update(['status' => 'revoked']);
 
+        // Bind the link to this browser + device + IP (same as OTP recovery), so
+        // the emailed link only works in the browser that requested it.
+        $sessionSecret = Str::random(40);
+        $sessionHash   = hash('sha256', $sessionSecret);
+
         // ── 6. Issue SecureToken ──────────────────────────────────────────────
         $rawToken  = $this->generateToken($purchase, $emailHash, $request);
         $tokenHash = hash('sha256', $rawToken);
@@ -1157,11 +1455,12 @@ class FindMyFilesController extends Controller
             'token_hash'     => $tokenHash,
             'issued_at'      => now(),
             'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
-            'max_downloads'  => self::MAX_DOWNLOADS,
+            'max_downloads'  => $this->maxDownloads(),
             'download_count' => 0,
             'status'         => 'active',
-            'device_hash'    => $deviceHash,
+            'device_hash'    => $this->uaHash($request), // UA only (IP checked separately)
             'ip'             => $request->ip(),
+            'session_secret' => $sessionHash,
         ]);
 
         \Log::info('[PayRef] SecureToken issued', ['order' => $purchase->order_number]);
@@ -1195,10 +1494,22 @@ class FindMyFilesController extends Controller
             'order_id'   => $purchase->order_number,
         ]));
 
+        // Drop the binding cookie on this browser so the emailed link is locked
+        // to it (+ device + IP). Opening it elsewhere is refused at download.
         return response()->json([
             'status'   => 'success',
             'redirect' => route('find_my_files.link_sent'),
-        ]);
+        ])->cookie(
+            'fmf_dl',
+            $sessionSecret,
+            self::TOKEN_TTL_HOURS * 60,
+            '/',
+            null,
+            $request->secure(),
+            true,
+            false,
+            'Lax'
+        );
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1263,65 +1574,81 @@ class FindMyFilesController extends Controller
             ]);
         }
 
-        // ── 3. Neutral lookup ─────────────────────────────────────────────────
-        $risk     = $this->riskScore($request, $emailHash);
-        $tender   = $this->resolveTender($request);
-        $purchase = $this->scopeToPurchase(TenderPurchase::query(), $tender)
-            ->get()
-            ->first(function ($p) use ($request, $phoneHash) {
-                return strtolower(trim($p->email))    === strtolower(trim($request->input('email')))
-                    && $this->phoneHash($p->phone_number) === $phoneHash;
-            });
+        // ── 3. Neutral lookup (across every tender the buyer ticked) ──────────
+        $risk    = $this->riskScore($request, $emailHash);
+        $tenders = $this->resolveTenders($request);
 
-        if (!$purchase) {
+        $matched = TenderPurchase::query()
+            ->when($tenders->isNotEmpty(), fn ($q) => $q->whereIn('tender_id', $tenders->pluck('id')))
+            ->get()
+            ->filter(function ($p) use ($request) {
+                return strtolower(trim($p->email)) === strtolower(trim($request->input('email')))
+                    && TenderPurchase::phoneMatches($p->phone_number, $request->input('phone'));
+            })
+            ->values();
+
+        // No email+phone match at all → explicit "not found" (product choice:
+        // clearer UX over anti-enumeration). Still rate-limited to slow probing.
+        if ($matched->isEmpty()) {
             \Log::info('[OTP/requestOtp] No matching purchase (email+phone)', ['ip' => $request->ip()]);
             $this->incrementAttempts($request, $emailHash);
             AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
                 'result'     => 'OTP_NO_MATCH',
                 'risk_score' => $risk,
             ]));
-            return response()->json([
-                'status'        => 'success',
-                'otp_sent'      => false,
-                'session_token' => Str::uuid()->toString(),
-                'masked_phone'  => OtpVerification::maskPhone($request->input('phone')),
-                'resend_after'  => OtpVerification::RESEND_DELAY,
-            ]);
+            return response()->json(['status' => 'error', 'type' => 'no_match']);
         }
 
-        // ── 4. Check payment status ───────────────────────────────────────────
-        if ($purchase->payment_status !== 'Completed') {
-            \Log::info('[OTP/requestOtp] Purchase not completed', [
-                'order'  => $purchase->order_number,
-                'status' => $purchase->payment_status,
+        // ── 4. Keep only downloadable orders (completed, not suspended) ───────
+        $completed = $matched->filter(fn ($p) => $p->payment_status === 'Completed')->values();
+
+        if ($completed->isEmpty()) {
+            \Log::info('[OTP/requestOtp] Matched but none completed', [
+                'orders' => $matched->pluck('order_number')->all(),
             ]);
             AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
                 'result'     => 'OTP_PAYMENT_PENDING',
                 'risk_score' => $risk,
-                'order_id'   => $purchase->order_number,
+                'order_id'   => $matched->first()->order_number,
             ]));
-            return response()->json([
-                'status' => 'error',
-                'type'   => 'payment_pending',
-            ]);
+            return response()->json(['status' => 'error', 'type' => 'payment_pending']);
         }
 
-        \Log::info('[OTP/requestOtp] Purchase matched and completed', ['order' => $purchase->order_number]);
+        // Drop suspended orders. Every remaining ORDER gets its own link — two
+        // separate purchases on the same tender (e.g. different buyers/modules
+        // under one shared email+phone) are distinct and each is recoverable.
+        // The cards are labelled with Order · Name · Company, so duplicate tender
+        // titles are unambiguous.
+        $usable = $completed
+            ->reject(fn ($p) => $p->isSuspended())
+            ->sortByDesc('id')
+            ->values();
 
-        // ── 4b. Suspension check ──────────────────────────────────────────────
-        if ($r = $this->suspendedResponse($purchase)) {
-            return $r;
+        if ($usable->isEmpty()) {
+            return $this->suspendedResponse($completed->first())
+                ?? response()->json(['status' => 'error', 'type' => 'suspended']);
         }
 
-        // ── 4. Invalidate any previous pending OTP sessions ───────────────────
-        OtpVerification::where('order_id', $purchase->order_number)
+        // Primary order carries the OTP identity + receives the SMS; every usable
+        // order rides along in order_ids so one OTP unlocks the whole selection.
+        $purchase = $usable->first();
+        $orderIds = $usable->pluck('order_number')->all();
+
+        \Log::info('[OTP/requestOtp] Purchases matched and completed', [
+            'primary' => $purchase->order_number,
+            'orders'  => $orderIds,
+        ]);
+
+        // ── 4b. Invalidate any previous pending OTP sessions for these orders ─
+        OtpVerification::whereIn('order_id', $orderIds)
             ->where('status', 'pending')
             ->update(['status' => 'expired']);
 
         // ── 5. Generate & store OTP ───────────────────────────────────────────
         $rawOtp       = OtpVerification::generateOtp();
         $sessionToken = Str::uuid()->toString();
-        $maskedPhone  = OtpVerification::maskPhone($purchase->phone_number);
+        $e164Phone    = $purchase->e164Phone();               // E.164 for the SMS gateway
+        $maskedPhone  = OtpVerification::maskPhone($e164Phone);
 
         OtpVerification::create([
             'session_token'  => $sessionToken,
@@ -1329,6 +1656,7 @@ class FindMyFilesController extends Controller
             'phone_hash'     => $phoneHash,
             'otp_hash'       => hash('sha256', $rawOtp),
             'order_id'       => $purchase->order_number,
+            'order_ids'      => $orderIds,
             'expires_at'     => now()->addMinutes(OtpVerification::OTP_TTL_MIN),
             'attempts'       => 0,
             'last_resend_at' => now(),
@@ -1344,14 +1672,14 @@ class FindMyFilesController extends Controller
         ]);
 
         // ── 6. Send SMS ───────────────────────────────────────────────────────
-        $appName = config('app.name');
+        $appName = $this->brandName();
         $message = "{$appName}: Your verification code is {$rawOtp}. Valid for " . OtpVerification::OTP_TTL_MIN . " minutes. Do not share this code.";
 
-        \Log::info('[OTP/requestOtp] Attempting SMS send', ['to' => substr($purchase->phone_number, 0, 5) . '***']);
+        \Log::info('[OTP/requestOtp] Attempting SMS send', ['to' => substr($e164Phone, 0, 6) . '***']);
 
         try {
             $sms  = app(SmsGatewayInterface::class);
-            $sent = $sms->send($purchase->phone_number, $message);
+            $sent = $sms->send($e164Phone, $message);
         } catch (\Throwable $e) {
             $sent = false;
             \Log::error('[OTP/requestOtp] SMS threw exception', [
@@ -1439,65 +1767,106 @@ class FindMyFilesController extends Controller
         }
 
         // ── OTP correct ───────────────────────────────────────────────────────
-        $purchase = TenderPurchase::where('order_number', $otp->order_id)->first();
+        // One verification can cover several tenders; order_ids holds them all
+        // (older single-order records fall back to order_id).
+        $orderIds  = !empty($otp->order_ids) ? $otp->order_ids : [$otp->order_id];
+        $purchases = TenderPurchase::whereIn('order_number', $orderIds)->get();
 
-        if (!$purchase) {
+        if ($purchases->isEmpty()) {
             $otp->update(['status' => 'expired']);
             return response()->json(['status' => 'error', 'type' => 'session_invalid']);
         }
 
-        // Suspension check — block issuing a token even after a valid OTP.
-        if ($r = $this->suspendedResponse($purchase)) {
-            $otp->update(['status' => 'verified']);
-            return $r;
-        }
-
         $otp->update(['status' => 'verified']);
 
-        SecureToken::where('order_id', $purchase->order_number)
-            ->where('status', 'active')
-            ->update(['status' => 'revoked']);
+        $emailHash = $otp->email_hash;
+        $downloads = [];      // {title, url} per tender, for the browser + email
 
-        $emailHash   = $otp->email_hash;
-        $rawToken    = $this->generateToken($purchase, $emailHash, $request);
-        $tokenHash   = hash('sha256', $rawToken);
+        // Session/device/IP binding: one secret for this verification, stored
+        // (hashed) on every token and dropped as an httpOnly cookie on THIS
+        // browser. The download is then locked to this browser + device + IP.
+        $sessionSecret = Str::random(40);
+        $sessionHash   = hash('sha256', $sessionSecret);
 
-        SecureToken::create([
-            'order_id'       => $purchase->order_number,
-            'email_hash'     => $emailHash,
-            'token_hash'     => $tokenHash,
-            'issued_at'      => now(),
-            'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
-            'max_downloads'  => self::MAX_DOWNLOADS,
-            'download_count' => 0,
-            'status'         => 'active',
-            'device_hash'    => $deviceHash,
-            'ip'             => $request->ip(),
-        ]);
+        foreach ($purchases as $purchase) {
+            // Skip anything no longer downloadable (not completed / suspended).
+            if ($purchase->payment_status !== 'Completed' || $purchase->isSuspended()) {
+                continue;
+            }
 
-        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
-        $emailSent   = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+            // Fresh token per order → each tender keeps its own open-counter.
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+
+            $rawToken = $this->generateToken($purchase, $emailHash, $request);
+
+            SecureToken::create([
+                'order_id'       => $purchase->order_number,
+                'email_hash'     => $emailHash,
+                'token_hash'     => hash('sha256', $rawToken),
+                'issued_at'      => now(),
+                'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
+                'max_downloads'  => $this->maxDownloads(),
+                'download_count' => 0,
+                'status'         => 'active',
+                'device_hash'    => $this->uaHash($request), // UA only (IP checked separately)
+                'ip'             => $request->ip(),
+                'session_secret' => $sessionHash,
+            ]);
+
+            $downloads[] = [
+                'title'   => optional($purchase->tender)->title ?: $purchase->order_number,
+                'url'     => route('find_my_files.download', ['t' => $rawToken]),
+                // Per-order buyer details — names/companies can differ across the
+                // purchases sharing this email+phone, so label each link with the
+                // one that actually placed it (year-end archiving clarity).
+                'name'    => trim($purchase->first_name . ' ' . $purchase->last_name),
+                'company' => (string) $purchase->company_name,
+                'order'   => $purchase->order_number,
+            ];
+
+            AccessLog::record(AccessLog::LINK_SENT, [
+                'ip'          => $request->ip(),
+                'user_agent'  => substr($request->userAgent(), 0, 255),
+                'email_hash'  => $emailHash,
+                'device_hash' => $deviceHash,
+                'order_id'    => $purchase->order_number,
+                'result'      => 'OTP_VERIFIED_OK',
+                'risk_score'  => 0,
+            ]);
+        }
+
+        // Every matched order turned out suspended/pending after verification.
+        if (empty($downloads)) {
+            return $this->suspendedResponse($purchases->first())
+                ?? response()->json(['status' => 'error', 'type' => 'suspended']);
+        }
+
+        $emailSent = $this->sendDownloadEmail($purchases->first(), $downloads, $be);
         \Log::info('[OTP/verifyOtp] Email result', [
-            'order' => $purchase->order_number,
-            'sent'  => $emailSent,
+            'orders' => array_column($downloads, 'title'),
+            'sent'   => $emailSent,
         ]);
 
         $this->resetAttempts($request, $emailHash);
 
-        AccessLog::record(AccessLog::LINK_SENT, [
-            'ip'          => $request->ip(),
-            'user_agent'  => substr($request->userAgent(), 0, 255),
-            'email_hash'  => $emailHash,
-            'device_hash' => $deviceHash,
-            'order_id'    => $purchase->order_number,
-            'result'      => 'OTP_VERIFIED_OK',
-            'risk_score'  => 0,
-        ]);
-
+        // Drop the binding cookie on this browser (httpOnly, lives as long as the
+        // links). The download routes require it to match.
         return response()->json([
-            'status'   => 'success',
-            'redirect' => route('find_my_files.link_sent'),
-        ]);
+            'status'    => 'success',
+            'downloads' => $downloads,
+        ])->cookie(
+            'fmf_dl',
+            $sessionSecret,
+            self::TOKEN_TTL_HOURS * 60,
+            '/',
+            null,
+            $request->secure(), // secure only over HTTPS
+            true,               // httpOnly
+            false,
+            'Lax'
+        );
     }
 
     public function resendOtp(Request $request)
@@ -1539,11 +1908,11 @@ class FindMyFilesController extends Controller
             'status'         => 'pending',
         ]);
 
-        $appName = config('app.name');
+        $appName = $this->brandName();
         $message = "{$appName}: Your new verification code is {$rawOtp}. Valid for " . OtpVerification::OTP_TTL_MIN . " minutes.";
 
         $sms  = app(SmsGatewayInterface::class);
-        $sent = $sms->send($purchase->phone_number, $message);
+        $sent = $sms->send($purchase->e164Phone(), $message);
 
         if (!$sent) {
             return response()->json(['status' => 'error', 'type' => 'sms_failed']);

@@ -13,7 +13,7 @@ class SecureToken extends Model
     protected $fillable = [
         'id', 'order_id', 'email_hash', 'token_hash',
         'issued_at', 'expires_at', 'max_downloads', 'download_count',
-        'status', 'device_hash', 'ip',
+        'status', 'device_hash', 'ip', 'session_secret',
     ];
 
     protected $dates = ['issued_at', 'expires_at'];

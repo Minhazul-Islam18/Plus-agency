@@ -39,7 +39,7 @@ class TenderWatermarkTest extends Command
 
     public function handle()
     {
-        $modulesDir = env('FMF_MODULES_PATH', base_path('../assets/front/files/tender_modules'));
+        $modulesDir = env('FMF_MODULES_PATH', storage_path('app/tender_modules'));
 
         if ($this->option('cleanup')) {
             return $this->cleanup($modulesDir);

@@ -168,6 +168,12 @@
     color: #fff;
     text-decoration: none;
 }
+.fmf-dl-autohint {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: #94a3b8;
+    text-align: center;
+}
 
 /* ── Footer ── */
 .fmf-dl-footer {
@@ -290,7 +296,7 @@
                                     <span>{{ __('Remaining downloads:') }}</span>
                                 </div>
                                 <span class="fmf-val-blue">
-                                    {{ $token->max_downloads - $token->download_count }} / {{ $token->max_downloads }}
+                                    <span id="fmf-remaining">{{ $token->max_downloads - $token->download_count }}</span> / {{ $token->max_downloads }}
                                 </span>
                             </div>
                         </div>
@@ -308,7 +314,7 @@
                             <div class="fmf-dl-item">
                                 <div class="fmf-dl-item-left">
                                     <span class="fmf-dot"></span>
-                                    <span>{{ __('IP verified') }}</span>
+                                    <span>{{ __('IP address verified') }}</span>
                                 </div>
                                 <div class="fmf-tick">
                                     <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -328,9 +334,11 @@
                             <div class="fmf-dl-item">
                                 <div class="fmf-dl-item-left">
                                     <span class="fmf-dot"></span>
-                                    <span>{{ __('Risk score:') }}</span>
+                                    <span>{{ __('Session locked to this browser') }}</span>
                                 </div>
-                                <span style="color:{{ $riskColor }}; font-weight:600;">{{ __($riskLabel) }}</span>
+                                <div class="fmf-tick">
+                                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
                             </div>
                         </div>
 
@@ -339,10 +347,56 @@
 
                     {{-- ── Download button ── --}}
                     <div class="fmf-dl-btn-wrap">
-                        <a href="{{ $streamUrl }}" class="btn-fmf-dl">
+                        <a href="{{ $streamUrl }}" class="btn-fmf-dl" id="fmf-dl-btn">
                             {{ __('Download the Secure Files') }}
                         </a>
+                        <p class="fmf-dl-autohint" id="fmf-dl-autohint">{{ __('Your download is starting automatically…') }}</p>
                     </div>
+
+                    {{-- Hidden frame that auto-starts the download on page load --}}
+                    <iframe id="fmf-dl-frame" title="download" style="display:none; width:0; height:0; border:0;"></iframe>
+                    <script>
+                        (function () {
+                            var url    = @json($streamUrl);
+                            var frame  = document.getElementById('fmf-dl-frame');
+                            var hint   = document.getElementById('fmf-dl-autohint');
+                            var remEl  = document.getElementById('fmf-remaining');
+                            var btn    = document.getElementById('fmf-dl-btn');
+
+                            // Keep the on-screen "remaining" in sync with each actual
+                            // download the user triggers (each stream = one count on the
+                            // server). Never drops below 0.
+                            function spendOne() {
+                                if (!remEl) return;
+                                var n = parseInt(remEl.textContent, 10);
+                                if (!isNaN(n) && n > 0) remEl.textContent = (n - 1);
+                            }
+
+                            // Auto-start the download once, only on a genuine page load
+                            // (not on bfcache back/forward restores), so a single redirect
+                            // from the email = one download.
+                            function autoStart() {
+                                if (window.__fmfAutoStarted) return;
+                                window.__fmfAutoStarted = true;
+                                if (frame) frame.src = url;
+                                spendOne();
+                                if (hint) {
+                                    setTimeout(function () {
+                                        hint.textContent = @json(__('If your download did not start, use the button above.'));
+                                    }, 2500);
+                                }
+                            }
+
+                            // Manual re-download also spends one.
+                            if (btn) btn.addEventListener('click', function () { spendOne(); });
+
+                            if (document.readyState === 'complete') {
+                                setTimeout(autoStart, 400);
+                            } else {
+                                window.addEventListener('load', function () { setTimeout(autoStart, 400); });
+                            }
+                        })();
+                    </script>
 
                     {{-- ── Footer ── --}}
                     <div class="fmf-dl-footer">

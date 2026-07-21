@@ -1,0 +1,17 @@
+# Deny direct HTTP access to PAID tender module files. They are delivered only via
+# the app's secure download endpoint (token + payment + watermark + limit + device
+# binding), which reads them from disk server-side. mod_rewrite blocks the subpath
+# even though the folder itself is web-served for other assets.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^tender_modules/ - [F,L]
+</IfModule>
+
+# Fallback: also block by extension inside this tree if rewrite is unavailable.
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(zip|pdf|xlsx|xls|docx|doc|rar|7z)$">
+        # Note: this also affects other files here; the rewrite rule above is the
+        # primary, path-scoped control. Kept commented to avoid over-blocking.
+        # Require all denied
+    </FilesMatch>
+</IfModule>

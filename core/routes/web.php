@@ -1162,6 +1162,11 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/tender/blacklist/delete', 'Admin\TenderBlacklistController@destroy')->name('admin.tender.blacklist.delete');
 
         // Admin Tender Module Routes
+        // One-off: move tender module files into secure storage (no terminal needed).
+        // Visit ?cleanup=1 only AFTER confirming a real download works. Remove this
+        // route once the migration is done.
+        Route::get('/tender/migrate-files', 'Admin\TenderModuleController@migrateFiles')->name('admin.tender.migrate_files');
+
         Route::get('/tender/{id}/modules', 'Admin\TenderModuleController@index')->name('admin.tender.module.index');
         Route::post('/tender/module/store', 'Admin\TenderModuleController@store')->name('admin.tender.module.store');
         Route::post('/tender/module/update', 'Admin\TenderModuleController@update')->name('admin.tender.module.update');

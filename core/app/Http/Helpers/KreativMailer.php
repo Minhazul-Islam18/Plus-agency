@@ -12,6 +12,16 @@ class KreativMailer {
     public function mailFromAdmin($data) {
         $temp = EmailTemplate::where('email_type', '=', $data['templateType'])->first();
 
+        // Missing template (e.g. not seeded on this environment) → log and stop
+        // instead of a fatal null-property access, so the caller can report a
+        // clean failure to the user.
+        if (!$temp) {
+            \Log::error('[KreativMailer] Email template missing', [
+                'templateType' => $data['templateType'] ?? null,
+            ]);
+            throw new \RuntimeException('Email template not found: ' . ($data['templateType'] ?? ''));
+        }
+
         $body = $temp->email_body;
         if (array_key_exists('customer_name', $data)) {
             $body = preg_replace("/{customer_name}/", $data['customer_name'], $body);
@@ -33,6 +43,11 @@ class KreativMailer {
         }
         if (array_key_exists('download_url', $data)) {
             $body = preg_replace("/{download_url}/", $data['download_url'], $body);
+        }
+        // HTML block of one-or-more titled download buttons (tender multi-download).
+        // str_replace so the HTML is never treated as a regex backreference.
+        if (array_key_exists('download_list', $data)) {
+            $body = str_replace('{download_list}', $data['download_list'], $body);
         }
         if (array_key_exists('expires_at', $data)) {
             $body = preg_replace("/{expires_at}/", $data['expires_at'], $body);

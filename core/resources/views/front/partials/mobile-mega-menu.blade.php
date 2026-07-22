@@ -25,6 +25,8 @@
                                 $catUrl = route('front.events', ['category' => $mcat->id]);
                             } elseif ($link["type"] == 'blogs-megamenu') {
                                 $catUrl = route('front.blogs', ['category' => $mcat->slug]);
+                            } elseif ($link["type"] == 'tenders-megamenu') {
+                                $catUrl = route('tenders', ['category_id' => $mcat->id]);
                             }
                         @endphp
                         <a href="{{$catUrl}}" data-tabid="#megaTab{{$link["type"]}}{{$mcat->id}}">{{$mcat->name}}</a>

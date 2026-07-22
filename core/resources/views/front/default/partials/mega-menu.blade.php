@@ -49,6 +49,12 @@
         $catModel = '\App\Bcategory';
         $itemModel = '\App\Blog';
         $allUrl = route("front.blogs");
+    } elseif ($link["type"] == 'tenders-megamenu') {
+        $data = $currentLang->megamenus()->where('type', 'tenders')->where('category', 1);
+        $cats = $currentLang->tender_categories()->where('status', 1)->get();
+        $catModel = '\App\TenderCategory';
+        $itemModel = '\App\Tender';
+        $allUrl = route("tenders");
     }
 
     if ($data->count() > 0) {
@@ -94,6 +100,8 @@
                                         $catUrl = route('front.events', ['category' => $mcat->id]);
                                     } elseif ($link["type"] == 'blogs-megamenu') {
                                         $catUrl = route('front.blogs', ['category' => $mcat->slug]);
+                                    } elseif ($link["type"] == 'tenders-megamenu') {
+                                        $catUrl = route('tenders', ['category_id' => $mcat->id]);
                                     }
                                 @endphp
                                 <li><a href="{{$catUrl}}" data-tabid="#megaTab{{$link["type"]}}{{$mcat->id}}">{{$mcat->name}}</a></li>
@@ -168,6 +176,9 @@
                                         } elseif ($link["type"] == 'blogs-megamenu') {
                                             $detailsUrl = route('front.blogdetails',[$mItem->slug]);
                                             $imgSrc = asset('assets/front/img/blogs/' . $mItem->main_image);
+                                        } elseif ($link["type"] == 'tenders-megamenu') {
+                                            $detailsUrl = route('tender_details', [$mItem->slug]);
+                                            $imgSrc = asset('assets/front/img/tenders/' . $mItem->tender_image);
                                         }
                                     @endphp
                                     <div class="col-lg-3">

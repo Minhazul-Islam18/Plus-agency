@@ -100,7 +100,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                     @endforeach
 
                                     <li class="list-group-item">{{__('Team Members')}} <a data-text="{{__('Team Members')}}" data-type="team" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
-                                    <li class="list-group-item">{{__('Career')}} <a data-text="{{__('Career')}}" data-type="career" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
 
                                     @if ($bex->is_tender == 1)
                                         <li class="list-group-item">
@@ -115,7 +114,6 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         </li>
                                     @endif
 
-                                    <li class="list-group-item">{{__('Event Calendar')}} <a data-text="{{__('Event Calendar')}}" data-type="calendar" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('Gallery')}} <a data-text="{{__('Gallery')}}" data-type="gallery" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
                                     <li class="list-group-item">{{__('FAQ')}} <a data-text="{{__('FAQ')}}" data-type="faq" class="addToMenus btn btn-primary btn-sm float-right" href="">Add to Menus</a></li>
 

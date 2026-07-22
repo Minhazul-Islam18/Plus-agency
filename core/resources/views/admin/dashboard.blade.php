@@ -116,33 +116,39 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table class="table table-striped">
+                                        <table class="table table-striped" style="table-layout: fixed; width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>Order</th>
-                                                    <th>Tender</th>
-                                                    <th>Status</th>
-                                                    <th>Actions</th>
+                                                    <th style="width: 130px;">Order</th>
+                                                    <th style="width: 220px;">Tender</th>
+                                                    <th style="width: 110px;">Status</th>
+                                                    <th style="width: 110px;">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @forelse ($tpurchases as $tpurchase)
                                                     <tr>
-                                                        <td>{{ $tpurchase->order_number }}</td>
-                                                        <td>
-                                                            {{ !empty($tpurchase->tender)
-                                                                ? (strlen($tpurchase->tender->title) > 25
-                                                                    ? mb_substr($tpurchase->tender->title, 0, 25, 'utf-8') . '...'
-                                                                    : $tpurchase->tender->title)
-                                                                : '-' }}
+                                                        <td style="width: 130px; word-break: break-word;">{{ $tpurchase->order_number }}</td>
+                                                        <td style="width: 220px;">
+                                                            @if (!empty($tpurchase->tender))
+                                                                @php $tTitle = $tpurchase->tender->title; @endphp
+                                                                @if (mb_strlen($tTitle, 'utf-8') > 25)
+                                                                    <span class="tender-title-short">{{ mb_substr($tTitle, 0, 25, 'utf-8') }}&hellip;</span><span class="tender-title-full d-none">{{ $tTitle }}</span>
+                                                                    <a href="javascript:void(0)" class="tender-title-toggle" style="font-size: 11px; white-space: nowrap;">Show more</a>
+                                                                @else
+                                                                    {{ $tTitle }}
+                                                                @endif
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
-                                                        <td>
+                                                        <td style="width: 110px;">
                                                             <span
                                                                 class="{{ strtolower($tpurchase->payment_status) == 'completed' ? 'badge badge-success' : 'badge badge-danger' }}">
                                                                 {{ strtolower($tpurchase->payment_status) == 'completed' ? 'Completed' : 'Pending' }}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td style="width: 110px;">
                                                             <div class="dropdown">
                                                                 <button class="btn btn-info btn-sm dropdown-toggle"
                                                                     type="button" data-toggle="dropdown"
@@ -177,4 +183,26 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .tender-title-full {
+            word-break: break-word;
+            white-space: normal;
+        }
+    </style>
+    <script>
+        document.addEventListener('click', function(e) {
+            var toggle = e.target.closest('.tender-title-toggle');
+            if (!toggle) return;
+
+            var cell = toggle.closest('td');
+            var short = cell.querySelector('.tender-title-short');
+            var full = cell.querySelector('.tender-title-full');
+            var expanded = !full.classList.contains('d-none');
+
+            short.classList.toggle('d-none', !expanded);
+            full.classList.toggle('d-none', expanded);
+            toggle.textContent = expanded ? 'Show more' : 'Show less';
+        });
+    </script>
 @endsection

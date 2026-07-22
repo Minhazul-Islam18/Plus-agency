@@ -60,39 +60,45 @@
                                 <h3 class="text-center">NO ENROLL FOUND</h3>
                             @else
                                 <div class="table-responsive">
-                                    <table class="table table-striped mt-3">
+                                    <table class="table table-striped mt-3" style="table-layout: fixed; width: 100%;">
                                         <thead>
                                             <tr>
-                                                <th scope="col">
+                                                <th scope="col" style="width: 40px;">
                                                     <input type="checkbox" class="bulk-check" data-val="all">
                                                 </th>
-                                                <th scope="col">Order Number</th>
-                                                <th scope="col">Tender</th>
-                                                <th scope="col">Name</th>
-                                                <th scope="col">Payment Status</th>
-                                                <th scope="col">Access</th>
-                                                <th scope="col">Receipt</th>
-                                                <th scope="col">Details</th>
-                                                <th scope="col">Actions</th>
+                                                <th scope="col" style="width: 120px;">Order Number</th>
+                                                <th scope="col" style="width: 190px;">Tender</th>
+                                                <th scope="col" style="width: 140px;">Name</th>
+                                                <th scope="col" style="width: 130px;">Payment Status</th>
+                                                <th scope="col" style="width: 90px;">Access</th>
+                                                <th scope="col" style="width: 140px;">Receipt</th>
+                                                <th scope="col" style="width: 90px;">Details</th>
+                                                <th scope="col" style="width: 260px;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($purchases as $purchase)
                                                 <tr>
-                                                    <td>
+                                                    <td style="width: 40px;">
                                                         <input type="checkbox" class="bulk-check"
                                                             data-val="{{ $purchase->id }}">
                                                     </td>
-                                                    <td>{{ $purchase->order_number }}</td>
-                                                    <td>
-                                                        {{ !empty($purchase->tender)
-                                                            ? (strlen($purchase->tender->title) > 30
-                                                                ? mb_substr($purchase->tender->title, 0, 30, 'utf-8') . '...'
-                                                                : $purchase->tender->title)
-                                                            : '-' }}
+                                                    <td style="width: 120px; word-break: break-word;">{{ $purchase->order_number }}</td>
+                                                    <td style="width: 190px;">
+                                                        @if (!empty($purchase->tender))
+                                                            @php $tTitle = $purchase->tender->title; @endphp
+                                                            @if (mb_strlen($tTitle, 'utf-8') > 30)
+                                                                <span class="tender-title-short">{{ mb_substr($tTitle, 0, 30, 'utf-8') }}&hellip;</span><span class="tender-title-full d-none">{{ $tTitle }}</span>
+                                                                <a href="javascript:void(0)" class="tender-title-toggle" style="font-size: 11px; white-space: nowrap;">Show more</a>
+                                                            @else
+                                                                {{ $tTitle }}
+                                                            @endif
+                                                        @else
+                                                            -
+                                                        @endif
                                                     </td>
-                                                    <td>{{ $purchase->first_name }} {{ $purchase->last_name }}</td>
-                                                    <td>
+                                                    <td style="width: 140px; word-break: break-word;">{{ $purchase->first_name }} {{ $purchase->last_name }}</td>
+                                                    <td style="width: 130px;">
                                                         @if ($purchase->gateway_type == 'offline')
                                                             <form
                                                                 action="{{ route('admin.tender.purchasePaymentStatus') }}"
@@ -119,7 +125,7 @@
                                                             </span>
                                                         @endif
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 90px;">
                                                         @if ($purchase->isSuspended())
                                                             <span class="badge badge-dark" data-toggle="tooltip"
                                                                 title="{{ $purchase->suspend_reason ?: 'Suspended by admin' }}">Suspended</span>
@@ -127,7 +133,7 @@
                                                             <span class="badge badge-success">Active</span>
                                                         @endif
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 140px;">
                                                         <div>
                                                             @if (!empty($purchase->invoice))
                                                                 <a href="{{ route('admin.tender.invoiceDownload', $purchase->id) }}"
@@ -150,13 +156,13 @@
                                                             @endif
                                                         </div>
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 90px;">
                                                         <a href="#" class="btn btn-primary btn-sm" data-toggle="modal"
                                                             data-target="#detailsModal{{ $purchase->id }}">
                                                             Details
                                                         </a>
                                                     </td>
-                                                    <td style="min-width: 250px;">
+                                                    <td style="width: 260px;">
                                                         <div class="d-flex flex-row flex-wrap align-items-center" style="gap: 6px;">
                                                             {{-- Suspend / Reactivate this transaction --}}
                                                             <form action="{{ route('admin.tender.purchaseSuspend') }}"
@@ -238,4 +244,26 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .tender-title-full {
+            word-break: break-word;
+            white-space: normal;
+        }
+    </style>
+    <script>
+        document.addEventListener('click', function(e) {
+            var toggle = e.target.closest('.tender-title-toggle');
+            if (!toggle) return;
+
+            var cell = toggle.closest('td');
+            var short = cell.querySelector('.tender-title-short');
+            var full = cell.querySelector('.tender-title-full');
+            var expanded = !full.classList.contains('d-none');
+
+            short.classList.toggle('d-none', !expanded);
+            full.classList.toggle('d-none', expanded);
+            toggle.textContent = expanded ? 'Show more' : 'Show less';
+        });
+    </script>
 @endsection

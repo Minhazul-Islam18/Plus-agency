@@ -25,6 +25,169 @@
     .thumb-preview:hover .remove-breadcrumb-btn {
         opacity: 1;
     }
+
+    /* ---- Tender Settings — premium tab layout ---- */
+    .tss-wrap {
+        display: flex;
+        align-items: flex-start;
+        gap: 26px;
+    }
+
+    .tss-nav {
+        flex: 0 0 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: #1a2035;
+        border: 1px solid rgba(255, 255, 255, .06);
+        border-radius: 16px;
+        padding: 12px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .tss-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 11px 13px;
+        border-radius: 12px;
+        color: #b9babf;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .15s ease;
+    }
+
+    .tss-nav-link:hover {
+        background: rgba(255, 255, 255, .05);
+        color: var(--tss-accent, #1572E8);
+        text-decoration: none;
+        box-shadow: none;
+        transform: translateX(2px);
+    }
+
+    .tss-nav-link.active {
+        background: linear-gradient(135deg, var(--tss-accent, #1572E8), var(--tss-accent-2, #4a9bff));
+        color: #fff;
+        box-shadow: 0 8px 18px -6px var(--tss-accent, #1572E8);
+    }
+
+    .tss-nav-icon {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        background: rgba(21, 114, 232, .12);
+        background: color-mix(in srgb, var(--tss-accent, #1572E8) 14%, transparent);
+        color: var(--tss-accent, #1572E8);
+        transition: background .2s ease, color .2s ease;
+    }
+
+    .tss-nav-link.active .tss-nav-icon {
+        background: rgba(255, 255, 255, .22);
+        color: #fff;
+    }
+
+    .tss-nav-title {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .tss-nav-sub {
+        display: block;
+        font-size: 11px;
+        font-weight: 400;
+        opacity: .62;
+        margin-top: 1px;
+    }
+
+    .tss-nav-link.active .tss-nav-sub {
+        opacity: .85;
+    }
+
+    .tss-content {
+        flex: 1 1 0%;
+        min-width: 0;
+        background: #1a2035;
+        border: 1px solid rgba(255, 255, 255, .06);
+        border-radius: 16px;
+        padding: 30px 32px 8px;
+    }
+
+    .tss-pane-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, .07);
+    }
+
+    .tss-pane-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        background: rgba(21, 114, 232, .1);
+        background: color-mix(in srgb, var(--tss-accent, #1572E8) 12%, transparent);
+        color: var(--tss-accent, #1572E8);
+    }
+
+    .tss-pane-title {
+        font-weight: 700;
+        margin-bottom: 3px;
+        color: #fff;
+    }
+
+    .tss-pane-desc {
+        font-size: 12.5px;
+        color: #8d9498;
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+
+    .tss-subhead {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--tss-accent, #1572E8);
+        margin: 28px 0 16px;
+        padding-left: 12px;
+        border-left: 3px solid var(--tss-accent, #1572E8);
+    }
+
+
+    @media (max-width: 767px) {
+        .tss-wrap {
+            flex-direction: column;
+        }
+
+        .tss-nav {
+            flex-direction: row;
+            overflow-x: auto;
+            position: static;
+            width: 100%;
+        }
+
+        .tss-nav-sub {
+            display: none;
+        }
+
+        .tss-content {
+            padding: 22px 18px 8px;
+        }
+    }
 </style>
 @endsection
 
@@ -55,12 +218,76 @@
       </div>
 
       <div class="card-body pt-4 pb-4">
-        <div class="row">
-          <div class="col-lg-8 offset-lg-2">
-            <form id="settingsForm" action="{{ route('admin.tender.updateSettings') }}"
-              method="POST" enctype="multipart/form-data">
-              @csrf
-              <input type="hidden" name="language" value="{{ $language }}">
+
+        <form id="settingsForm" action="{{ route('admin.tender.updateSettings') }}"
+          method="POST" enctype="multipart/form-data">
+          @csrf
+          <input type="hidden" name="language" value="{{ $language }}">
+
+          <div class="tss-wrap">
+            <div class="tss-nav nav" id="tenderSettingsTabs" role="tablist">
+              <a class="tss-nav-link active" style="--tss-accent:#1572E8;--tss-accent-2:#4a9bff;"
+                data-toggle="tab" href="#tab-general" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-sliders-h"></i></span>
+                <span>
+                  <span class="tss-nav-title">General</span>
+                  <span class="tss-nav-sub">Module on / off</span>
+                </span>
+              </a>
+              <a class="tss-nav-link" style="--tss-accent:#6861CE;--tss-accent-2:#8f7dfb;"
+                data-toggle="tab" href="#tab-invoice" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                <span>
+                  <span class="tss-nav-title">Invoice Design</span>
+                  <span class="tss-nav-sub">Images &amp; footer</span>
+                </span>
+              </a>
+              <a class="tss-nav-link" style="--tss-accent:#48ABF7;--tss-accent-2:#78c4ff;"
+                data-toggle="tab" href="#tab-watermark" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-stamp"></i></span>
+                <span>
+                  <span class="tss-nav-title">Download Watermark</span>
+                  <span class="tss-nav-sub">Stamp on PDFs</span>
+                </span>
+              </a>
+              <a class="tss-nav-link" style="--tss-accent:#F25961;--tss-accent-2:#ff8188;"
+                data-toggle="tab" href="#tab-encryption" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-lock"></i></span>
+                <span>
+                  <span class="tss-nav-title">PDF Encryption</span>
+                  <span class="tss-nav-sub">Owner password</span>
+                </span>
+              </a>
+              <a class="tss-nav-link" style="--tss-accent:#31CE36;--tss-accent-2:#5fe064;"
+                data-toggle="tab" href="#tab-links" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-link"></i></span>
+                <span>
+                  <span class="tss-nav-title">Secure Links</span>
+                  <span class="tss-nav-sub">Opens allowed</span>
+                </span>
+              </a>
+              <a class="tss-nav-link" style="--tss-accent:#FFAD46;--tss-accent-2:#ffc373;"
+                data-toggle="tab" href="#tab-breadcrumb" role="tab">
+                <span class="tss-nav-icon"><i class="fas fa-image"></i></span>
+                <span>
+                  <span class="tss-nav-title">Breadcrumb</span>
+                  <span class="tss-nav-sub">Per-language banner</span>
+                </span>
+              </a>
+            </div>
+
+            <div class="tss-content tab-content" id="tenderSettingsTabContent">
+
+              {{-- ============ General ============ --}}
+              <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#1572E8;">
+                <span class="tss-pane-icon"><i class="fas fa-sliders-h"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">General</h5>
+                  <p class="tss-pane-desc">Master switch for the whole Tender module.</p>
+                </div>
+              </div>
 
               {{-- Tender Module Toggle --}}
               <div class="form-group">
@@ -82,8 +309,21 @@
                 </p>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">Invoice Images</h6>
+              </div>
+              {{-- ============ /General ============ --}}
+
+              {{-- ============ Invoice Design ============ --}}
+              <div class="tab-pane fade" id="tab-invoice" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#6861CE;">
+                <span class="tss-pane-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">Invoice Design</h5>
+                  <p class="tss-pane-desc">Images and footer text printed on every generated invoice.</p>
+                </div>
+              </div>
+
+              <div class="tss-subhead" style="--tss-accent:#6861CE;">Invoice Images</div>
 
               {{-- Watermark --}}
               <div class="form-group">
@@ -172,8 +412,7 @@
                 <p class="text-muted mb-0"><small>Background image behind footer address. Leave empty to use default.</small></p>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">Invoice Footer</h6>
+              <div class="tss-subhead" style="--tss-accent:#6861CE;">Invoice Footer</div>
 
               {{-- Footer Address --}}
               <div class="form-group">
@@ -182,12 +421,22 @@
                 <small class="text-muted">Shown in the footer of every invoice. Leave empty to use the built-in default address.</small>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">Download Watermark</h6>
-              <p class="text-muted mb-3" style="font-size:12px;">
-                Personalised, traceable watermark stamped on every <strong>PDF</strong> a buyer downloads.
-                Applies globally (all languages). Non-PDF files are not stamped.
-              </p>
+              </div>
+              {{-- ============ /Invoice Design ============ --}}
+
+              {{-- ============ Download Watermark ============ --}}
+              <div class="tab-pane fade" id="tab-watermark" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#48ABF7;">
+                <span class="tss-pane-icon"><i class="fas fa-stamp"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">Download Watermark</h5>
+                  <p class="tss-pane-desc">
+                    Personalised, traceable watermark stamped on every <strong>PDF</strong> a buyer downloads.
+                    Applies globally (all languages). Non-PDF files are not stamped.
+                  </p>
+                </div>
+              </div>
 
               {{-- Enable toggle --}}
               <div class="form-group">
@@ -261,13 +510,23 @@
                 </div>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">PDF Encryption</h6>
-              <p class="text-muted mb-3" style="font-size:12px;">
-                Lock every downloaded <strong>PDF</strong> against editing. Buyers open the file normally (no prompt),
-                but cannot modify, annotate or fill it &mdash; those actions need the owner password below, held by admins only.
-                Applies globally (all languages). Non-PDF files are not encrypted.
-              </p>
+              </div>
+              {{-- ============ /Download Watermark ============ --}}
+
+              {{-- ============ PDF Encryption ============ --}}
+              <div class="tab-pane fade" id="tab-encryption" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#F25961;">
+                <span class="tss-pane-icon"><i class="fas fa-lock"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">PDF Encryption</h5>
+                  <p class="tss-pane-desc">
+                    Lock every downloaded <strong>PDF</strong> against editing. Buyers open the file normally (no prompt),
+                    but cannot modify, annotate or fill it &mdash; those actions need the owner password below, held by admins only.
+                    Applies globally (all languages). Non-PDF files are not encrypted.
+                  </p>
+                </div>
+              </div>
 
               {{-- Encryption toggle --}}
               <div class="form-group">
@@ -305,12 +564,22 @@
                 <small class="text-muted d-block mt-1">Required when encryption is active. Admin-only &mdash; never sent to buyers. Use it to unlock editing in a PDF reader.</small>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">Secure Download Links</h6>
-              <p class="text-muted mb-3" style="font-size:12px;">
-                How many times each secure download link may be opened before it expires. Applies to every
-                tender download link (email &amp; on-screen). Global (all languages).
-              </p>
+              </div>
+              {{-- ============ /PDF Encryption ============ --}}
+
+              {{-- ============ Secure Links ============ --}}
+              <div class="tab-pane fade" id="tab-links" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#31CE36;">
+                <span class="tss-pane-icon"><i class="fas fa-link"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">Secure Links</h5>
+                  <p class="tss-pane-desc">
+                    How many times each secure download link may be opened before it expires. Applies to every
+                    tender download link (email &amp; on-screen). Global (all languages).
+                  </p>
+                </div>
+              </div>
 
               {{-- Max downloads per link --}}
               <div class="form-group">
@@ -320,9 +589,19 @@
                 <small class="text-muted d-block mt-1">Default 3. Each selected tender gets its own link with its own counter.</small>
               </div>
 
-              <hr>
-              <h6 class="font-weight-bold mb-3 mt-2">Breadcrumb Background</h6>
-              <p class="text-muted mb-3" style="font-size:12px;">Applied to the Tenders list page and Tender Details page. Settings are per-language.</p>
+              </div>
+              {{-- ============ /Secure Links ============ --}}
+
+              {{-- ============ Breadcrumb ============ --}}
+              <div class="tab-pane fade" id="tab-breadcrumb" role="tabpanel">
+
+              <div class="tss-pane-head" style="--tss-accent:#FFAD46;">
+                <span class="tss-pane-icon"><i class="fas fa-image"></i></span>
+                <div>
+                  <h5 class="tss-pane-title">Breadcrumb Background</h5>
+                  <p class="tss-pane-desc">Applied to the Tenders list page and Tender Details page. Settings are per-language.</p>
+                </div>
+              </div>
 
               {{-- Breadcrumb BG Image --}}
               <div class="form-group">
@@ -367,9 +646,12 @@
                 <p class="text-warning mb-0">Value must be between 0 to 1 (e.g. 0.5 for 50% opacity)</p>
               </div>
 
-            </form>
+              </div>
+              {{-- ============ /Breadcrumb ============ --}}
+
+            </div>
           </div>
-        </div>
+        </form>
       </div>
 
       <div class="card-footer">
@@ -400,6 +682,13 @@
 @section('scripts')
 <script>
 $(document).ready(function() {
+
+    // Summernote inits at 0 width while its tab is hidden (Invoice Design isn't
+    // the default tab) — force the editor to recalc once that tab is shown.
+    $('#tenderSettingsTabs a[href="#tab-invoice"]').on('shown.bs.tab', function() {
+        $('#tab-invoice .note-editor, #tab-invoice .note-editing-area, #tab-invoice .note-editable')
+            .css('width', '100%');
+    });
 
     // PDF password show / hide
     $('#togglePdfPassword').on('click', function() {
@@ -464,4 +753,31 @@ $(document).ready(function() {
 
 });
 </script>
+@if ($errors->any())
+<script>
+$(document).ready(function() {
+    var fieldToTab = {
+        invoice_footer_address: '#tab-invoice',
+        tender_watermark_opacity: '#tab-watermark',
+        tender_watermark_font_size: '#tab-watermark',
+        tender_watermark_rotation: '#tab-watermark',
+        tender_watermark_color: '#tab-watermark',
+        tender_watermark_template: '#tab-watermark',
+        tender_pdf_encrypt_enabled: '#tab-encryption',
+        tender_pdf_password: '#tab-encryption',
+        tender_max_downloads: '#tab-links',
+        tender_breadcrumb_overlay_color: '#tab-breadcrumb',
+        tender_breadcrumb_overlay_opacity: '#tab-breadcrumb',
+    };
+    var errorFields = @json(array_keys($errors->toArray()));
+    for (var i = 0; i < errorFields.length; i++) {
+        var tab = fieldToTab[errorFields[i]];
+        if (tab) {
+            $('#tenderSettingsTabs a[href="' + tab + '"]').tab('show');
+            break;
+        }
+    }
+});
+</script>
+@endif
 @endsection

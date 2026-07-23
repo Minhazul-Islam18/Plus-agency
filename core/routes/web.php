@@ -39,7 +39,7 @@ Route::group(['middleware' => 'setlang'], function () {
     Route::post('/payment/instructions', 'Front\FrontendController@paymentInstruction')->name('front.payment.instructions');
 
 
-    Route::post('/sendmail', 'Front\FrontendController@sendmail')->name('front.sendmail');
+    Route::post('/sendmail', 'Front\FrontendController@sendmail')->name('front.sendmail')->middleware('throttle:3,10');
     Route::post('/subscribe', 'Front\FrontendController@subscribe')->name('front.subscribe');
 
 
@@ -764,6 +764,16 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/feedbacks', 'Admin\FeedbackController@feedbacks')->name('admin.client_feedbacks');
         Route::post('/delete_feedback', 'Admin\FeedbackController@deleteFeedback')->name('admin.delete_feedback');
         Route::post('/feedback/bulk-delete', 'Admin\FeedbackController@bulkDelete')->name('admin.feedback.bulk.delete');
+    });
+
+    Route::group(['middleware' => 'checkpermission:Contact Messages'], function () {
+        // Admin View Contact Messages Routes
+        Route::get('/contact-messages', 'Admin\ContactMessageController@index')->name('admin.contact_messages');
+        Route::post('/contact-message/delete', 'Admin\ContactMessageController@delete')->name('admin.delete_contact_message');
+        Route::post('/contact-message/bulk-delete', 'Admin\ContactMessageController@bulkDelete')->name('admin.contact_message.bulk.delete');
+        Route::post('/contact-message/approve', 'Admin\ContactMessageController@approve')->name('admin.contact_message.approve');
+        Route::post('/contact-message/reject', 'Admin\ContactMessageController@reject')->name('admin.contact_message.reject');
+        Route::post('/contact-message/reply', 'Admin\ContactMessageController@reply')->name('admin.contact_message.reply');
     });
 });
 

@@ -94,6 +94,10 @@
                 			<input type="checkbox" name="permissions[]" value="Client Feedbacks" class="selectgroup-input" @if(is_array($permissions) && in_array('Client Feedbacks', $permissions)) checked @endif>
                 			<span class="selectgroup-button">Client Feedbacks</span>
                 		</label>
+                		<label class="selectgroup-item">
+                			<input type="checkbox" name="permissions[]" value="Contact Messages" class="selectgroup-input" @if(is_array($permissions) && in_array('Contact Messages', $permissions)) checked @endif>
+                			<span class="selectgroup-button">Contact Messages</span>
+                		</label>
                 	</div>
                 </div>
               </form>

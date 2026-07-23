@@ -710,6 +710,16 @@
                         </a>
                     </li>
                 @endif
+
+                @if (empty($admin->role) || (!empty($permissions) && in_array('Contact Messages', $permissions)))
+                    {{-- Contact Messages --}}
+                    <li class="nav-item @if (request()->path() == 'admin/contact-messages') active @endif">
+                        <a href="{{ route('admin.contact_messages') }}">
+                            <i class="fas fa-envelope"></i>
+                            <p>Contact Messages</p>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>

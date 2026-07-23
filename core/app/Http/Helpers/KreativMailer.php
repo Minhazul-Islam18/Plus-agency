@@ -91,6 +91,18 @@ class KreativMailer {
         if (array_key_exists('website_title', $data)) {
             $body = preg_replace("/{website_title}/", $data['website_title'], $body);
         }
+        if (array_key_exists('contact_email', $data)) {
+            $body = preg_replace("/{contact_email}/", $data['contact_email'], $body);
+        }
+        if (array_key_exists('contact_subject', $data)) {
+            $body = preg_replace("/{contact_subject}/", $data['contact_subject'], $body);
+        }
+        if (array_key_exists('contact_message', $data)) {
+            $body = str_replace('{contact_message}', $data['contact_message'], $body);
+        }
+        if (array_key_exists('admin_reply_message', $data)) {
+            $body = str_replace('{admin_reply_message}', $data['admin_reply_message'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
@@ -157,7 +169,17 @@ class KreativMailer {
             $mail->Body    = $body;
 
             $mail->send();
-        } catch (Exception $e) { }
+
+            return true;
+        } catch (Exception $e) {
+            \Log::error('[KreativMailer] Send failed', [
+                'templateType' => $data['templateType'] ?? null,
+                'toMail'       => $data['toMail'] ?? null,
+                'error'        => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 
 }

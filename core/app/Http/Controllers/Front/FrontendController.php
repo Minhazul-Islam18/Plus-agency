@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Front;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
 use App\BasicSetting as BS;
 use App\BasicExtended as BE;
+use App\ContactMessage;
+use App\Http\Helpers\KreativMailer;
+use Illuminate\Support\Facades\Log;
 use App\Slider;
 use App\Scategory;
 use App\Portfolio;
@@ -435,28 +435,73 @@ class FrontendController extends Controller
 
         $request->validate($rules, $messages);
 
-        $request->validate($rules, $messages);
-
         $be =  BE::firstOrFail();
         $from = $request->email;
         $to = $be->to_mail;
         $subject = $request->subject;
         $message = $request->message;
 
+        // Persist first so the submission survives even if the mailer fails —
+        // previously a bad `to_mail` setting or SMTP error silently dropped it.
+        $contactMessage = ContactMessage::create([
+            'name'    => $request->name,
+            'email'   => $from,
+            'subject' => $subject,
+            'message' => $message,
+            'status'  => 'pending',
+        ]);
+
+        // Escaped copies for injecting into the HTML email templates — the
+        // fields below are free-text visitor input, not admin-authored content.
+        $safeName    = e($request->name);
+        $safeEmail   = e($from);
+        $safeSubject = e($subject);
+        $safeMessage = nl2br(e($message));
+
+        $mailer = new KreativMailer;
+
+        // 1) Notify the site owner.
         try {
+            $adminSent = $mailer->mailFromAdmin([
+                'toMail'          => $to,
+                'toName'          => $be->from_name ?: $bs->website_title,
+                'customer_name'   => $safeName,
+                'contact_email'   => $safeEmail,
+                'contact_subject' => $safeSubject,
+                'contact_message' => $safeMessage,
+                'website_title'   => $bs->website_title,
+                'templateType'    => 'contact_admin_notify',
+                'type'            => 'contactAdminNotify',
+            ]);
 
-            $mail = new PHPMailer(true);
-            $mail->setFrom($from, $request->name);
-            $mail->addAddress($to);     // Add a recipient
-
-            // Content
-            $mail->isHTML(true);  // Set email format to HTML
-            $mail->Subject = $subject;
-            $mail->Body    = $message;
-
-            $mail->send();
+            if ($adminSent) {
+                $contactMessage->mail_sent = 1;
+                $contactMessage->save();
+            }
         } catch (\Exception $e) {
-            // die($e->getMessage());
+            Log::error('[Contact] Admin notification email failed', [
+                'contact_message_id' => $contactMessage->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // 2) Auto-reply to the visitor confirming receipt.
+        try {
+            $mailer->mailFromAdmin([
+                'toMail'          => $from,
+                'toName'          => $request->name,
+                'customer_name'   => $safeName,
+                'contact_subject' => $safeSubject,
+                'contact_message' => $safeMessage,
+                'website_title'   => $bs->website_title,
+                'templateType'    => 'contact_customer_confirm',
+                'type'            => 'contactCustomerConfirm',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Contact] Customer confirmation email failed', [
+                'contact_message_id' => $contactMessage->id,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         Session::flash('success', 'Email sent successfully!');

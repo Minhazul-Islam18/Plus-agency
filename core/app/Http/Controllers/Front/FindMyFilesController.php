@@ -683,6 +683,7 @@ class FindMyFilesController extends Controller
         $data['currentLang'] = $currentLang;
         $data['version']     = $this->getVersion($currentLang);
         $data['bs']          = $currentLang->basic_setting;
+        $data['maxDownloads'] = $this->maxDownloads();
 
         return view('front.find-my-files.link_sent', $data);
     }

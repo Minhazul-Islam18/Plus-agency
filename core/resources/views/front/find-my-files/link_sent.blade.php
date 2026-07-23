@@ -205,7 +205,7 @@
                     <ul class="fmf-info-list">
                         <li>{{ __('Please check your inbox (and spam folder).') }}</li>
                         <li>{{ __('The link is valid for 24 hours.') }}</li>
-                        <li>{{ __('Downloads are limited to 3 attempts.') }}</li>
+                        <li>{{ __('Downloads are limited to :count attempts.', ['count' => $maxDownloads]) }}</li>
                         <li>{{ __('You may submit a new request if no email arrives.') }}</li>
                     </ul>
 

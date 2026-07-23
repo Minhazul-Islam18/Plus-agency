@@ -573,5 +573,7 @@
     "tender selected": "appel d’offres sélectionné",
     "tenders selected": "appels d’offres sélectionnés",
     "to reach our support team.": "pour contacter notre équipe de support.",
-    "← Start over": "← Recommencer"
+    "← Start over": "← Recommencer",
+    "Downloads are limited to :count attempts.": "Les téléchargements sont limités à :count tentatives.",
+    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "Le lien a peut-être expiré (valable 24 heures), atteint la limite de téléchargement (:count tentatives), ou été révoqué."
 }

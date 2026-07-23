@@ -573,5 +573,7 @@
     "tender selected": "tender selected",
     "tenders selected": "tenders selected",
     "to reach our support team.": "to reach our support team.",
-    "← Start over": "← Start over"
+    "← Start over": "← Start over",
+    "Downloads are limited to :count attempts.": "Downloads are limited to :count attempts.",
+    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked."
 }

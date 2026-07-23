@@ -13,7 +13,6 @@ class ContactMessage extends Model
     'email',
     'subject',
     'message',
-    'status',
     'mail_sent',
     'reply_message',
     'replied_at',
@@ -23,21 +22,6 @@ class ContactMessage extends Model
   protected $casts = [
     'replied_at' => 'datetime',
   ];
-
-  public function isPending(): bool
-  {
-    return $this->status === 'pending';
-  }
-
-  public function isApproved(): bool
-  {
-    return $this->status === 'approved';
-  }
-
-  public function isRejected(): bool
-  {
-    return $this->status === 'rejected';
-  }
 
   public function isReplied(): bool
   {

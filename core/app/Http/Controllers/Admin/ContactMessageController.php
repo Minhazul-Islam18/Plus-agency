@@ -15,8 +15,11 @@ class ContactMessageController extends Controller
 {
   public function index(Request $request)
   {
-    $contactMessages = ContactMessage::when($request->status, function ($q) use ($request) {
-        $q->where('status', $request->status);
+    $contactMessages = ContactMessage::when($request->status === 'pending', function ($q) {
+        $q->whereNull('replied_at');
+      })
+      ->when($request->status === 'replied', function ($q) {
+        $q->whereNotNull('replied_at');
       })
       ->orderBy('id', 'desc')
       ->paginate(10);
@@ -44,28 +47,6 @@ class ContactMessageController extends Controller
 
     Session::flash('success', 'Messages deleted successfully!');
     return "success";
-  }
-
-  public function approve(Request $request)
-  {
-    $contactMessage = ContactMessage::findOrFail($request->contact_message_id);
-    $contactMessage->status = 'approved';
-    $contactMessage->save();
-
-    Session::flash('success', 'Message approved successfully!');
-
-    return redirect()->back();
-  }
-
-  public function reject(Request $request)
-  {
-    $contactMessage = ContactMessage::findOrFail($request->contact_message_id);
-    $contactMessage->status = 'rejected';
-    $contactMessage->save();
-
-    Session::flash('success', 'Message rejected successfully!');
-
-    return redirect()->back();
   }
 
   public function reply(Request $request)

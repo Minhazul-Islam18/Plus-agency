@@ -36,8 +36,7 @@
                       onchange="window.location='{{ route('admin.contact_messages') }}?status='+this.value">
                       <option value="">All Statuses</option>
                       <option value="pending" {{ request()->input('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                      <option value="approved" {{ request()->input('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                      <option value="rejected" {{ request()->input('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                      <option value="replied" {{ request()->input('status') == 'replied' ? 'selected' : '' }}>Replied</option>
                     </select>
                   </div>
                 </div>
@@ -85,15 +84,10 @@
                           @endif
                         </td>
                         <td>
-                          @if ($contactMessage->isApproved())
-                            <span class="badge badge-success">Approved</span>
-                          @elseif ($contactMessage->isRejected())
-                            <span class="badge badge-danger">Rejected</span>
+                          @if ($contactMessage->isReplied())
+                            <span class="badge badge-success" data-toggle="tooltip" title="Replied by {{ $contactMessage->replied_by }} on {{ $contactMessage->replied_at->format('d M Y, h:i A') }}">Replied</span>
                           @else
                             <span class="badge badge-warning">Pending</span>
-                          @endif
-                          @if ($contactMessage->isReplied())
-                            <br><span class="badge badge-info mt-1" data-toggle="tooltip" title="Replied by {{ $contactMessage->replied_by }} on {{ $contactMessage->replied_at->format('d M Y, h:i A') }}">Replied</span>
                           @endif
                         </td>
                         <td>{{ $contactMessage->created_at->format('d M Y, h:i A') }}</td>
@@ -102,25 +96,6 @@
                         </td>
                         <td>
                           <div class="d-flex flex-row flex-wrap align-items-center" style="gap: 6px;">
-                            @if (!$contactMessage->isApproved())
-                              <form class="d-inline-block m-0" action="{{route('admin.contact_message.approve')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="contact_message_id" value="{{$contactMessage->id}}">
-                                <button type="submit" class="btn btn-success btn-sm m-0">
-                                  <i class="fas fa-check"></i> Approve
-                                </button>
-                              </form>
-                            @endif
-                            @if (!$contactMessage->isRejected())
-                              <form class="d-inline-block m-0" action="{{route('admin.contact_message.reject')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="contact_message_id" value="{{$contactMessage->id}}">
-                                <button type="submit" class="btn btn-warning btn-sm m-0">
-                                  <i class="fas fa-times"></i> Reject
-                                </button>
-                              </form>
-                            @endif
-
                             <a class="btn btn-sm btn-primary m-0" href="#" data-toggle="modal" data-target="#replyContactMessageModal{{ $contactMessage->id }}">
                               <i class="fas fa-reply"></i> Reply
                             </a>

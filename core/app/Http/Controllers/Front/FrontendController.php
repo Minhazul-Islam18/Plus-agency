@@ -448,7 +448,6 @@ class FrontendController extends Controller
             'email'   => $from,
             'subject' => $subject,
             'message' => $message,
-            'status'  => 'pending',
         ]);
 
         // Escaped copies for injecting into the HTML email templates — the

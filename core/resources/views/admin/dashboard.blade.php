@@ -60,42 +60,49 @@
                 </a>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-success card-round">
-                    <div class="card-body ">
-                        <div class="row">
-                            <div class="col-3">
-                                <div class="icon-big text-center">
-                                    <i class="fas fa-briefcase"></i>
+                <a href="{{ route('admin.service.index', ['language' => $default->code]) }}" class="d-block">
+                    <div class="card card-stats card-secondary card-round">
+                        <div class="card-body ">
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="icon-big text-center">
+                                        <i class="far fa-users-cog"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-9 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Projects</p>
-                                    <h4 class="card-title">{{ $default->portfolios()->count() }}</h4>
+                                <div class="col-9 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">Services</p>
+                                        <h4 class="card-title">{{ $default->services()->count() }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
+        @endif
+
+        @if (empty($admin->role) || (!empty($permissions) && in_array('Tender Management', $permissions)))
             <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-secondary card-round">
-                    <div class="card-body ">
-                        <div class="row">
-                            <div class="col-3">
-                                <div class="icon-big text-center">
-                                    <i class="far fa-users-cog"></i>
+                <a href="{{ route('admin.tender.index', ['language' => $default->code]) }}" class="d-block">
+                    <div class="card card-stats card-success card-round">
+                        <div class="card-body ">
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="icon-big text-center">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-9 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Services</p>
-                                    <h4 class="card-title">{{ $default->services()->count() }}</h4>
+                                <div class="col-9 col-stats">
+                                    <div class="numbers">
+                                        <p class="card-category">Tenders</p>
+                                        <h4 class="card-title">{{ \App\Tender::where('language_id', $default->id)->count() }}</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         @endif
     </div>

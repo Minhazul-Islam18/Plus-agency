@@ -444,5 +444,12 @@
     "WhatsApp": "WhatsApp",
     "No reviews yet.": "No reviews yet.",
     "EXPIRED": "EXPIRED",
-    "TODAY": "TODAY"
+    "TODAY": "TODAY",
+    "Name is required.": "Name is required.",
+    "Email is required.": "Email is required.",
+    "Please enter a valid email address.": "Please enter a valid email address.",
+    "Subject is required.": "Subject is required.",
+    "Please select a rating.": "Please select a rating.",
+    "Please select a valid rating.": "Please select a valid rating.",
+    "Feedback is required.": "Feedback is required."
 }

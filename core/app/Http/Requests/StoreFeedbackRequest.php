@@ -31,4 +31,22 @@ class StoreFeedbackRequest extends FormRequest
       'feedback' => 'required'
     ];
   }
+
+  /**
+   * Get the error messages for the defined validation rules.
+   *
+   * @return array
+   */
+  public function messages()
+  {
+    return [
+      'name.required'     => __('Name is required.'),
+      'email.required'    => __('Email is required.'),
+      'email.email'       => __('Please enter a valid email address.'),
+      'subject.required'  => __('Subject is required.'),
+      'rating.required'   => __('Please select a rating.'),
+      'rating.numeric'    => __('Please select a valid rating.'),
+      'feedback.required' => __('Feedback is required.'),
+    ];
+  }
 }

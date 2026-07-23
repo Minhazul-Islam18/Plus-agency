@@ -459,5 +459,12 @@
     "Click on this link to read the general": "Click on this link to read the general",
     "related to the purchase of tender documents.": "related to the purchase of tender documents.",
     "Click on this link to read the general terms and conditions related to the purchase of tender documents.": "Click on this link to read the general terms and conditions related to the purchase of tender documents.",
-    "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one.": "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one."
+    "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one.": "Special types (e.g. Terms & Conditions) allow only one page per language. Setting it here replaces any existing one.",
+    "Name is required.": "Name is required.",
+    "Email is required.": "Email is required.",
+    "Please enter a valid email address.": "Please enter a valid email address.",
+    "Subject is required.": "Subject is required.",
+    "Please select a rating.": "Please select a rating.",
+    "Please select a valid rating.": "Please select a valid rating.",
+    "Feedback is required.": "Feedback is required."
 }

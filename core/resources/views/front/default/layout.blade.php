@@ -218,10 +218,10 @@
                                 </a>
                             </div>
                             <p class="footer-txt">
-                                @if (strlen($bs->footer_text) > 194)
-                                    {{ mb_substr($bs->footer_text, 0, 194, 'UTF-8') }}<span
-                                        style="display: none;">{{ mb_substr($bs->footer_text, 194, null, 'UTF-8') }}</span>
-                                    <a href="#" class="see-more">{{ __('see more') }}...</a>
+                                @if (mb_strlen($bs->footer_text, 'UTF-8') > 194)
+                                    <span class="footer-text-short">{{ mb_substr($bs->footer_text, 0, 194, 'UTF-8') }}…</span><span
+                                        class="footer-text-full" style="display:none;">{{ $bs->footer_text }}</span>
+                                    <span class="footer-text-toggle" style="white-space:nowrap; font-size:11px; text-decoration:underline; cursor:pointer; color:#0d6efd;">{{ __('Show more') }}</span>
                                 @else
                                     {{ $bs->footer_text }}
                                 @endif
@@ -231,7 +231,24 @@
                             <h4>{{ __('Useful Links') }}</h4>
                             <ul class="footer-links">
                                 @foreach ($ulinks as $key => $ulink)
-                                    <li><a href="{{ $ulink->url }}">{{ convertUtf8($ulink->name) }}</a></li>
+                                    @php
+                                        $ulinkName = convertUtf8($ulink->name);
+                                        $ulinkShort = mb_strlen($ulinkName, 'UTF-8') > 36
+                                            ? mb_substr($ulinkName, 0, 36, 'UTF-8') . '…'
+                                            : null;
+                                    @endphp
+                                    @if ($ulinkShort)
+                                        <li>
+                                            <a href="{{ $ulink->url }}" style="display:inline;">
+                                                <span class="footer-link-short">{{ $ulinkShort }}</span><span class="footer-link-full" style="display:none;">{{ $ulinkName }}</span>
+                                            </a>
+                                            <span class="footer-link-toggle" style="white-space:nowrap; font-size:11px; text-decoration:underline; cursor:pointer; color:#0d6efd;">{{ __('Show more') }}</span>
+                                        </li>
+                                    @else
+                                        <li>
+                                            <a href="{{ $ulink->url }}">{{ $ulinkName }}</a>
+                                        </li>
+                                    @endif
                                 @endforeach
                             </ul>
                         </div>
@@ -362,6 +379,40 @@
     <script src="{{ asset('assets/front/js/main.js') }}"></script>
     <!-- pagebuilder custom js -->
     <script src="{{ asset('assets/front/js/common-main.js') }}" defer></script>
+
+    {{-- Footer "Useful Links" — long link names truncate to ~2 lines with a
+         Show more / Show less toggle right after the visible text. Swapping
+         short/full <span>s (instead of CSS ellipsis) keeps the toggle inline
+         because the <a> is display:inline, so trailing siblings flow onto
+         the last wrapped line same as normal text. --}}
+    <script>
+        $(document).on('click', '.footer-link-toggle', function(e) {
+            e.preventDefault();
+            var $toggle = $(this);
+            var $li = $toggle.closest('li');
+            var $short = $li.find('.footer-link-short');
+            var $full = $li.find('.footer-link-full');
+            var expanded = $full.is(':visible');
+
+            $short.toggle(expanded);
+            $full.toggle(!expanded);
+            $toggle.text(expanded ? @json(__('Show more')) : @json(__('Show less')));
+        });
+
+        {{-- Footer about-text — same short/full swap + Show more/Show less style. --}}
+        $(document).on('click', '.footer-text-toggle', function(e) {
+            e.preventDefault();
+            var $toggle = $(this);
+            var $p = $toggle.closest('p');
+            var $short = $p.find('.footer-text-short');
+            var $full = $p.find('.footer-text-full');
+            var expanded = $full.is(':visible');
+
+            $short.toggle(expanded);
+            $full.toggle(!expanded);
+            $toggle.text(expanded ? @json(__('Show more')) : @json(__('Show less')));
+        });
+    </script>
 
     {{-- whatsapp init code --}}
     @if ($bex?->is_whatsapp == 1)

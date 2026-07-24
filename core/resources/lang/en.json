@@ -590,5 +590,7 @@
     "We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.": "We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.",
     "A fresh 6-digit code was just sent to your email.": "A fresh 6-digit code was just sent to your email.",
     "Could not send the verification code. Please try again shortly or contact support.": "Could not send the verification code. Please try again shortly or contact support.",
-    "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range.": "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range."
+    "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range.": "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range.",
+    "Show more": "Show more",
+    "Show less": "Show less"
 }

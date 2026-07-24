@@ -319,6 +319,7 @@ class TenderController extends Controller
         ])->values()->toJson();
 
         $purchase->save();
+        \App\TenderCompany::syncFromPurchase($purchase);
 
         $this->sendOrderReceivedEmail($purchase);
 

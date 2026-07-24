@@ -136,6 +136,7 @@ trait TenderPaymentHelper
         ])->values()->toJson();
 
         $purchase->save();
+        \App\TenderCompany::syncFromPurchase($purchase);
         return $purchase;
     }
 

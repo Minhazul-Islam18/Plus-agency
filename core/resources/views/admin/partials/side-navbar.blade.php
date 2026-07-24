@@ -291,8 +291,6 @@
                     <li
                         class="nav-item
 @if (request()->routeIs('admin.register.user')) active
-@elseif(request()->routeIs('register.user.view')) active
-@elseif(request()->routeIs('register.user.changePass')) active
 
 @elseif(request()->path() == 'admin/pushnotification/settings') active
 @elseif(request()->path() == 'admin/pushnotification/send') active
@@ -306,8 +304,6 @@
                         </a>
                         <div class="collapse
 @if (request()->routeIs('admin.register.user')) show
-@elseif(request()->routeIs('register.user.view')) show
-@elseif(request()->routeIs('register.user.changePass')) show
 
 @elseif(request()->path() == 'admin/pushnotification/settings') show
 @elseif(request()->path() == 'admin/pushnotification/send') show
@@ -320,9 +316,7 @@
                                 {{-- Registered Users --}}
                                 <li
                                     class="
-    @if (request()->routeIs('admin.register.user')) active
-    @elseif(request()->routeIs('register.user.view')) active
-    @elseif(request()->routeIs('register.user.changePass')) active @endif">
+    @if (request()->routeIs('admin.register.user')) active @endif">
                                     <a href="{{ route('admin.register.user') }}">
                                         <span class="sub-item">Registered Users</span>
                                     </a>

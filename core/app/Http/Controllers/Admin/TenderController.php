@@ -551,12 +551,14 @@ class TenderController extends Controller
     {
         $orderNum = $request->order_number;
         $langCode = $request->language;
+        $regNo    = $request->registration_no;
 
         $purchases = TenderPurchase::with([
                 'tender',
                 'tender.tenderModules' => fn($q) => $q->where('status', 1)->orderBy('id'),
             ])
             ->when($orderNum, fn($q) => $q->where('order_number', $orderNum))
+            ->when($regNo, fn($q) => $q->where('company_registration_no', TenderPurchase::normalizeRegNo($regNo)))
             ->when($langCode, function ($q) use ($langCode) {
                 $language = Language::where('code', $langCode)->first();
                 if ($language) {
@@ -565,9 +567,10 @@ class TenderController extends Controller
                 }
             })
             ->orderBy('id', 'DESC')
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->query());
 
-        return view('admin.tender.tender.purchase', compact('purchases'));
+        return view('admin.tender.tender.purchase', compact('purchases', 'orderNum', 'langCode', 'regNo'));
     }
 
     public function purchasePaymentStatus(Request $request)

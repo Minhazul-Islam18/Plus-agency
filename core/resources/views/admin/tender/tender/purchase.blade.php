@@ -32,7 +32,7 @@
 
                                 {{-- Language filter --}}
                                 <select name="language" class="form-control form-control-sm mr-2" style="width: auto;"
-                                    onchange="window.location='{{ route('admin.tender.purchaseLog') }}?language='+this.value+'&order_number={{ request()->input('order_number') }}'">
+                                    onchange="window.location='{{ route('admin.tender.purchaseLog') }}?language='+this.value+'&order_number={{ request()->input('order_number') }}&registration_no={{ request()->input('registration_no') }}'">
                                     <option value="">All Languages</option>
                                     @foreach ($langs as $lang)
                                         <option value="{{ $lang->code }}"
@@ -43,10 +43,19 @@
                                 </select>
 
                                 {{-- Order number search --}}
-                                <form action="{{ route('admin.tender.purchaseLog') }}" method="GET" class="d-flex">
+                                <form action="{{ route('admin.tender.purchaseLog') }}" method="GET" class="d-flex mr-2">
                                     <input type="hidden" name="language" value="{{ request()->input('language') }}">
+                                    <input type="hidden" name="registration_no" value="{{ request()->input('registration_no') }}">
                                     <input name="order_number" type="text" class="form-control form-control-sm"
                                         placeholder="Search Order Number" value="{{ request()->input('order_number') }}">
+                                </form>
+
+                                {{-- Company registration number search --}}
+                                <form action="{{ route('admin.tender.purchaseLog') }}" method="GET" class="d-flex">
+                                    <input type="hidden" name="language" value="{{ request()->input('language') }}">
+                                    <input type="hidden" name="order_number" value="{{ request()->input('order_number') }}">
+                                    <input name="registration_no" type="text" class="form-control form-control-sm"
+                                        placeholder="Search Registration No." value="{{ request()->input('registration_no') }}">
                                 </form>
                             </div>
                         </div>
@@ -237,6 +246,7 @@
                             {{ $purchases->appends([
                                     'language' => request()->input('language'),
                                     'order_number' => request()->input('order_number'),
+                                    'registration_no' => request()->input('registration_no'),
                                 ])->links() }}
                         </div>
                     </div>

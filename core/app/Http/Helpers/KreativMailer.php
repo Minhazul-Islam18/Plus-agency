@@ -103,6 +103,12 @@ class KreativMailer {
         if (array_key_exists('admin_reply_message', $data)) {
             $body = str_replace('{admin_reply_message}', $data['admin_reply_message'], $body);
         }
+        if (array_key_exists('otp_code', $data)) {
+            $body = preg_replace("/{otp_code}/", $data['otp_code'], $body);
+        }
+        if (array_key_exists('otp_ttl_minutes', $data)) {
+            $body = preg_replace("/{otp_ttl_minutes}/", $data['otp_ttl_minutes'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();

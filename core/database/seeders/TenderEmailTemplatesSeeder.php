@@ -32,6 +32,14 @@ class TenderEmailTemplatesSeeder extends Seeder
                 'email_subject' => 'Your Tender Download Links — File Recovery',
                 'email_body'    => $this->tenderRecoveryLinkBody(),
             ],
+            // 4) Sent from "Find My Files" Method 4 (Expired Link / Regenerate) —
+            //    the verification code gating that method's email-only recovery
+            //    before any link is issued. Same indigo identity as #3.
+            [
+                'email_type'    => 'tender_recovery_otp',
+                'email_subject' => 'Your Verification Code — File Recovery',
+                'email_body'    => $this->tenderRecoveryOtpBody(),
+            ],
         ];
 
         // updateOrInsert so re-running repairs existing rows (subject + body).
@@ -414,6 +422,89 @@ HTML;
           </td>
         </tr>
         <!-- Footer -->
+        <tr>
+          <td style="background-color:#1e1b4b; border-radius:0 0 14px 14px; padding:22px 40px;">
+            <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>
+            <p style="margin:0; font-size:12px; color:#818cf8;">Automated message — please do not reply.</p>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:14px auto 0;">
+        <tr><td align="center"><p style="margin:0; font-size:11px; color:#94a3b8; line-height:1.7;">&copy; {website_title}. All rights reserved. &middot; File recovery request.</p></td></tr>
+      </table>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+HTML;
+    }
+
+    // ── 4. RECOVERY OTP — indigo, verification code ─────────────────────────────
+    private function tenderRecoveryOtpBody(): string
+    {
+        $head = $this->head('Your Verification Code', 'Enter this code to continue recovering your tender files.');
+        return $head . <<<'HTML'
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef1f6;">
+  <tr>
+    <td align="center" style="padding:32px 14px 44px;">
+      <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+        <tr>
+          <td class="px" style="background-color:#312e81; border-radius:14px 14px 0 0; padding:22px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-size:19px; font-weight:700; color:#ffffff; letter-spacing:0.03em;">{website_title}</td>
+                <td align="right" class="hide-sm" style="font-size:11px; color:#c7d2fe; letter-spacing:0.14em; text-transform:uppercase; font-weight:700;">File Recovery</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#eef2ff; padding:32px 40px 26px; border-bottom:1px solid #e0e7ff;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="52" valign="middle" style="padding-right:16px;">
+                  <div style="width:52px; height:52px; background-color:#4f46e5; border-radius:13px; text-align:center; line-height:52px; font-size:26px; color:#ffffff;">&#128274;</div>
+                </td>
+                <td valign="middle">
+                  <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#4338ca; letter-spacing:0.1em; text-transform:uppercase;">Verify It's You</p>
+                  <p class="h1" style="margin:0; font-size:23px; font-weight:800; color:#0f172a; line-height:1.25;">Enter this code to continue.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:30px 40px 6px;">
+            <p style="margin:0 0 6px 0; font-size:15px; color:#334155; line-height:1.7;">Hello,</p>
+            <p style="margin:0 0 24px 0; font-size:15px; color:#475569; line-height:1.7;">Someone requested a file-recovery link for this email address. Enter the code below on the Find My Files page to continue. If this wasn&#39;t you, you can safely ignore this email — no link will be issued without this code.</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 30px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e0e7ff; border-radius:10px; overflow:hidden;">
+              <tr>
+                <td align="center" style="background-color:#eef2ff; padding:26px 18px;">
+                  <p style="margin:0 0 8px 0; font-size:11px; font-weight:700; color:#4338ca; letter-spacing:0.14em; text-transform:uppercase;">Verification Code</p>
+                  <p style="margin:0; font-size:36px; font-weight:800; color:#312e81; letter-spacing:0.28em; font-family:monospace;">{otp_code}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background-color:#eef2ff; border-left:4px solid #4f46e5; border-radius:0 6px 6px 0; padding:14px 18px;">
+                  <p style="margin:0; font-size:13px; color:#3730a3; line-height:1.6;">This code expires in <strong>{otp_ttl_minutes} minutes</strong> and can only be used once. Never share it with anyone.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
         <tr>
           <td style="background-color:#1e1b4b; border-radius:0 0 14px 14px; padding:22px 40px;">
             <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>

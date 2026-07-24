@@ -10,6 +10,7 @@ class OtpVerification extends Model
         'session_token',
         'email_hash',
         'phone_hash',
+        'channel',
         'otp_hash',
         'order_id',
         'order_ids',
@@ -96,5 +97,20 @@ class OtpVerification extends Model
             return str_repeat('*', $len);
         }
         return substr($phone, 0, 3) . str_repeat('*', max(0, strlen($phone) - 5)) . substr($phone, -2);
+    }
+
+    /**
+     * "j***@domain.com" — first character of the local part visible, rest
+     * masked, domain untouched.
+     */
+    public static function maskEmail(string $email): string
+    {
+        $parts = explode('@', $email, 2);
+        if (count($parts) !== 2 || $parts[0] === '') {
+            return str_repeat('*', strlen($email));
+        }
+        [$local, $domain] = $parts;
+        $visible = substr($local, 0, 1);
+        return $visible . str_repeat('*', max(1, strlen($local) - 1)) . '@' . $domain;
     }
 }

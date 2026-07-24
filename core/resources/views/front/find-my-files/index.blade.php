@@ -1036,6 +1036,14 @@
                                                 </div>
                                             </div>
 
+                                            <div class="fmf-alert fmf-alert-error" id="otp-error-regenlimit" style="display:none;">
+                                                <div class="fmf-alert-icon"><span>!</span></div>
+                                                <div class="fmf-alert-body">
+                                                    <strong>{{ __('Daily regeneration limit reached.') }}</strong>
+                                                    <p>{{ __('You have requested the maximum number of new links for today. Please try again after 24 hours, or contact support.') }}</p>
+                                                </div>
+                                            </div>
+
                                             <div class="fmf-alert fmf-alert-warning" id="otp-error-payment-pending" style="display:none;">
                                                 <div class="fmf-alert-icon"><span>!</span></div>
                                                 <div class="fmf-alert-body">
@@ -1240,6 +1248,15 @@
                                             </div>
                                         </div>
 
+                                        {{-- Recovery cap error --}}
+                                        <div class="fmf-alert fmf-alert-error" id="payref-error-regenlimit" style="display:none;">
+                                            <div class="fmf-alert-icon"><span>!</span></div>
+                                            <div class="fmf-alert-body">
+                                                <strong>{{ __('Daily regeneration limit reached.') }}</strong>
+                                                <p>{{ __('You have requested the maximum number of new links for today. Please try again after 24 hours, or contact support.') }}</p>
+                                            </div>
+                                        </div>
+
                                         @if ($bs->is_recaptcha == 1)
                                             <div class="fmf-captcha-wrap fmf-captcha-payref">
                                                 {!! NoCaptcha::display(['data-callback' => 'fmfPayrefCaptchaVerified', 'data-expired-callback' => 'fmfPayrefCaptchaExpired']) !!}
@@ -1254,10 +1271,11 @@
 
                                 {{-- Method 4: Expired Link / Regenerate --}}
                                 <div id="panel-expired_link" style="display:none;">
+                                  <div id="regen-step-input">
                                     <h6>{{ __('2) Enter Your Email') }}</h6>
 
                                     <p style="font-size:13px; color:#6b7280; margin-bottom:18px; line-height:1.6;">
-                                        {{ __('Enter the email address you used when purchasing. If a valid completed order exists, a fresh download link will be sent to your inbox.') }}
+                                        {{ __('Enter the email address you used when purchasing and a purchase date range. We\'ll email you a verification code, then a download link for every completed order in that range.') }}
                                     </p>
 
                                     <form id="regen-form" autocomplete="off">
@@ -1268,12 +1286,27 @@
                                                 placeholder="{{ __('e.g., name@domain.com') }}" autocomplete="off">
                                         </div>
 
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">{{ __('Purchase Date Range') }}</label>
+                                            <div class="row no-gutters" style="gap:10px 0;">
+                                                <div class="col-6" style="padding-right:5px;">
+                                                    <input type="date" name="date_from" id="regen-date-from" class="form-control"
+                                                        aria-label="{{ __('From') }}" max="{{ now()->format('Y-m-d') }}" required>
+                                                </div>
+                                                <div class="col-6" style="padding-left:5px;">
+                                                    <input type="date" name="date_to" id="regen-date-to" class="form-control"
+                                                        aria-label="{{ __('To') }}" max="{{ now()->format('Y-m-d') }}" required>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">{{ __('Only purchases paid for within this range will be included.') }}</small>
+                                        </div>
+
                                         {{-- Validation error --}}
                                         <div class="fmf-alert fmf-alert-error" id="regen-error-validation">
                                             <div class="fmf-alert-icon"><span>!</span></div>
                                             <div class="fmf-alert-body">
-                                                <strong>{{ __('Please enter a valid email address.') }}</strong>
-                                                <p>{{ __('Check the format and try again.') }}</p>
+                                                <strong>{{ __('Please fill in all fields correctly.') }}</strong>
+                                                <p>{{ __('Enter a valid email address and a valid purchase date range (not in the future).') }}</p>
                                             </div>
                                         </div>
 
@@ -1302,6 +1335,14 @@
                                             </div>
                                         </div>
 
+                                        <div class="fmf-alert fmf-alert-error" id="regen-error-nomatch" style="display:none;">
+                                            <div class="fmf-alert-icon"><span>!</span></div>
+                                            <div class="fmf-alert-body">
+                                                <strong>{{ __('No matching purchase found') }}</strong>
+                                                <p>{{ __('We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.') }}</p>
+                                            </div>
+                                        </div>
+
                                         {{-- Regen limit error --}}
                                         <div class="fmf-alert fmf-alert-error" id="regen-error-limit">
                                             <div class="fmf-alert-icon"><span>!</span></div>
@@ -1318,13 +1359,111 @@
                                         @endif
 
                                         <button type="submit" class="btn-fmf-submit" id="regen-submit-btn" disabled>
-                                            {{ __('Send New Download Link') }}
+                                            {{ __('Send Verification Code') }}
                                         </button>
                                     </form>
 
                                     <div style="margin-top:16px; padding:12px 16px; background:#fff8e1; border:1px solid #fde68a; border-radius:6px; font-size:12px; color:#92400e; line-height:1.5;">
-                                        {{ __('This method sends a link to the most recently purchased order on your email. If you have multiple orders, use "Email + Order Number" for a specific one.') }}
+                                        {{ __('This method emails a separate download link for every completed purchase on this address within the date range you select.') }}
                                     </div>
+                                  </div>
+                                  {{-- /regen-step-input --}}
+
+                                  {{-- Step B: OTP entry (hidden until code is sent) --}}
+                                  <div id="regen-step-verify" style="display:none;">
+                                    <h6>{{ __('3) Enter Verification Code') }}</h6>
+
+                                    <p class="otp-hint" id="regen-otp-sent-hint"></p>
+
+                                    <div class="otp-digits">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]" autocomplete="one-time-code">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]">
+                                        <input class="regen-otp-digit" type="tel" maxlength="1" inputmode="numeric"
+                                            pattern="[0-9]">
+                                    </div>
+
+                                    <div class="otp-timer" id="regen-otp-timer">
+                                        {{ __('Code expires in') }} <span id="regen-otp-countdown">10:00</span>
+                                    </div>
+
+                                    {{-- OTP verify alerts --}}
+                                    <div class="fmf-alert fmf-alert-error" id="regen-otp-error-invalid">
+                                        <div class="fmf-alert-icon"><span>!</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('Incorrect code.') }}</strong>
+                                            <p id="regen-otp-attempts-msg">{{ __('Please try again.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="fmf-alert fmf-alert-error" id="regen-otp-error-exhausted">
+                                        <div class="fmf-alert-icon"><span>!</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('Too many wrong attempts.') }}</strong>
+                                            <p>{{ __('Please request a new code.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="fmf-alert fmf-alert-error" id="regen-otp-error-expired">
+                                        <div class="fmf-alert-icon"><span>!</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('Code expired.') }}</strong>
+                                            <p>{{ __('Please request a new code using the Resend button below.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="fmf-alert fmf-alert-error" id="regen-otp-error-session">
+                                        <div class="fmf-alert-icon"><span>!</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('Session expired.') }}</strong>
+                                            <p>{{ __('Please start over.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="fmf-alert fmf-alert-error" id="regen-otp-error-sendfailed" style="display:none;">
+                                        <div class="fmf-alert-icon"><span>!</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('Email delivery failed.') }}</strong>
+                                            <p>{{ __('Could not send the verification code. Please try again shortly or contact support.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Shown briefly when a resend succeeds --}}
+                                    <div class="fmf-alert fmf-alert-success" id="regen-otp-resend-success" style="display:none;">
+                                        <div class="fmf-alert-icon"><span>&#10003;</span></div>
+                                        <div class="fmf-alert-body">
+                                            <strong>{{ __('New code sent.') }}</strong>
+                                            <p>{{ __('A fresh 6-digit code was just sent to your email.') }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="otp-resend-wrap">
+                                        {{ __('Didn\'t receive it?') }}
+                                        <button type="button" class="otp-resend-btn" id="regen-otp-resend-btn" disabled>
+                                            {{ __('Resend code') }}
+                                        </button>
+                                        <span id="regen-otp-resend-timer" style="font-size:12px; color:#b0b8c9;"></span>
+                                    </div>
+
+                                    <button type="button" class="btn-fmf-submit" id="regen-otp-verify-btn" disabled>
+                                        {{ __('Verify Code') }}
+                                    </button>
+
+                                    <div style="text-align:center; margin-top:12px;">
+                                        <button type="button" id="regen-otp-back-btn"
+                                            style="background:none;border:none;color:#6b7280;font-size:13px;cursor:pointer;text-decoration:underline;">
+                                            {{ __('← Start over') }}
+                                        </button>
+                                    </div>
+                                  </div>
+                                  {{-- /regen-step-verify --}}
                                 </div>
 
                                 <div id="panel-contact_support" style="display:none;">
@@ -1680,6 +1819,7 @@
                                     'email_mismatch': '{{ __('Email address does not match.') }}',
                                     'invalid_status': '{{ __('Order not eligible.') }}',
                                     'suspended': '{{ __('Order under verification') }}',
+                                    'regen_limit': '{{ __('Daily regeneration limit reached.') }}',
                                 };
                                 var bodies = {
                                     'validation': '{{ __('Check your email and order number, then try again.') }}',
@@ -1689,6 +1829,7 @@
                                         '{{ __('The email address does not match the one used for this order.') }}',
                                     'invalid_status': data.message ||
                                         '{{ __('This order has not been completed. Only paid orders are eligible for file recovery.') }}',
+                                    'regen_limit': '{{ __('You have requested the maximum number of new links for today. Please try again after 24 hours, or contact support.') }}',
                                 };
 
                                 var errTitle = document.getElementById('fmf-error-title');
@@ -1813,7 +1954,7 @@
             // ── Hide all OTP alerts ───────────────────────────────────────────
             function hideOtpAlerts() {
                 ['otp-error-validation', 'otp-error-sms', 'otp-error-ratelimit', 'otp-error-payment-pending',
-                    'otp-error-suspended', 'otp-error-nomatch',
+                    'otp-error-suspended', 'otp-error-nomatch', 'otp-error-regenlimit',
                     'otp-error-invalid', 'otp-error-exhausted', 'otp-error-expired', 'otp-error-session',
                     'otp-resend-success'
                 ]
@@ -2151,6 +2292,8 @@
                             'otp_exhausted': 'otp-error-exhausted',
                             'otp_expired': 'otp-error-expired',
                             'session_invalid': 'otp-error-session',
+                            'suspended': 'otp-error-suspended',
+                            'regen_limit': 'otp-error-regenlimit',
                         };
 
                         var elId = errorMap[data.type];
@@ -2299,7 +2442,7 @@
 
             // ── Hide alerts ───────────────────────────────────────────────────
             function hideAlerts() {
-                ['payref-error-validation', 'payref-error-nomatch', 'payref-error-emailfailed', 'payref-error-ratelimit', 'payref-error-suspended'].forEach(function (id) {
+                ['payref-error-validation', 'payref-error-nomatch', 'payref-error-emailfailed', 'payref-error-ratelimit', 'payref-error-suspended', 'payref-error-regenlimit'].forEach(function (id) {
                     var el = document.getElementById(id);
                     if (el) el.style.display = 'none';
                 });
@@ -2358,6 +2501,9 @@
                         } else if (data.type === 'suspended') {
                             var el = document.getElementById('payref-error-suspended');
                             if (el) el.style.display = 'flex';
+                        } else if (data.type === 'regen_limit') {
+                            var el = document.getElementById('payref-error-regenlimit');
+                            if (el) el.style.display = 'flex';
                         } else {
                             var el = document.getElementById('payref-error-validation');
                             if (el) el.style.display = 'flex';
@@ -2381,28 +2527,159 @@
         (function () {
             'use strict';
 
-            var emailInput = document.getElementById('regen-email');
-            var submitBtn  = document.getElementById('regen-submit-btn');
-            var form       = document.getElementById('regen-form');
+            var emailInput    = document.getElementById('regen-email');
+            var dateFromInput = document.getElementById('regen-date-from');
+            var dateToInput   = document.getElementById('regen-date-to');
+            var submitBtn     = document.getElementById('regen-submit-btn');
+            var form          = document.getElementById('regen-form');
 
-            // ── Enable submit when email valid ────────────────────────────────
+            var stepInput  = document.getElementById('regen-step-input');
+            var stepVerify = document.getElementById('regen-step-verify');
+            var digits     = document.querySelectorAll('.regen-otp-digit');
+            var verifyBtn  = document.getElementById('regen-otp-verify-btn');
+            var resendBtn  = document.getElementById('regen-otp-resend-btn');
+            var backBtn    = document.getElementById('regen-otp-back-btn');
+            var countdownEl = document.getElementById('regen-otp-countdown');
+            var timerEl      = document.getElementById('regen-otp-timer');
+            var resendTimerEl = document.getElementById('regen-otp-resend-timer');
+
+            var sessionToken = null;
+            var countdownInterval, resendInterval, expireAt;
+
+            // ── Enable submit when email + date range are valid ───────────────
             function checkReady() {
-                var ok        = emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+                var emailOk   = emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+                var datesOk   = dateFromInput && dateToInput && dateFromInput.value && dateToInput.value;
                 var captchaOk = {{ $bs->is_recaptcha == 1 ? '!!(window._fmfRegenCaptcha)' : 'true' }};
-                if (submitBtn) submitBtn.disabled = !(ok && captchaOk);
+                if (submitBtn) submitBtn.disabled = !(emailOk && datesOk && captchaOk);
             }
             if (emailInput) emailInput.addEventListener('input', checkReady);
+            if (dateFromInput) dateFromInput.addEventListener('input', checkReady);
+            if (dateToInput) dateToInput.addEventListener('input', checkReady);
 
-            // ── Hide alerts ───────────────────────────────────────────────────
+            // ── Hide alerts (step A) ────────────────────────────────────────────
             function hideAlerts() {
-                ['regen-error-validation', 'regen-error-ratelimit', 'regen-error-limit', 'regen-error-emailfailed', 'regen-error-suspended']
+                ['regen-error-validation', 'regen-error-ratelimit', 'regen-error-limit', 'regen-error-emailfailed', 'regen-error-suspended', 'regen-error-nomatch']
                     .forEach(function (id) {
                         var el = document.getElementById(id);
                         if (el) el.style.display = 'none';
                     });
             }
 
-            // ── Form submit ───────────────────────────────────────────────────
+            // ── Hide OTP alerts (step B) ─────────────────────────────────────────
+            function hideOtpAlerts() {
+                ['regen-otp-error-invalid', 'regen-otp-error-exhausted', 'regen-otp-error-expired',
+                    'regen-otp-error-session', 'regen-otp-error-sendfailed', 'regen-otp-resend-success']
+                    .forEach(function (id) {
+                        var el = document.getElementById(id);
+                        if (el) el.style.display = 'none';
+                    });
+            }
+
+            // ── Countdown timer (OTP expiry) ────────────────────────────────────
+            function startCountdown(ttlSeconds) {
+                clearInterval(countdownInterval);
+                expireAt = new Date(Date.now() + ttlSeconds * 1000);
+
+                function tick() {
+                    var remaining = Math.max(0, Math.round((expireAt - Date.now()) / 1000));
+                    var m = Math.floor(remaining / 60);
+                    var s = remaining % 60;
+                    if (countdownEl) countdownEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+                    if (timerEl) {
+                        if (remaining <= 60) { timerEl.classList.add('urgent'); }
+                        else { timerEl.classList.remove('urgent'); }
+                    }
+                    if (remaining === 0) {
+                        clearInterval(countdownInterval);
+                        hideOtpAlerts();
+                        var el = document.getElementById('regen-otp-error-expired');
+                        if (el) el.style.display = 'flex';
+                        if (verifyBtn) verifyBtn.disabled = true;
+                    }
+                }
+                tick();
+                countdownInterval = setInterval(tick, 1000);
+            }
+
+            // ── Resend cooldown timer ───────────────────────────────────────────
+            function startResendCooldown(seconds) {
+                clearInterval(resendInterval);
+                if (resendBtn) resendBtn.disabled = true;
+                var end = Date.now() + seconds * 1000;
+
+                function tick() {
+                    var remaining = Math.max(0, Math.round((end - Date.now()) / 1000));
+                    if (resendTimerEl) resendTimerEl.textContent = remaining > 0 ? '(' + remaining + 's)' : '';
+                    if (remaining === 0) {
+                        clearInterval(resendInterval);
+                        if (resendBtn) resendBtn.disabled = false;
+                    }
+                }
+                tick();
+                resendInterval = setInterval(tick, 1000);
+            }
+
+            // ── Digit box behaviour ──────────────────────────────────────────────
+            digits.forEach(function (input, index) {
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        digits[index - 1].focus();
+                    }
+                });
+                input.addEventListener('input', function () {
+                    input.value = input.value.replace(/\D/g, '');
+                    if (input.value) {
+                        input.classList.add('filled');
+                        if (index < digits.length - 1) digits[index + 1].focus();
+                    } else {
+                        input.classList.remove('filled');
+                    }
+                    checkOtpComplete();
+                });
+                input.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                    pasted.split('').slice(0, digits.length).forEach(function (ch, i) {
+                        if (digits[i]) {
+                            digits[i].value = ch;
+                            digits[i].classList.toggle('filled', !!ch);
+                        }
+                    });
+                    checkOtpComplete();
+                    var lastFilled = Math.min(pasted.length, digits.length - 1);
+                    if (digits[lastFilled]) digits[lastFilled].focus();
+                });
+            });
+
+            function getOtpCode() {
+                return Array.from(digits).map(function (d) { return d.value; }).join('');
+            }
+            function clearDigits() {
+                digits.forEach(function (d) { d.value = ''; d.classList.remove('filled'); });
+                if (digits[0]) digits[0].focus();
+            }
+            function checkOtpComplete() {
+                var code = getOtpCode();
+                if (verifyBtn) verifyBtn.disabled = (code.length !== 6);
+                if (code.length === 6) submitVerify();
+            }
+
+            // ── Show step B ──────────────────────────────────────────────────────
+            function showVerifyStep(maskedEmail, resendAfter) {
+                if (stepInput) stepInput.style.display = 'none';
+                if (stepVerify) stepVerify.style.display = 'block';
+
+                var hint = document.getElementById('regen-otp-sent-hint');
+                if (hint) hint.textContent = '{{ __('A 6-digit code was sent to') }} ' + maskedEmail;
+
+                hideOtpAlerts();
+                clearDigits();
+                startCountdown({{ \App\OtpVerification::OTP_TTL_MIN }} * 60);
+                startResendCooldown(resendAfter || {{ \App\OtpVerification::RESEND_DELAY }});
+            }
+
+            // ── Form submit (step A) ─────────────────────────────────────────────
             if (form) {
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
@@ -2430,6 +2707,11 @@
                         if (overlay)     overlay.classList.remove('active');
                         if (procHeading) procHeading.style.display = 'none';
 
+                        if (data.status === 'success' && data.otp_sent) {
+                            sessionToken = data.session_token;
+                            showVerifyStep(data.masked_email, data.resend_after);
+                            return;
+                        }
                         if (data.status === 'success' && data.redirect) {
                             window.location.href = data.redirect;
                             return;
@@ -2455,6 +2737,9 @@
                         } else if (data.type === 'suspended') {
                             var el = document.getElementById('regen-error-suspended');
                             if (el) el.style.display = 'flex';
+                        } else if (data.type === 'no_match') {
+                            var el = document.getElementById('regen-error-nomatch');
+                            if (el) el.style.display = 'flex';
                         } else {
                             var el = document.getElementById('regen-error-validation');
                             if (el) el.style.display = 'flex';
@@ -2467,6 +2752,177 @@
                         var el = document.getElementById('regen-error-validation');
                         if (el) el.style.display = 'flex';
                     });
+                });
+            }
+
+            // ── Step B: Verify OTP ───────────────────────────────────────────────
+            function submitVerify() {
+                if (!sessionToken) return;
+                var code = getOtpCode();
+                if (code.length !== 6) return;
+
+                hideOtpAlerts();
+                var overlay     = document.getElementById('fmf-overlay');
+                var procHeading = document.getElementById('fmf-processing-heading');
+                if (overlay) overlay.classList.add('active');
+                if (procHeading) procHeading.style.display = 'block';
+                if (verifyBtn) verifyBtn.disabled = true;
+
+                var body = new FormData();
+                body.append('_token', '{{ csrf_token() }}');
+                body.append('session_token', sessionToken);
+                body.append('otp_code', code);
+
+                fetch('{{ route('find_my_files.regenerate_otp_verify') }}', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        body: body,
+                    })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (overlay) overlay.classList.remove('active');
+                        if (procHeading) procHeading.style.display = 'none';
+
+                        if (data.status === 'success' && data.redirect) {
+                            window.location.href = data.redirect;
+                            return;
+                        }
+
+                        clearDigits();
+                        if (verifyBtn) verifyBtn.disabled = true;
+
+                        // These 4 come back from AFTER verification succeeded (link
+                        // issuance itself failed) — their alert boxes live in Step A,
+                        // so drop back to Step A to show them (matches Back button).
+                        var stepAErrors = {
+                            'suspended': 'regen-error-suspended',
+                            'regen_limit': 'regen-error-limit',
+                            'no_match': 'regen-error-nomatch',
+                            'email_failed': 'regen-error-emailfailed',
+                        };
+                        if (stepAErrors[data.type]) {
+                            clearInterval(countdownInterval);
+                            clearInterval(resendInterval);
+                            sessionToken = null;
+                            if (stepVerify) stepVerify.style.display = 'none';
+                            if (stepInput) stepInput.style.display = 'block';
+                            if (submitBtn) submitBtn.disabled = false;
+                            var errEl = document.getElementById(stepAErrors[data.type]);
+                            if (errEl) errEl.style.display = 'flex';
+                            return;
+                        }
+
+                        var errorMap = {
+                            'otp_invalid': 'regen-otp-error-invalid',
+                            'otp_exhausted': 'regen-otp-error-exhausted',
+                            'otp_expired': 'regen-otp-error-expired',
+                            'session_invalid': 'regen-otp-error-session',
+                        };
+
+                        var elId = errorMap[data.type];
+                        if (elId === 'regen-otp-error-invalid' && data.attempts_left !== undefined) {
+                            var msg = document.getElementById('regen-otp-attempts-msg');
+                            if (msg) {
+                                msg.textContent = data.attempts_left === 1 ?
+                                    '{{ __('1 attempt remaining.') }}' :
+                                    data.attempts_left + ' {{ __('attempts remaining.') }}';
+                            }
+                        }
+                        var errEl = document.getElementById(elId || 'regen-otp-error-invalid');
+                        if (errEl) errEl.style.display = 'flex';
+                    })
+                    .catch(function () {
+                        if (overlay) overlay.classList.remove('active');
+                        if (procHeading) procHeading.style.display = 'none';
+                        clearDigits();
+                        var el = document.getElementById('regen-otp-error-session');
+                        if (el) el.style.display = 'flex';
+                    });
+            }
+
+            if (verifyBtn) verifyBtn.addEventListener('click', submitVerify);
+
+            // ── Resend OTP ───────────────────────────────────────────────────────
+            var resendLabel = resendBtn ? resendBtn.textContent.trim() : '';
+
+            function setResendLoading(on) {
+                if (!resendBtn) return;
+                if (on) {
+                    resendBtn.disabled = true;
+                    resendBtn.classList.add('loading');
+                    resendBtn.innerHTML = '<span class="otp-resend-spin"></span>' + @json(__('Sending…'));
+                } else {
+                    resendBtn.classList.remove('loading');
+                    resendBtn.textContent = resendLabel;
+                }
+            }
+
+            if (resendBtn) {
+                resendBtn.addEventListener('click', function () {
+                    if (!sessionToken || resendBtn.disabled) return;
+
+                    hideOtpAlerts();
+                    setResendLoading(true);
+                    if (resendTimerEl) resendTimerEl.textContent = '';
+
+                    var body = new FormData();
+                    body.append('_token', '{{ csrf_token() }}');
+                    body.append('session_token', sessionToken);
+
+                    fetch('{{ route('find_my_files.regenerate_otp_resend') }}', {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                            body: body,
+                        })
+                        .then(function (res) { return res.json(); })
+                        .then(function (data) {
+                            setResendLoading(false);
+                            if (data.status === 'success') {
+                                hideOtpAlerts();
+                                clearDigits();
+                                if (verifyBtn) verifyBtn.disabled = true;
+                                startCountdown({{ \App\OtpVerification::OTP_TTL_MIN }} * 60);
+                                startResendCooldown(data.resend_after || {{ \App\OtpVerification::RESEND_DELAY }});
+                                var okEl = document.getElementById('regen-otp-resend-success');
+                                if (okEl) {
+                                    okEl.style.display = 'flex';
+                                    clearTimeout(window.__regenResendOkTimer);
+                                    window.__regenResendOkTimer = setTimeout(function () {
+                                        okEl.style.display = 'none';
+                                    }, 5000);
+                                }
+                            } else if (data.type === 'resend_too_soon') {
+                                startResendCooldown(data.resend_after || {{ \App\OtpVerification::RESEND_DELAY }});
+                            } else if (data.type === 'session_invalid') {
+                                var el = document.getElementById('regen-otp-error-session');
+                                if (el) el.style.display = 'flex';
+                            } else if (data.type === 'email_failed') {
+                                var el = document.getElementById('regen-otp-error-sendfailed');
+                                if (el) el.style.display = 'flex';
+                                resendBtn.disabled = false;
+                            } else {
+                                resendBtn.disabled = false;
+                            }
+                        })
+                        .catch(function () {
+                            setResendLoading(false);
+                            resendBtn.disabled = false;
+                        });
+                });
+            }
+
+            // ── Back button ──────────────────────────────────────────────────────
+            if (backBtn) {
+                backBtn.addEventListener('click', function () {
+                    sessionToken = null;
+                    clearInterval(countdownInterval);
+                    clearInterval(resendInterval);
+                    hideOtpAlerts();
+                    if (stepVerify) stepVerify.style.display = 'none';
+                    if (stepInput) stepInput.style.display = 'block';
                 });
             }
 

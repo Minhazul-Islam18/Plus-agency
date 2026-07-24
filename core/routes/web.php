@@ -109,6 +109,8 @@ Route::post('/find-my-files/payment-ref', 'Front\FindMyFilesController@requestBy
 
 /** Find My Files — Expired Link Regenerate **/
 Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestRegenerate')->name('find_my_files.regenerate')->middleware('throttle:5,1');
+Route::post('/find-my-files/regenerate/otp/verify', 'Front\FindMyFilesController@verifyRegenerateOtp')->name('find_my_files.regenerate_otp_verify')->middleware('throttle:6,1');
+Route::post('/find-my-files/regenerate/otp/resend', 'Front\FindMyFilesController@resendRegenerateOtp')->name('find_my_files.regenerate_otp_resend')->middleware('throttle:3,1');
 
 
 

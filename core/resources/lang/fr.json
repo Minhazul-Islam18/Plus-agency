@@ -575,5 +575,20 @@
     "to reach our support team.": "pour contacter notre équipe de support.",
     "← Start over": "← Recommencer",
     "Downloads are limited to :count attempts.": "Les téléchargements sont limités à :count tentatives.",
-    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "Le lien a peut-être expiré (valable 24 heures), atteint la limite de téléchargement (:count tentatives), ou été révoqué."
+    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "Le lien a peut-être expiré (valable 24 heures), atteint la limite de téléchargement (:count tentatives), ou été révoqué.",
+    "Enter the email address you used when purchasing. If valid completed orders exist, fresh download links for every one of them will be sent to your inbox.": "Saisissez l’adresse e-mail utilisée lors de l’achat. Si des commandes valides et complétées existent, un lien de téléchargement pour chacune d’entre elles vous sera envoyé.",
+    "Narrow by purchase date (optional)": "Filtrer par date d’achat (facultatif)",
+    "From": "Du",
+    "To": "Au",
+    "Leave both blank to receive links for every purchase on this email.": "Laissez les deux champs vides pour recevoir les liens de tous les achats liés à cet e-mail.",
+    "This method emails a separate download link for every completed purchase on this address. Use the date fields above to only include purchases from a specific period.": "Cette méthode envoie par e-mail un lien de téléchargement distinct pour chaque achat complété sur cette adresse. Utilisez les champs de date ci-dessus pour n’inclure que les achats d’une période spécifique.",
+    "Enter the email address you used when purchasing and a purchase date range. Fresh download links for every completed order in that range will be sent to your inbox.": "Saisissez l’adresse e-mail utilisée lors de l’achat ainsi qu’une période d’achat. Un lien de téléchargement pour chaque commande complétée dans cette période vous sera envoyé.",
+    "Purchase Date Range": "Période d’achat",
+    "Only purchases paid for within this range will be included.": "Seuls les achats payés au cours de cette période seront inclus.",
+    "This method emails a separate download link for every completed purchase on this address within the date range you select.": "Cette méthode envoie par e-mail un lien de téléchargement distinct pour chaque achat complété sur cette adresse dans la période sélectionnée.",
+    "Enter a valid email address and a valid purchase date range (not in the future).": "Saisissez une adresse e-mail valide et une période d’achat valide (pas dans le futur).",
+    "We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.": "Nous n’avons trouvé aucun achat complété pour cet e-mail dans la période sélectionnée. Vérifiez vos informations, ou contactez le support si vous pensez qu’il s’agit d’une erreur.",
+    "A fresh 6-digit code was just sent to your email.": "Un nouveau code à 6 chiffres vient d’être envoyé à votre e-mail.",
+    "Could not send the verification code. Please try again shortly or contact support.": "Impossible d’envoyer le code de vérification. Réessayez sous peu ou contactez le support.",
+    "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range.": "Saisissez l’adresse e-mail utilisée lors de l’achat ainsi qu’une période d’achat. Nous vous enverrons un code de vérification par e-mail, puis un lien de téléchargement pour chaque commande complétée dans cette période."
 }

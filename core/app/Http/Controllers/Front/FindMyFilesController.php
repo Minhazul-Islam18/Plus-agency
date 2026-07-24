@@ -105,6 +105,32 @@ class FindMyFilesController extends Controller
     }
 
     /**
+     * How many times one order's link may be (re)issued per 24h, shared across
+     * all 4 Find-My-Files methods. Editable at admin/tender/settings
+     * (basic_settings_extra.tender_max_regen_per_day); falls back to the
+     * MAX_REGEN_PER_DAY constant when unset or invalid.
+     */
+    private function maxRegenPerDay(): int
+    {
+        $n = (int) optional(\App\BasicExtra::first())->tender_max_regen_per_day;
+        return $n > 0 ? $n : self::MAX_REGEN_PER_DAY;
+    }
+
+    /**
+     * Whether the per-order recovery cap applies to a given method — false if
+     * the master switch is off, or that specific method's switch is off.
+     * $method is one of: 'order_number' | 'otp' | 'payref' | 'regenerate'.
+     */
+    private function regenCapApplies(string $method): bool
+    {
+        $bex = \App\BasicExtra::first();
+        if (!$bex || !$bex->tender_regen_cap_enabled) {
+            return false;
+        }
+        return (bool) ($bex->{"tender_regen_cap_$method"} ?? true);
+    }
+
+    /**
      * Brand name for the OTP SMS body — the configured site title, falling back to
      * the app name. Avoids the default "Laravel" showing in messages.
      */
@@ -607,6 +633,24 @@ class FindMyFilesController extends Controller
                 'risk_score' => $risk,
             ]));
             return $r;
+        }
+
+        // ── 6c. Recovery cap: max N link issuances per order per 24h, shared
+        // across all 4 Find-My-Files methods (admin configurable) ────────────
+        if ($this->regenCapApplies('order_number')) {
+            $regenCount = SecureToken::where('email_hash', $emailHash)
+                ->where('order_id', $purchase->order_number)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->count();
+
+            if ($regenCount >= $this->maxRegenPerDay()) {
+                AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                    'result'     => 'REGEN_LIMIT_EXCEEDED',
+                    'risk_score' => $risk,
+                    'order_id'   => $purchase->order_number,
+                ]));
+                return response()->json(['status' => 'error', 'type' => 'regen_limit']);
+            }
         }
 
         // ── 7. Revoke any previous active tokens for this order ───────────────
@@ -1200,7 +1244,7 @@ class FindMyFilesController extends Controller
 
         $risk = $this->riskScore($request, $emailHash);
 
-        // ── 3. Find the order to re-issue a link for ──────────────────────────
+        // ── 3. Find the order(s) to re-issue links for ────────────────────────
         $email    = strtolower(trim($request->input('email')));
         $regNo    = TenderPurchase::normalizeRegNo($request->input('company_registration_no', ''));
         $tenderId = (int) $request->input('tender_id', 0);
@@ -1209,6 +1253,8 @@ class FindMyFilesController extends Controller
             // Checkout "already paid" context: the entered email MUST be the one
             // that paid under this registration number on this tender. Otherwise
             // anyone knowing a registration number could mail themselves the link.
+            // Single order only — a checkout retry is scoped to the tender the
+            // buyer is currently on, not their whole purchase history.
             $regOrders = TenderPurchase::where('payment_status', 'Completed')
                 ->where('tender_id', $tenderId)
                 ->get()
@@ -1228,107 +1274,255 @@ class FindMyFilesController extends Controller
                     'type'   => 'email_mismatch',
                 ]);
             }
-        } else {
-            // Email-only recovery (Method 4): the link is only ever sent to the
-            // address that placed the order, so it can't be redirected elsewhere.
-            $purchase = TenderPurchase::where('payment_status', 'Completed')
-                ->get()
-                ->filter(fn ($p) => strtolower(trim($p->email)) === $email)
-                ->sortByDesc('created_at')
-                ->first();
 
-            if (!$purchase) {
-                $this->incrementAttempts($request, $emailHash);
-                AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
-                    'result'     => 'REGEN_NO_MATCH',
-                    'risk_score' => $risk,
-                ]));
-                // Neutral — same response as success (no account enumeration)
-                return response()->json([
-                    'status'   => 'success',
-                    'redirect' => route('find_my_files.link_sent'),
-                ]);
-            }
+            $purchases = collect([$purchase]);
+
+            // Registration-number recovery already has its own second factor
+            // (the reg. no. itself) — issue immediately, no OTP gate.
+            return $this->issueRecoveryLinks($purchases, $emailHash, $request, $be, $logMeta, $risk);
         }
 
-        // ── 3b. Suspension check ──────────────────────────────────────────────
-        if ($r = $this->suspendedResponse($purchase)) {
-            return $r;
+        // Email-only recovery (Method 4): every completed purchase under this
+        // email within a required purchase-date range — the link is only ever
+        // sent to the address that placed the order, so it can't be redirected
+        // elsewhere. Range is validated on paid_at, the actual payment
+        // timestamp. This is the weakest-auth path (email alone), so it's
+        // additionally gated behind an emailed OTP before anything is issued.
+        $rangeValidator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'date_from' => 'required|date|before_or_equal:today',
+            'date_to'   => 'required|date|before_or_equal:today',
+        ]);
+
+        if ($rangeValidator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
         }
 
-        // ── 4. Regeneration cap: max 3 new tokens per order per 24h ──────────
-        $regenCount = SecureToken::where('email_hash', $emailHash)
-            ->where('order_id', $purchase->order_number)
-            ->where('created_at', '>=', now()->subHours(24))
-            ->count();
+        $dateFrom = \Carbon\Carbon::parse($request->input('date_from'))->startOfDay();
+        $dateTo   = \Carbon\Carbon::parse($request->input('date_to'))->endOfDay();
+        if ($dateFrom->gt($dateTo)) {
+            [$dateFrom, $dateTo] = [$dateTo->copy()->startOfDay(), $dateFrom->copy()->endOfDay()];
+        }
 
-        if ($regenCount >= self::MAX_REGEN_PER_DAY) {
+        // Some Completed purchases have no paid_at (older rows, or admin
+        // manually marking an offline payment Completed without going through
+        // the gateway helper) — fall back to created_at so those orders stay
+        // reachable instead of silently disappearing from every possible date
+        // range.
+        $purchases = TenderPurchase::where('payment_status', 'Completed')
+            ->get()
+            ->filter(fn ($p) => strtolower(trim($p->email)) === $email)
+            ->filter(function ($p) use ($dateFrom, $dateTo) {
+                $ref = $p->paid_at ?: $p->created_at;
+                return $ref && $ref->gte($dateFrom) && $ref->lte($dateTo);
+            })
+            ->sortByDesc(fn ($p) => $p->paid_at ?: $p->created_at)
+            ->values();
+
+        if ($purchases->isEmpty()) {
+            // No email match at all → explicit "not found", same product
+            // choice already made for the OTP method (clearer UX over
+            // anti-enumeration; rate limiting is what actually slows probing,
+            // not response ambiguity).
+            $this->incrementAttempts($request, $emailHash);
             AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
-                'result'     => 'REGEN_LIMIT_EXCEEDED',
+                'result'     => 'REGEN_NO_MATCH',
                 'risk_score' => $risk,
-                'order_id'   => $purchase->order_number,
             ]));
-            return response()->json([
-                'status' => 'error',
-                'type'   => 'regen_limit',
-            ]);
+            return response()->json(['status' => 'error', 'type' => 'no_match']);
         }
 
-        // ── 5. Revoke any current active tokens for this order ────────────────
-        SecureToken::where('order_id', $purchase->order_number)
-            ->where('status', 'active')
-            ->update(['status' => 'revoked']);
+        // ── 4. Invalidate any previous pending OTP for these orders ───────────
+        $orderIds = $purchases->pluck('order_number')->all();
+        $primary  = $purchases->first();
 
-        // Bind the link to this browser + device + IP (same as OTP / payref), so
-        // the emailed link only works in the browser that requested it.
+        OtpVerification::whereIn('order_id', $orderIds)
+            ->where('status', 'pending')
+            ->update(['status' => 'expired']);
+
+        // ── 5. Generate, store & email the OTP ─────────────────────────────────
+        $rawOtp       = OtpVerification::generateOtp();
+        $sessionToken = Str::uuid()->toString();
+
+        OtpVerification::create([
+            'session_token'  => $sessionToken,
+            'email_hash'     => $emailHash,
+            'phone_hash'     => null,
+            'channel'        => 'email',
+            'otp_hash'       => hash('sha256', $rawOtp),
+            'order_id'       => $primary->order_number,
+            'order_ids'      => $orderIds,
+            'expires_at'     => now()->addMinutes(OtpVerification::OTP_TTL_MIN),
+            'attempts'       => 0,
+            'last_resend_at' => now(),
+            'status'         => 'pending',
+            'ip'             => $request->ip(),
+            'device_hash'    => $deviceHash,
+            'masked_phone'   => null,
+        ]);
+
+        $bs   = $currentLang->basic_setting;
+        $sent = $this->sendRecoveryOtpEmail($email, $primary->first_name, $rawOtp, $bs);
+
+        if (!$sent) {
+            OtpVerification::where('session_token', $sessionToken)->update(['status' => 'expired']);
+            AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                'result'     => 'REGEN_OTP_EMAIL_FAILED',
+                'risk_score' => $risk,
+                'order_id'   => $primary->order_number,
+            ]));
+            return response()->json(['status' => 'error', 'type' => 'email_failed']);
+        }
+
+        AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+            'result'     => 'REGEN_OTP_SENT',
+            'risk_score' => $risk,
+            'order_id'   => $primary->order_number,
+        ]));
+
+        return response()->json([
+            'status'        => 'success',
+            'otp_sent'      => true,
+            'session_token' => $sessionToken,
+            'masked_email'  => OtpVerification::maskEmail($email),
+            'resend_after'  => OtpVerification::RESEND_DELAY,
+        ]);
+    }
+
+    /**
+     * Sends the recovery OTP code by email. Shared by the initial request and
+     * the resend endpoint.
+     */
+    private function sendRecoveryOtpEmail(string $email, string $toName, string $rawOtp, $bs): bool
+    {
+        try {
+            $mailer = new KreativMailer;
+            return (bool) $mailer->mailFromAdmin([
+                'toMail'          => $email,
+                'toName'          => $toName,
+                'otp_code'        => $rawOtp,
+                'otp_ttl_minutes' => OtpVerification::OTP_TTL_MIN,
+                'website_title'   => $bs->website_title,
+                'templateType'    => 'tender_recovery_otp',
+                'type'            => 'tenderRecoveryOtp',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('[Regenerate] OTP email failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Issues a SecureToken + emails download links for every eligible purchase
+     * in $purchases (skips suspended / capped orders individually). Shared by
+     * the immediate registration-number path and the post-OTP-verify path for
+     * the email-only branch.
+     */
+    private function issueRecoveryLinks($purchases, string $emailHash, Request $request, $be, array $logMeta, float $risk)
+    {
+        // One binding secret for the whole batch — every emailed link in this
+        // request is locked to this browser + device + IP (same as OTP/payref).
         $sessionSecret = Str::random(40);
         $sessionHash   = hash('sha256', $sessionSecret);
 
-        // ── 6. Issue new SecureToken ──────────────────────────────────────────
-        $rawToken  = $this->generateToken($purchase, $emailHash, $request);
-        $tokenHash = hash('sha256', $rawToken);
+        $downloads      = [];
+        $anySuspended   = false;
+        $anyCapExceeded = false;
 
-        SecureToken::create([
-            'order_id'       => $purchase->order_number,
-            'email_hash'     => $emailHash,
-            'token_hash'     => $tokenHash,
-            'issued_at'      => now(),
-            'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
-            'max_downloads'  => $this->maxDownloads(),
-            'download_count' => 0,
-            'status'         => 'active',
-            'device_hash'    => $this->uaHash($request), // UA only (IP checked separately)
-            'ip'             => $request->ip(),
-            'session_secret' => $sessionHash,
-        ]);
+        foreach ($purchases as $purchase) {
+            if ($purchase->isSuspended()) {
+                $anySuspended = true;
+                continue;
+            }
 
-        // ── 7. Email the new download link ────────────────────────────────────
-        $downloadUrl = route('find_my_files.download', ['t' => $rawToken]);
-        $emailSent   = $this->sendDownloadEmail($purchase, $downloadUrl, $be);
+            // Regeneration cap: max N new tokens per order per 24h (admin
+            // configurable, shared across all 4 methods) — scoped to THIS
+            // order, so one order hitting its cap doesn't block the rest.
+            if ($this->regenCapApplies('regenerate')) {
+                $regenCount = SecureToken::where('email_hash', $emailHash)
+                    ->where('order_id', $purchase->order_number)
+                    ->where('created_at', '>=', now()->subHours(24))
+                    ->count();
+
+                if ($regenCount >= $this->maxRegenPerDay()) {
+                    $anyCapExceeded = true;
+                    AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                        'result'     => 'REGEN_LIMIT_EXCEEDED',
+                        'risk_score' => $risk,
+                        'order_id'   => $purchase->order_number,
+                    ]));
+                    continue;
+                }
+            }
+
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+
+            $rawToken = $this->generateToken($purchase, $emailHash, $request);
+
+            SecureToken::create([
+                'order_id'       => $purchase->order_number,
+                'email_hash'     => $emailHash,
+                'token_hash'     => hash('sha256', $rawToken),
+                'issued_at'      => now(),
+                'expires_at'     => now()->addHours(self::TOKEN_TTL_HOURS),
+                'max_downloads'  => $this->maxDownloads(),
+                'download_count' => 0,
+                'status'         => 'active',
+                'device_hash'    => $this->uaHash($request), // UA only (IP checked separately)
+                'ip'             => $request->ip(),
+                'session_secret' => $sessionHash,
+            ]);
+
+            $downloads[] = [
+                'title'   => optional($purchase->tender)->title ?: $purchase->order_number,
+                'url'     => route('find_my_files.download', ['t' => $rawToken]),
+                'name'    => trim($purchase->first_name . ' ' . $purchase->last_name),
+                'company' => (string) $purchase->company_name,
+                'order'   => $purchase->order_number,
+            ];
+
+            AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
+                'result'     => 'REGEN_OK',
+                'risk_score' => $risk,
+                'order_id'   => $purchase->order_number,
+            ]));
+        }
+
+        // Every matched order turned out non-issuable.
+        if (empty($downloads)) {
+            if ($anySuspended && $r = $this->suspendedResponse($purchases->first(fn ($p) => $p->isSuspended()))) {
+                return $r;
+            }
+            if ($anyCapExceeded) {
+                return response()->json(['status' => 'error', 'type' => 'regen_limit']);
+            }
+            // Shouldn't normally reach here ($purchases was non-empty and every
+            // entry is either suspended, cap-exceeded, or issued) — but stay
+            // consistent with the "clear over neutral" choice above if it does.
+            return response()->json(['status' => 'error', 'type' => 'no_match']);
+        }
+
+        // ── Email the new download link(s) ─────────────────────────────────────
+        $emailSent = $this->sendDownloadEmail($purchases->first(), $downloads, $be);
         \Log::info('[Regenerate] Email result', [
-            'order' => $purchase->order_number,
-            'sent'  => $emailSent,
+            'orders' => array_column($downloads, 'order'),
+            'sent'   => $emailSent,
         ]);
 
         if (!$emailSent) {
             AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
                 'result'     => 'REGEN_EMAIL_FAILED',
                 'risk_score' => $risk,
-                'order_id'   => $purchase->order_number,
             ]));
             return response()->json(['status' => 'error', 'type' => 'email_failed']);
         }
 
         $this->resetAttempts($request, $emailHash);
 
-        AccessLog::record(AccessLog::LINK_SENT, array_merge($logMeta, [
-            'result'     => 'REGEN_OK',
-            'risk_score' => $risk,
-            'order_id'   => $purchase->order_number,
-        ]));
-
-        // Drop the binding cookie on this browser so the emailed link is locked
-        // to it (+ device + IP), matching the OTP and payment-reference flows.
+        // Drop the binding cookie on this browser so every emailed link is
+        // locked to it (+ device + IP), matching the OTP and payment-reference
+        // flows.
         return response()->json([
             'status'   => 'success',
             'redirect' => route('find_my_files.link_sent'),
@@ -1343,6 +1537,138 @@ class FindMyFilesController extends Controller
             false,
             'Lax'
         );
+    }
+
+    public function verifyRegenerateOtp(Request $request)
+    {
+        $currentLang = $this->getCurrentLang();
+        $be          = $currentLang->basic_extended;
+        $deviceHash  = $this->deviceHash($request);
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'session_token' => 'required|string|size:36',
+            'otp_code'      => 'required|string|size:6|regex:/^\d{6}$/',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        $otp = OtpVerification::where('session_token', $request->input('session_token'))
+            ->where('channel', 'email')
+            ->first();
+
+        if (!$otp) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        if (!$otp->isUsable()) {
+            $type = ($otp->status === 'exhausted') ? 'otp_exhausted' : 'otp_expired';
+            return response()->json(['status' => 'error', 'type' => $type]);
+        }
+
+        // ── Wrong OTP ─────────────────────────────────────────────────────────
+        if (!$otp->verifyOtp($request->input('otp_code'))) {
+            $otp->increment('attempts');
+
+            if ($otp->attempts >= OtpVerification::MAX_ATTEMPTS) {
+                $otp->update(['status' => 'exhausted']);
+                AccessLog::record(AccessLog::LINK_REQUESTED, [
+                    'ip'          => $request->ip(),
+                    'user_agent'  => substr($request->userAgent(), 0, 255),
+                    'email_hash'  => $otp->email_hash,
+                    'device_hash' => $deviceHash,
+                    'order_id'    => $otp->order_id ?? '',
+                    'result'      => 'REGEN_OTP_EXHAUSTED',
+                    'risk_score'  => 0,
+                ]);
+                return response()->json(['status' => 'error', 'type' => 'otp_exhausted']);
+            }
+
+            return response()->json([
+                'status'        => 'error',
+                'type'          => 'otp_invalid',
+                'attempts_left' => OtpVerification::MAX_ATTEMPTS - $otp->attempts,
+            ]);
+        }
+
+        // ── OTP correct — resolve the same order set and issue links ──────────
+        $orderIds  = !empty($otp->order_ids) ? $otp->order_ids : [$otp->order_id];
+        $purchases = TenderPurchase::whereIn('order_number', $orderIds)->get();
+
+        if ($purchases->isEmpty()) {
+            $otp->update(['status' => 'expired']);
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        $otp->update(['status' => 'verified']);
+
+        $emailHash = $otp->email_hash;
+        $risk      = $this->riskScore($request, $emailHash);
+        $logMeta   = [
+            'ip'          => $request->ip(),
+            'user_agent'  => substr($request->userAgent(), 0, 255),
+            'email_hash'  => $emailHash,
+            'device_hash' => $deviceHash,
+            'order_id'    => '',
+        ];
+
+        return $this->issueRecoveryLinks($purchases, $emailHash, $request, $be, $logMeta, $risk);
+    }
+
+    public function resendRegenerateOtp(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'session_token' => 'required|string|size:36',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        $otp = OtpVerification::where('session_token', $request->input('session_token'))
+            ->where('channel', 'email')
+            ->first();
+
+        if (!$otp || !$otp->isUsable()) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        if (!$otp->canResend()) {
+            return response()->json([
+                'status'       => 'error',
+                'type'         => 'resend_too_soon',
+                'resend_after' => $otp->resendCooldownSeconds(),
+            ]);
+        }
+
+        $primary = TenderPurchase::where('order_number', $otp->order_id)->first();
+
+        if (!$primary) {
+            return response()->json(['status' => 'error', 'type' => 'session_invalid']);
+        }
+
+        $rawOtp = OtpVerification::generateOtp();
+        $otp->update([
+            'otp_hash'       => hash('sha256', $rawOtp),
+            'expires_at'     => now()->addMinutes(OtpVerification::OTP_TTL_MIN),
+            'attempts'       => 0,
+            'last_resend_at' => now(),
+            'status'         => 'pending',
+        ]);
+
+        $currentLang = $this->getCurrentLang();
+        $bs          = $currentLang->basic_setting;
+        $sent        = $this->sendRecoveryOtpEmail($primary->email, $primary->first_name, $rawOtp, $bs);
+
+        if (!$sent) {
+            return response()->json(['status' => 'error', 'type' => 'email_failed']);
+        }
+
+        return response()->json([
+            'status'       => 'success',
+            'resend_after' => OtpVerification::RESEND_DELAY,
+        ]);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1434,6 +1760,24 @@ class FindMyFilesController extends Controller
         // ── 4b. Suspension check ──────────────────────────────────────────────
         if ($r = $this->suspendedResponse($purchase)) {
             return $r;
+        }
+
+        // ── 4c. Recovery cap: max N link issuances per order per 24h, shared
+        // across all 4 Find-My-Files methods (admin configurable) ────────────
+        if ($this->regenCapApplies('payref')) {
+            $regenCount = SecureToken::where('email_hash', $emailHash)
+                ->where('order_id', $purchase->order_number)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->count();
+
+            if ($regenCount >= $this->maxRegenPerDay()) {
+                AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
+                    'result'     => 'REGEN_LIMIT_EXCEEDED',
+                    'risk_score' => $risk,
+                    'order_id'   => $purchase->order_number,
+                ]));
+                return response()->json(['status' => 'error', 'type' => 'regen_limit']);
+            }
         }
 
         // ── 5. Revoke previous active tokens ──────────────────────────────────
@@ -1782,6 +2126,7 @@ class FindMyFilesController extends Controller
 
         $emailHash = $otp->email_hash;
         $downloads = [];      // {title, url} per tender, for the browser + email
+        $anyCapExceeded = false;
 
         // Session/device/IP binding: one secret for this verification, stored
         // (hashed) on every token and dropped as an httpOnly cookie on THIS
@@ -1793,6 +2138,30 @@ class FindMyFilesController extends Controller
             // Skip anything no longer downloadable (not completed / suspended).
             if ($purchase->payment_status !== 'Completed' || $purchase->isSuspended()) {
                 continue;
+            }
+
+            // Recovery cap: max N link issuances per order per 24h, shared
+            // across all 4 Find-My-Files methods (admin configurable) — scoped
+            // to THIS order, so one capped order doesn't block the rest.
+            if ($this->regenCapApplies('otp')) {
+                $regenCount = SecureToken::where('email_hash', $emailHash)
+                    ->where('order_id', $purchase->order_number)
+                    ->where('created_at', '>=', now()->subHours(24))
+                    ->count();
+
+                if ($regenCount >= $this->maxRegenPerDay()) {
+                    $anyCapExceeded = true;
+                    AccessLog::record(AccessLog::LINK_REQUESTED, [
+                        'ip'          => $request->ip(),
+                        'user_agent'  => substr($request->userAgent(), 0, 255),
+                        'email_hash'  => $emailHash,
+                        'device_hash' => $deviceHash,
+                        'order_id'    => $purchase->order_number,
+                        'result'      => 'REGEN_LIMIT_EXCEEDED',
+                        'risk_score'  => 0,
+                    ]);
+                    continue;
+                }
             }
 
             // Fresh token per order → each tender keeps its own open-counter.
@@ -1838,10 +2207,15 @@ class FindMyFilesController extends Controller
             ]);
         }
 
-        // Every matched order turned out suspended/pending after verification.
+        // Every matched order turned out non-issuable after verification.
         if (empty($downloads)) {
-            return $this->suspendedResponse($purchases->first())
-                ?? response()->json(['status' => 'error', 'type' => 'suspended']);
+            if ($r = $this->suspendedResponse($purchases->first(fn ($p) => $p->isSuspended()))) {
+                return $r;
+            }
+            if ($anyCapExceeded) {
+                return response()->json(['status' => 'error', 'type' => 'regen_limit']);
+            }
+            return response()->json(['status' => 'error', 'type' => 'suspended']);
         }
 
         $emailSent = $this->sendDownloadEmail($purchases->first(), $downloads, $be);

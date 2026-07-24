@@ -589,6 +589,112 @@
                 <small class="text-muted d-block mt-1">Default 3. Each selected tender gets its own link with its own counter.</small>
               </div>
 
+              <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">Recovery Request Cap</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">
+                How many times a single order's link may be (re)issued per 24 hours across the
+                <strong>Find My Files</strong> page — Order Number, OTP, Payment Reference and
+                Regenerate all share the same budget for that order, not one each. Every issuance
+                on any of those 4 methods counts toward it.
+              </p>
+
+              {{-- Master on/off --}}
+              <div class="form-group">
+                <label class="font-weight-bold">Recovery Cap</label>
+                <div class="selectgroup w-100">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_regen_cap_enabled" value="1" class="selectgroup-input"
+                      {{ $abex->tender_regen_cap_enabled == 1 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Active</span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="tender_regen_cap_enabled" value="0" class="selectgroup-input"
+                      {{ $abex->tender_regen_cap_enabled == 0 ? 'checked' : '' }}>
+                    <span class="selectgroup-button">Deactive</span>
+                  </label>
+                </div>
+                <p class="text-warning mb-0 mt-1" style="font-size:12px;">
+                  When deactive, none of the 4 methods below enforce any cap — links can be
+                  re-issued without limit (still subject to the general rate limiter).
+                </p>
+              </div>
+
+              {{-- Max attempts per order --}}
+              <div class="form-group">
+                <label>Recovery Requests Per Order (24h)</label>
+                <input type="number" class="form-control ltr" name="tender_max_regen_per_day"
+                  value="{{ $abex->tender_max_regen_per_day ?? 3 }}" step="1" min="1" max="20">
+                <small class="text-muted d-block mt-1">Default 3. Only used while Recovery Cap above is Active.</small>
+              </div>
+
+              {{-- Per-method toggles --}}
+              <div class="form-group">
+                <label class="font-weight-bold">Apply Cap To</label>
+                <div class="row">
+                  <div class="col-md-6 col-lg-3">
+                    <label class="d-block">Order Number</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_order_number" value="1" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_order_number == 1 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">On</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_order_number" value="0" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_order_number == 0 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">Off</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <label class="d-block">OTP</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_otp" value="1" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_otp == 1 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">On</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_otp" value="0" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_otp == 0 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">Off</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <label class="d-block">Payment Reference</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_payref" value="1" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_payref == 1 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">On</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_payref" value="0" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_payref == 0 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">Off</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 col-lg-3">
+                    <label class="d-block">Regenerate</label>
+                    <div class="selectgroup w-100">
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_regenerate" value="1" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_regenerate == 1 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">On</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="radio" name="tender_regen_cap_regenerate" value="0" class="selectgroup-input"
+                          {{ $abex->tender_regen_cap_regenerate == 0 ? 'checked' : '' }}>
+                        <span class="selectgroup-button">Off</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <small class="text-muted d-block mt-2">Switch a method off to exempt it from the shared cap while leaving the others capped.</small>
+              </div>
+
               </div>
               {{-- ============ /Secure Links ============ --}}
 

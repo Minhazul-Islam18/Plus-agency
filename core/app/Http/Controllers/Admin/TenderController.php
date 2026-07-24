@@ -575,6 +575,12 @@ class TenderController extends Controller
         $purchase        = TenderPurchase::findOrFail($request->purchase_id);
         $previousStatus  = $purchase->payment_status;
         $purchase->payment_status = $request->payment_status;
+        // Match the gateway path (TenderPaymentHelper::completePurchase) — stamp
+        // paid_at the first time this order is marked Completed, so it's not
+        // left null for manually-approved (e.g. offline) payments.
+        if ($request->payment_status === 'Completed' && empty($purchase->paid_at)) {
+            $purchase->paid_at = now();
+        }
         $purchase->save();
 
         \App\TenderAuditLog::record('payment_status_changed', $purchase,
@@ -863,6 +869,12 @@ class TenderController extends Controller
             'tender_pdf_encrypt_enabled'        => 'nullable|in:0,1',
             'tender_pdf_password'               => 'nullable|string|max:255|required_if:tender_pdf_encrypt_enabled,1',
             'tender_max_downloads'              => 'nullable|integer|min:1|max:20',
+            'tender_max_regen_per_day'          => 'nullable|integer|min:1|max:20',
+            'tender_regen_cap_enabled'          => 'nullable|in:0,1',
+            'tender_regen_cap_order_number'     => 'nullable|in:0,1',
+            'tender_regen_cap_otp'              => 'nullable|in:0,1',
+            'tender_regen_cap_payref'           => 'nullable|in:0,1',
+            'tender_regen_cap_regenerate'       => 'nullable|in:0,1',
         ], [
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
         ]);
@@ -914,6 +926,17 @@ class TenderController extends Controller
             $bex->tender_max_downloads = $request->filled('tender_max_downloads')
                 ? (int) $request->tender_max_downloads
                 : 3;
+
+            // Per-order recovery cap (global) — shared across all 4 Find-My-Files
+            // methods, with a master on/off plus one on/off per method.
+            $bex->tender_max_regen_per_day      = $request->filled('tender_max_regen_per_day')
+                ? (int) $request->tender_max_regen_per_day
+                : 3;
+            $bex->tender_regen_cap_enabled      = $request->input('tender_regen_cap_enabled', 1);
+            $bex->tender_regen_cap_order_number = $request->input('tender_regen_cap_order_number', 1);
+            $bex->tender_regen_cap_otp          = $request->input('tender_regen_cap_otp', 1);
+            $bex->tender_regen_cap_payref       = $request->input('tender_regen_cap_payref', 1);
+            $bex->tender_regen_cap_regenerate   = $request->input('tender_regen_cap_regenerate', 1);
 
             $bex->save();
         }

@@ -12,7 +12,11 @@ class CreateOtpVerificationsTable extends Migration
             $table->bigIncrements('id');
             $table->uuid('session_token')->unique();
             $table->string('email_hash', 64)->index();
-            $table->string('phone_hash', 64)->index();
+            // Nullable: email-channel verifications (Find My Files Method 4) have
+            // no phone at all. channel tells verify/resend which delivery path a
+            // given record used.
+            $table->string('phone_hash', 64)->nullable()->index();
+            $table->string('channel', 10)->default('sms');
             $table->string('otp_hash', 64);
             $table->string('order_id', 50)->nullable()->index();
             // All order numbers a single OTP verification covers (multi-tender).

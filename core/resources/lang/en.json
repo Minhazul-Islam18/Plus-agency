@@ -575,5 +575,20 @@
     "to reach our support team.": "to reach our support team.",
     "← Start over": "← Start over",
     "Downloads are limited to :count attempts.": "Downloads are limited to :count attempts.",
-    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked."
+    "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.": "The link may have expired (valid for 24 hours), already reached the download limit (:count attempts), or been revoked.",
+    "Enter the email address you used when purchasing. If valid completed orders exist, fresh download links for every one of them will be sent to your inbox.": "Enter the email address you used when purchasing. If valid completed orders exist, fresh download links for every one of them will be sent to your inbox.",
+    "Narrow by purchase date (optional)": "Narrow by purchase date (optional)",
+    "From": "From",
+    "To": "To",
+    "Leave both blank to receive links for every purchase on this email.": "Leave both blank to receive links for every purchase on this email.",
+    "This method emails a separate download link for every completed purchase on this address. Use the date fields above to only include purchases from a specific period.": "This method emails a separate download link for every completed purchase on this address. Use the date fields above to only include purchases from a specific period.",
+    "Enter the email address you used when purchasing and a purchase date range. Fresh download links for every completed order in that range will be sent to your inbox.": "Enter the email address you used when purchasing and a purchase date range. Fresh download links for every completed order in that range will be sent to your inbox.",
+    "Purchase Date Range": "Purchase Date Range",
+    "Only purchases paid for within this range will be included.": "Only purchases paid for within this range will be included.",
+    "This method emails a separate download link for every completed purchase on this address within the date range you select.": "This method emails a separate download link for every completed purchase on this address within the date range you select.",
+    "Enter a valid email address and a valid purchase date range (not in the future).": "Enter a valid email address and a valid purchase date range (not in the future).",
+    "We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.": "We could not find a completed purchase for that email within the selected date range. Please check your details, or contact support if you believe this is an error.",
+    "A fresh 6-digit code was just sent to your email.": "A fresh 6-digit code was just sent to your email.",
+    "Could not send the verification code. Please try again shortly or contact support.": "Could not send the verification code. Please try again shortly or contact support.",
+    "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range.": "Enter the email address you used when purchasing and a purchase date range. We'll email you a verification code, then a download link for every completed order in that range."
 }

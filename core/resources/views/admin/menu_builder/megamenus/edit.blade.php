@@ -98,7 +98,7 @@
                                 } elseif($type == 'blogs') {
                                     $items = $cat->blogs;
                                 } elseif($type == 'tenders') {
-                                    $items = $cat->tenders;
+                                    $items = $cat->tenders->where('status', 1);
                                 }
                             @endphp
 

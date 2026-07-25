@@ -157,6 +157,9 @@
                                         } else {
                                             $mItem = $mItem->first();
                                         }
+                                        if ($link['type'] == 'tenders-megamenu' && (int) $mItem->status !== 1) {
+                                            continue;
+                                        }
                                         if ($link['type'] == 'services-megamenu') {
                                             $detailsUrl = route('front.servicedetails', [$mItem->slug]);
                                             $imgSrc = asset('assets/front/img/services/' . $mItem->main_image);

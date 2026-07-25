@@ -1042,8 +1042,13 @@ class TenderController extends Controller
             $enrolls = collect([]);
         }
 
-        $onPms  = PaymentGateway::where('status', 1)->get();
-        $offPms = OfflineGateway::all();
+        // Match exactly what the tender checkout page actually offers (see
+        // Front\TenderController@tenderDetails) — not every globally-enabled
+        // gateway, only the ones a buyer could actually have paid with here.
+        $onPms  = PaymentGateway::where('status', 1)
+            ->whereIn('keyword', ['stripe', 'razorpay', 'moneroo'])
+            ->get();
+        $offPms = OfflineGateway::where('course_checkout_status', 1)->get();
 
         return view('admin.tender.tender.report', compact('enrolls', 'onPms', 'offPms'));
     }

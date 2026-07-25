@@ -26,7 +26,7 @@
             <form action="{{ url()->full() }}" class="form-inline flex-wrap" style="gap: 6px;">
               <div class="form-group">
                 <label class="mr-1">From</label>
-                <input class="form-control datepicker" type="text" name="from_date"
+                <input class="form-control datepicker" type="text" name="from_date" id="fromDate"
                   placeholder="From"
                   value="{{ request()->input('from_date') }}"
                   required autocomplete="off">
@@ -34,7 +34,7 @@
 
               <div class="form-group">
                 <label class="mr-1">To</label>
-                <input class="form-control datepicker" type="text" name="to_date"
+                <input class="form-control datepicker" type="text" name="to_date" id="toDate"
                   placeholder="To"
                   value="{{ request()->input('to_date') }}"
                   required autocomplete="off">
@@ -155,4 +155,15 @@
     </div>
   </div>
 </div>
+@endsection
+
+@section('scripts')
+    <script>
+        // custom.js inits every .datepicker with plain autoclose (submission
+        // deadlines elsewhere need future dates allowed) — this report is
+        // filtering past enrollments, so cap just these two at today.
+        $(document).ready(function() {
+            $('#fromDate, #toDate').datepicker('setEndDate', new Date());
+        });
+    </script>
 @endsection

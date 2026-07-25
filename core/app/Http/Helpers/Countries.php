@@ -252,4 +252,30 @@ class Countries
         }
         return null;
     }
+
+    /**
+     * Split a stored digits-only number (no leading "+") back into a dial
+     * code + national number, for pre-filling a code-picker + number input
+     * from a previously-saved value. Longest-matching dial code wins, so
+     * "+1" doesn't shadow "+1246" (Barbados). Falls back to no code (all
+     * digits treated as the national number) when nothing matches.
+     *
+     * @return array{code: string, number: string}
+     */
+    public static function splitDial(string $digits): array
+    {
+        $best = '';
+        foreach (self::dialCodes() as $dial) {
+            $bare = ltrim($dial, '+');
+            if (strpos($digits, $bare) === 0 && strlen($bare) > strlen($best)) {
+                $best = $bare;
+            }
+        }
+
+        if ($best === '') {
+            return ['code' => '', 'number' => $digits];
+        }
+
+        return ['code' => '+' . $best, 'number' => substr($digits, strlen($best))];
+    }
 }

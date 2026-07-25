@@ -430,10 +430,10 @@
                                                             href="{{ $member->linkedin }}"><i
                                                                 class="fab fa-linkedin-in"></i></a></li>
                                                 @endif
-                                                @if (!empty($member->instagram))
+                                                @if (!empty($member->whatsapp_link))
                                                     <li class="single-social-account"><a
-                                                            href="{{ $member->instagram }}"><i
-                                                                class="fab fa-instagram"></i></a></li>
+                                                            href="{{ $member->whatsapp_link }}" target="_blank"><i
+                                                                class="fab fa-whatsapp"></i></a></li>
                                                 @endif
                                             </ul>
                                         </div>

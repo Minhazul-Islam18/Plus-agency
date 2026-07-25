@@ -45,8 +45,8 @@
                         @if (!empty($member->linkedin))
                           <li class="single-social-account"><a href="{{$member->linkedin}}"><i class="fab fa-linkedin-in"></i></a></li>
                         @endif
-                        @if (!empty($member->instagram))
-                          <li class="single-social-account"><a href="{{$member->instagram}}"><i class="fab fa-instagram"></i></a></li>
+                        @if (!empty($member->whatsapp_link))
+                          <li class="single-social-account"><a href="{{$member->whatsapp_link}}" target="_blank"><i class="fab fa-whatsapp"></i></a></li>
                         @endif
                      </ul>
                   </div>

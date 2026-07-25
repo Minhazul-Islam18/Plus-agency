@@ -111,9 +111,18 @@
                   <p id="errtwitter" class="mb-0 text-danger em"></p>
                 </div>
                 <div class="form-group">
-                  <label for="">Instagram</label>
-                  <input type="text" class="form-control ltr" name="instagram" value="{{$member->instagram}}" placeholder="Enter instagram url">
-                  <p id="errinstagram" class="mb-0 text-danger em"></p>
+                  <label for="">WhatsApp</label>
+                  @include('admin.partials.country-code-picker', [
+                      'codeInputId' => 'memberWhatsappCode',
+                      'numberInputId' => 'memberWhatsappNumber',
+                      'numberInputName' => 'whatsapp_number',
+                      'countries' => $countries,
+                      'preCode' => $preWhatsappCode,
+                      'preNumber' => $preWhatsappNumber,
+                      'preFlag' => $preWhatsappFlag,
+                  ])
+                  <p id="errwhatsapp_number_code" class="mb-0 text-danger em"></p>
+                  <p id="errwhatsapp_number" class="mb-0 text-danger em"></p>
                 </div>
                 <div class="form-group">
                   <label for="">Linkedin</label>

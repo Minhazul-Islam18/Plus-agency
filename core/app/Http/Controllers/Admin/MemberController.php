@@ -13,6 +13,43 @@ use Session;
 
 class MemberController extends Controller
 {
+    /**
+     * Combine the picked dial code with the national number for wa.me,
+     * tolerating whatever the admin actually typed in the number field:
+     *  - "01917817191"          → trunk "0" dropped: code + 1917817191
+     *  - "0033612345678"        → "00" international-access prefix dropped
+     *                              first, exposing the re-typed code beneath
+     *  - "880 1917817191"       → re-typed code dropped, not duplicated
+     *  - "+880 1917-817191"     → dashes/spaces/plus already stripped by the
+     *                              picker's own input handler before this runs
+     * Leading zeros are stripped both before AND after the re-typed-code
+     * check, since removing the code can expose a further trunk "0"
+     * underneath (e.g. "880" + "0" + "1917817191" typed as one block).
+     * Same de-duplication idea as TenderPurchase::e164Phone().
+     */
+    private function whatsappValue(Request $request): ?string
+    {
+        if (!$request->filled('whatsapp_number')) {
+            return null;
+        }
+
+        $code     = (string) $request->whatsapp_number_code; // e.g. "+880"
+        $bareCode = ltrim($code, '+');
+
+        $national = preg_replace('/\D/', '', (string) $request->whatsapp_number);
+        $national = ltrim($national, '0');
+
+        // Admin re-typed the country code inside the number field too — drop
+        // the duplicate rather than doubling it up.
+        if ($bareCode !== '' && strpos($national, $bareCode) === 0) {
+            $national = substr($national, strlen($bareCode));
+        }
+
+        $national = ltrim($national, '0');
+
+        return $code . $national;
+    }
+
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->firstOrFail();
@@ -29,12 +66,23 @@ class MemberController extends Controller
 
     public function create()
     {
-        return view('admin.home.member.create');
+        $data['countries'] = \App\Http\Helpers\Countries::forCheckout();
+        return view('admin.home.member.create', $data);
     }
 
     public function edit($id)
     {
-        $data['member'] = Member::findOrFail($id);
+        $data['member']    = Member::findOrFail($id);
+        $data['countries'] = \App\Http\Helpers\Countries::forCheckout();
+
+        $digits = preg_replace('/\D/', '', (string) $data['member']->whatsapp);
+        $split  = \App\Http\Helpers\Countries::splitDial($digits);
+        $data['preWhatsappCode']   = $split['code'];
+        $data['preWhatsappNumber'] = $split['number'];
+        $data['preWhatsappFlag']   = $split['code'] !== ''
+            ? (collect($data['countries'])->firstWhere('dial', $split['code'])['flag'] ?? '')
+            : '';
+
         return view('admin.home.member.edit', $data);
     }
 
@@ -45,7 +93,8 @@ class MemberController extends Controller
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
-            'language_id.required' => 'The language field is required'
+            'language_id.required' => 'The language field is required',
+            'whatsapp_number_code.required_with' => 'Select a country code for the WhatsApp number.',
         ];
 
         $rules = [
@@ -56,7 +105,8 @@ class MemberController extends Controller
             'facebook' => 'nullable|max:50',
             'twitter' => 'nullable|max:50',
             'linkedin' => 'nullable|max:50',
-            'instagram' => 'nullable|max:50',
+            'whatsapp_number' => 'nullable|max:20',
+            'whatsapp_number_code' => 'required_with:whatsapp_number',
         ];
         if ($request->filled('image')) {
             $rules['image'] = [
@@ -82,7 +132,7 @@ class MemberController extends Controller
         $member->facebook = $request->facebook;
         $member->twitter = $request->twitter;
         $member->linkedin = $request->linkedin;
-        $member->instagram = $request->instagram;
+        $member->whatsapp = $this->whatsappValue($request);
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
@@ -108,7 +158,12 @@ class MemberController extends Controller
             'facebook' => 'nullable|max:50',
             'twitter' => 'nullable|max:50',
             'linkedin' => 'nullable|max:50',
-            'instagram' => 'nullable|max:50',
+            'whatsapp_number' => 'nullable|max:20',
+            'whatsapp_number_code' => 'required_with:whatsapp_number',
+        ];
+
+        $messages = [
+            'whatsapp_number_code.required_with' => 'Select a country code for the WhatsApp number.',
         ];
 
         if ($request->filled('image')) {
@@ -121,7 +176,7 @@ class MemberController extends Controller
             ];
         }
 
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             $errmsgs = $validator->getMessageBag()->add('error', 'true');
             return response()->json($validator->errors());
@@ -133,7 +188,7 @@ class MemberController extends Controller
         $member->facebook = $request->facebook;
         $member->twitter = $request->twitter;
         $member->linkedin = $request->linkedin;
-        $member->instagram = $request->instagram;
+        $member->whatsapp = $this->whatsappValue($request);
 
         if ($request->filled('image')) {
             @unlink('assets/front/img/members/' . $member->image);

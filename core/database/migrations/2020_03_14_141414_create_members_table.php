@@ -21,7 +21,7 @@ class CreateMembersTable extends Migration
             $table->string('image', 255)->nullable();
             $table->string('facebook', 255)->nullable();
             $table->string('twitter', 255)->nullable();
-            $table->string('instagram', 255)->nullable();
+            $table->string('whatsapp', 255)->nullable();
             $table->string('linkedin', 255)->nullable();
         });
     }

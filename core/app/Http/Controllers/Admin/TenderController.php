@@ -213,7 +213,7 @@ class TenderController extends Controller
         // but only fetch the columns the list + module modal actually use, and
         // eager-load modules to avoid a query per row (N+1).
         $tenders = Tender::where('language_id', $language_id)
-            ->select(['id', 'language_id', 'country', 'title', 'submission_deadline', 'tender_image', 'is_featured'])
+            ->select(['id', 'language_id', 'country', 'title', 'submission_deadline', 'tender_image', 'is_featured', 'status'])
             ->with('tenderModules:id,tender_id,name,cost')
             ->orderBy('id', 'desc')
             ->get();
@@ -545,6 +545,15 @@ class TenderController extends Controller
         }
 
         return redirect()->back()->with('success', 'Featured status updated successfully.');
+    }
+
+    public function status(Request $request)
+    {
+        $tender = Tender::findOrFail($request->id);
+        $tender->status = $request->status;
+        $tender->save();
+
+        return response()->json(['success' => true]);
     }
 
     public function purchaseLog(Request $request)

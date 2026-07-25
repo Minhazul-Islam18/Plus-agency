@@ -656,6 +656,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::post('/tender/delete', 'Admin\TenderController@delete')->name('admin.tender.delete');
         Route::post('/tender/bulk_delete', 'Admin\TenderController@bulkDelete')->name('admin.tender.bulk_delete');
         Route::post('/tender/featured', 'Admin\TenderController@featured')->name('admin.tender.featured');
+        Route::post('/tender/status', 'Admin\TenderController@status')->name('admin.tender.status');
         Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
         Route::post('/tender/purchase/update-reference', 'Admin\TenderController@purchaseUpdateReference')->name('admin.tender.purchaseUpdateReference');

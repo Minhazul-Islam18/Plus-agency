@@ -27,6 +27,7 @@ class Tender extends Model
         'expert_email',
         'expert_image',
         'is_featured',
+        'status',
     ];
 
     public function tenderCategory()

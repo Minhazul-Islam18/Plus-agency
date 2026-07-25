@@ -66,6 +66,7 @@ class TenderController extends Controller
 
         $data['featured_tenders'] = Tender::where('language_id', $currentLang->id)
             ->where('is_featured', 1)
+            ->where('status', 1)
             ->select($listCols)
             ->with($listWith)
             ->orderBy('id', 'desc')
@@ -77,10 +78,11 @@ class TenderController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $data['tenderCount'] = Tender::where('language_id', $currentLang->id)->count();
+        $data['tenderCount'] = Tender::where('language_id', $currentLang->id)->where('status', 1)->count();
 
         // All unique countries for filtering
         $data['countries'] = Tender::where('language_id', $currentLang->id)
+            ->where('status', 1)
             ->distinct()
             ->pluck('country')
             ->filter()
@@ -96,6 +98,7 @@ class TenderController extends Controller
         $filterKey  = $request->filterValue;
 
         $data['tenders'] = Tender::where('language_id', $currentLang->id)
+            ->where('status', 1)
             ->select($listCols)
             ->with($listWith)
             ->when($searchKey, fn($q) => $q->where(function ($q) use ($searchKey) {
@@ -131,6 +134,7 @@ class TenderController extends Controller
 
         // Price-slider bounds — one aggregate query instead of two run in the view.
         $bounds = Tender::where('language_id', $currentLang->id)
+            ->where('status', 1)
             ->selectRaw('MIN(current_price) AS mn, MAX(current_price) AS mx')
             ->first();
         $data['minPrice'] = (float) ($bounds->mn ?? 0);
@@ -154,6 +158,7 @@ class TenderController extends Controller
 
         $data['tender'] = Tender::where('language_id', $currentLang->id)
             ->where('slug', $slug)
+            ->where('status', 1)
             ->firstOrFail();
 
         $tender = $data['tender'];
@@ -204,6 +209,7 @@ class TenderController extends Controller
 
         $related = Tender::where('language_id', $currentLang->id)
             ->where('id', '!=', $tender->id)
+            ->where('status', 1)
             ->where($activeOnly)
             ->when($tender->tender_category_id, fn($q) => $q->where('tender_category_id', $tender->tender_category_id))
             ->select($relatedCols)
@@ -214,6 +220,7 @@ class TenderController extends Controller
         if ($related->isEmpty()) {
             $related = Tender::where('language_id', $currentLang->id)
                 ->where('id', '!=', $tender->id)
+                ->where('status', 1)
                 ->where($activeOnly)
                 ->select($relatedCols)
                 ->with($relatedWith)
@@ -241,6 +248,13 @@ class TenderController extends Controller
         // Blacklisted companies (by registration no.) cannot place a new order.
         if (\App\TenderBlacklist::matches($request->company_registration_no)) {
             return back()->with('error', __('This order cannot be processed. Please contact ICA support.'));
+        }
+
+        // Inactive tenders have no visible/linked checkout path, but guard the
+        // endpoint directly too in case a stale link is replayed.
+        $activeTender = Tender::where('id', $request->tender_id)->where('status', 1)->exists();
+        if (!$activeTender) {
+            return back()->with('error', __('This tender is not currently available.'));
         }
 
         $bse = BasicExtra::first();

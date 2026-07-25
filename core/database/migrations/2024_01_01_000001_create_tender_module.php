@@ -51,6 +51,9 @@ return new class extends Migration
                 $table->string('expert_email');
                 $table->string('expert_image')->nullable();
                 $table->tinyInteger('is_featured')->default(0);
+                // 0 = Inactive (hidden from frontend, default for new tenders while
+                // modules/prices are still being set up), 1 = Active (visible).
+                $table->tinyInteger('status')->default(0);
                 $table->timestamps();
             });
         }

@@ -23,16 +23,24 @@
 
 
     <!--    introduction area start   -->
-    <div class="intro-section"
-        @if ($bs->feature_section == 0) style="margin-top: 0px; @if (!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif"
-    @else
-        style="@if (!empty($be->intro_section_bg)) background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}'); background-size: cover; background-position: center; position: relative; overflow: hidden; @endif"
-        @endif>
-        @if (!empty($be->intro_section_bg))
-            <div class="intro-overlay"
-                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #{{ $be->intro_overlay_color ?? '000000' }}; opacity: {{ $be->intro_overlay_opacity ?? '0.6' }}; z-index: 0; pointer-events: none;">
-            </div>
-        @endif
+    {{--
+        .intro-section-backdrop carries the bg-image/overlay/fallback color and
+        is offset by +213px whenever .has-features shifts the section itself
+        by -213px, so the backdrop's own paint area always starts exactly at
+        the hero's real bottom edge — it can never bleed upward over the hero,
+        regardless of whether a bg image/overlay is set. Only the feature
+        cards (own opaque background-color) are meant to render in that
+        213px overlap band. See style.css .intro-section rules.
+    --}}
+    <div class="intro-section {{ $bs->feature_section == 1 ? 'has-features' : '' }}">
+        <div class="intro-section-backdrop"
+            @if (!empty($be->intro_section_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}');" @endif>
+            @if (!empty($be->intro_section_bg))
+                <div class="intro-section-overlay"
+                    style="background-color: #{{ $be->intro_overlay_color ?? '000000' }}; opacity: {{ $be->intro_overlay_opacity ?? '0.6' }};">
+                </div>
+            @endif
+        </div>
         <div class="container" style="position: relative; z-index: 2;">
             @if ($bs->feature_section == 1)
                 <div class="hero-features">
@@ -570,4 +578,25 @@
         <!--   partner section end    -->
     @endif
 
+@endsection
+
+@section('scripts')
+<script>
+    // The hero can be a JS-sized carousel and the card row's text wraps to a
+    // variable number of lines, so neither the hero's nor the card row's
+    // height is a fixed number — measure the card row and feed its real
+    // height to CSS (--intro-overlap) so the cards' bottom edge always lands
+    // exactly on the hero/intro boundary, whatever that height turns out to be.
+    (function () {
+        function syncIntroOverlap() {
+            var section = document.querySelector('.intro-section.has-features');
+            var features = section && section.querySelector('.hero-features');
+            if (!section || !features) return;
+            section.style.setProperty('--intro-overlap', features.offsetHeight + 'px');
+        }
+        document.addEventListener('DOMContentLoaded', syncIntroOverlap);
+        window.addEventListener('load', syncIntroOverlap);
+        window.addEventListener('resize', syncIntroOverlap);
+    })();
+</script>
 @endsection

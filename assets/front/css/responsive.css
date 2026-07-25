@@ -317,7 +317,7 @@
   .section-summary {
     font-size: 30px;
   }
-  .intro-section {
+  .intro-section.has-features {
     margin-top: auto;
   }
   .intro-txt {
@@ -616,7 +616,7 @@
   .service.breadcrumb-txt span {
     margin-bottom: 16px;
   }
-  .intro-section {
+  .intro-section.has-features {
     margin-top: 0;
   }
   .hero-features {

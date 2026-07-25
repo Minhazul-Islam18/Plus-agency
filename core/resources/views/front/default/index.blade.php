@@ -40,9 +40,6 @@
     @endif
     @if(count($features) == 0)
     <style>
-        .intro-section {
-            margin-top: 0;
-        }
         .hero-txt {
             padding: 310px 270px 165px 0px;
             color: #fff;
@@ -72,8 +69,9 @@
   <!--   hero area end    -->
 
 
-  <div class="intro-section">
-      <div class="container">
+  <div class="intro-section {{ count($features) > 0 ? 'has-features' : '' }}">
+      <div class="intro-section-backdrop"></div>
+      <div class="container" style="position: relative; z-index: 2;">
         @if (count($features) > 0)
         <div class="hero-features">
             <div class="row">
@@ -107,4 +105,24 @@
     @includeIf('front.partials.pagebuilder-notice')
   @endif
 
+@endsection
+
+@section('scripts')
+<script>
+    // See index1.blade.php — the hero can be a JS-sized carousel and the
+    // card row's text wraps to a variable number of lines, so measure the
+    // card row's real height and feed it to CSS (--intro-overlap) instead
+    // of relying on a fixed px guess.
+    (function () {
+        function syncIntroOverlap() {
+            var section = document.querySelector('.intro-section.has-features');
+            var features = section && section.querySelector('.hero-features');
+            if (!section || !features) return;
+            section.style.setProperty('--intro-overlap', features.offsetHeight + 'px');
+        }
+        document.addEventListener('DOMContentLoaded', syncIntroOverlap);
+        window.addEventListener('load', syncIntroOverlap);
+        window.addEventListener('resize', syncIntroOverlap);
+    })();
+</script>
 @endsection

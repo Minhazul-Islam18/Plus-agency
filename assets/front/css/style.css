@@ -1006,7 +1006,47 @@ a.hero-boxed-btn:hover::after {
   font-weight: 600;
 }
 .intro-section {
-  margin-top: -213px;
+  /* Own stacking context so .intro-section-backdrop's z-index: -1 is scoped
+     here, not to the whole page. */
+  position: relative;
+  z-index: 1;
+  --intro-overlap: 0px;
+}
+/* .has-features pulls the whole section (cards + backdrop together) up by
+   the card strip's own rendered height (--intro-overlap, set by JS in
+   index1.blade.php/index.blade.php — the hero can be a JS-sized carousel and
+   the card text can wrap to 1-3 lines, so no fixed px value stays correct),
+   so the cards' bottom edge lands exactly on the hero/intro boundary. The
+   backdrop below is offset by the same amount in the opposite direction, so
+   its own paint area — and any bg image/overlay on it — always starts
+   exactly at the hero's real bottom edge and never bleeds upward over the
+   hero. Only the cards themselves (own opaque per-feature background-color)
+   render in that overlap band. Until JS runs, --intro-overlap is 0 so the
+   section just renders flush, no shift. */
+.intro-section.has-features {
+  margin-top: calc(-1 * var(--intro-overlap));
+}
+.intro-section-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background-color: #fff;
+  background-size: cover;
+  background-position: center;
+}
+.intro-section.has-features .intro-section-backdrop {
+  top: var(--intro-overlap);
+}
+.intro-section-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
 }
 .intro-txt {
   padding: 77px 47px 79px 47px;

@@ -70,22 +70,15 @@
           <div class="row">
             <div class="col-lg-6">
               <div class="form-group">
-                <label for="">Password **</label>
-                <input type="password" class="form-control" name="password" placeholder="Enter password" value="">
-                <p id="errpassword" class="mb-0 text-danger em"></p>
+                <label for="">Status **</label>
+                <select class="form-control" name="status">
+                  <option value="1" selected>Active</option>
+                  <option value="0">Inactive</option>
+                </select>
+                <p id="errstatus" class="mb-0 text-danger em"></p>
               </div>
             </div>
             <div class="col-lg-6">
-              <div class="form-group">
-                <label for="">Re-type Password **</label>
-                <input type="password" class="form-control" name="password_confirmation" placeholder="Enter your password again" value="">
-                <p id="errpassword_confirmation" class="mb-0 text-danger em"></p>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-lg-12">
               <div class="form-group">
                 <label for="">Role **</label>
                 <select class="form-control" name="role">
@@ -97,6 +90,10 @@
                 <p id="errrole" class="mb-0 text-danger em"></p>
               </div>
             </div>
+          </div>
+
+          <div class="alert alert-info mb-0">
+            <strong>Account Activation:</strong> An activation email will be sent automatically to the administrator. The account can only be used after the administrator creates a personal password through the activation link.
           </div>
 
         </form>

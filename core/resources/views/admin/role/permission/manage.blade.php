@@ -91,6 +91,14 @@
                 			<span class="selectgroup-button">Admins Management</span>
                 		</label>
                 		<label class="selectgroup-item">
+                			<input type="checkbox" name="permissions[]" value="Role Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Role Management', $permissions)) checked @endif>
+                			<span class="selectgroup-button">Role Management</span>
+                		</label>
+                		<label class="selectgroup-item">
+                			<input type="checkbox" name="permissions[]" value="Tender Management" class="selectgroup-input" @if(is_array($permissions) && in_array('Tender Management', $permissions)) checked @endif>
+                			<span class="selectgroup-button">Tender Management</span>
+                		</label>
+                		<label class="selectgroup-item">
                 			<input type="checkbox" name="permissions[]" value="Client Feedbacks" class="selectgroup-input" @if(is_array($permissions) && in_array('Client Feedbacks', $permissions)) checked @endif>
                 			<span class="selectgroup-button">Client Feedbacks</span>
                 		</label>

@@ -73,11 +73,23 @@
                               @elseif ($user->status == 0)
                                 <span class="badge badge-danger">Deactive</span>
                               @endif
+                              @if ($user->locked_at)
+                                <span class="badge badge-warning">Locked</span>
+                              @endif
                             </td>
                             <td width="15%">
                               <a class="btn btn-secondary btn-sm" href="{{route('admin.user.edit', $user->id)}}">
                                   <i class="fas fa-edit"></i>
                               </a>
+                              @if ($user->locked_at && Auth::guard('admin')->user()->isSuperAdmin())
+                                <form class="d-inline-block" action="{{route('admin.user.unlock')}}" method="post">
+                                  @csrf
+                                  <input type="hidden" name="user_id" value="{{$user->id}}">
+                                  <button type="submit" class="btn btn-warning btn-sm" title="Unlock account">
+                                      <i class="fas fa-unlock"></i>
+                                  </button>
+                                </form>
+                              @endif
                               <form class="deleteform d-inline-block" action="{{route('admin.user.delete')}}" method="post">
                                 @csrf
                                 <input type="hidden" name="user_id" value="{{$user->id}}">

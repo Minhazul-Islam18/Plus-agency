@@ -58,6 +58,19 @@ return [
 
   /*
     |--------------------------------------------------------------------------
+    | Admin Panel URL Prefix
+    |--------------------------------------------------------------------------
+    |
+    | Changes the /admin URL segment across the whole admin panel to make it
+    | harder to guess. Editing this requires `php artisan config:clear` and
+    | `php artisan route:clear` to take effect — it is not a runtime setting.
+    |
+    */
+
+  'admin_prefix' => env('ADMIN_PANEL_PREFIX', 'admin'),
+
+  /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

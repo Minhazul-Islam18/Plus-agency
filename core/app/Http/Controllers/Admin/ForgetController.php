@@ -6,10 +6,8 @@ use App\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Language;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-use Mail;
+use App\Http\Helpers\KreativMailer;
+use Illuminate\Support\Str;
 use Session;
 
 class ForgetController extends Controller
@@ -32,71 +30,39 @@ class ForgetController extends Controller
             ]
         ]);
 
-        // change the password with newly created random password
-        $pass = uniqid();
+        // Issue a temporary password valid for a limited window instead of an
+        // unlimited one — Str::random is cryptographically strong, unlike the
+        // previous uniqid()-based password which is time-derived/predictable.
+        $tempPassword = Str::random(12);
         $admin = Admin::where('email', $request->email)->first();
-        $admin->password = bcrypt($pass);
+        $expiresAt = now()->addHours(24);
+
+        $admin->password = bcrypt($tempPassword);
+        $admin->temp_password_expires_at = $expiresAt;
+        $admin->must_change_password = true;
         $admin->save();
 
-        // send the random (newly created) & username to the mail
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
+        $language = Language::where('is_default', 1)->first();
+        $bs = $language->basic_setting;
+
+        try {
+            (new KreativMailer)->mailFromAdmin([
+                'toMail' => $admin->email,
+                'toName' => $admin->username,
+                'admin_name' => $admin->username,
+                'admin_email' => $admin->email,
+                'temporary_password' => $tempPassword,
+                'expiry_date_time' => $expiresAt->format('d M Y, H:i'),
+                'login_url' => route('admin.login'),
+                'website_title' => $bs->website_title,
+                'logo_path' => KreativMailer::resolveAssetPath($bs->logo),
+                'templateType' => 'admin_temp_password',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[ForgetController] Temp password email failed', ['error' => $e->getMessage()]);
         }
 
-        $be = $currentLang->basic_extended;
-        $from = $be->from_mail;
-        $to = $request->email;
-        $subject = "Restore Password & Username";
-        $username = $admin->username;
-
-
-        // Send Mail
-        $mail = new PHPMailer(true);
-
-        if ($be->is_smtp == 1) {
-            try {
-                $mail->isSMTP();
-                $mail->Host       = $be->smtp_host;
-                $mail->SMTPAuth   = true;
-                $mail->Username   = $be->smtp_username;
-                $mail->Password   = $be->smtp_password;
-                $mail->SMTPSecure = $be->encryption;
-                $mail->Port       = $be->smtp_port;
-
-                //Recipients
-                $mail->setFrom($from, $be->from_name);
-                $mail->addAddress($to);
-
-                // Content
-                $mail->isHTML(true);
-                $mail->Subject = $subject;
-                $mail->Body    = "<h4>Hello $username,</h4><div><p><strong>Your current username:</strong> $username</p><p><strong>Your new password:</strong>$pass</p></div>";
-
-                $mail->send();
-            } catch (Exception $e) {
-
-            }
-        } else {
-            try {
-
-                //Recipients
-                $mail->setFrom($from, $be->from_name);
-                $mail->addAddress($to);
-
-                // Content
-                $mail->isHTML(true);
-                $mail->Subject = $subject;
-                $mail->Body    = "<h4>Hello $username,</h4><div><p><strong>Your current username:</strong> $username</p><p><strong>Your new password:</strong>$pass</p></div>";
-
-                $mail->send();
-            } catch (Exception $e) {
-
-            }
-        }
-
-        Session::flash('success', 'New password & current username sent successfully via mail');
+        Session::flash('success', 'A temporary password has been sent to your email.');
         return back();
     }
 }

@@ -17,6 +17,31 @@ class ProfileController extends Controller
       return view('admin.profile.changepass');
     }
 
+    public function forcedChangePassword() {
+      return view('admin.profile.forced-changepass');
+    }
+
+    public function updateForcedPassword(Request $request) {
+      $validator = Validator::make($request->all(), [
+          'password' => 'required|min:8|confirmed',
+      ], [
+          'password.confirmed' => "Password doesn't match",
+      ]);
+
+      if ($validator->fails()) {
+          return redirect()->route('admin.forcedChangePassword')->withErrors($validator);
+      }
+
+      $admin = Admin::findOrFail(Auth::guard('admin')->user()->id);
+      $admin->password = bcrypt($request->password);
+      $admin->temp_password_expires_at = null;
+      $admin->must_change_password = false;
+      $admin->save();
+
+      Session::flash('success', 'Password changed successfully!');
+      return redirect()->route('admin.dashboard');
+    }
+
     public function editProfile() {
       $admin = Admin::findOrFail(Auth::guard('admin')->user()->id);
       return view('admin.profile.editprofile', ['admin' => $admin]);

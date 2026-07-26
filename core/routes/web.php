@@ -146,15 +146,23 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'setlan
 ******************** Admin Routes **********************
 =======================================================*/
 
-Route::group(['prefix' => 'admin', 'middleware' => 'guest:admin'], function () {
+Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => 'guest:admin'], function () {
     Route::post('/login', 'Admin\LoginController@authenticate')->name('admin.auth');
 
     Route::get('/mail-form', 'Admin\ForgetController@mailForm')->name('admin.forget.form');
     Route::post('/sendmail', 'Admin\ForgetController@sendmail')->name('admin.forget.mail');
+
+    Route::get('/activate/{token}', 'Admin\UserController@activate')->name('admin.activate');
+    Route::post('/activate/{token}', 'Admin\UserController@activateStore')->name('admin.activate.store')->middleware('throttle:10,1');
 });
 
 
-Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus', 'setLfmPath']], function () {
+Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => ['auth:admin', 'checkstatus', 'forcepasswordchange', 'setLfmPath']], function () {
+
+    // Forced password change (temp password from forgot-password flow) —
+    // deliberately outside every checkpermission group, same as changePassword.
+    Route::get('/change-password-required', 'Admin\ProfileController@forcedChangePassword')->name('admin.forcedChangePassword');
+    Route::post('/change-password-required/update', 'Admin\ProfileController@updateForcedPassword')->name('admin.forcedChangePassword.update');
 
     // RTL check
     Route::get('/rtlcheck/{langid}', 'Admin\LanguageController@rtlcheck')->name('admin.rtlcheck');
@@ -753,6 +761,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin', 'checkstatus',
         Route::get('/user/{id}/edit', 'Admin\UserController@edit')->name('admin.user.edit');
         Route::post('/user/update', 'Admin\UserController@update')->name('admin.user.update');
         Route::post('/user/delete', 'Admin\UserController@delete')->name('admin.user.delete');
+        Route::post('/user/unlock', 'Admin\UserController@unlock')->name('admin.user.unlock');
+    });
+
+    Route::group(['middleware' => 'checkpermission:Admins Management'], function () {
+        Route::get('/admin-settings/login-branding', 'Admin\AdminSettingsController@loginBranding')->name('admin.adminSettings.loginBranding');
+        Route::post('/admin-settings/login-branding', 'Admin\AdminSettingsController@updateLoginBranding')->name('admin.adminSettings.updateLoginBranding');
+        Route::get('/admin-settings/security', 'Admin\AdminSettingsController@security')->name('admin.adminSettings.security');
+        Route::post('/admin-settings/security', 'Admin\AdminSettingsController@updateSecurity')->name('admin.adminSettings.updateSecurity');
     });
 
 
@@ -841,9 +857,15 @@ Route::group(['middleware' => ['setlang']], function () {
             $action = 'User\ForgotController@showforgotform';
             $routeName = 'user-forgot';
         } elseif ($type == 'admin_login') {
+            // Deliberately NOT using the DB-stored $permalink here: the whole
+            // admin panel's URL is governed by config('app.admin_prefix')
+            // (ADMIN_PANEL_PREFIX) as of the configurable-admin-URL feature —
+            // keeping this on the old permalink value would let the login
+            // page stay reachable at the previous, presumably-leaked URL
+            // even after the prefix is rotated.
             $action = 'Admin\LoginController@login';
             $routeName = 'admin.login';
-            Route::get("$permalink", "$action")->name("$routeName")->middleware('guest:admin');
+            Route::get(config('app.admin_prefix', 'admin'), "$action")->name("$routeName")->middleware('guest:admin');
             continue;
         }
 

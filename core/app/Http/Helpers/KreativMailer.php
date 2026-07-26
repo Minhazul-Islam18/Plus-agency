@@ -9,6 +9,32 @@ use PHPMailer\PHPMailer\Exception;
 
 class KreativMailer {
 
+    /**
+     * Resolve a basic_settings image filename to an absolute filesystem
+     * path, trying every location the app has stored logos in historically
+     * (same candidate list as TenderController::generateInvoice's PDF logo
+     * embedding). Returns null if the file can't be found anywhere.
+     */
+    public static function resolveAssetPath(?string $filename): ?string {
+        if (empty($filename)) {
+            return null;
+        }
+
+        $candidates = [
+            storage_path('app/public/front/img/' . $filename),
+            base_path('public/assets/front/img/' . $filename),
+            base_path('../assets/front/img/' . $filename),
+        ];
+
+        foreach ($candidates as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
     public function mailFromAdmin($data) {
         $temp = EmailTemplate::where('email_type', '=', $data['templateType'])->first();
 
@@ -109,6 +135,27 @@ class KreativMailer {
         if (array_key_exists('otp_ttl_minutes', $data)) {
             $body = preg_replace("/{otp_ttl_minutes}/", $data['otp_ttl_minutes'], $body);
         }
+        if (array_key_exists('admin_name', $data)) {
+            $body = preg_replace("/{admin_name}/", $data['admin_name'], $body);
+        }
+        if (array_key_exists('admin_email', $data)) {
+            $body = preg_replace("/{admin_email}/", $data['admin_email'], $body);
+        }
+        if (array_key_exists('activation_link', $data)) {
+            $body = preg_replace("/{activation_link}/", $data['activation_link'], $body);
+        }
+        if (array_key_exists('temporary_password', $data)) {
+            $body = preg_replace("/{temporary_password}/", $data['temporary_password'], $body);
+        }
+        if (array_key_exists('expiry_date_time', $data)) {
+            $body = preg_replace("/{expiry_date_time}/", $data['expiry_date_time'], $body);
+        }
+        if (array_key_exists('login_url', $data)) {
+            $body = preg_replace("/{login_url}/", $data['login_url'], $body);
+        }
+        if (array_key_exists('logo_url', $data)) {
+            $body = preg_replace("/{logo_url}/", $data['logo_url'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
@@ -158,6 +205,15 @@ class KreativMailer {
                 if (file_exists($data['attachment'])) {
                     $mail->addAttachment($data['attachment'], $data['attachmentName'] ?? basename($data['attachment']));
                 }
+            }
+
+            // Logo embedded inline (cid:applogo) rather than referenced by a
+            // remote URL — a recipient's mail client fetches remote images
+            // over the public internet, which fails on local/dev domains and
+            // is blocked by default in many clients anyway. Shipping the
+            // bytes with the email guarantees it renders.
+            if (array_key_exists('logo_path', $data) && file_exists($data['logo_path'])) {
+                $mail->addEmbeddedImage($data['logo_path'], 'applogo');
             }
 
             // Content

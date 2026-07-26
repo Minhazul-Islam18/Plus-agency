@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance as Middleware;
 
 class PreventRequestsDuringMaintenance extends Middleware
@@ -12,9 +13,15 @@ class PreventRequestsDuringMaintenance extends Middleware
      * @var array
      */
     protected $except = [
-        'admin/*',
-        'admin',
         'laravel-filemanager',
         'laravel-filemanager/*'
     ];
+
+    public function __construct(Application $app)
+    {
+        parent::__construct($app);
+
+        $prefix = config('app.admin_prefix', 'admin');
+        $this->except = array_merge($this->except, [$prefix, $prefix . '/*']);
+    }
 }

@@ -7,8 +7,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use App\Admin;
 use App\Role;
+use App\Language;
+use App\Http\Helpers\KreativMailer;
+use Illuminate\Support\Str;
 use Validator;
 use Session;
+use Auth;
 
 class UserController extends Controller
 {
@@ -38,7 +42,6 @@ class UserController extends Controller
             'email' => 'required|email|max:255|unique:admins',
             'first_name' => 'required|max:255',
             'last_name' => 'required|max:255',
-            'password' => 'required|confirmed',
             'role' => 'required',
         ];
         if ($request->filled('image')) {
@@ -62,7 +65,8 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
-        $user->password = bcrypt($request->password);
+        $user->status = $request->filled('status') ? $request->status : 1;
+        $user->password = null;
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
@@ -70,11 +74,80 @@ class UserController extends Controller
             $user->image = $filename;
         }
 
+        // No password is set at creation time — an activation email carries a
+        // one-time link the new admin uses to choose their own password.
+        $plainToken = Str::random(48);
+        $user->activation_token_hash = hash_hmac('sha256', $plainToken, config('app.key'));
+        $user->activation_expires_at = now()->addHours(24);
 
         $user->save();
 
-        Session::flash('success', 'User created successfully!');
+        $this->sendActivationEmail($user, $plainToken);
+
+        Session::flash('success', 'User created successfully! An activation email has been sent.');
         return "success";
+    }
+
+    private function sendActivationEmail(Admin $user, $plainToken)
+    {
+        $language = Language::where('is_default', 1)->first();
+        $bs = $language->basic_setting;
+
+        try {
+            (new KreativMailer)->mailFromAdmin([
+                'toMail' => $user->email,
+                'toName' => $user->first_name . ' ' . $user->last_name,
+                'admin_name' => $user->first_name,
+                'activation_link' => route('admin.activate', $plainToken),
+                'website_title' => $bs->website_title,
+                'logo_path' => KreativMailer::resolveAssetPath($bs->logo),
+                'templateType' => 'admin_account_activation',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[UserController] Activation email failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function activate($token)
+    {
+        $tokenHash = hash_hmac('sha256', $token, config('app.key'));
+        $user = Admin::where('activation_token_hash', $tokenHash)->first();
+
+        $valid = $user
+            && $user->activation_expires_at
+            && now()->lt($user->activation_expires_at)
+            && hash_equals($user->activation_token_hash, $tokenHash);
+
+        return view('admin.activate', ['token' => $token, 'valid' => $valid]);
+    }
+
+    public function activateStore(Request $request, $token)
+    {
+        $tokenHash = hash_hmac('sha256', $token, config('app.key'));
+        $user = Admin::where('activation_token_hash', $tokenHash)->first();
+
+        $valid = $user
+            && $user->activation_expires_at
+            && now()->lt($user->activation_expires_at)
+            && hash_equals($user->activation_token_hash, $tokenHash);
+
+        if (!$valid) {
+            return view('admin.activate', ['token' => $token, 'valid' => false]);
+        }
+
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user->password = bcrypt($request->password);
+        $user->activation_token_hash = null;
+        $user->activation_expires_at = null;
+        $user->save();
+
+        Auth::guard('admin')->login($user);
+
+        Session::flash('success', 'Password created successfully! Welcome aboard.');
+        return redirect()->route('admin.dashboard');
     }
 
 
@@ -150,6 +223,19 @@ class UserController extends Controller
         $user->delete();
 
         Session::flash('success', 'User deleted successfully!');
+        return back();
+    }
+
+    public function unlock(Request $request)
+    {
+        abort_unless(Auth::guard('admin')->user()->isSuperAdmin(), 403);
+
+        $user = Admin::findOrFail($request->user_id);
+        $user->locked_at = null;
+        $user->failed_login_attempts = 0;
+        $user->save();
+
+        Session::flash('success', 'Account unlocked successfully!');
         return back();
     }
 

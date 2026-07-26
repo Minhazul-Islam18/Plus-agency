@@ -22,6 +22,13 @@ class CreateAdminsTable extends Migration
             $table->string('last_name', 255)->nullable();
             $table->string('image', 255)->nullable();
             $table->string('password', 255)->nullable();
+            $table->string('activation_token_hash', 64)->nullable()->unique();
+            $table->timestamp('activation_expires_at')->nullable();
+            $table->timestamp('temp_password_expires_at')->nullable();
+            $table->boolean('must_change_password')->default(false);
+            $table->unsignedInteger('failed_login_attempts')->default(0);
+            $table->timestamp('locked_at')->nullable();
+            $table->rememberToken();
             $table->tinyInteger('status')->default(1)->comment('0 - deactive, 1 - active');
             $table->timestamps();
         });

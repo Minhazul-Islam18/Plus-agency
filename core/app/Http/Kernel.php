@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
         'checkpermission' => \App\Http\Middleware\CheckPermission::class,
         'setlang' => \App\Http\Middleware\SetLangMiddleware::class,
         'checkstatus' => \App\Http\Middleware\CheckStatus::class,
+        'forcepasswordchange' => \App\Http\Middleware\ForcePasswordChange::class,
         'userstatus' => \App\Http\Middleware\UserStatus::class,
         'setLfmPath' => \App\Http\Middleware\SetLfmPath::class,
     ];

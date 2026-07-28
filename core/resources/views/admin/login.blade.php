@@ -17,10 +17,10 @@
     @csrf
 
     <div class="form-group">
-      <label>{{__('Username')}}</label>
+      <label>{{__('Username or Email')}}</label>
       <div class="login-v2-input">
         <i class="far fa-user"></i>
-        <input type="text" name="username" placeholder="{{__('Enter your username')}}" autocomplete="username">
+        <input type="text" name="username" placeholder="{{__('Enter your username or email')}}" autocomplete="username">
       </div>
       @if ($errors->has('username'))
         <p class="text-danger mb-0">{{$errors->first('username')}}</p>

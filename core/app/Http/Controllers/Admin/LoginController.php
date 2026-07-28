@@ -27,7 +27,13 @@ class LoginController extends Controller
         'password' => 'required'
       ]);
 
-      $target = Admin::where('username', $request->username)->first();
+      // Accept either username or email in the one field — the guard's
+      // provider only matches the `username` column, so attempt() below
+      // always authenticates against $target->username, never the raw
+      // input (which may actually be an email).
+      $target = Admin::where('username', $request->username)
+          ->orWhere('email', $request->username)
+          ->first();
 
       // Already locked (from a previous run of failed attempts) — block
       // outright, before even trying the password. Super admin is exempt.
@@ -35,7 +41,7 @@ class LoginController extends Controller
           return redirect()->back()->with('alert', __(self::LOCKED_MESSAGE));
       }
 
-      if (Auth::guard('admin')->attempt(['username' => $request->username,'password' => $request->password], $request->boolean('remember')))
+      if ($target && Auth::guard('admin')->attempt(['username' => $target->username, 'password' => $request->password], $request->boolean('remember')))
       {
           $admin = Auth::guard('admin')->user();
 

@@ -146,11 +146,11 @@ Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'setlan
 ******************** Admin Routes **********************
 =======================================================*/
 
-Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => 'guest:admin'], function () {
+Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => ['guest:admin', 'setlang']], function () {
     Route::post('/login', 'Admin\LoginController@authenticate')->name('admin.auth');
 
     Route::get('/mail-form', 'Admin\ForgetController@mailForm')->name('admin.forget.form');
-    Route::post('/sendmail', 'Admin\ForgetController@sendmail')->name('admin.forget.mail');
+    Route::post('/sendmail', 'Admin\ForgetController@sendmail')->name('admin.forget.mail')->middleware('throttle:5,1');
 
     Route::get('/activate/{token}', 'Admin\UserController@activate')->name('admin.activate');
     Route::post('/activate/{token}', 'Admin\UserController@activateStore')->name('admin.activate.store')->middleware('throttle:10,1');

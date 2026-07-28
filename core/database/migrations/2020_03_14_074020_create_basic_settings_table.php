@@ -18,6 +18,7 @@ class CreateBasicSettingsTable extends Migration
             $table->integer('language_id')->nullable();
             $table->string('favicon', 50)->nullable();
             $table->string('logo', 50)->nullable();
+            $table->string('email_logo', 50)->nullable();
             $table->string('contact_mail', 255)->nullable();
             $table->string('base_color', 30)->nullable();
             $table->string('secondary_base_color', 20)->nullable();

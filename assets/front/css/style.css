@@ -505,8 +505,13 @@ ul.language-dropdown li:last-child a {
   vertical-align: middle;
 }
 .logo-wrapper img {
-  max-width: 150px;
-  max-height: 95px;
+  /* Explicit box + object-fit rather than max-width/max-height alone: an
+     SVG with a viewBox but no width/height attribute has no intrinsic size,
+     so max-width/max-height (which only cap an existing size) render it at
+     ~0. Fixed box + contain works for any file type. */
+  width: 150px;
+  height: 95px;
+  object-fit: contain;
 }
 #mobileMenu {
   display: none;
@@ -2030,7 +2035,12 @@ a.readmore-btn:hover::after {
   display: inline-block;
 }
 .footer-logo-wrapper img {
-  width: 100%;
+  /* Same fix as .logo-wrapper img — width:100% alone can't size an SVG
+     that has no intrinsic width/height (viewBox only), so it renders at
+     ~0 height. Fixed box + contain works for any file type. */
+  width: 150px;
+  height: 90px;
+  object-fit: contain;
 }
 .footer-section .footer-txt {
   font-size: 14px;

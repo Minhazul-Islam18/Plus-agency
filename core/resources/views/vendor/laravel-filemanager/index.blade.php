@@ -337,11 +337,18 @@
 
                         if (!multiple) {
                             let modItemUrl = item.url.replace("{{url('/')}}" + '/', "");
+                            // item.url is a plain string LFM builds by concatenating path
+                            // segments — it's never percent-encoded, so any file/folder
+                            // name with a space or other special character breaks when
+                            // used directly as an <img>/<source> src (a real URL, fetched
+                            // over HTTP). encodeURI() only affects the preview here — the
+                            // hidden fileInput below stays a raw filesystem path, which is
+                            // what the server's copy() expects and doesn't need encoding.
                             if (!video) {
-                                $("#thumbPreview" + serial, parent.document).find('img').attr('src', item.url);
+                                $("#thumbPreview" + serial, parent.document).find('img').attr('src', encodeURI(item.url));
                                 $("#fileInput" + serial, parent.document).val(modItemUrl);
                             } else {
-                                $("#videoPreview" + serial, parent.document).find('source').attr('src', item.url);
+                                $("#videoPreview" + serial, parent.document).find('source').attr('src', encodeURI(item.url));
                                 $("#videoPreview" + serial + " video", parent.document)[0].load();
                                 $("#fileInput" + serial, parent.document).val(modItemUrl);
                             }

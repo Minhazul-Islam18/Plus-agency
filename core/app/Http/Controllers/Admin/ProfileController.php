@@ -10,6 +10,9 @@ use Session;
 use Hash;
 use Validator;
 use App\Admin;
+use App\AdminPanelSetting;
+use App\Language;
+use App\Http\Helpers\KreativMailer;
 
 class ProfileController extends Controller
 {
@@ -18,7 +21,8 @@ class ProfileController extends Controller
     }
 
     public function forcedChangePassword() {
-      return view('admin.profile.forced-changepass');
+      $currentLang = Language::where('code', app()->getLocale())->first() ?: Language::where('is_default', 1)->first();
+      return view('admin.profile.forced-changepass', ['aps' => AdminPanelSetting::forLanguage($currentLang->id)]);
     }
 
     public function updateForcedPassword(Request $request) {
@@ -34,12 +38,37 @@ class ProfileController extends Controller
 
       $admin = Admin::findOrFail(Auth::guard('admin')->user()->id);
       $admin->password = bcrypt($request->password);
+      $admin->temp_password = null;
       $admin->temp_password_expires_at = null;
       $admin->must_change_password = false;
       $admin->save();
 
+      $this->sendPasswordChangedEmail($admin);
+
       Session::flash('success', 'Password changed successfully!');
       return redirect()->route('admin.dashboard');
+    }
+
+    private function sendPasswordChangedEmail(Admin $admin)
+    {
+      $language = Language::where('is_default', 1)->first();
+      $bs = $language->basic_setting;
+
+      try {
+        (new KreativMailer)->mailFromAdmin([
+          'toMail' => $admin->email,
+          'toName' => $admin->username,
+          'admin_name' => $admin->username,
+          'admin_email' => $admin->email,
+          'changed_at' => now()->format('d M Y, H:i'),
+          'login_url' => route('admin.login'),
+          'website_title' => $bs->website_title,
+          'logo_path' => KreativMailer::resolveAssetPath($bs->email_logo ?: $bs->logo),
+          'templateType' => 'admin_password_changed',
+        ]);
+      } catch (\Throwable $e) {
+        \Log::error('[ProfileController] Password-changed email failed', ['error' => $e->getMessage()]);
+      }
     }
 
     public function editProfile() {
@@ -132,6 +161,8 @@ class ProfileController extends Controller
       $user = Admin::findOrFail(Auth::guard('admin')->user()->id);
       $user->password = bcrypt($request->password);
       $user->save();
+
+      $this->sendPasswordChangedEmail($user);
 
       Session::flash('success', 'Password changed successfully!');
 

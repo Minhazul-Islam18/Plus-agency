@@ -18,7 +18,7 @@ class Admin extends Authenticatable
   protected $fillable = [
     'role_id', 'username', 'email', 'password', 'first_name', 'last_name', 'image', 'status',
     'activation_token_hash', 'activation_expires_at',
-    'temp_password_expires_at', 'must_change_password',
+    'temp_password', 'temp_password_expires_at', 'must_change_password',
     'failed_login_attempts', 'locked_at',
   ];
 

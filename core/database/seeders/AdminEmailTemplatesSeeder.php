@@ -26,6 +26,15 @@ class AdminEmailTemplatesSeeder extends Seeder
                 'email_subject' => 'Your Temporary Administrator Password',
                 'email_body'    => $this->tempPasswordBody(),
             ],
+            // Sent when an admin finishes a forgot-password reset (sets a real
+            // password after logging in with the temp one) — confirms the
+            // change so the admin has a record of it even if they didn't
+            // initiate it themselves.
+            [
+                'email_type'    => 'admin_password_changed',
+                'email_subject' => 'Your Password Has Been Changed',
+                'email_body'    => $this->passwordChangedBody(),
+            ],
         ];
 
         foreach ($templates as $template) {
@@ -227,6 +236,84 @@ HTML;
           </td>
         </tr>
       </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+HTML;
+    }
+
+    private function passwordChangedBody(): string
+    {
+        $head = $this->head('Your Password Has Been Changed', 'Your administrator account password was changed successfully.');
+        return $head . <<<'HTML'
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef1f6;">
+  <tr>
+    <td align="center" style="padding:32px 14px 44px;">
+      <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+        <!-- Header: logo + site name -->
+        <tr>
+          <td class="px" style="background-color:#0f1b30; border-radius:14px 14px 0 0; padding:20px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="1" valign="middle"><img src="cid:applogo" alt="{website_title}" width="72" height="28" style="height:28px; max-height:28px; width:72px; display:block; border:0;"></td>
+                <td align="right" valign="middle" width="100%" style="font-size:16px; font-weight:700; color:#ffffff; white-space:nowrap;">{website_title}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Emerald hero -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:36px 40px 8px; text-align:center;">
+            <div style="width:64px; height:64px; background-color:#16a34a; border-radius:16px; text-align:center; line-height:64px; font-size:32px; color:#ffffff; margin:0 auto 16px;">&#10003;</div>
+            <p style="margin:0 0 6px 0; font-size:11px; font-weight:700; color:#16a34a; letter-spacing:0.12em; text-transform:uppercase;">Password Changed</p>
+            <p class="h1" style="margin:0; font-size:23px; font-weight:800; color:#0f172a; line-height:1.25;">Your password was changed successfully.</p>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:20px 40px 4px; text-align:center;">
+            <p style="margin:0 0 24px 0; font-size:15px; color:#475569; line-height:1.7;">Hello <strong style="color:#0f172a;">{admin_name}</strong>, this confirms the password for your administrator account was changed on <strong style="color:#0f172a;">{changed_at}</strong>.</p>
+          </td>
+        </tr>
+        <!-- Login CTA -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 30px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" style="background-color:#16a34a; border-radius:9px;">
+                  <a href="{login_url}" target="_blank" style="display:block; padding:17px 30px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:9px; text-align:center; letter-spacing:0.01em;">Go to Admin Panel</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Security note -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 34px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background-color:#fffbeb; border-left:4px solid #f59e0b; border-radius:0 6px 6px 0; padding:14px 18px;">
+                  <p style="margin:0; font-size:13px; color:#713f12; line-height:1.6;">If you did not make this change, please contact the Super Administrator immediately — your account may be compromised.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#0f1b30; border-radius:0 0 14px 14px; padding:22px 40px;">
+            <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>
+            <p style="margin:0; font-size:12px; color:#64748b;">Automated message — please do not reply.</p>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:14px auto 0;">
+        <tr><td align="center"><p style="margin:0; font-size:11px; color:#94a3b8; line-height:1.7;">&copy; {website_title}. All rights reserved.</p></td></tr>
+      </table>
+      <!--[if mso]></td></tr></table><![endif]-->
     </td>
   </tr>
 </table>

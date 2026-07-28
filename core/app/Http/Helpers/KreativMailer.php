@@ -156,6 +156,9 @@ class KreativMailer {
         if (array_key_exists('logo_url', $data)) {
             $body = preg_replace("/{logo_url}/", $data['logo_url'], $body);
         }
+        if (array_key_exists('changed_at', $data)) {
+            $body = preg_replace("/{changed_at}/", $data['changed_at'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
@@ -213,7 +216,16 @@ class KreativMailer {
             // is blocked by default in many clients anyway. Shipping the
             // bytes with the email guarantees it renders.
             if (array_key_exists('logo_path', $data) && file_exists($data['logo_path'])) {
-                $mail->addEmbeddedImage($data['logo_path'], 'applogo');
+                if (strtolower(pathinfo($data['logo_path'], PATHINFO_EXTENSION)) === 'svg') {
+                    // Most email clients (Outlook chief among them) don't
+                    // render inline SVG at all, no matter how it's embedded —
+                    // a format limitation, not a sizing/markup issue. Drop
+                    // the <img> so it degrades to the text branding next to
+                    // it instead of showing a broken image.
+                    $body = preg_replace('/<img[^>]*src="cid:applogo"[^>]*>/', '', $body);
+                } else {
+                    $mail->addEmbeddedImage($data['logo_path'], 'applogo');
+                }
             }
 
             // Content

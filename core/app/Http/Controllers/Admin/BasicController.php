@@ -33,11 +33,16 @@ class BasicController extends Controller
     public function updatelogo(Request $request)
     {
         $logo = $request->logo;
+        $emailLogo = $request->email_logo;
         $favicon = $request->favicon;
         $breadcrumb = $request->breadcrumb;
 
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        // Email clients (Outlook especially) largely don't render inline SVG
+        // regardless of markup — the email logo must be a raster format.
+        $allowedEmailExts = array('jpg', 'png', 'jpeg');
         $extLogo = pathinfo($logo, PATHINFO_EXTENSION);
+        $extEmailLogo = pathinfo($emailLogo, PATHINFO_EXTENSION);
         $extFav = pathinfo($favicon, PATHINFO_EXTENSION);
         $extBread = pathinfo($breadcrumb, PATHINFO_EXTENSION);
 
@@ -48,6 +53,16 @@ class BasicController extends Controller
                 function ($attribute, $value, $fail) use ($extLogo, $allowedExts) {
                     if (!in_array($extLogo, $allowedExts)) {
                         return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        if ($request->filled('email_logo')) {
+            $rules['email_logo'] = [
+                function ($attribute, $value, $fail) use ($extEmailLogo, $allowedEmailExts) {
+                    if (!in_array($extEmailLogo, $allowedEmailExts)) {
+                        return $fail("Only png, jpg, jpeg image is allowed (SVG is not supported by most email clients)");
                     }
                 }
             ];
@@ -86,6 +101,20 @@ class BasicController extends Controller
                 @copy($logo, 'assets/front/img/' . $filename);
 
                 $bs->logo = $filename;
+                $bs->save();
+            }
+        }
+
+        if ($request->filled('email_logo')) {
+
+            $bss = BasicSetting::all();
+
+            foreach ($bss as $key => $bs) {
+                @unlink('assets/front/img/' . $bs->email_logo);
+                $filename = uniqid() . '.' . $extEmailLogo;
+                @copy($emailLogo, 'assets/front/img/' . $filename);
+
+                $bs->email_logo = $filename;
                 $bs->save();
             }
         }

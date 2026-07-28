@@ -24,6 +24,7 @@ class CreateAdminsTable extends Migration
             $table->string('password', 255)->nullable();
             $table->string('activation_token_hash', 64)->nullable()->unique();
             $table->timestamp('activation_expires_at')->nullable();
+            $table->string('temp_password', 255)->nullable();
             $table->timestamp('temp_password_expires_at')->nullable();
             $table->boolean('must_change_password')->default(false);
             $table->unsignedInteger('failed_login_attempts')->default(0);

@@ -3,15 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\AdminPanelSetting;
+use App\Language;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Session;
 
 class AdminSettingsController extends Controller
 {
-    public function loginBranding()
+    private function resolveLanguage(Request $request): Language
     {
-        $data['aps'] = AdminPanelSetting::singleton();
+        $lang = $request->filled('language')
+            ? Language::where('code', $request->input('language'))->first()
+            : null;
+
+        return $lang ?: Language::where('is_default', 1)->first();
+    }
+
+    public function loginBranding(Request $request)
+    {
+        $selLang = $this->resolveLanguage($request);
+
+        $data['aps'] = AdminPanelSetting::forLanguage($selLang->id);
+        $data['langs'] = Language::all();
+        $data['selLang'] = $selLang;
+
         return view('admin.admin_settings.login-branding', $data);
     }
 
@@ -24,10 +39,14 @@ class AdminSettingsController extends Controller
         $extBg = pathinfo($bgImage, PATHINFO_EXTENSION);
 
         $rules = [
+            'language_id' => 'required|exists:languages,id',
             'platform_name' => 'nullable|max:255',
             'tagline' => 'required|max:255',
             'copyright_text' => 'nullable|max:255',
-            'features' => 'required|array|size:4',
+            // Variable length on purpose — different languages can have a
+            // different number of feature highlights (e.g. 4 in English,
+            // 3 in French), not a fixed set of slots.
+            'features' => 'required|array|min:1|max:8',
             'features.*.icon' => 'required|max:255',
             'features.*.title' => 'required|max:255',
             'features.*.desc' => 'nullable|max:255',
@@ -55,11 +74,21 @@ class AdminSettingsController extends Controller
 
         $request->validate($rules);
 
-        $aps = AdminPanelSetting::singleton();
+        // Re-index features (the form can submit sparse/gappy keys after
+        // rows are removed client-side) and drop the row's client-only id.
+        $features = array_values(array_map(function ($f) {
+            return [
+                'icon' => $f['icon'],
+                'title' => $f['title'],
+                'desc' => $f['desc'] ?? '',
+            ];
+        }, $request->features));
+
+        $aps = AdminPanelSetting::forLanguage($request->language_id);
         $aps->platform_name = $request->platform_name;
         $aps->tagline = $request->tagline;
         $aps->copyright_text = $request->copyright_text;
-        $aps->features = $request->features;
+        $aps->features = $features;
 
         if ($request->filled('login_logo')) {
             @unlink('assets/front/img/' . $aps->login_logo);
@@ -89,7 +118,12 @@ class AdminSettingsController extends Controller
 
     public function security()
     {
-        $data['aps'] = AdminPanelSetting::singleton();
+        // Global in effect (a lockout threshold has no per-language variant),
+        // so this always targets the default language's row regardless of
+        // any ?language= — no language switcher on this sub-page.
+        $defaultLang = Language::where('is_default', 1)->first();
+
+        $data['aps'] = AdminPanelSetting::forLanguage($defaultLang->id);
         $data['adminPrefix'] = config('app.admin_prefix', 'admin');
         return view('admin.admin_settings.security', $data);
     }
@@ -100,7 +134,9 @@ class AdminSettingsController extends Controller
             'max_login_attempts' => 'required|integer|min:1|max:20',
         ]);
 
-        $aps = AdminPanelSetting::singleton();
+        $defaultLang = Language::where('is_default', 1)->first();
+
+        $aps = AdminPanelSetting::forLanguage($defaultLang->id);
         $aps->max_login_attempts = $request->max_login_attempts;
         $aps->save();
 

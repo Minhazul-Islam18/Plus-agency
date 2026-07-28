@@ -100,7 +100,7 @@ class UserController extends Controller
                 'admin_name' => $user->first_name,
                 'activation_link' => route('admin.activate', $plainToken),
                 'website_title' => $bs->website_title,
-                'logo_path' => KreativMailer::resolveAssetPath($bs->logo),
+                'logo_path' => KreativMailer::resolveAssetPath($bs->email_logo ?: $bs->logo),
                 'templateType' => 'admin_account_activation',
             ]);
         } catch (\Throwable $e) {

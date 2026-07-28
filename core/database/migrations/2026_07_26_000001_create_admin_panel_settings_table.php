@@ -7,14 +7,18 @@ use Illuminate\Database\Migrations\Migration;
 class CreateAdminPanelSettingsTable extends Migration
 {
     /**
-     * Singleton settings row for the admin panel itself (guard-global, not
-     * per-language like BasicExtra/BasicExtended) — login page branding and
-     * the login-lockout threshold.
+     * Login page branding, one row per language (same pattern as
+     * basic_settings) — platform name, tagline, feature list (variable
+     * length per language) and copyright can all differ by language.
+     * max_login_attempts lives here too for storage convenience, but is
+     * only ever read from/written to the default language's row — a
+     * lockout threshold has no meaningful per-language variant.
      */
     public function up()
     {
         Schema::create('admin_panel_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->integer('language_id')->nullable();
             $table->string('login_logo')->nullable();
             $table->string('login_bg_image')->nullable();
             $table->string('platform_name')->nullable();

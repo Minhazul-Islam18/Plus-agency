@@ -29,25 +29,6 @@
                                 </div>
                             @endif
 
-                            @if ($bex->is_user_panel == 1)
-                                @guest
-                                <ul class="login">
-                                    <li><a href="{{route('user.login')}}">{{__('Login')}}</a></li>
-                                </ul>
-                                @endguest
-                                @auth
-                                <div class="dropdown ml-4">
-                                    <button type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class="far fa-user mr-1"></i> {{Auth::user()->username}}
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{route('user-dashboard')}}">{{__('Dashboard')}}</a>
-                                        <a class="dropdown-item" href="{{route('user-profile')}}">{{__('Edit Profile')}}</a>
-                                        <a class="dropdown-item" href="{{route('user-reset')}}">{{__('Change Password')}}</a>
-                                        <a class="dropdown-item" href="{{route('user-logout')}}" target="_self">{{__('Logout')}}</a>
-                                    </div>
-                                </div>
-                                @endauth
-                            @endif
 
                         </div>
                     </div>

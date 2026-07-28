@@ -131,38 +131,6 @@
                             </div>
                         @endif
 
-                        @guest
-                            @if ($bex?->is_user_panel == 1)
-                                <ul class="login">
-                                    <li><a href="{{ route('user.login') }}">{{ __('Login') }}</a></li>
-                                </ul>
-                            @endif
-                        @endguest
-                        @auth
-                            <div class="language dashboard">
-                                <a class="language-btn" href="#">
-                                    <i class="far fa-user"></i> {{ Auth::user()->username }}
-                                </a>
-                                <ul class="language-dropdown">
-                                    <li>
-                                        <a href="{{ route('user-dashboard') }}">{{ __('Dashboard') }}</a>
-                                    </li>
-
-                                    <li>
-                                        <a href="{{ route('user-profile') }}">{{ __('Edit Profile') }}</a>
-                                    </li>
-
-                                    <li>
-                                        <a href="{{ route('user-reset') }}">{{ __('Change Password') }}</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('user-logout') }}" target="_self">{{ __('Logout') }}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        @endauth
-
-
                     </div>
                 </div>
             </div>

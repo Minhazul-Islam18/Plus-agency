@@ -441,7 +441,6 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/cookie-alert') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/mail-from-admin') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/mail-to-admin') active
-@elseif(request()->routeIs('admin.featuresettings')) active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/email-templates') active
 @elseif(request()->routeIs('admin.email.editTemplate')) active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/languages') active
@@ -471,7 +470,6 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/cookie-alert') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/mail-from-admin') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/mail-to-admin') show
-@elseif(request()->routeIs('admin.featuresettings')) show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/email-templates') show
 @elseif(request()->routeIs('admin.email.editTemplate')) show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/languages') show
@@ -530,11 +528,6 @@
                                 <li class="@if (request()->path() == config('app.admin_prefix','admin').'/preloader') active @endif">
                                     <a href="{{ route('admin.preloader') }}">
                                         <span class="sub-item">Preloader</span>
-                                    </a>
-                                </li>
-                                <li class="@if (request()->routeIs('admin.featuresettings')) active @endif">
-                                    <a href="{{ route('admin.featuresettings') . '?language=' . $default->code }}">
-                                        <span class="sub-item">Preferences</span>
                                     </a>
                                 </li>
                                 <li class="@if (request()->path() == config('app.admin_prefix','admin').'/support') active @endif">

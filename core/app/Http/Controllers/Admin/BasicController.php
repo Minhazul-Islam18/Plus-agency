@@ -154,27 +154,6 @@ class BasicController extends Controller
     }
 
 
-    public function featuresettings()
-    {
-        $data['abex'] = BasicExtra::first();
-
-        return view('admin.basic.features', $data);
-    }
-
-    public function updatefeatrue(Request $request)
-    {
-
-        $bexs = BasicExtra::all();
-
-        foreach ($bexs as $key => $bex) {
-            $bex->is_user_panel = $request->is_user_panel;
-            $bex->save();
-        }
-
-        Session::flash('success', 'Updated successfully!');
-        return back();
-    }
-
     public function updatethemeversion(Request $request)
     {
         $bes = BasicExtended::all();

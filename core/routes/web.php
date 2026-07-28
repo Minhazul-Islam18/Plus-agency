@@ -55,22 +55,6 @@ Route::group(['middleware' => 'setlang'], function () {
     Route::post('/store_feedback', 'Front\FeedbackController@storeFeedback')->name('store_feedback');
 });
 
-Route::group(['middleware' => ['web', 'setlang']], function () {
-    Route::post('/login', 'User\LoginController@login')->name('user.login.submit');
-
-    Route::get('/login/facebook', 'User\LoginController@redirectToFacebook')->name('front.facebook.login');
-    Route::get('/login/facebook/callback', 'User\LoginController@handleFacebookCallback')->name('front.facebook.callback');
-
-    Route::get('/login/google', 'User\LoginController@redirectToGoogle')->name('front.google.login');
-    Route::get('/login/google/callback', 'User\LoginController@handleGoogleCallback')->name('front.google.callback');
-
-    Route::get('/register', 'User\RegisterController@registerPage')->name('user-register');
-    Route::post('/register/submit', 'User\RegisterController@register')->name('user-register-submit');
-    Route::get('/register/verify/{token}', 'User\RegisterController@token')->name('user-register-token');
-    Route::get('/forgot', 'User\ForgotController@showforgotform')->name('user-forgot');
-    Route::post('/forgot', 'User\ForgotController@forgot')->name('user-forgot-submit');
-});
-
 /** Health probe for uptime monitors / load balancers **/
 Route::get('/health', 'HealthController')->name('health')->middleware('throttle:60,1');
 
@@ -118,29 +102,6 @@ Route::post('/find-my-files/regenerate/otp/resend', 'Front\FindMyFilesController
 
 
 
-
-Route::group(['middleware' => ['web', 'setlang']], function () {
-    Route::get('/login', 'User\LoginController@showLoginForm')->name('user.login');
-    Route::post('/login', 'User\LoginController@login')->name('user.login.submit');
-    Route::get('/register', 'User\RegisterController@registerPage')->name('user-register');
-    Route::post('/register/submit', 'User\RegisterController@register')->name('user-register-submit');
-    Route::get('/register/verify/{token}', 'User\RegisterController@token')->name('user-register-token');
-    Route::get('/forgot', 'User\ForgotController@showforgotform')->name('user-forgot');
-    Route::post('/forgot', 'User\ForgotController@forgot')->name('user-forgot-submit');
-});
-
-
-Route::group(['prefix' => 'user', 'middleware' => ['auth', 'userstatus', 'setlang']], function () {
-    // Summernote image upload
-    Route::post('/summernote/upload', 'User\SummernoteController@upload')->name('user.summernote.upload');
-
-    Route::get('/dashboard', 'User\UserController@index')->name('user-dashboard');
-    Route::get('/reset', 'User\UserController@resetform')->name('user-reset');
-    Route::post('/reset', 'User\UserController@reset')->name('user-reset-submit');
-    Route::get('/profile', 'User\UserController@profile')->name('user-profile');
-    Route::post('/profile', 'User\UserController@profileupdate')->name('user-profile-update');
-    Route::get('/logout', 'User\LoginController@logout')->name('user-logout');
-});
 
 /*=======================================================
 ******************** Admin Routes **********************
@@ -208,10 +169,6 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/preloader', 'Admin\BasicController@preloader')->name('admin.preloader');
         Route::post('/preloader/post', 'Admin\BasicController@updatepreloader')->name('admin.preloader.update');
 
-
-        // Admin Scripts Routes
-        Route::get('/feature/settings', 'Admin\BasicController@featuresettings')->name('admin.featuresettings');
-        Route::post('/feature/settings/update', 'Admin\BasicController@updatefeatrue')->name('admin.featuresettings.update');
 
         // Admin Basic Information Routes
         Route::get('/basicinfo', 'Admin\BasicController@basicinfo')->name('admin.basicinfo');
@@ -847,15 +804,11 @@ Route::group(['middleware' => ['setlang']], function () {
         } elseif ($type == 'contact') {
             $action = 'Front\FrontendController@contact';
             $routeName = 'front.contact';
-        } elseif ($type == 'login') {
-            $action = 'User\LoginController@showLoginForm';
-            $routeName = 'user.login';
-        } elseif ($type == 'register') {
-            $action = 'User\RegisterController@registerPage';
-            $routeName = 'user-register';
-        } elseif ($type == 'forget_password') {
-            $action = 'User\ForgotController@showforgotform';
-            $routeName = 'user-forgot';
+        } elseif (in_array($type, ['login', 'register', 'forget_password'])) {
+            // Customer login/register system removed — skip so a stale
+            // permalinks row of this type can't fall through to whatever
+            // $action/$routeName the previous loop iteration left behind.
+            continue;
         } elseif ($type == 'admin_login') {
             // Deliberately NOT using the DB-stored $permalink here: the whole
             // admin panel's URL is governed by config('app.admin_prefix')

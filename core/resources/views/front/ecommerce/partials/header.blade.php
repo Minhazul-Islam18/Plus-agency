@@ -37,16 +37,6 @@
                                             </select>
                                         </form>
                                     </li>
-                                    @guest
-                                        @if ($bex->is_user_panel == 1)
-                                            <li><a href="{{route('user.login')}}" class="login">{{__('Login')}}<i class="far fa-user"></i></a></li>
-                                        @endif
-                                    @endguest
-                                    @auth
-                                        @if ($bex->is_user_panel == 1)
-                                            <li><a href="{{route('user-dashboard')}}" class="login">{{__('Dashboard')}}<i class="far fa-user"></i></a></li>
-                                        @endif
-                                    @endauth
                                 </ul>
                             </div>
                         </div>

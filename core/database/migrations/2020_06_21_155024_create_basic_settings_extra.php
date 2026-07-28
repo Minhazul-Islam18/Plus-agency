@@ -18,7 +18,6 @@ class CreateBasicSettingsExtra extends Migration
       $table->integer('language_id')->default(1);
       $table->tinyInteger('is_shop')->default(1);
       $table->tinyInteger('is_ticket')->default(1);
-      $table->tinyInteger('is_user_panel')->default(1);
     });
   }
 

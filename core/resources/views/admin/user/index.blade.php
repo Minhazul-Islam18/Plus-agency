@@ -78,25 +78,29 @@
                               @endif
                             </td>
                             <td width="15%">
-                              <a class="btn btn-secondary btn-sm" href="{{route('admin.user.edit', $user->id)}}">
-                                  <i class="fas fa-edit"></i>
-                              </a>
-                              @if ($user->locked_at && Auth::guard('admin')->user()->isSuperAdmin())
-                                <form class="d-inline-block" action="{{route('admin.user.unlock')}}" method="post">
+                              @if ($user->isSuperAdmin())
+                                <span class="text-muted">&mdash;</span>
+                              @else
+                                <a class="btn btn-secondary btn-sm" href="{{route('admin.user.edit', $user->id)}}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                @if ($user->locked_at && Auth::guard('admin')->user()->isSuperAdmin())
+                                  <form class="d-inline-block" action="{{route('admin.user.unlock')}}" method="post">
+                                    @csrf
+                                    <input type="hidden" name="user_id" value="{{$user->id}}">
+                                    <button type="submit" class="btn btn-warning btn-sm" title="Unlock account">
+                                        <i class="fas fa-unlock"></i>
+                                    </button>
+                                  </form>
+                                @endif
+                                <form class="deleteform d-inline-block" action="{{route('admin.user.delete')}}" method="post">
                                   @csrf
                                   <input type="hidden" name="user_id" value="{{$user->id}}">
-                                  <button type="submit" class="btn btn-warning btn-sm" title="Unlock account">
-                                      <i class="fas fa-unlock"></i>
+                                  <button type="submit" class="btn btn-danger btn-sm deletebtn">
+                                      <i class="fas fa-trash"></i>
                                   </button>
                                 </form>
                               @endif
-                              <form class="deleteform d-inline-block" action="{{route('admin.user.delete')}}" method="post">
-                                @csrf
-                                <input type="hidden" name="user_id" value="{{$user->id}}">
-                                <button type="submit" class="btn btn-danger btn-sm deletebtn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                              </form>
                             </td>
                           </tr>
                         @endif

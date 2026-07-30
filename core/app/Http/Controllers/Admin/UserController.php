@@ -25,6 +25,14 @@ class UserController extends Controller
 
     public function edit($id)
     {
+        // Owner's own record is only ever editable by the owner themself —
+        // via Edit Profile, not this Admins Management CRUD. Block any other
+        // admin from even opening the edit form for it.
+        if ($id == 1 && Auth::guard('admin')->user()->id != 1) {
+            Session::flash('warning', "You cannot edit the owner's account!");
+            return redirect()->route('admin.user.index');
+        }
+
         $data['user'] = Admin::findOrFail($id);
         $data['roles'] = Role::all();
         return view('admin.user.edit', $data);
@@ -153,6 +161,13 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        // Same protection as edit() — belt and suspenders in case this is
+        // ever hit directly, bypassing the edit form.
+        if ($request->user_id == 1 && Auth::guard('admin')->user()->id != 1) {
+            Session::flash('warning', "You cannot edit the owner's account!");
+            return "forbidden";
+        }
+
         $user = Admin::findOrFail($request->user_id);
         $image = $request->image;
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg');

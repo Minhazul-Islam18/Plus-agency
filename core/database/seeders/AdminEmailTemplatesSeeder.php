@@ -35,6 +35,15 @@ class AdminEmailTemplatesSeeder extends Seeder
                 'email_subject' => 'Your Password Has Been Changed',
                 'email_body'    => $this->passwordChangedBody(),
             ],
+            // Sent the moment an admin account hits the failed-login-attempt
+            // threshold and gets locked. Tells them exactly when the account
+            // auto-unlocks (locked_at + lockout_duration_minutes), so they're
+            // not left guessing or hammering the login form.
+            [
+                'email_type'    => 'admin_account_locked',
+                'email_subject' => 'Your Administrator Account Has Been Locked',
+                'email_body'    => $this->accountLockedBody(),
+            ],
         ];
 
         foreach ($templates as $template) {
@@ -307,6 +316,96 @@ HTML;
           <td style="background-color:#0f1b30; border-radius:0 0 14px 14px; padding:22px 40px;">
             <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>
             <p style="margin:0; font-size:12px; color:#64748b;">Automated message — please do not reply.</p>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:14px auto 0;">
+        <tr><td align="center"><p style="margin:0; font-size:11px; color:#94a3b8; line-height:1.7;">&copy; {website_title}. All rights reserved.</p></td></tr>
+      </table>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+HTML;
+    }
+
+    private function accountLockedBody(): string
+    {
+        $head = $this->head('Your Administrator Account Has Been Locked', 'Your administrator account has been temporarily locked.');
+        return $head . <<<'HTML'
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef1f6;">
+  <tr>
+    <td align="center" style="padding:32px 14px 44px;">
+      <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+        <!-- Header: logo + site name -->
+        <tr>
+          <td class="px" style="background-color:#0f1b30; border-radius:14px 14px 0 0; padding:20px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="1" valign="middle"><img src="cid:applogo" alt="{website_title}" width="72" height="28" style="height:28px; max-height:28px; width:72px; display:block; border:0;"></td>
+                <td align="right" valign="middle" width="100%" style="font-size:16px; font-weight:700; color:#ffffff; white-space:nowrap;">{website_title}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Red hero -->
+        <tr>
+          <td class="px" style="background-color:#fef2f2; padding:32px 40px 26px; border-bottom:1px solid #fecaca;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="52" valign="middle" style="padding-right:16px;">
+                  <div style="width:52px; height:52px; background-color:#dc2626; border-radius:13px; text-align:center; line-height:52px; font-size:26px; color:#ffffff;">&#128274;</div>
+                </td>
+                <td valign="middle">
+                  <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#b91c1c; letter-spacing:0.1em; text-transform:uppercase;">Account Locked</p>
+                  <p class="h1" style="margin:0; font-size:23px; font-weight:800; color:#0f172a; line-height:1.25;">Too many failed login attempts</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:30px 40px 8px;">
+            <p style="margin:0 0 6px 0; font-size:15px; color:#334155; line-height:1.7;">Dear <strong style="color:#0f172a;">{admin_name}</strong>,</p>
+            <p style="margin:0 0 20px 0; font-size:15px; color:#475569; line-height:1.7;">Your administrator account (<strong style="color:#0f172a;">{admin_email}</strong>) has been temporarily locked after exceeding the maximum number of failed login attempts.</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e8ecf3; border-radius:10px; overflow:hidden;">
+              <tr>
+                <td style="padding:12px 18px; font-size:13px; color:#94a3b8;">You can try again after</td>
+                <td style="padding:12px 18px; font-size:15px; font-weight:800; color:#0f172a;">{locked_until}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 20px;">
+            <p style="margin:0; font-size:14px; color:#334155; line-height:1.7;">Login Page: <a href="{login_url}" style="color:#1572E8;">{login_url}</a></p>
+          </td>
+        </tr>
+        <!-- Security note -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 34px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background-color:#fffbeb; border-left:4px solid #f59e0b; border-radius:0 6px 6px 0; padding:14px 18px;">
+                  <p style="margin:0; font-size:13px; color:#713f12; line-height:1.6;">If this wasn't you, someone may be trying to guess your password. Contact the Super Administrator if you're concerned about your account's security.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#0f1b30; border-radius:0 0 14px 14px; padding:22px 40px;">
+            <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title} System Security Team</p>
+            <p style="margin:0; font-size:12px; color:#64748b;">This is an automated message. Please do not reply.</p>
           </td>
         </tr>
       </table>

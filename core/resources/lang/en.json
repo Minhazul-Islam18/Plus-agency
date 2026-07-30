@@ -651,6 +651,8 @@
     "Logo": "Logo",
     "Max Login Attempts": "Max Login Attempts",
     "Number of failed login attempts before an admin account is locked. Does not apply to the super admin.": "Number of failed login attempts before an admin account is locked. Does not apply to the super admin.",
+    "Lockout Duration (minutes)": "Lockout Duration (minutes)",
+    "How long a locked account stays locked before it can try again. A locked admin is notified by email with the exact time.": "How long a locked account stays locked before it can try again. A locked admin is notified by email with the exact time.",
     "Platform Name": "Platform Name",
     "Remove custom background and use the default instead": "Remove custom background and use the default instead",
     "Remove custom logo and use the site logo instead": "Remove custom logo and use the site logo instead",

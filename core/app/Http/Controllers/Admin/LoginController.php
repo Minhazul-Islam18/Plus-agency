@@ -7,13 +7,54 @@ use App\Http\Controllers\Controller;
 use App\Admin;
 use App\AdminPanelSetting;
 use App\Language;
+use App\Http\Helpers\KreativMailer;
 use Auth;
 use Hash;
 use Session;
 
 class LoginController extends Controller
 {
-    const LOCKED_MESSAGE = 'Your account has been locked because you have exceeded the maximum number of login attempts. To unlock your account, please contact support.';
+    /**
+     * Lockout has no stored expiry column — it's derived on every check from
+     * locked_at + the current lockout_duration_minutes setting, so changing
+     * the setting later doesn't retroactively change an in-progress lock's
+     * length in a confusing way (only future locks use the new duration).
+     */
+    private function lockoutExpiresAt(Admin $target)
+    {
+        // locked_at isn't cast to Carbon on the Admin model, so parse it
+        // explicitly rather than assuming a Carbon instance.
+        return \Carbon\Carbon::parse($target->locked_at)->addMinutes(AdminPanelSetting::lockoutDurationMinutes());
+    }
+
+    private function lockedMessage($unlockAt): string
+    {
+        return __('Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.', [
+            'time' => $unlockAt->format('d M Y, H:i'),
+        ]);
+    }
+
+    private function sendLockedEmail(Admin $target, $unlockAt): void
+    {
+        $language = Language::where('is_default', 1)->first();
+        $bs = $language->basic_setting;
+
+        try {
+            (new KreativMailer)->mailFromAdmin([
+                'toMail' => $target->email,
+                'toName' => $target->username,
+                'admin_name' => $target->username,
+                'admin_email' => $target->email,
+                'locked_until' => $unlockAt->format('d M Y, H:i'),
+                'login_url' => route('admin.login'),
+                'website_title' => $bs->website_title,
+                'logo_path' => KreativMailer::resolveAssetPath($bs->email_logo ?: $bs->logo),
+                'templateType' => 'admin_account_locked',
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('[LoginController] Account-locked email failed', ['error' => $e->getMessage()]);
+        }
+    }
 
     public function login(){
       $currentLang = Language::where('code', app()->getLocale())->first() ?: Language::where('is_default', 1)->first();
@@ -38,7 +79,16 @@ class LoginController extends Controller
       // Already locked (from a previous run of failed attempts) — block
       // outright, before even trying the password. Super admin is exempt.
       if ($target && !$target->isSuperAdmin() && $target->locked_at) {
-          return redirect()->back()->with('alert', __(self::LOCKED_MESSAGE));
+          $unlockAt = $this->lockoutExpiresAt($target);
+
+          if (now()->lt($unlockAt)) {
+              return redirect()->back()->with('alert', $this->lockedMessage($unlockAt));
+          }
+
+          // Cooldown has elapsed — auto-unlock before this attempt proceeds.
+          $target->locked_at = null;
+          $target->failed_login_attempts = 0;
+          $target->save();
       }
 
       if ($target && Auth::guard('admin')->attempt(['username' => $target->username, 'password' => $request->password], $request->boolean('remember')))
@@ -91,11 +141,27 @@ class LoginController extends Controller
 
       if ($target && !$target->isSuperAdmin()) {
           $target->increment('failed_login_attempts');
-          if ($target->failed_login_attempts >= AdminPanelSetting::maxLoginAttempts()) {
+          $max = AdminPanelSetting::maxLoginAttempts();
+
+          if ($target->failed_login_attempts >= $max) {
               $target->locked_at = now();
               $target->save();
-              return redirect()->back()->with('alert', __(self::LOCKED_MESSAGE));
+
+              $unlockAt = $this->lockoutExpiresAt($target);
+              $this->sendLockedEmail($target, $unlockAt);
+
+              return redirect()->back()->with('alert', $this->lockedMessage($unlockAt));
           }
+
+          // Warn before it happens, not just after — an admin silently
+          // approaching lockout (e.g. from a stale saved password) has no
+          // other signal that the next wrong attempt locks them out.
+          $remaining = $max - $target->failed_login_attempts;
+          return redirect()->back()->with('alert', trans_choice(
+              'Username and Password Not Matched. :count attempt remaining before your account is locked.|Username and Password Not Matched. :count attempts remaining before your account is locked.',
+              $remaining,
+              ['count' => $remaining]
+          ));
       }
 
       return redirect()->back()->with('alert', __('Username and Password Not Matched'));

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AdminPanelSetting extends Model
 {
     protected $fillable = [
-        'language_id', 'login_logo', 'login_bg_image', 'platform_name', 'tagline', 'features', 'copyright_text', 'max_login_attempts',
+        'language_id', 'login_logo', 'login_bg_image', 'platform_name', 'tagline', 'features', 'copyright_text', 'max_login_attempts', 'lockout_duration_minutes',
     ];
 
     protected $casts = [
@@ -30,6 +30,17 @@ class AdminPanelSetting extends Model
         $defaultLang = Language::where('is_default', 1)->first();
         $n = $defaultLang ? (int) optional(self::forLanguage($defaultLang->id))->max_login_attempts : 0;
         return $n > 0 ? $n : 5;
+    }
+
+    /**
+     * Same default-language-row-only convention as maxLoginAttempts() — a
+     * lockout cooldown has no meaningful per-language variant.
+     */
+    public static function lockoutDurationMinutes(): int
+    {
+        $defaultLang = Language::where('is_default', 1)->first();
+        $n = $defaultLang ? (int) optional(self::forLanguage($defaultLang->id))->lockout_duration_minutes : 0;
+        return $n > 0 ? $n : 30;
     }
 
     private static function defaultFeatures(): array
@@ -62,6 +73,7 @@ class AdminPanelSetting extends Model
             'tagline' => 'Secure. Transparent. Efficient.',
             'features' => self::defaultFeatures(),
             'max_login_attempts' => 5,
+            'lockout_duration_minutes' => 30,
         ]);
     }
 }

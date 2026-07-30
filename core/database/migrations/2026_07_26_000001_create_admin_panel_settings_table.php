@@ -26,6 +26,9 @@ class CreateAdminPanelSettingsTable extends Migration
             $table->json('features')->nullable();
             $table->string('copyright_text')->nullable();
             $table->unsignedInteger('max_login_attempts')->default(5);
+            // How long an account stays locked before it auto-unlocks. Same
+            // default-language-row-only convention as max_login_attempts.
+            $table->unsignedInteger('lockout_duration_minutes')->default(30);
             $table->timestamps();
         });
     }

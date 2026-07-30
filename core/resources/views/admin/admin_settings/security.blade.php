@@ -49,6 +49,14 @@
                                 <p class="text-danger mb-0">{{$errors->first('max_login_attempts')}}</p>
                                 @endif
                             </div>
+                            <div class="form-group">
+                                <label for="">{{__('Lockout Duration (minutes)')}} **</label>
+                                <input type="number" min="1" max="10080" class="form-control" name="lockout_duration_minutes" value="{{old('lockout_duration_minutes', $aps->lockout_duration_minutes)}}">
+                                <p class="text-warning mb-0">{{__('How long a locked account stays locked before it can try again. A locked admin is notified by email with the exact time.')}}</p>
+                                @if ($errors->has('lockout_duration_minutes'))
+                                <p class="text-danger mb-0">{{$errors->first('lockout_duration_minutes')}}</p>
+                                @endif
+                            </div>
                             <div class="form-group text-center">
                                 <button type="submit" class="btn btn-success">{{__('Update')}}</button>
                             </div>

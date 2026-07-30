@@ -132,12 +132,14 @@ class AdminSettingsController extends Controller
     {
         $request->validate([
             'max_login_attempts' => 'required|integer|min:1|max:20',
+            'lockout_duration_minutes' => 'required|integer|min:1|max:10080', // up to 7 days
         ]);
 
         $defaultLang = Language::where('is_default', 1)->first();
 
         $aps = AdminPanelSetting::forLanguage($defaultLang->id);
         $aps->max_login_attempts = $request->max_login_attempts;
+        $aps->lockout_duration_minutes = $request->lockout_duration_minutes;
         $aps->save();
 
         Session::flash('success', 'Security settings updated successfully!');

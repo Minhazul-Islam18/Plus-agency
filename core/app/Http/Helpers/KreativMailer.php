@@ -159,6 +159,9 @@ class KreativMailer {
         if (array_key_exists('changed_at', $data)) {
             $body = preg_replace("/{changed_at}/", $data['changed_at'], $body);
         }
+        if (array_key_exists('locked_until', $data)) {
+            $body = preg_replace("/{locked_until}/", $data['locked_until'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();

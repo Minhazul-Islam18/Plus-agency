@@ -36,7 +36,7 @@ class BlogController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -52,11 +52,8 @@ class BlogController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug) {
-                    $blogs = Blog::all();
-                    foreach ($blogs as $key => $blog) {
-                        if (strtolower($slug) == strtolower($blog->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Blog::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],
@@ -109,7 +106,7 @@ class BlogController extends Controller
         $blogId = $request->blog_id;
 
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -117,11 +114,8 @@ class BlogController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug, $blogId) {
-                    $blogs = Blog::all();
-                    foreach ($blogs as $key => $blog) {
-                        if ($blog->id != $blogId && strtolower($slug) == strtolower($blog->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Blog::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $blogId)->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],

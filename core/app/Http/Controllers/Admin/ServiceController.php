@@ -102,7 +102,7 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $language = Language::find($request->language_id);
@@ -121,11 +121,8 @@ class ServiceController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug) {
-                    $services = Service::all();
-                    foreach ($services as $key => $service) {
-                        if (strtolower($slug) == strtolower($service->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Service::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],
@@ -194,7 +191,7 @@ class ServiceController extends Controller
         $serviceId = $request->service_id;
 
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $language = Language::find($service->language_id);
@@ -205,11 +202,8 @@ class ServiceController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug, $serviceId) {
-                    $services = Service::all();
-                    foreach ($services as $key => $service) {
-                        if ($service->id != $serviceId && strtolower($slug) == strtolower($service->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Service::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $serviceId)->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],

@@ -95,6 +95,11 @@
                         @endforeach
                     @endif
                 </div>
+                @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    <div class="col-lg-12">
+                        {{ $portfolios->appends(['category' => request()->input('category')])->links() }}
+                    </div>
+                @endif
             </div>
 
 

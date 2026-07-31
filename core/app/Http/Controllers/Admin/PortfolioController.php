@@ -57,7 +57,7 @@ class PortfolioController extends Controller
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -67,11 +67,8 @@ class PortfolioController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug) {
-                    $portfolios = Portfolio::all();
-                    foreach ($portfolios as $key => $portfolio) {
-                        if (strtolower($slug) == strtolower($portfolio->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],
@@ -167,7 +164,7 @@ class PortfolioController extends Controller
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -176,11 +173,8 @@ class PortfolioController extends Controller
                 'required',
                 'max:255',
                 function ($attribute, $value, $fail) use ($slug, $portfolioId) {
-                    $portfolios = Portfolio::all();
-                    foreach ($portfolios as $key => $portfolio) {
-                        if ($portfolio->id != $portfolioId && strtolower($slug) == strtolower($portfolio->slug)) {
-                            $fail('The title field must be unique.');
-                        }
+                    if (Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $portfolioId)->exists()) {
+                        $fail('The title field must be unique.');
                     }
                 }
             ],

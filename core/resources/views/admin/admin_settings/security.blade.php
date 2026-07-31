@@ -33,6 +33,7 @@
                     </div>
                     <div class="col-lg-4 text-right">
                         <a class="btn btn-secondary btn-sm" href="{{route('admin.adminSettings.loginBranding')}}">{{__('Login Branding')}}</a>
+                        <a class="btn btn-secondary btn-sm" href="{{route('admin.cache.clear')}}">{{__('Clear Cache')}}</a>
                     </div>
                 </div>
             </div>

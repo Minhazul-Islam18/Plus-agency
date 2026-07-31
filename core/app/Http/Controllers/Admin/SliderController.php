@@ -32,7 +32,7 @@ class SliderController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -62,23 +62,6 @@ class SliderController extends Controller
             ];
         }
 
-        $be = BasicExtended::first();
-        $version = $be->theme_version;
-
-
-        if ($version == 'cleaning') {
-            $rules['text_font_size'] = 'nullable';
-        }
-
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $rules['bold_text'] = 'nullable';
-            $rules['bold_text_font_size'] = 'required|integer|digits_between:1,3';
-        }
-
-        if ($version == 'cleaning') {
-            $rules['bold_text_color'] = 'required';
-        }
-
         $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             $errmsgs = $validator->getMessageBag()->add('error', 'true');
@@ -89,20 +72,8 @@ class SliderController extends Controller
         $slider->language_id = $request->language_id;
         $slider->title = $request->title;
         $slider->title_font_size = $request->title_font_size;
-
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $slider->bold_text = $request->bold_text;
-            $slider->bold_text_font_size = $request->bold_text_font_size;
-        }
-        if ($version == 'cleaning') {
-            $slider->bold_text_color = $request->bold_text_color;
-        }
-
-        if ($version != 'cleaning') {
-            $slider->text = $request->text;
-            $slider->text_font_size = $request->text_font_size;
-        }
-
+        $slider->text = $request->text;
+        $slider->text_font_size = $request->text_font_size;
 
         $slider->button_text = $request->button_text;
         $slider->button_text_font_size = $request->button_text_font_size;
@@ -124,7 +95,7 @@ class SliderController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -148,22 +119,6 @@ class SliderController extends Controller
             ];
         }
 
-        $be = BasicExtended::first();
-        $version = $be->theme_version;
-
-        if ($version == 'cleaning') {
-            $rules['text_font_size'] = 'nullable';
-        }
-
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $rules['bold_text'] = 'nullable';
-            $rules['bold_text_font_size'] = 'required|integer|digits_between:1,3';
-        }
-
-        if ($version == 'cleaning') {
-            $rules['bold_text_color'] = 'required';
-        }
-
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             $errmsgs = $validator->getMessageBag()->add('error', 'true');
@@ -181,19 +136,8 @@ class SliderController extends Controller
             $slider->image = $filename;
         }
 
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $slider->bold_text = $request->bold_text;
-            $slider->bold_text_font_size = $request->bold_text_font_size;
-        }
-
-        if ($version == 'cleaning') {
-            $slider->bold_text_color = $request->bold_text_color;
-        }
-
-        if ($version != 'cleaning') {
-            $slider->text = $request->text;
-            $slider->text_font_size = $request->text_font_size;
-        }
+        $slider->text = $request->text;
+        $slider->text_font_size = $request->text_font_size;
 
         $slider->button_text = $request->button_text;
         $slider->button_text_font_size = $request->button_text_font_size;

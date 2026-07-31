@@ -36,7 +36,7 @@
   <div class="row">
     <div class="col-md-12">
 
-      @if ($be->theme_version != 'car' && $bex->home_page_pagebuilder == 0)
+      @if ($bex->home_page_pagebuilder == 0)
         <div class="card">
             <div class="card-header">
                 <div class="row">

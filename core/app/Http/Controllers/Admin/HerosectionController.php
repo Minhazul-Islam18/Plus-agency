@@ -25,7 +25,7 @@ class HerosectionController extends Controller
     public function update(Request $request, $langid)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -49,21 +49,6 @@ class HerosectionController extends Controller
         }
 
         $be = BasicExtended::where('language_id', $langid)->firstOrFail();
-        $version = $be->theme_version;
-
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $rules['hero_section_bold_text'] = 'nullable';
-            $rules['hero_section_bold_text_font_size'] = 'required|integer|digits_between:1,3';
-        }
-
-        if ($version == 'cleaning') {
-            $rules['hero_section_bold_text_color'] = 'required';
-        }
-
-        if ($version == 'cleaning') {
-            $rules['hero_section_text_font_size'] = 'nullable';
-        }
-
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
@@ -73,12 +58,7 @@ class HerosectionController extends Controller
 
         $bs = BS::where('language_id', $langid)->firstOrFail();
         $bs->hero_section_title = $request->hero_section_title;
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $bs->hero_section_bold_text = $request->hero_section_bold_text;
-        }
-        if ($version != 'cleaning') {
-            $bs->hero_section_text = $request->hero_section_text;
-        }
+        $bs->hero_section_text = $request->hero_section_text;
         $bs->hero_section_button_text = $request->hero_section_button_text;
         $bs->hero_section_button_url = $request->hero_section_button_url;
         if ($request->filled('image')) {
@@ -92,15 +72,7 @@ class HerosectionController extends Controller
 
 
         $be->hero_section_title_font_size = $request->hero_section_title_font_size;
-        if ($version == 'gym' || $version == 'car' || $version == 'cleaning') {
-            $be->hero_section_bold_text_font_size = $request->hero_section_bold_text_font_size;
-        }
-        if ($version == 'cleaning') {
-            $be->hero_section_bold_text_color = $request->hero_section_bold_text_color;
-        }
-        if ($version != 'cleaning') {
-            $be->hero_section_text_font_size = $request->hero_section_text_font_size;
-        }
+        $be->hero_section_text_font_size = $request->hero_section_text_font_size;
         $be->hero_section_button_text_font_size = $request->hero_section_button_text_font_size;
 
         $be->save();

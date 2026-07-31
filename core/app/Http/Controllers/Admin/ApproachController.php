@@ -37,13 +37,6 @@ class ApproachController extends Controller
             'serial_number' => 'required|integer',
         ];
 
-        $be = BasicExtended::first();
-        $version = $be->theme_version;
-
-        if ($version == 'cleaning') {
-            $rules['color'] = 'required';
-        }
-
         $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             $errmsgs = $validator->getMessageBag()->add('error', 'true');
@@ -53,9 +46,6 @@ class ApproachController extends Controller
         $point = new Point;
         $point->language_id = $request->language_id;
         $point->icon = $request->icon;
-        if ($version == 'cleaning') {
-            $point->color = $request->color;
-        }
         $point->title = $request->title;
         $point->short_text = $request->short_text;
         $point->serial_number = $request->serial_number;
@@ -74,7 +64,7 @@ class ApproachController extends Controller
     public function update(Request $request, $langid)
     {
         $approachSectionBg = $request->approach_section_bg;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extApproachSectionBg = pathinfo($approachSectionBg, PATHINFO_EXTENSION);
 
         $rules = [
@@ -152,20 +142,10 @@ class ApproachController extends Controller
             'serial_number' => 'required|integer',
         ];
 
-        $be = BasicExtended::first();
-        $version = $be->theme_version;
-
-        if ($version == 'cleaning') {
-            $rules['color'] = 'required';
-        }
-
         $request->validate($rules);
 
         $point = Point::findOrFail($request->pointid);
         $point->icon = $request->icon;
-        if ($version == 'cleaning') {
-            $point->color = $request->color;
-        }
         $point->title = $request->title;
         $point->short_text = $request->short_text;
         $point->serial_number = $request->serial_number;

@@ -37,7 +37,7 @@ class BasicController extends Controller
         $favicon = $request->favicon;
         $breadcrumb = $request->breadcrumb;
 
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         // Email clients (Outlook especially) largely don't render inline SVG
         // regardless of markup — the email logo must be a raster format.
         $allowedEmailExts = array('jpg', 'png', 'jpeg');
@@ -209,7 +209,7 @@ class BasicController extends Controller
     public function updatepreloader(Request $request)
     {
         $preloader = $request->preloader;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'gif', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'gif', 'svg', 'webp');
         $extPreloader = pathinfo($preloader, PATHINFO_EXTENSION);
 
         $rules = [
@@ -279,12 +279,7 @@ class BasicController extends Controller
 
         $be = BasicExtended::first();
 
-        if ($be->theme_version == 'cleaning' || $be->theme_version == 'logistic') {
-            $rules["hero_area_overlay_color"] = 'nullable';
-            $rules["hero_area_overlay_opacity"] = 'nullable';
-        }
-
-        if ($be->theme_version == 'dark' || $be->theme_version == 'gym' || $be->theme_version == 'car' || $be->theme_version == 'construction' || $be->theme_version == 'lawyer') {
+        if ($be->theme_version == 'dark') {
             $rules["secondary_base_color"] = 'nullable';
         }
 
@@ -296,7 +291,7 @@ class BasicController extends Controller
             $bs->website_title = $request->website_title;
             $bs->base_color = $request->base_color;
 
-            if ($be->theme_version != 'dark' && $be->theme_version != 'gym' && $be->theme_version != 'car' && $be->theme_version != 'construction' && $be->theme_version != 'lawyer') {
+            if ($be->theme_version != 'dark') {
                 $bs->secondary_base_color = $request->secondary_base_color;
             }
 
@@ -307,10 +302,8 @@ class BasicController extends Controller
 
         $bes = BasicExtended::all();
         foreach ($bes as $key => $be) {
-            if ($be->theme_version != 'cleaning' && $be->theme_version != 'logistic') {
-                $be->hero_overlay_color = $request->hero_area_overlay_color;
-                $be->hero_overlay_opacity = $request->hero_area_overlay_opacity;
-            }
+            $be->hero_overlay_color = $request->hero_area_overlay_color;
+            $be->hero_overlay_opacity = $request->hero_area_overlay_opacity;
 
 
             $be->breadcrumb_overlay_color = $request->breadcrumb_area_overlay_color;
@@ -587,7 +580,7 @@ class BasicController extends Controller
     public function updatemaintainance(Request $request, $langid)
     {
         $maintenance = $request->maintenance;
-        $allowedExts = array('jpg', 'png', 'jpeg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
         $extLogo = pathinfo($maintenance, PATHINFO_EXTENSION);
 
         $rules = [];
@@ -656,20 +649,14 @@ class BasicController extends Controller
         foreach ($bss as $key => $bs) {
             $bs->feature_section = $request->feature_section;
 
-            if ($be->theme_version != 'ecommerce') {
-                $bs->intro_section = $request->intro_section;
-                $bs->service_section = $request->service_section;
-                $bs->approach_section = $request->approach_section;
-                $bs->statistics_section = $request->statistics_section;
-                $bs->portfolio_section = $request->portfolio_section;
-                $bs->testimonial_section = $request->testimonial_section;
-                $bs->team_section = $request->team_section;
-                $bs->call_to_action_section = $request->call_to_action_section;
-            }
-
-            if ($be->theme_version == 'ecommerce') {
-                $bs->newsletter_section = $request->newsletter_section;
-            }
+            $bs->intro_section = $request->intro_section;
+            $bs->service_section = $request->service_section;
+            $bs->approach_section = $request->approach_section;
+            $bs->statistics_section = $request->statistics_section;
+            $bs->portfolio_section = $request->portfolio_section;
+            $bs->testimonial_section = $request->testimonial_section;
+            $bs->team_section = $request->team_section;
+            $bs->call_to_action_section = $request->call_to_action_section;
 
             $bs->news_section = $request->news_section;
             $bs->partner_section = $request->partner_section;
@@ -680,11 +667,6 @@ class BasicController extends Controller
 
         $bes = BasicExtended::all();
         foreach ($bes as $key => $be) {
-            if ($be->theme_version == 'ecommerce') {
-                $be->categories_section = $request->categories_section;
-                $be->featured_products_section = $request->featured_products_section;
-                $be->category_products_section = $request->category_products_section;
-            }
             $be->save();
         }
 

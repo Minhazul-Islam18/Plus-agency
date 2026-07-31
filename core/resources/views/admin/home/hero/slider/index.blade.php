@@ -161,41 +161,6 @@
                 </div>
 
 
-                @if ($be->theme_version == 'gym' || $be->theme_version == 'car' || $be->theme_version == 'cleaning')
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="">Bold Text </label>
-                            <input type="text" class="form-control" name="bold_text" value="" placeholder="Enter Bold Text">
-                            <p id="errbold_text" class="mb-0 text-danger em"></p>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="">Bold Text Font Size **</label>
-                            <input type="number" class="form-control ltr" name="bold_text_font_size" value="">
-                            <p id="errbold_text_font_size" class="em text-danger mb-0"></p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-
-
-                @if ($be->theme_version == 'cleaning')
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <label for="">Bold Text Color **</label>
-                            <input type="text" class="form-control jscolor" name="bold_text_color" value="#13287e">
-                            <p id="errbold_text_color" class="em text-danger mb-0"></p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-
-                @if ($be->theme_version != 'cleaning')
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group">
@@ -212,7 +177,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
 
                 <div class="row">

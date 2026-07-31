@@ -78,15 +78,6 @@
                   </div>
                 </div>
 
-                @if ($be->theme_version == 'cleaning')
-                    <div class="form-group">
-                        <label for="">Color **</label>
-                        <input type="text" class="form-control jscolor" name="color" value="{{$point->color}}">
-                        @if ($errors->has('color'))
-                          <p class="mb-0 text-danger">{{$errors->first('color')}}</p>
-                        @endif
-                    </div>
-                @endif
 
                 <div class="form-group">
                   <label for="">Title **</label>

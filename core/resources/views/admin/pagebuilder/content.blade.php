@@ -484,27 +484,6 @@
                 @if($version == 'default' || $version == 'dark')
                     "{{asset('assets/front/css/style.css')}}",
                 @endif
-                @if($version == 'gym')
-                    "{{asset('assets/front/css/gym-style.css')}}",
-                @endif
-                @if($version == 'car')
-                    "{{asset('assets/front/css/car-style.css')}}",
-                @endif
-                @if($version == 'cleaning')
-                    "{{asset('assets/front/css/cleaning-style.css')}}",
-                @endif
-                @if($version == 'construction')
-                    "{{asset('assets/front/css/construction-style.css')}}",
-                @endif
-                @if($version == 'logistic')
-                    "{{asset('assets/front/css/logistic-style.css')}}",
-                @endif
-                @if($version == 'lawyer')
-                    "{{asset('assets/front/css/lawyer-style.css')}}",
-                @endif
-                @if($version == 'ecommerce')
-                    "{{asset('assets/front/css/ecommerce-style.css')}}",
-                @endif
                 "{{asset('assets/admin/css/pb-canvas.css?time=' . time())}}",
                 "{{url('/')}}/assets/front/css/common-base-color.php?color={{$bs->base_color}}",
                 @if($version == 'default' || $version == 'dark')
@@ -514,53 +493,11 @@
                     "{{asset('assets/front/css/dark.css')}}",
                     "{{url('/')}}/assets/front/css/dark-base-color.php?color={{$abs->base_color}}",
                 @endif
-                @if($version == 'gym')
-                    "{{url('/')}}/assets/front/css/gym-base-color.php?color={{$abs->base_color}}",
-                @endif
-                @if($version == 'car')
-                    "{{url('/')}}/assets/front/css/car-base-color.php?color={{$abs->base_color}}",
-                @endif
-                @if($version == 'cleaning')
-                    "{{url('/')}}/assets/front/css/cleaning-base-color.php?color={{$abs->base_color}}&color1={{$abs->secondary_base_color}}",
-                @endif
-                @if($version == 'construction')
-                    "{{url('/')}}/assets/front/css/construction-base-color.php?color={{$abs->base_color}}",
-                @endif
-                @if($version == 'logistic')
-                    "{{url('/')}}/assets/front/css/logistic-base-color.php?color={{$abs->base_color}}&color1={{$abs->secondary_base_color}}",
-                @endif
-                @if($version == 'lawyer')
-                    "{{url('/')}}/assets/front/css/lawyer-base-color.php?color={{$abs->base_color}}",
-                @endif
-                @if($version == 'ecommerce')
-                    "{{url('/')}}/assets/front/css/ecommerce-base-color.php?color={{$abs->base_color}}",
-                @endif
 
                 @if($lang->rtl == 1)
                     "{{asset('assets/admin/css/pb-rtl-canvas.css')}}",
                     @if($version == 'default' || $version == 'dark')
                         "{{asset('assets/front/css/rtl.css')}}",
-                    @endif
-                    @if($version == 'gym')
-                        "{{asset('assets/front/css/gym-rtl.css')}}",
-                    @endif
-                    @if($version == 'car')
-                        "{{asset('assets/front/css/car-rtl.css')}}",
-                    @endif
-                    @if($version == 'cleaning')
-                        "{{asset('assets/front/css/cleaning-rtl.css')}}",
-                    @endif
-                    @if($version == 'construction')
-                        "{{asset('assets/front/css/construction-rtl.css')}}",
-                    @endif
-                    @if($version == 'logistic')
-                        "{{asset('assets/front/css/logistic-rtl.css')}}",
-                    @endif
-                    @if($version == 'lawyer')
-                        "{{asset('assets/front/css/lawyer-rtl.css')}}",
-                    @endif
-                    @if($version == 'ecommerce')
-                        "{{asset('assets/front/css/ecommerce-rtl.css')}}",
                     @endif
                 @endif
             ],
@@ -572,24 +509,6 @@
                 "{{asset('assets/admin/js/pb-custom.js')}}",
                 @if($version == 'default' || $version == 'dark')
                     "{{asset('assets/admin/js/pb-default-custom.js')}}"
-                @endif
-                @if($version == 'gym')
-                    "{{asset('assets/admin/js/pb-gym-custom.js')}}"
-                @endif
-                @if($version == 'car')
-                    "{{asset('assets/admin/js/pb-car-custom.js')}}"
-                @endif
-                @if($version == 'cleaning')
-                    "{{asset('assets/admin/js/pb-cleaning-custom.js')}}"
-                @endif
-                @if($version == 'construction')
-                    "{{asset('assets/admin/js/pb-construction-custom.js')}}"
-                @endif
-                @if($version == 'logistic')
-                    "{{asset('assets/admin/js/pb-logistic-custom.js')}}"
-                @endif
-                @if($version == 'lawyer')
-                    "{{asset('assets/admin/js/pb-lawyer-custom.js')}}"
                 @endif
 
             ]

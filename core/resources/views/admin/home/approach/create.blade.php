@@ -38,14 +38,6 @@
                        </div>
                     </div>
 
-                    @if ($be->theme_version == 'cleaning')
-                        <div class="form-group">
-                            <label for="">Color **</label>
-                            <input type="text" class="form-control jscolor" name="color" value="39498a">
-                            <p id="errcolor" class="mb-0 text-danger em"></p>
-                        </div>
-                    @endif
-
                     <div class="form-group">
                        <label for="">Title **</label>
                        <input type="text" class="form-control" name="title" value="" placeholder="Enter Title">

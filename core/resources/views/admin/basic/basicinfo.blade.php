@@ -146,7 +146,7 @@
                     </div>
                     <div class="col-lg-6">
 
-                        @if ($abe->theme_version != 'dark' && $abe->theme_version != 'gym' && $abe->theme_version != 'car' && $abe->theme_version != 'construction' && $abe->theme_version != 'lawyer')
+                        @if ($abe->theme_version != 'dark')
                             <div class="form-group">
                                 <label>Secondary Base Color Code **</label>
                                 <input class="jscolor form-control ltr" name="secondary_base_color" value="{{$abs->secondary_base_color}}">
@@ -159,7 +159,6 @@
                 </div>
 
 
-                @if ($abe->theme_version != 'cleaning' && $abe->theme_version != 'logistic')
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group">
@@ -181,7 +180,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
 
                 <div class="row">

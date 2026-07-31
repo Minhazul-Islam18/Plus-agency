@@ -81,7 +81,6 @@
                       <p class="mb-0 text-danger">{{$errors->first('title')}}</p>
                     @endif
                   </div>
-                  @if ($be->theme_version != 'car')
                     <div class="form-group">
                         <label>Color **</label>
                         <input class="jscolor form-control ltr" name="color" value="{{$feature->color}}">
@@ -89,7 +88,6 @@
                             <p class="mb-0 text-danger">{{$errors->first('color')}}</p>
                         @endif
                     </div>
-                  @endif
                   <div class="form-group">
                     <label for="">Serial Number **</label>
                     <input type="number" class="form-control ltr" name="serial_number" value="{{$feature->serial_number}}" placeholder="Enter Serial Number">

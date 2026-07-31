@@ -48,11 +48,6 @@ class FeatureController extends Controller
             'serial_number' => 'required|integer',
         ];
 
-        $be = BasicExtended::select('theme_version')->first();
-        if ($be->theme_version == 'car') {
-            $rules['color'] = 'nullable';
-        }
-
         $validator = Validator::make($request->all(), $rules, $messages);
         if ($validator->fails()) {
             $errmsgs = $validator->getMessageBag()->add('error', 'true');
@@ -63,11 +58,7 @@ class FeatureController extends Controller
         $feature->icon = $request->icon;
         $feature->language_id = $request->language_id;
         $feature->title = $request->title;
-
-        if ($be->theme_version != 'car') {
-            $feature->color = $request->color;
-        }
-
+        $feature->color = $request->color;
         $feature->serial_number = $request->serial_number;
         $feature->save();
 
@@ -84,21 +75,12 @@ class FeatureController extends Controller
             'serial_number' => 'required|integer',
         ];
 
-        $be = BasicExtended::select('theme_version')->first();
-        if ($be->theme_version == 'car') {
-            $rules['color'] = 'nullable';
-        }
-
         $request->validate($rules);
 
         $feature = Feature::findOrFail($request->feature_id);
         $feature->icon = $request->icon;
         $feature->title = $request->title;
-
-        if ($be->theme_version != 'car') {
-            $feature->color = $request->color;
-        }
-
+        $feature->color = $request->color;
         $feature->serial_number = $request->serial_number;
         $feature->save();
 

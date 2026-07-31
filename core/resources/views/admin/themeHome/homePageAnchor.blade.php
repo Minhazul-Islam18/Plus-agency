@@ -1,32 +1,6 @@
 @php
-
-if ($be->theme_version == 'default') {
-    $type = 'themeHome'; $theme = 'default';
-}
-elseif ($be->theme_version == 'dark') {
-    $type = 'themeHome'; $theme = 'dark';
-}
-elseif ($be->theme_version == 'gym') {
-    $type = 'themeHome'; $theme = 'gym';
-}
-elseif ($be->theme_version == 'car') {
-    $type = 'themeHome'; $theme = 'car';
-}
-elseif ($be->theme_version == 'cleaning') {
-    $type = 'themeHome'; $theme = 'cleaning';
-}
-elseif ($be->theme_version == 'construction') {
-    $type = 'themeHome'; $theme = 'construction';
-}
-elseif ($be->theme_version == 'logistic') {
-    $type = 'themeHome'; $theme = 'logistic';
-}
-elseif ($be->theme_version == 'lawyer') {
-    $type = 'themeHome'; $theme = 'lawyer';
-}
-elseif ($be->theme_version == 'ecommerce') {
-    $type = 'themeHome'; $theme = 'ecommerce';
-}
+$type = 'themeHome';
+$theme = $be->theme_version;
 @endphp
 
 <!-- Modal -->

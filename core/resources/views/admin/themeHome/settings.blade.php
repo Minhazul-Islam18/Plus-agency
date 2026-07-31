@@ -58,12 +58,6 @@
                                             <option value="" selected disabled>Select a Theme</option>
                                             <option value="default" {{$abe->theme_version == 'default' ? 'selected' : ''}}>Default</option>
                                             <option value="dark" {{$abe->theme_version == 'dark' ? 'selected' : ''}}>Dark</option>
-                                            <option value="gym" {{$abe->theme_version == 'gym' ? 'selected' : ''}}>Gym</option>
-                                            <option value="car" {{$abe->theme_version == 'car' ? 'selected' : ''}}>Car</option>
-                                            <option value="cleaning" {{$abe->theme_version == 'cleaning' ? 'selected' : ''}}>Cleaning</option>
-                                            <option value="construction" {{$abe->theme_version == 'construction' ? 'selected' : ''}}>Construction</option>
-                                            <option value="logistic" {{$abe->theme_version == 'logistic' ? 'selected' : ''}}>Logistic</option>
-                                            <option value="lawyer" {{$abe->theme_version == 'lawyer' ? 'selected' : ''}}>Lawyer</option>
                                         </select>
                                     </div>
                                 </div>

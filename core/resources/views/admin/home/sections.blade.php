@@ -52,7 +52,6 @@
                                     </label>
                                 </div>
                             </div>
-                            @if ($be->theme_version != "ecommerce")
                                 <div class="form-group">
                                     <label>Introduction Section **</label>
                                     <div class="selectgroup w-100">
@@ -157,7 +156,6 @@
                                         </label>
                                     </div>
                                 </div>
-                            @endif
                             <div class="form-group">
                                 <label>News Section **</label>
                                 <div class="selectgroup w-100">
@@ -197,60 +195,6 @@
                                     </label>
                                 </div>
                             </div>
-                            @if ($be->theme_version == 'ecommerce')
-                            <div class="form-group">
-                                <label>Categories Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="categories_section" value="1" class="selectgroup-input" {{$abe->categories_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="categories_section" value="0" class="selectgroup-input" {{$abe->categories_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Featured Products Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="featured_products_section" value="1" class="selectgroup-input" {{$abe->featured_products_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="featured_products_section" value="0" class="selectgroup-input" {{$abe->featured_products_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Category-wise Products Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="category_products_section" value="1" class="selectgroup-input" {{$abe->category_products_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="category_products_section" value="0" class="selectgroup-input" {{$abe->category_products_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Newsletter Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="newsletter_section" value="1" class="selectgroup-input" {{$abs->newsletter_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="newsletter_section" value="0" class="selectgroup-input" {{$abs->newsletter_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            @endif
                             <div class="form-group">
                                 <label>Copyright Section **</label>
                                 <div class="selectgroup w-100">

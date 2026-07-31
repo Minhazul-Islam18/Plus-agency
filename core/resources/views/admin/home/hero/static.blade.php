@@ -121,56 +121,22 @@
                     </div>
                 </div>
 
-                @if ($be->theme_version == 'gym' || $be->theme_version == 'car' || $be->theme_version == 'cleaning')
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="">Bold Text</label>
-                                <input name="hero_section_bold_text" class="form-control" value="{{$abs->hero_section_bold_text}}">
-                                <p id="errhero_section_bold_text" class="em text-danger mb-0"></p>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                              <label for="">Bold Text Font Size **</label>
-                              <input type="number" class="form-control ltr" name="hero_section_bold_text_font_size" value="{{$abe->hero_section_bold_text_font_size}}">
-                              <p id="errhero_section_bold_text_font_size" class="em text-danger mb-0"></p>
-                            </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                        <label for="">Text</label>
+                        <input name="hero_section_text" class="form-control" value="{{$abs->hero_section_text}}">
+                        <p id="errhero_section_text" class="em text-danger mb-0"></p>
                         </div>
                     </div>
-                @endif
-
-                @if ($be->theme_version == 'cleaning')
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <label for="">Bold Text</label>
-                                <input name="hero_section_bold_text_color" class="form-control jscolor" value="{{$abe->hero_section_bold_text_color}}">
-                                <p id="errhero_section_bold_text_color" class="em text-danger mb-0"></p>
-                            </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                        <label for="">Text Font Size **</label>
+                        <input type="number" class="form-control ltr" name="hero_section_text_font_size" value="{{$abe->hero_section_text_font_size}}">
+                        <p id="errhero_section_text_font_size" class="em text-danger mb-0"></p>
                         </div>
                     </div>
-                @endif
-
-
-                @if ($be->theme_version != 'cleaning')
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                            <label for="">Text</label>
-                            <input name="hero_section_text" class="form-control" value="{{$abs->hero_section_text}}">
-                            <p id="errhero_section_text" class="em text-danger mb-0"></p>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                            <label for="">Text Font Size **</label>
-                            <input type="number" class="form-control ltr" name="hero_section_text_font_size" value="{{$abe->hero_section_text_font_size}}">
-                            <p id="errhero_section_text_font_size" class="em text-danger mb-0"></p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                </div>
 
 
                 <div class="row">

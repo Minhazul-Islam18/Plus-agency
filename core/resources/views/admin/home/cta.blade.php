@@ -67,7 +67,6 @@
               <form id="ctaForm" action="{{route('admin.cta.update', $lang_id)}}" method="post">
                 @csrf
 
-                @if ($abe->theme_version != 'gym' && $abe->theme_version != 'car')
                 {{-- Background Part --}}
                 <div class="form-group">
                     <label for="">Background ** </label>
@@ -110,7 +109,6 @@
                         </div>
                     </div>
                 </div>
-                @endif
 
                 <div class="form-group">
                   <label for="">Text **</label>

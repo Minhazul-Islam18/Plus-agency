@@ -73,71 +73,35 @@ class FrontendController extends Controller
 
         // if home page page builder is disabled
         if ($bex?->home_page_pagebuilder == 0) {
-            $data['portfolios'] = Portfolio::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->limit(10)->get();
-            $data['points'] = Point::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
-            $data['statistics'] = Statistic::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
-            $data['testimonials'] = Testimonial::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
-            $data['faqs'] = Faq::orderBy('serial_number', 'ASC')->get();
-            $data['members'] = Member::where('language_id', $lang_id)->where('feature', 1)->get();
-            $data['blogs'] = Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get();
-            $data['partners'] = Partner::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
-            $data['scategories'] = Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
-            if (!serviceCategory()) {
-                $data['services'] = Service::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
-            }
+            // Featured listing blocks change only via admin CRUD, not
+            // real-time — short TTL keeps the homepage fast without a
+            // manual invalidation hook on every one of these models.
+            $data += \Illuminate\Support\Facades\Cache::remember("home_listing_blocks:lang:{$lang_id}", now()->addMinutes(15), function () use ($lang_id) {
+                $blocks = [
+                    'portfolios' => Portfolio::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->limit(10)->get(),
+                    'points' => Point::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
+                    'statistics' => Statistic::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
+                    'testimonials' => Testimonial::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
+                    'faqs' => Faq::orderBy('serial_number', 'ASC')->get(),
+                    'members' => Member::where('language_id', $lang_id)->where('feature', 1)->get(),
+                    'blogs' => Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get(),
+                    'partners' => Partner::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
+                    'scategories' => Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
+                ];
+
+                if (!serviceCategory()) {
+                    $blocks['services'] = Service::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
+                }
+
+                return $blocks;
+            });
         }
         // if home page page builder is disabled
         else {
             $data['home'] = Home::where('theme', $be->theme_version)->where('language_id', $currentLang->id)->first();
         }
 
-        if ($version == 'gym') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.gym.index', $data);
-            } else {
-                return view('front.gym.index1', $data);
-            }
-        } elseif ($version == 'car') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.car.index', $data);
-            } else {
-                return view('front.car.index1', $data);
-            }
-        } elseif ($version == 'cleaning') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.cleaning.index', $data);
-            } else {
-                return view('front.cleaning.index1', $data);
-            }
-        } elseif ($version == 'construction') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.construction.index', $data);
-            } else {
-                return view('front.construction.index1', $data);
-            }
-        } elseif ($version == 'logistic') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.logistic.index', $data);
-            } else {
-                return view('front.logistic.index1', $data);
-            }
-        } elseif ($version == 'lawyer') {
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.lawyer.index', $data);
-            } else {
-                return view('front.lawyer.index1', $data);
-            }
-        } elseif ($version == 'ecommerce') {
-            $data['fcategories'] = Pcategory::where('status', 1)->where('language_id', $currentLang->id)->where('is_feature', 1)->get();
-            $data['hcategories'] = Pcategory::where('status', 1)->where('language_id', $currentLang->id)->where('products_in_home', 1)->get();
-            $data['fproducts'] = Product::where('status', 1)->where('is_feature', 1)->where('language_id', $currentLang->id)->orderBy('id', 'DESC')->limit(10)->get();
-            $data['products'] = Product::where('status', 1)->where('language_id', $currentLang->id)->orderBy('id', 'DESC')->limit(10)->get();
-            if ($bex->home_page_pagebuilder == 1) {
-                return view('front.ecommerce.index', $data);
-            } else {
-                return view('front.ecommerce.index1', $data);
-            }
-        } elseif ($version == 'default' || $version == 'dark') {
+        if ($version == 'default' || $version == 'dark') {
             if ($bex?->home_page_pagebuilder == 1) {
                 return view('front.default.index', $data);
             } else {
@@ -175,19 +139,7 @@ class FrontendController extends Controller
 
         $version = $be->theme_version;
 
-        if ($version == 'gym') {
-            return view('front.gym.services', $data);
-        } elseif ($version == 'car') {
-            return view('front.car.services', $data);
-        } elseif ($version == 'cleaning') {
-            return view('front.cleaning.services', $data);
-        } elseif ($version == 'construction') {
-            return view('front.construction.services', $data);
-        } elseif ($version == 'logistic') {
-            return view('front.logistic.services', $data);
-        } elseif ($version == 'lawyer') {
-            return view('front.lawyer.services', $data);
-        } elseif ($version == 'default' || $version == 'dark' || $version == 'ecommerce') {
+        if ($version == 'default' || $version == 'dark') {
             $data['version'] = $version == 'dark' ? 'default' : $version;
             return view('front.services', $data);
         }
@@ -215,7 +167,7 @@ class FrontendController extends Controller
             $data['category'] = Scategory::findOrFail($category);
         }
 
-        $data['portfolios'] = Portfolio::when($category, function ($query, $category) {
+        $data['portfolios'] = Portfolio::with('service.scategory')->when($category, function ($query, $category) {
             $serviceIdArr = [];
             $serviceids = Service::select('id')->where('scategory_id', $category)->get();
             foreach ($serviceids as $key => $serviceid) {
@@ -228,27 +180,9 @@ class FrontendController extends Controller
 
         $version = $be->theme_version;
 
-        if ($version == 'gym') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.gym.portfolios', $data);
-        } elseif ($version == 'car') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.car.portfolios', $data);
-        } elseif ($version == 'cleaning') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.cleaning.portfolios', $data);
-        } elseif ($version == 'construction') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.construction.portfolios', $data);
-        } elseif ($version == 'logistic') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.logistic.portfolios', $data);
-        } elseif ($version == 'lawyer') {
-            $data['portfolios'] = $data['portfolios']->get();
-            return view('front.lawyer.portfolios', $data);
-        } elseif ($version == 'default' || $version == 'dark' || $version == 'ecommerce') {
+        if ($version == 'default' || $version == 'dark') {
             $data['version'] = $version == 'dark' ? 'default' : $version;
-            $data['portfolios'] = $data['portfolios']->get();
+            $data['portfolios'] = $data['portfolios']->paginate(9);
             return view('front.portfolios', $data);
         }
     }
@@ -541,19 +475,7 @@ class FrontendController extends Controller
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
 
-        if ($version == 'gym') {
-            return view('front.gym.team', $data);
-        } elseif ($version == 'car') {
-            return view('front.car.team', $data);
-        } elseif ($version == 'cleaning') {
-            return view('front.cleaning.team', $data);
-        } elseif ($version == 'construction') {
-            return view('front.construction.team', $data);
-        } elseif ($version == 'logistic') {
-            return view('front.logistic.team', $data);
-        } elseif ($version == 'lawyer') {
-            return view('front.lawyer.team', $data);
-        } elseif ($version == 'default' || $version == 'dark' || $version == 'ecommerce') {
+        if ($version == 'default' || $version == 'dark') {
             $data['version'] = $version == 'dark' ? 'default' : $version;
             return view('front.team', $data);
         }

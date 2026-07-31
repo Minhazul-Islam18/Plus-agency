@@ -987,6 +987,12 @@ a.hero-boxed-btn:hover::after {
 .single-hero-feature {
   position: relative;
   padding: 40px 60px 41px 60px;
+  /* Fixed height (icon + up to 2 title lines + padding) so --intro-overlap
+     below can be a static value instead of JS-measured at runtime — trades
+     unbounded text length for zero layout shift. */
+  height: 260px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .single-hero-feature::after {
   position: absolute;
@@ -1009,25 +1015,35 @@ a.hero-boxed-btn:hover::after {
   margin-top: 26px;
   font-size: 24px;
   font-weight: 600;
+  line-height: 1.3;
+  /* Cap to 2 lines so the card's height (see .single-hero-feature) stays a
+     fixed, predictable value regardless of title length. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .intro-section {
   /* Own stacking context so .intro-section-backdrop's z-index: -1 is scoped
      here, not to the whole page. */
   position: relative;
   z-index: 1;
-  --intro-overlap: 0px;
+  /* 260px = the now-fixed .single-hero-feature card height, correct for the
+     4-cards-in-1-row desktop/tablet layout (col-md-3) from first paint — no
+     shift there. JS in index1.blade.php/index.blade.php still re-measures on
+     load/resize to correct this for narrower breakpoints where the cards
+     wrap into 2+ rows (col-sm-6 and below), where the real height is a
+     multiple of this value. */
+  --intro-overlap: 260px;
 }
 /* .has-features pulls the whole section (cards + backdrop together) up by
-   the card strip's own rendered height (--intro-overlap, set by JS in
-   index1.blade.php/index.blade.php — the hero can be a JS-sized carousel and
-   the card text can wrap to 1-3 lines, so no fixed px value stays correct),
-   so the cards' bottom edge lands exactly on the hero/intro boundary. The
-   backdrop below is offset by the same amount in the opposite direction, so
-   its own paint area — and any bg image/overlay on it — always starts
-   exactly at the hero's real bottom edge and never bleeds upward over the
-   hero. Only the cards themselves (own opaque per-feature background-color)
-   render in that overlap band. Until JS runs, --intro-overlap is 0 so the
-   section just renders flush, no shift. */
+   the card strip's rendered height (--intro-overlap), so the cards' bottom
+   edge lands exactly on the hero/intro boundary. The backdrop below is
+   offset by the same amount in the opposite direction, so its own paint
+   area — and any bg image/overlay on it — always starts exactly at the
+   hero's real bottom edge and never bleeds upward over the hero. Only the
+   cards themselves (own opaque per-feature background-color) render in that
+   overlap band. */
 .intro-section.has-features {
   margin-top: calc(-1 * var(--intro-overlap));
 }
@@ -1057,9 +1073,21 @@ a.hero-boxed-btn:hover::after {
   padding: 77px 47px 79px 47px;
   background-color: #25d06f;
   color: #fff;
+  /* Fixed height (padding + label + up to 2 title lines + button) so
+     .intro-bg opposite it (height matches, see below) doesn't depend on
+     this column's real content height — avoids a layout shift once the
+     text has actually rendered. */
+  min-height: 420px;
+  box-sizing: border-box;
 }
 .intro-txt h2 {
   color: #fff;
+  /* Cap to 2 lines so .intro-txt's height (above) stays a fixed, predictable
+     value regardless of title length. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .intro-txt a {
   display: inline-block;
@@ -1102,6 +1130,9 @@ a.hero-boxed-btn:hover::after {
   right: 45px;
 }
 .intro-bg {
+  /* Matches .intro-txt's fixed min-height (above) instead of height:100%,
+     which depended on that column's real (variable) content height. */
+  min-height: 420px;
   height: 100%;
 }
 .video-play-button {

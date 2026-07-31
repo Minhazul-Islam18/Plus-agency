@@ -2,6 +2,12 @@
     "use strict";
     jQuery(document).ready(function($) {
 
+        // Start observing lazy images/backgrounds immediately, before the
+        // heavier carousel/masonry/video setup below runs — otherwise even
+        // the above-the-fold hero image doesn't start fetching until all of
+        // that synchronous jQuery init work finishes first.
+        new LazyLoad();
+
         // hero carousel
         var hero2Responsive = {
             0: {
@@ -322,9 +328,9 @@
         }
 
         // // background video initialization for home 5
-        if ($("#bgndVideo").length > 0) {
-            $("#bgndVideo").YTPlayer();
-        }
+        // Deferred to window 'load' (see bottom of file) — YTPlayer fetches
+        // the YouTube iframe API from an external host, which shouldn't
+        // compete with the page's own critical-path CSS/JS/images.
 
 
 
@@ -402,6 +408,12 @@
       
     });
 
-    
-    new LazyLoad();
+    // Video background (home 5) starts after everything else has finished
+    // loading — it hits an external host (YouTube) and shouldn't hold up
+    // the page's own critical-path resources.
+    $(window).on('load', function() {
+        if ($("#bgndVideo").length > 0) {
+            $("#bgndVideo").YTPlayer();
+        }
+    });
 }(jQuery));

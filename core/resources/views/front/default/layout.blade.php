@@ -19,13 +19,21 @@
     <title>{{ $bs->website_title }} @yield('pagename')</title>
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/front/img/' . $bs->favicon) }}" type="image/x-icon">
+    {{-- Icon webfonts are only discovered once plugin.min.css finishes parsing,
+         so they fetch late and swap in after icons already reserved space with
+         a fallback glyph — that swap is what's causing the CLS layout shift.
+         Preloading fetches them in parallel with the CSS instead. --}}
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('assets/front/fonts/fa-solid-900.woff2') }}" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('assets/front/fonts/fa-regular-400.woff2') }}" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('assets/front/fonts/fa-brands-400.woff2') }}" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('assets/front/fonts/Flaticon.woff2') }}" crossorigin>
     <!-- bootstrap css -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/bootstrap.min.css') }}">
     <!-- plugin css -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/plugin.min.css') }}">
 
     <!-- main css -->
-    <link rel="stylesheet" href="{{ asset('assets/front/css/style.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/front/css/style.css') }}">
 
     <!-- common css -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/common-style.css') }}">
@@ -52,14 +60,20 @@
     @endif
 
     <!-- responsive css -->
-    <link rel="stylesheet" href="{{ asset('assets/front/css/responsive.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/front/css/responsive.css') }}">
+    @php
+        $commonBaseColorHref = url('/') . '/assets/front/css/common-base-color.php?color=' . $bs->base_color;
+        $baseColorHref = url('/') . '/assets/front/css/base-color.php?color=' . $bs->base_color . ($be->theme_version != 'dark' ? '&color1=' . $bs->secondary_base_color : '');
+    @endphp
+    {{-- Brand-color overlays only tweak accent colors on top of the base theme —
+         safe to load non-render-blocking (preload + swap) since a brief moment
+         on default theme colors, before load, causes no layout shift. --}}
     <!-- common base color change -->
-    <link href="{{ url('/') }}/assets/front/css/common-base-color.php?color={{ $bs->base_color }}"
-        rel="stylesheet">
+    <link rel="preload" as="style" href="{{ $commonBaseColorHref }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ $commonBaseColorHref }}"></noscript>
     <!-- base color change -->
-    <link
-        href="{{ url('/') }}/assets/front/css/base-color.php?color={{ $bs->base_color }}{{ $be->theme_version != 'dark' ? '&color1=' . $bs->secondary_base_color : '' }}"
-        rel="stylesheet">
+    <link rel="preload" as="style" href="{{ $baseColorHref }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ $baseColorHref }}"></noscript>
 
     @if ($be->theme_version == 'dark')
         <!-- dark version css -->

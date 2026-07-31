@@ -73,6 +73,21 @@ if (! function_exists('serviceCategory')) {
     }
 }
 
+if (!function_exists('asset_v')) {
+    // filemtime-based cache-busting: only changes the URL when the file
+    // itself changes, so browsers can actually cache it in between —
+    // unlike a ?v=time() query string, which busts the cache on every request.
+    // Deployment serves /assets from the project root (sibling of core/,
+    // i.e. dirname(base_path())), not core/public — asset() URLs already
+    // account for this via the web server; filemtime() must too.
+    function asset_v($path)
+    {
+        $full = dirname(base_path()) . '/' . ltrim($path, '/');
+        $version = file_exists($full) ? filemtime($full) : time();
+        return asset($path) . '?v=' . $version;
+    }
+}
+
 if (!function_exists('slug_create')) {
     function slug_create($val)
     {

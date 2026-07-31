@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\InvalidatesHomeListingCache;
 
 class Portfolio extends Model
 {
+    use InvalidatesHomeListingCache;
   protected $fillable = ['id', 'language_id', 'title', 'slug', 'start_date', 'submission_date', 'client_name', 'tags', 'featured_image', 'content', 'service_id', 'status', 'serial_number', 'meta_keywords', 'meta_description', 'website_link', 'cost_of_service'];
 
   public function portfolio_images()

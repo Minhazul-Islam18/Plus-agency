@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\InvalidatesHomeListingCache;
 
 class Testimonial extends Model
 {
+    use InvalidatesHomeListingCache;
     public $timestamps = false;
 
     public function language() {

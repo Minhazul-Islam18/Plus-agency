@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\InvalidatesGlobalViewCache;
 
 class BasicExtra extends Model
 {
+    use InvalidatesGlobalViewCache;
   protected $table = 'basic_settings_extra';
 
   public $timestamps = false;

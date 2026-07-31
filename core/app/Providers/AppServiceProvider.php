@@ -7,6 +7,7 @@ use App\Services\SmsGateway\LogSmsGateway;
 use App\Services\SmsGateway\SmsGatewayInterface;
 use App\Services\SmsGateway\TwilioSmsGateway;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use App\Social;
 use App\Language;
@@ -50,8 +51,12 @@ class AppServiceProvider extends ServiceProvider
     Paginator::useBootstrap();
 
     try {
-      $socials = Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
-      $langs   = Language::where('status', 1)->get();
+      $socials = Cache::remember('global_socials', now()->addMinutes(30), function () {
+        return Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
+      });
+      $langs = Cache::remember('global_languages_active', now()->addMinutes(30), function () {
+        return Language::where('status', 1)->get();
+      });
     } catch (\Exception $e) {
       $socials = collect();
       $langs   = collect();
@@ -94,23 +99,51 @@ class AppServiceProvider extends ServiceProvider
       $currentLang = Language::where('is_default', 1)->first();
     }
 
-    $menuRow = Menu::where('language_id', $currentLang->id)->first();
+    // Cached cross-request (not just per-request) — this bundle is read on
+    // every single view render but only changes via admin CRUD (BasicController,
+    // LanguageController). TTL keeps writes from other controllers (menus,
+    // popups, ulinks, categories) eventually consistent within 30 min even
+    // though they don't explicitly bust this key.
+    $data = Cache::remember(self::globalViewCacheKey($currentLang->id), now()->addMinutes(30), function () use ($currentLang) {
+      $menuRow = Menu::where('language_id', $currentLang->id)->first();
 
-    $data = [
-      'bs'          => $currentLang->basic_setting,
-      'be'          => $currentLang->basic_extended,
-      'bex'         => $currentLang->basic_extra,
-      'ulinks'      => $currentLang->ulinks,
-      'apopups'     => $currentLang->popups()->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
-      'menus'       => $menuRow ? $menuRow->menus : json_encode([]),
-      'currentLang' => $currentLang,
-      'rtl'         => $currentLang->rtl == 1 ? 1 : 0,
-    ];
+      $data = [
+        'bs'          => $currentLang->basic_setting,
+        'be'          => $currentLang->basic_extended,
+        'bex'         => $currentLang->basic_extra,
+        'ulinks'      => $currentLang->ulinks,
+        'apopups'     => $currentLang->popups()->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
+        'menus'       => $menuRow ? $menuRow->menus : json_encode([]),
+        'currentLang' => $currentLang,
+        'rtl'         => $currentLang->rtl == 1 ? 1 : 0,
+      ];
 
-    if (serviceCategory()) {
-      $data['scats'] = $currentLang->scategories()->where('status', 1)->orderBy('serial_number', 'ASC')->get();
-    }
+      if (serviceCategory()) {
+        $data['scats'] = $currentLang->scategories()->where('status', 1)->orderBy('serial_number', 'ASC')->get();
+      }
+
+      return $data;
+    });
 
     return $this->globalViewMemo[$key] = $data;
+  }
+
+  private static function globalViewCacheKey(int $languageId): string
+  {
+    return "global_view_data:lang:{$languageId}";
+  }
+
+  /**
+   * Called from admin controllers that write to the data bundled above
+   * (BasicController, LanguageController) so edits show up on the next
+   * request instead of waiting out the TTL.
+   */
+  public static function flushGlobalViewCache(): void
+  {
+    Cache::forget('global_socials');
+    Cache::forget('global_languages_active');
+    foreach (Language::pluck('id') as $id) {
+      Cache::forget(self::globalViewCacheKey($id));
+    }
   }
 }

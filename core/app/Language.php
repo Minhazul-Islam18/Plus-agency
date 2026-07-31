@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\InvalidatesGlobalViewCache;
 
 class Language extends Model
 {
+    use InvalidatesGlobalViewCache;
   protected $fillable = ['id', 'name', 'is_default', 'code', 'rtl', 'status'];
 
   public function basic_setting()

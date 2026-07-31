@@ -49,7 +49,7 @@ class PopupController extends Controller
 
         if ($type == 1 || $type == 4 || $type == 5 || $type == 7) {
             $image = $request->image;
-            $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+            $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
             $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
             $rules['image'] = [
@@ -191,7 +191,7 @@ class PopupController extends Controller
         if ($type == 1 || $type == 4 || $type == 5 || $type == 7) {
             if ($request->filled('image')) {
                 $image = $request->image;
-                $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+                $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
                 $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
                 $rules['image'] = [

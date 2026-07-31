@@ -17,7 +17,7 @@ class SummernoteController extends Controller
     public function uploadFileManager(Request $request) {
         $items = $request->items;
         // return $items;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         foreach ($items as $key => $item) {
             $ext = pathinfo($item, PATHINFO_EXTENSION);
             if (!in_array($ext, $allowedExts)) {

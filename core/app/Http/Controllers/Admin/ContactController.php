@@ -44,7 +44,7 @@ class ContactController extends Controller
 
         // Handle contact breadcrumb background image upload
         if ($request->filled('contact_breadcrumb_bg')) {
-            $allowedExts = array('jpg', 'png', 'jpeg');
+            $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
             $extBg = pathinfo($request->contact_breadcrumb_bg, PATHINFO_EXTENSION);
 
             if (in_array($extBg, $allowedExts)) {

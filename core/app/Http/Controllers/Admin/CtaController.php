@@ -25,7 +25,7 @@ class CtaController extends Controller
     public function update(Request $request, $langid)
     {
         $background = $request->background;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extBackground = pathinfo($background, PATHINFO_EXTENSION);
 
         $rules = [

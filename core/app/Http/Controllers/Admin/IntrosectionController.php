@@ -25,7 +25,7 @@ class IntrosectionController extends Controller
     public function update(Request $request, $langid)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $image2 = $request->image_2;

@@ -30,7 +30,7 @@ class PortfoliosectionController extends Controller
     public function update(Request $request, $langid)
     {
         $portfolioSectionBg = $request->portfolio_section_bg;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extPortfolioSectionBg = pathinfo($portfolioSectionBg, PATHINFO_EXTENSION);
 
         $rules = [

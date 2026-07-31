@@ -21,7 +21,7 @@ class PushController extends Controller
     public function updateSettings(Request $request)
     {
         $icon = $request->icon;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $exticon = pathinfo($icon, PATHINFO_EXTENSION);
 
         $rules = [];

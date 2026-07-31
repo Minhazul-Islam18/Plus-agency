@@ -98,7 +98,7 @@ class StatisticsController extends Controller
     public function upload(Request $request, $langid)
     {
         $image = $request->background_image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

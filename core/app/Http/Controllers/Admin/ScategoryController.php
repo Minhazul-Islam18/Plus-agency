@@ -32,7 +32,7 @@ class ScategoryController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -85,7 +85,7 @@ class ScategoryController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

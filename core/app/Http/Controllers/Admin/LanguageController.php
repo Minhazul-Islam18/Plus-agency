@@ -153,7 +153,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -174,7 +174,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -195,7 +195,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -216,7 +216,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -237,7 +237,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -258,7 +258,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -279,7 +279,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -300,7 +300,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -321,7 +321,7 @@ class LanguageController extends Controller
                 }
                 $newImgName = $filename . '.' . $ext;
 
-                @copy($dimg, 'assets/front/img/' . $newImgName);
+                @copy($dimg, FRONT_IMG_PATH . $newImgName);
 
                 // save the unique name in database
                 $bs[$key] = $newImgName;
@@ -519,7 +519,7 @@ class LanguageController extends Controller
         if ($la->is_default == 1) {
             return back()->with('warning', 'Default language cannot be deleted!');
         }
-        @unlink('assets/front/img/languages/' . $la->icon);
+        @unlink(FRONT_IMG_PATH . 'languages/' . $la->icon);
         @unlink(resource_path('lang/') . $la->code . '.json');
         if (session()->get('lang') == $la->code) {
             session()->forget('lang');
@@ -529,23 +529,23 @@ class LanguageController extends Controller
         $bs = $la->basic_setting;
         if (!empty($bs)) {
 
-            @unlink('assets/front/img/' . $bs->favicon);
+            @unlink(FRONT_IMG_PATH . $bs->favicon);
 
-            @unlink('assets/front/img/' . $bs->logo);
+            @unlink(FRONT_IMG_PATH . $bs->logo);
 
-            @unlink('assets/front/img/' . $bs->breadcrumb);
+            @unlink(FRONT_IMG_PATH . $bs->breadcrumb);
 
-            @unlink('assets/front/img/' . $bs->announcement);
+            @unlink(FRONT_IMG_PATH . $bs->announcement);
 
-            @unlink('assets/front/img/' . $bs->hero_bg);
+            @unlink(FRONT_IMG_PATH . $bs->hero_bg);
 
-            @unlink('assets/front/img/' . $bs->intro_bg);
+            @unlink(FRONT_IMG_PATH . $bs->intro_bg);
 
-            @unlink('assets/front/img/' . $bs->cta_bg);
+            @unlink(FRONT_IMG_PATH . $bs->cta_bg);
 
-            @unlink('assets/front/img/' . $bs->team_bg);
+            @unlink(FRONT_IMG_PATH . $bs->team_bg);
 
-            @unlink('assets/front/img/' . $bs->footer_logo);
+            @unlink(FRONT_IMG_PATH . $bs->footer_logo);
 
             $bs->delete();
         }
@@ -568,7 +568,7 @@ class LanguageController extends Controller
         if (!empty($la->sliders)) {
             $sliders = $la->sliders;
             foreach ($sliders as $slider) {
-                @unlink('assets/front/img/sliders/' . $slider->image);
+                @unlink(FRONT_IMG_PATH . 'sliders/' . $slider->image);
                 $slider->delete();
             }
         }
@@ -577,7 +577,7 @@ class LanguageController extends Controller
         if (!empty($la->testimonials)) {
             $testimonials = $la->testimonials;
             foreach ($testimonials as $testimonial) {
-                @unlink('assets/front/img/testimonials/' . $testimonial->image);
+                @unlink(FRONT_IMG_PATH . 'testimonials/' . $testimonial->image);
                 $testimonial->delete();
             }
         }
@@ -591,7 +591,7 @@ class LanguageController extends Controller
         if (!empty($la->members)) {
             $members = $la->members;
             foreach ($members as $member) {
-                @unlink('assets/front/img/members/' . $member->image);
+                @unlink(FRONT_IMG_PATH . 'members/' . $member->image);
                 $member->delete();
             }
         }
@@ -600,7 +600,7 @@ class LanguageController extends Controller
         if (!empty($la->partners)) {
             $partners = $la->partners;
             foreach ($partners as $partner) {
-                @unlink('assets/front/img/partners/' . $partner->image);
+                @unlink(FRONT_IMG_PATH . 'partners/' . $partner->image);
                 $partner->delete();
             }
         }
@@ -609,7 +609,7 @@ class LanguageController extends Controller
         if (!empty($la->scategories)) {
             $scategories = $la->scategories;
             foreach ($scategories as $scategory) {
-                @unlink('assets/front/img/service_category_icons/' . $scategory->image);
+                @unlink(FRONT_IMG_PATH . 'service_category_icons/' . $scategory->image);
                 $scategory->delete();
             }
         }
@@ -618,7 +618,7 @@ class LanguageController extends Controller
         if (!empty($la->services)) {
             $services = $la->services;
             foreach ($services as $service) {
-                @unlink('assets/front/img/services/' . $service->main_image);
+                @unlink(FRONT_IMG_PATH . 'services/' . $service->main_image);
                 $service->delete();
             }
         }
@@ -657,7 +657,7 @@ class LanguageController extends Controller
         if (!empty($la->galleries)) {
             $galleries = $la->galleries;
             foreach ($galleries as $gallery) {
-                @unlink('assets/front/img/gallery/' . $gallery->image);
+                @unlink(FRONT_IMG_PATH . 'gallery/' . $gallery->image);
                 $gallery->delete();
             }
         }
@@ -666,12 +666,12 @@ class LanguageController extends Controller
         if (!empty($la->portfolios)) {
             $portfolios = $la->portfolios;
             foreach ($portfolios as $portfolio) {
-                @unlink('assets/front/img/portfolios/featured/' . $portfolio->featured_image);
+                @unlink(FRONT_IMG_PATH . 'portfolios/featured/' . $portfolio->featured_image);
 
                 // deleting slider images of the specific portfolio
                 $pis = $portfolio->portfolio_images;
                 foreach ($pis as $pi) {
-                    @unlink('assets/front/img/portfolios/sliders/' . $pi->image);
+                    @unlink(FRONT_IMG_PATH . 'portfolios/sliders/' . $pi->image);
                     $pi->delete();
                 }
                 $portfolio->delete();
@@ -683,7 +683,7 @@ class LanguageController extends Controller
         if (!empty($la->blogs)) {
             $blogs = $la->blogs;
             foreach ($blogs as $blog) {
-                @unlink('assets/front/img/blogs/' . $blog->main_image);
+                @unlink(FRONT_IMG_PATH . 'blogs/' . $blog->main_image);
                 $blog->delete();
             }
         }

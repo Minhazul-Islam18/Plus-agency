@@ -8,6 +8,12 @@ class CreateRateLimitAttemptsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('rate_limit_attempts')) {
+
+            return;
+
+        }
+
         Schema::create('rate_limit_attempts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('key')->unique(); // ip:xxx | email:hash | device:hash

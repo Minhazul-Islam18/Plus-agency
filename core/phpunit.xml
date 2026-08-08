@@ -22,6 +22,11 @@
             <directory suffix=".php">./app</directory>
         </whitelist>
     </filter>
+    <source>
+        <include>
+            <directory suffix=".php">./app</directory>
+        </include>
+    </source>
     <php>
         <server name="APP_ENV" value="testing"/>
         <server name="APP_URL" value="http://localhost"/>
@@ -30,6 +35,15 @@
         <server name="MAIL_DRIVER" value="array"/>
         <server name="QUEUE_CONNECTION" value="sync"/>
         <server name="SESSION_DRIVER" value="array"/>
+        <!-- Dedicated, disposable test DB — never point this at plus_agency
+             (the real dev DB). RefreshDatabase runs migrate:fresh, which
+             drops every table; that's fine here, not on real data. -->
+        <server name="DB_CONNECTION" value="mysql"/>
+        <server name="DB_HOST" value="127.0.0.1"/>
+        <server name="DB_PORT" value="3306"/>
+        <server name="DB_DATABASE" value="plus_agency_test"/>
+        <server name="DB_USERNAME" value="root"/>
+        <server name="DB_PASSWORD" value="root"/>
         <server name="FMF_MODULES_PATH" value="/tmp/fmf_test_modules"/>
         <server name="FMF_ZIP_TEMP_PATH" value="/tmp/fmf_test_zip"/>
     </php>

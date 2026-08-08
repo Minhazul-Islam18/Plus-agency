@@ -8,6 +8,12 @@ class CreateAccessLogsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('access_logs')) {
+
+            return;
+
+        }
+
         Schema::create('access_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('event_type'); // LINK_REQUESTED, LINK_SENT, LINK_CLICKED, DOWNLOAD_SUCCESS, DOWNLOAD_FAILED, RATE_LIMIT_TRIGGERED

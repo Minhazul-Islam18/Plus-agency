@@ -8,6 +8,12 @@ class CreateSecureTokensTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('secure_tokens')) {
+
+            return;
+
+        }
+
         Schema::create('secure_tokens', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('order_id');

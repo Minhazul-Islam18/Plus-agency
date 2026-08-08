@@ -8,6 +8,12 @@ class CreateOtpVerificationsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasTable('otp_verifications')) {
+
+            return;
+
+        }
+
         Schema::create('otp_verifications', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('session_token')->unique();

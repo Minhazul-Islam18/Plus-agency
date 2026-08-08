@@ -32,6 +32,7 @@ Route::get('/backup', 'Front\FrontendController@backup');
 =======================================================*/
 
 Route::post('/push', 'Front\PushController@store');
+Route::get('/push/track/{log}', 'Front\PushController@track')->name('push.track');
 
 Route::group(['middleware' => 'setlang'], function () {
     Route::get('/', 'Front\FrontendController@index')->name('front.index');
@@ -41,6 +42,8 @@ Route::group(['middleware' => 'setlang'], function () {
 
     Route::post('/sendmail', 'Front\FrontendController@sendmail')->name('front.sendmail')->middleware('throttle:3,10');
     Route::post('/subscribe', 'Front\FrontendController@subscribe')->name('front.subscribe');
+    Route::get('/newsletter/unsubscribe/{token}', 'Front\FrontendController@unsubscribeByToken')->name('front.unsubscribe.token');
+    Route::post('/newsletter/unsubscribe', 'Front\FrontendController@unsubscribeByEmail')->name('front.unsubscribe.email')->middleware('throttle:5,10');
 
 
     Route::get('/team', 'Front\FrontendController@team')->name('front.team');
@@ -53,6 +56,9 @@ Route::group(['middleware' => 'setlang'], function () {
     // client feedback route
     Route::get('/feedback', 'Front\FeedbackController@feedback')->name('feedback');
     Route::post('/store_feedback', 'Front\FeedbackController@storeFeedback')->name('store_feedback');
+
+    // dark-theme homepage service-categories: server-side "Load more" pagination
+    Route::get('/service-categories/load-more', 'Front\FrontendController@loadMoreServiceCategories')->name('front.serviceCategories.loadMore')->middleware('throttle:30,1');
 });
 
 /** Health probe for uptime monitors / load balancers **/
@@ -184,12 +190,6 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/email-template/{id}/edit', 'Admin\EmailController@editTemplate')->name('admin.email.editTemplate');
         Route::post('/emailtemplate/{id}/update', 'Admin\EmailController@templateUpdate')->name('admin.email.templateUpdate');
 
-        // Admin Email Settings Routes
-        Route::get('/mail-from-admin', 'Admin\EmailController@mailFromAdmin')->name('admin.mailFromAdmin');
-        Route::post('/mail-from-admin/update', 'Admin\EmailController@updateMailFromAdmin')->name('admin.mailfromadmin.update');
-        Route::get('/mail-to-admin', 'Admin\EmailController@mailToAdmin')->name('admin.mailToAdmin');
-        Route::post('/mail-to-admin/update', 'Admin\EmailController@updateMailToAdmin')->name('admin.mailtoadmin.update');
-
 
         // Admin Support Routes
         Route::get('/support', 'Admin\BasicController@support')->name('admin.support');
@@ -229,16 +229,6 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         // Admin Offer Banner Routes
         Route::get('/announcement', 'Admin\BasicController@announcement')->name('admin.announcement');
         Route::post('/announcement/{langid}/update', 'Admin\BasicController@updateannouncement')->name('admin.announcement.update');
-
-
-        // Admin Section Customization Routes
-        Route::get('/sections', 'Admin\BasicController@sections')->name('admin.sections.index');
-        Route::post('/sections/update', 'Admin\BasicController@updatesections')->name('admin.sections.update');
-
-
-        // Admin Section Customization Routes
-        Route::get('/sections', 'Admin\BasicController@sections')->name('admin.sections.index');
-        Route::post('/sections/update', 'Admin\BasicController@updatesections')->name('admin.sections.update');
 
         // Admin Cookie Alert Routes
         Route::get('/cookie-alert', 'Admin\BasicController@cookiealert')->name('admin.cookie.alert');
@@ -322,9 +312,15 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/herosection/parallax/update', 'Admin\HerosectionController@parallaxupdate')->name('admin.herosection.parallax.update');
 
 
+        // Admin Dark Theme Hero Settings Routes (separate from the light-theme hero fields above)
+        Route::get('/darkhero', 'Admin\DarkHeroController@index')->name('admin.darkhero.index');
+        Route::post('/darkhero/{langid}/update', 'Admin\DarkHeroController@update')->name('admin.darkhero.update');
+
+
         // Admin Feature Routes
         Route::get('/features', 'Admin\FeatureController@index')->name('admin.feature.index');
         Route::post('/feature/store', 'Admin\FeatureController@store')->name('admin.feature.store');
+        Route::post('/feature/section/{langid}/update', 'Admin\FeatureController@updateSection')->name('admin.feature.section.update');
         Route::get('/feature/{id}/edit', 'Admin\FeatureController@edit')->name('admin.feature.edit');
         Route::post('/feature/update', 'Admin\FeatureController@update')->name('admin.feature.update');
         Route::post('/feature/delete', 'Admin\FeatureController@delete')->name('admin.feature.delete');
@@ -364,6 +360,10 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         // Admin Portfolio Section Routes
         Route::get('/portfoliosection', 'Admin\PortfoliosectionController@index')->name('admin.portfoliosection.index');
         Route::post('/portfoliosection/{langid}/update', 'Admin\PortfoliosectionController@update')->name('admin.portfoliosection.update');
+
+        // Admin Tender Section Routes (homepage section header, not tender module content)
+        Route::get('/tendersection', 'Admin\TendersectionController@index')->name('admin.tendersection.index');
+        Route::post('/tendersection/{langid}/update', 'Admin\TendersectionController@update')->name('admin.tendersection.update');
 
         // Admin Testimonial Routes
         Route::get('/testimonials', 'Admin\TestimonialController@index')->name('admin.testimonial.index');
@@ -685,12 +685,16 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/pushnotification/update/settings', 'Admin\PushController@updateSettings')->name('admin.pushnotification.updateSettings');
         Route::get('/pushnotification/send', 'Admin\PushController@send')->name('admin.pushnotification.send');
         Route::post('/push', 'Admin\PushController@push')->name('admin.pushnotification.push');
+        Route::get('/pushnotification/subscribers', 'Admin\PushController@subscribers')->name('admin.pushnotification.subscribers');
+        Route::get('/pushnotification/history', 'Admin\PushController@history')->name('admin.pushnotification.history');
+        Route::get('/pushnotification/statistics', 'Admin\PushController@statistics')->name('admin.pushnotification.statistics');
 
 
         // Admin Subscriber Routes
         Route::get('/subscribers', 'Admin\SubscriberController@index')->name('admin.subscriber.index');
         Route::get('/mailsubscriber', 'Admin\SubscriberController@mailsubscriber')->name('admin.mailsubscriber');
         Route::post('/subscribers/sendmail', 'Admin\SubscriberController@subscsendmail')->name('admin.subscribers.sendmail');
+        Route::get('/subscribers/history', 'Admin\SubscriberController@history')->name('admin.subscribers.history');
         Route::post('/subscriber/delete', 'Admin\SubscriberController@delete')->name('admin.subscriber.delete');
         Route::post('/subscriber/bulk-delete', 'Admin\SubscriberController@bulkDelete')->name('admin.subscriber.bulk.delete');
     });

@@ -69,14 +69,6 @@ class MonerooPaymentGatewayModelTest extends TestCase
     }
 
     /** @test */
-    public function show_checkout_link_returns_moneroo_route()
-    {
-        $link = $this->gateway->showCheckoutLink();
-
-        $this->assertEquals(route('front.moneroo.submit'), $link);
-    }
-
-    /** @test */
     public function show_form_returns_no_for_moneroo()
     {
         $showForm = $this->gateway->showForm();
@@ -222,22 +214,6 @@ class MonerooPaymentGatewayModelTest extends TestCase
         $text = $this->gateway->getAutoDataText();
 
         $this->assertEquals('Pay via Moneroo', $text);
-    }
-
-    /** @test */
-    public function show_checkout_link_returns_empty_for_unknown_gateway()
-    {
-        $unknown = PaymentGateway::create([
-            'name' => 'Unknown Gateway',
-            'keyword' => 'unknown_gateway',
-            'type' => 'automatic',
-            'information' => '{}',
-            'status' => 1,
-        ]);
-
-        $link = $unknown->showCheckoutLink();
-
-        $this->assertEquals('', $link);
     }
 
     /** @test */

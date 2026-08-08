@@ -144,6 +144,20 @@ class TenderController extends Controller
         $data['currentLang'] = $currentLang;
         $data['version']     = $this->getVersionData($currentLang);
 
+        // Dark theme's filter/sort/pagination controls submit via AJAX (see
+        // dark-tp-fx below) instead of a full page reload — this branch is
+        // what they actually hit. Light theme never sends this header, so
+        // its real GET-and-reload flow is completely unaffected.
+        if ($request->ajax() && $currentLang->basic_extended->theme_version == 'dark') {
+            return response()->json([
+                'html'  => view('front.tender.partials.dark-results', [
+                    'tenders' => $data['tenders'],
+                    'bse'     => $data['bse'],
+                ])->render(),
+                'total' => $data['tenders']->total(),
+            ]);
+        }
+
         return view('front.tender.tenders', $data);
     }
 

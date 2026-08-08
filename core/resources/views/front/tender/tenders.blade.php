@@ -164,6 +164,173 @@
 
 @section('content')
 
+@if ($be->theme_version == 'dark')
+    @php
+        $darkTenderCatId = request()->input('category_id');
+    @endphp
+    @section('breadcrumb-ledger')
+        <div class="dark-bc-ledger-item">
+            <span class="dark-bc-ledger-num">{{ str_pad($tenderCount, 2, '0', STR_PAD_LEFT) }}</span>
+            <span class="dark-bc-ledger-label">{{ __('Active Tenders') }}</span>
+        </div>
+        <div class="dark-bc-ledger-item">
+            <span class="dark-bc-ledger-num">{{ str_pad(count($tender_categories), 2, '0', STR_PAD_LEFT) }}</span>
+            <span class="dark-bc-ledger-label">{{ __('Categories') }}</span>
+        </div>
+    @endsection
+
+    @if ($featured_tenders->count() > 0)
+        <div class="dark-tp-spotlight">
+            <div class="dark-tp-spotlight-head">
+                <span class="dark-tp-spotlight-label">{{ __('Featured') }}</span>
+                @if ($featured_tenders->count() > 1)
+                    <div class="dark-tp-spotlight-nav">
+                        <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotPrev" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6" /></svg></button>
+                        <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotNext" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6" /></svg></button>
+                    </div>
+                @endif
+            </div>
+            <div class="dark-tp-spotlight-track-wrap">
+                <div class="dark-tp-spotlight-track" id="darkTpSpotTrack">
+                    @foreach ($featured_tenders as $ft)
+                        @php
+                            // A non-empty tender_image doesn't guarantee the file is actually
+                            // on disk (real data has rows pointing at deleted/missing files) —
+                            // check existence too, otherwise the thumb silently renders blank
+                            // instead of falling back to the "no image" dossier-icon state.
+                            $ftHasImage = !empty($ft->tender_image) && file_exists(base_path('../assets/front/img/tenders/' . $ft->tender_image));
+                        @endphp
+                        <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}" class="dark-tender-card">
+                            <div class="dark-tender-thumb @if (!$ftHasImage) no-image @endif"
+                                @if ($ftHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $ft->tender_image) }}');" @endif>
+                                @if (!$ftHasImage)
+                                    <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" /><path d="M15 3v4h4" /><path d="M9 12h6M9 16h6M9 8h2" /></svg>
+                                @endif
+                                @if (!empty($ft->tenderCategory))
+                                    <span class="dark-tender-cat">{{ convertUtf8($ft->tenderCategory->name) }}</span>
+                                @endif
+                                @if ($ft->submission_deadline)
+                                    <div class="dark-tender-countdown" data-deadline="{{ \Carbon\Carbon::parse($ft->submission_deadline)->toIso8601String() }}">
+                                        <span class="unit"><b data-d>00</b><span>{{ __('d') }}</span></span>
+                                        <span class="unit"><b data-h>00</b><span>{{ __('h') }}</span></span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="dark-tender-body">
+                                <h3>{{ convertUtf8($ft->title) }}</h3>
+                                <div class="dark-tender-meta">
+                                    <span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $ft->country }}</span>
+                                    <span>{{ $ft->tender_code }}</span>
+                                </div>
+                                <div class="dark-tender-foot">
+                                    <div class="dark-tender-price">
+                                        @if (is_null($ft->current_price))
+                                            <span class="now">{{ __('Free') }}</span>
+                                        @else
+                                            @if (!empty($ft->previous_price))
+                                                <span class="prev">{{ number_format($ft->previous_price, 0) }} {{ optional($bse)->base_currency_symbol }}</span>
+                                            @endif
+                                            <span class="now">
+                                                {{ optional($bse)->base_currency_symbol_position == 'left' ? optional($bse)->base_currency_symbol . ' ' : '' }}{{ number_format($ft->current_price, 0) }}
+                                                <small>{{ optional($bse)->base_currency_symbol_position == 'right' ? optional($bse)->base_currency_symbol : '' }}</small>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <span class="dark-tender-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="dark-tp-layout">
+        <div>
+            <span class="dark-tp-rail-label">{{ __('Filter') }}</span>
+
+            <div class="dark-svcp-widget">
+                <h4>{{ __('Categories') }}</h4>
+                <ul class="dark-svcp-cat-list dark-tp-cat-list">
+                    <li class="{{ empty($darkTenderCatId) ? 'is-active' : '' }}">
+                        <a href="#" data-href="" class="categoryId">{{ __('All') }}<span class="count">({{ str_pad($tenderCount, 2, '0', STR_PAD_LEFT) }})</span></a>
+                    </li>
+                    @foreach ($tender_categories as $cat)
+                        <li class="{{ $darkTenderCatId == $cat->id ? 'is-active' : '' }}">
+                            <a href="#" data-href="{{ $cat->id }}" class="categoryId">{{ convertUtf8($cat->name) }}<span class="count">({{ str_pad($cat->tenders()->count(), 2, '0', STR_PAD_LEFT) }})</span></a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            @if ($countries->count() > 0)
+                <div class="dark-svcp-widget">
+                    <h4>{{ __('Country') }}</h4>
+                    <ul class="dark-tp-country-list">
+                        <li class="{{ empty(request()->input('country')) ? 'is-active' : '' }}">
+                            <a href="#" data-href="" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ __('All Countries') }}</a>
+                        </li>
+                        @foreach ($countries as $c)
+                            <li class="{{ request()->input('country') == $c ? 'is-active' : '' }}">
+                                <a href="#" data-href="{{ $c }}" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $c }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="dark-svcp-widget">
+                <h4>{{ __('Filter By Price') }}</h4>
+                <div class="dark-tp-range">
+                    <div id="slider-range"></div>
+                    <input type="text" id="amount" class="dark-tp-range-value" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="dark-tp-toolbar">
+                <div class="dark-svcp-search dark-tp-search">
+                    <input type="search" id="searchInput" placeholder="{{ __('Search By Tender Title or ID') }}" value="{{ request()->input('search') ?? '' }}">
+                    <button type="button" id="search-input-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+                </div>
+                <div class="dark-tp-sort">
+                    <select id="filterType">
+                        <option selected disabled>{{ __('Filter') }}</option>
+                        <option value="new" {{ request()->input('filterValue') == 'new' ? 'selected' : '' }}>{{ __('Newest First') }}</option>
+                        <option value="old" {{ request()->input('filterValue') == 'old' ? 'selected' : '' }}>{{ __('Oldest First') }}</option>
+                        <option value="deadline_asc" {{ request()->input('filterValue') == 'deadline_asc' ? 'selected' : '' }}>{{ __('Deadline (Soonest)') }}</option>
+                        <option value="high-to-low" {{ request()->input('filterValue') == 'high-to-low' ? 'selected' : '' }}>{{ __('High To Low Price') }}</option>
+                        <option value="low-to-high" {{ request()->input('filterValue') == 'low-to-high' ? 'selected' : '' }}>{{ __('Low To High Price') }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="dark-tp-results-wrap" id="darkTpResultsWrap">
+                <div class="dark-tp-loader" id="darkTpLoader">
+                    <span class="dark-tp-spinner"></span>
+                </div>
+                <div id="darkTpResults">
+                    @include('front.tender.partials.dark-results', ['tenders' => $tenders, 'bse' => $bse])
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Hidden search form — same real filter contract as the light theme,
+         just restyled controls above trigger it via the JS below. --}}
+    <form id="searchForm" class="d-none" action="{{ route('tenders') }}" method="GET">
+        <input type="hidden" id="searchKey" name="search" value="{{ request()->input('search') ?? '' }}">
+        <input type="hidden" id="categoryKey" name="category_id" value="{{ request()->input('category_id') ?? '' }}">
+        <input type="hidden" id="countryKey" name="country" value="{{ request()->input('country') ?? '' }}">
+        <input type="hidden" id="checkedKey" name="checked_value" value="{{ request()->input('checked_value') ?? '' }}">
+        <input type="hidden" id="minPriceId" name="minValue" value="{{ request()->input('minValue') ?? '' }}">
+        <input type="hidden" id="maxPriceId" name="maxValue" value="{{ request()->input('maxValue') ?? '' }}">
+        <input type="hidden" id="typeId" name="filterValue" value="{{ request()->input('filterValue') ?? '' }}">
+        <button type="submit" id="submitBtn"></button>
+    </form>
+@else
     {{-- Featured Tenders --}}
     @if (count($featured_tenders) > 0)
         <section class="course-area-v1 pt-80 pb-120 bg_cover"
@@ -427,12 +594,15 @@
         <input type="hidden" id="typeId" name="filterValue" value="{{ request()->input('filterValue') ?? '' }}">
         <button type="submit" id="submitBtn"></button>
     </form>
+@endif
 
 @endsection
 
 @section('scripts')
     <script src="{{ asset('assets/front/js/jquery.ui.js') }}"></script>
-    <script src="{{ asset('assets/front/js/jquery.nice-select.min.js') }}"></script>
+    @if ($be->theme_version != 'dark')
+        <script src="{{ asset('assets/front/js/jquery.nice-select.min.js') }}"></script>
+    @endif
     <script>
         $(document).ready(function() {
             var featuredCount = {{ count($featured_tenders) }};
@@ -464,7 +634,69 @@
                 ]
             });
 
-            $('select').niceSelect();
+            @if ($be->theme_version != 'dark')
+                $('select').niceSelect();
+            @endif
+
+            var isDark = @json($be->theme_version == 'dark');
+            var $darkTpResults = $('#darkTpResults');
+            var $darkTpResultsWrap = $('#darkTpResultsWrap');
+            var darkTpLoadingTimer = null;
+
+            // Dark theme: every filter/sort/pagination control fetches the
+            // results fragment via AJAX and swaps it in place instead of a
+            // full page reload. Falls back to a real navigation if the
+            // request fails for any reason (offline, server error, etc.).
+            function loadTendersUrl(url, scrollToResults) {
+                if (!isDark) return;
+                // Small delay before showing the spinner — fast responses
+                // (same-server, cached) shouldn't flash a loader for 80ms.
+                clearTimeout(darkTpLoadingTimer);
+                darkTpLoadingTimer = setTimeout(function() {
+                    $darkTpResultsWrap.addClass('is-loading');
+                }, 150);
+
+                $.get(url)
+                    .done(function(res) {
+                        $darkTpResults.html(res.html);
+                        history.pushState({
+                            darkTpAjax: true
+                        }, '', url);
+                        if (scrollToResults) {
+                            $('html, body').animate({
+                                scrollTop: $darkTpResultsWrap.offset().top - 120
+                            }, 300);
+                        }
+                    })
+                    .fail(function() {
+                        window.location.href = url;
+                    })
+                    .always(function() {
+                        clearTimeout(darkTpLoadingTimer);
+                        $darkTpResultsWrap.removeClass('is-loading');
+                    });
+            }
+
+            function triggerFilter() {
+                if (isDark) {
+                    loadTendersUrl('{{ route('tenders') }}?' + $('#searchForm').serialize(), false);
+                } else {
+                    $('#submitBtn').click();
+                }
+            }
+
+            // Pagination links get replaced with every AJAX swap, so this is
+            // delegated on document rather than bound once.
+            $(document).on('click', '.dark-tp-pagination a', function(e) {
+                if (!isDark) return;
+                e.preventDefault();
+                var url = $(this).attr('href');
+                if (url) loadTendersUrl(url, true);
+            });
+
+            window.addEventListener('popstate', function() {
+                if (isDark) loadTendersUrl(location.href, false);
+            });
 
             var position = '{{ $bse->base_currency_symbol_position }}';
             var symbol = '{{ $bse->base_currency_symbol }}';
@@ -501,28 +733,46 @@
             $(document).on('keyup', '#searchInput', function(e) {
                 if (e.keyCode === 13) {
                     $('#searchKey').val($(this).val());
-                    $('#submitBtn').click();
+                    triggerFilter();
                 }
             });
 
             // Category filter
-            $(document).on('click', '.categoryId', function() {
+            $(document).on('click', '.categoryId', function(e) {
+                e.preventDefault();
                 var id = $(this).attr('data-href');
                 $('#categoryKey').val(id != '0' ? id : '');
-                $('#submitBtn').click();
+                if (isDark) {
+                    $('.categoryId').closest('li').removeClass('is-active');
+                    $(this).closest('li').addClass('is-active');
+                }
+                triggerFilter();
             });
 
             // Country filter
-            $(document).on('click', '.countryFilter', function() {
+            $(document).on('click', '.countryFilter', function(e) {
+                e.preventDefault();
                 var c = $(this).attr('data-href');
                 $('#countryKey').val(c);
-                $('#submitBtn').click();
+                if (isDark) {
+                    $('.countryFilter').closest('li').removeClass('is-active');
+                    $(this).closest('li').addClass('is-active');
+                }
+                triggerFilter();
+            });
+
+            // Search icon button (dark theme's is a real <button>, unlike the
+            // light theme's decorative <i> — Enter-to-search below still works too)
+            $(document).on('click', '#search-input-btn', function(e) {
+                e.preventDefault();
+                $('#searchKey').val($('#searchInput').val());
+                triggerFilter();
             });
 
             // Tender type radio
             $(document).on('click', '.tender-type', function() {
                 $('#checkedKey').val($('.tender-type:checked').val());
-                $('#submitBtn').click();
+                triggerFilter();
             });
 
             // Price slider stop
@@ -530,14 +780,52 @@
                 var parts = $('#amount').val().split('-');
                 $('#minPriceId').val(parseInt(parts[0].replace(/[^0-9]/g, '')));
                 $('#maxPriceId').val(parseInt(parts[1].replace(/[^0-9]/g, '')));
-                $('#submitBtn').click();
+                triggerFilter();
             });
 
             // Sort filter
             $(document).on('change', '#filterType', function() {
                 $('#typeId').val($(this).val());
-                $('#submitBtn').click();
+                triggerFilter();
             });
+
+            @if ($be->theme_version == 'dark')
+                // Featured carousel — arrow-driven horizontal scroll-snap.
+                // The live countdown on each card is handled sitewide by
+                // dark-tenders-fx.js (matches any [data-deadline] element).
+                (function() {
+                    var track = document.getElementById('darkTpSpotTrack');
+                    if (!track) return;
+                    var prevBtn = document.getElementById('darkTpSpotPrev');
+                    var nextBtn = document.getElementById('darkTpSpotNext');
+                    if (!prevBtn || !nextBtn) return;
+
+                    function cardStep() {
+                        var card = track.querySelector('.dark-tender-card');
+                        return card ? card.getBoundingClientRect().width + 22 : 360;
+                    }
+                    function updateArrows() {
+                        prevBtn.disabled = track.scrollLeft <= 4;
+                        nextBtn.disabled = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;
+                    }
+                    prevBtn.addEventListener('click', function() {
+                        track.scrollBy({
+                            left: -cardStep(),
+                            behavior: 'smooth'
+                        });
+                    });
+                    nextBtn.addEventListener('click', function() {
+                        track.scrollBy({
+                            left: cardStep(),
+                            behavior: 'smooth'
+                        });
+                    });
+                    track.addEventListener('scroll', updateArrows, {
+                        passive: true
+                    });
+                    updateArrows();
+                })();
+            @endif
         });
     </script>
 @endsection

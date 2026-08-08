@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\InvalidatesHomeListingCache;
 use Illuminate\Database\Eloquent\Model;
 
 class Tender extends Model
 {
+    use InvalidatesHomeListingCache;
+
     protected $fillable = [
         'language_id',
         'tender_category_id',

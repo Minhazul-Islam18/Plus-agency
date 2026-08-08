@@ -1002,6 +1002,42 @@
             line-height: 1.7;
         }
 
+        /* Admin-authored WYSIWYG content (tender overview, module description,
+           etc. — anything rendered inside .content-box) — the sitewide
+           "ol, ul { list-style: none; }" reset strips bullets/numbers from
+           any <ul>/<ol> a moderator types, with nothing restoring them here.
+           .content-box is the shared ancestor for the Overview, Modules, and
+           Expert tabs, so this covers all three instead of just modules. */
+        .content-box ul,
+        .content-box ol {
+            padding-left: 20px;
+            margin: 0 0 12px;
+        }
+
+        .content-box ul {
+            list-style: disc;
+        }
+
+        .content-box ol {
+            list-style: decimal;
+        }
+
+        .content-box li {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 4px;
+        }
+
+        /* .module-sections-list is its own icon-based checklist (see below) —
+           exclude it from the WYSIWYG bullet restoration above; ".content-box
+           ul" alone would otherwise outrank ".module-sections-list"'s plain
+           class selector and put bullets back next to the check icons. */
+        .content-box ul.module-sections-list {
+            list-style: none;
+            padding: 0;
+        }
+
         .module-sections-list {
             list-style: none;
             padding: 0;
@@ -1206,7 +1242,8 @@
 @endif
 
 @section('content')
-    <section class="course-details-section pt-120 pb-120">
+    <section
+        class="course-details-section pt-120 pb-120 @if ($be->theme_version == 'dark') dark-tender-details @endif">
         <div class="container">
 
             @if (session('success'))
@@ -1806,7 +1843,10 @@ $preFlag = $preCountry['flag'] ?? '';
                                             <p class="gateway-desc">{{ $ogw->short_description }}</p>
                                         </div>
                                         <div class="col-12">
-                                            <div class="gateway-instruction">{!! replaceBaseUrl($ogw->instructions) !!}</div>
+                                            <div
+                                            class="gateway-instruction @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                            {!! replaceBaseUrl($ogw->instructions) !!}
+                                        </div>
                                         </div>
                                         @if ($ogw->is_receipt == 1)
                                             <div class="col-12 mb-3">
@@ -1969,7 +2009,10 @@ $preFlag = $preCountry['flag'] ?? '';
                             <div id="overview" class="tab-pane active">
                                 <div class="content-box">
                                     <h4>{{ __('Tender Overview') }}</h4>
-                                    <div>{!! $tender->overview !!}</div>
+                                    <div
+                                        class="@if ($be->theme_version == 'dark') dark-service-details @endif">
+                                        {!! $tender->overview !!}
+                                    </div>
                                 </div>
                             </div>
 
@@ -1996,7 +2039,10 @@ $preFlag = $preCountry['flag'] ?? '';
                                                 </div>
                                                 <div id="module-body-{{ $module->id }}" class="collapse module-body">
                                                     @if (!empty($module->summary))
-                                                        <div class="mb-3">{!! $module->summary !!}</div>
+                                                        <div
+                                                            class="mb-3 @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                            {!! $module->summary !!}
+                                                        </div>
                                                     @endif
                                                     @if ($module->sections->count() > 0)
                                                         <ul class="module-sections-list">
@@ -2020,7 +2066,22 @@ $preFlag = $preCountry['flag'] ?? '';
                                 <div class="content-box">
                                     @if (!empty($tender->expert_name))
                                         <div class="expert-wrap">
-                                            @if (!empty($tender->expert_image))
+                                            @php
+                                                $expertHasImage =
+                                                    $be->theme_version == 'dark' &&
+                                                    !empty($tender->expert_image) &&
+                                                    file_exists(
+                                                        base_path(
+                                                            '../assets/front/img/tender_experts/' .
+                                                                $tender->expert_image,
+                                                        ),
+                                                    );
+                                            @endphp
+                                            @if ($be->theme_version == 'dark' && !$expertHasImage)
+                                                <div class="dark-td-avatar-fallback">
+                                                    {{ strtoupper(mb_substr($tender->expert_name, 0, 1)) }}
+                                                </div>
+                                            @elseif (!empty($tender->expert_image))
                                                 <div class="thumb">
                                                     <img data-src="{{ asset('assets/front/img/tender_experts/' . $tender->expert_image) }}"
                                                         class="lazy img-fluid" alt="{{ $tender->expert_name }}">
@@ -2067,166 +2128,248 @@ $preFlag = $preCountry['flag'] ?? '';
                  RELATED TENDERS
             ═══════════════════════════════════════════ --}}
             @if (!empty($relatedTenders) && $relatedTenders->count() > 0)
-                <style>
-                    .related-tenders-title {
-                        font-size: 22px;
-                        font-weight: 700;
-                        color: #1f2a37;
-                        margin-bottom: 22px;
-                    }
-
-                    .rt-card {
-                        background: #fff;
-                        border: 1px solid #eef1f5;
-                        border-radius: 14px;
-                        overflow: hidden;
-                        box-shadow: 0 4px 18px rgba(0, 0, 0, .05);
-                        transition: transform .18s, box-shadow .18s;
-                        height: 100%;
-                        display: flex;
-                        flex-direction: column;
-                    }
-
-                    .rt-card:hover {
-                        transform: translateY(-4px);
-                        box-shadow: 0 10px 26px rgba(0, 0, 0, .1);
-                    }
-
-                    .rt-thumb {
-                        position: relative;
-                        display: block;
-                        height: 170px;
-                        overflow: hidden;
-                        background: #f2f4f7;
-                    }
-
-                    .rt-thumb img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        transition: transform .3s;
-                    }
-
-                    .rt-card:hover .rt-thumb img {
-                        transform: scale(1.05);
-                    }
-
-                    .rt-cat {
-                        position: absolute;
-                        top: 10px;
-                        left: 10px;
-                        background: #4aa4f8;
-                        color: #fff;
-                        font-size: 11px;
-                        font-weight: 700;
-                        padding: 4px 12px;
-                        border-radius: 20px;
-                    }
-
-                    .rt-body {
-                        padding: 14px 16px 16px;
-                        display: flex;
-                        flex-direction: column;
-                        flex: 1;
-                    }
-
-                    .rt-deadline {
-                        font-size: 12px;
-                        font-weight: 600;
-                        color: #e74c3c;
-                        margin-bottom: 8px;
-                    }
-
-                    .rt-name {
-                        font-size: 15px;
-                        font-weight: 600;
-                        line-height: 1.45;
-                        margin: 0 0 12px;
-                        flex: 1;
-                    }
-
-                    .rt-name a {
-                        color: #222;
-                        text-decoration: none;
-                    }
-
-                    .rt-name a:hover {
-                        color: var(--main-color, #3498db);
-                    }
-
-                    .rt-meta {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        border-top: 1px solid #f0f2f5;
-                        padding-top: 10px;
-                        font-size: 13px;
-                        color: #666;
-                    }
-
-                    .rt-meta .rt-country i {
-                        color: var(--main-color, #3498db);
-                        margin-right: 4px;
-                    }
-
-                    .rt-meta .rt-price {
-                        font-weight: 800;
-                        color: var(--main-color, #3498db);
-                    }
-
-                    .rt-meta .rt-price.free {
-                        color: #27ae60;
-                    }
-                </style>
-                <div class="row mt-5 pt-4" style="border-top:1px solid #eef1f5;">
-                    <div class="col-12">
-                        <h3 class="related-tenders-title">{{ __('Related Tenders') }}</h3>
-                        <div class="related-tenders-carousel owl-carousel owl-theme">
+                @if ($be->theme_version == 'dark')
+                    <div class="dark-td-related">
+                        <div class="dark-td-related-row">
+                            <span class="dark-td-related-label">{{ __('Related Tenders') }}</span>
+                            <div class="dark-td-related-arrows">
+                                <button type="button" id="relTendersPrev" aria-label="Previous">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.2">
+                                        <path d="M15 6l-6 6 6 6" />
+                                    </svg>
+                                </button>
+                                <button type="button" id="relTendersNext" aria-label="Next">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.2">
+                                        <path d="M9 6l6 6-6 6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="dark-td-related-track" id="relTendersTrack">
                             @foreach ($relatedTenders as $rt)
-                                <div class="rt-item">
-                                    <div class="rt-card">
-                                        <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}" class="rt-thumb">
-                                            @if (!empty($rt->tender_image))
-                                                <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
-                                                    alt="{{ $rt->title }}">
-                                            @else
-                                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
-                                            @endif
-                                            @if ($rt->tenderCategory)
-                                                <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
-                                            @endif
-                                        </a>
-                                        <div class="rt-body">
-                                            @if ($rt->submission_deadline)
-                                                <div class="rt-deadline">
-                                                    <i class="far fa-clock"></i>
-                                                    {{ \Carbon\Carbon::parse($rt->submission_deadline)->format('d M Y') }}
-                                                </div>
-                                            @endif
-                                            <h4 class="rt-name">
-                                                <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}">
-                                                    {{ Str::limit(convertUtf8($rt->title), 60) }}
-                                                </a>
-                                            </h4>
-                                            <div class="rt-meta">
-                                                <span class="rt-country">
-                                                    <i class="fas fa-map-marker-alt"></i> {{ $rt->country }}
-                                                </span>
-                                                <span class="rt-price {{ is_null($rt->current_price) ? 'free' : '' }}">
-                                                    @if (is_null($rt->current_price))
-                                                        {{ __('Free') }}
-                                                    @else
-                                                        {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($rt->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
-                                                    @endif
-                                                </span>
+                                @php
+                                    $rtHasImage =
+                                        !empty($rt->tender_image) &&
+                                        file_exists(base_path('../assets/front/img/tenders/' . $rt->tender_image));
+                                @endphp
+                                <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}" class="dark-tender-card">
+                                    <div class="dark-tender-thumb @if (!$rtHasImage) no-image @endif"
+                                        @if ($rtHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}');" @endif>
+                                        @if (!$rtHasImage)
+                                            <svg viewBox="0 0 24 24">
+                                                <path
+                                                    d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
+                                                <path d="M15 3v4h4" />
+                                                <path d="M9 12h6M9 16h6M9 8h2" />
+                                            </svg>
+                                        @endif
+                                        @if (!empty($rt->tenderCategory))
+                                            <span class="dark-tender-cat">{{ convertUtf8($rt->tenderCategory->name) }}</span>
+                                        @endif
+                                        @if ($rt->submission_deadline)
+                                            <div class="dark-tender-countdown"
+                                                data-deadline="{{ \Carbon\Carbon::parse($rt->submission_deadline)->toIso8601String() }}">
+                                                <span class="unit"><b data-d>00</b><span>{{ __('d') }}</span></span>
+                                                <span class="unit"><b data-h>00</b><span>{{ __('h') }}</span></span>
                                             </div>
+                                        @endif
+                                    </div>
+                                    <div class="dark-tender-body">
+                                        <h3>{{ Str::limit(convertUtf8($rt->title), 60) }}</h3>
+                                        <div class="dark-tender-meta">
+                                            <span><svg viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
+                                                    <circle cx="12" cy="9" r="2.5" />
+                                                </svg>{{ $rt->country }}</span>
+                                        </div>
+                                        <div class="dark-tender-foot">
+                                            <div class="dark-tender-price">
+                                                @if (is_null($rt->current_price))
+                                                    <span class="now">{{ __('Free') }}</span>
+                                                @else
+                                                    <span class="now">
+                                                        {{ optional($bse)->base_currency_symbol_position == 'left' ? optional($bse)->base_currency_symbol . ' ' : '' }}{{ number_format($rt->current_price, 0) }}
+                                                        <small>{{ optional($bse)->base_currency_symbol_position == 'right' ? optional($bse)->base_currency_symbol : '' }}</small>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <span class="dark-tender-cta"><svg viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2.2">
+                                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                                </svg></span>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             @endforeach
                         </div>
                     </div>
-                </div>
+                @else
+                    <style>
+                        .related-tenders-title {
+                            font-size: 22px;
+                            font-weight: 700;
+                            color: #1f2a37;
+                            margin-bottom: 22px;
+                        }
+
+                        .rt-card {
+                            background: #fff;
+                            border: 1px solid #eef1f5;
+                            border-radius: 14px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 18px rgba(0, 0, 0, .05);
+                            transition: transform .18s, box-shadow .18s;
+                            height: 100%;
+                            display: flex;
+                            flex-direction: column;
+                        }
+
+                        .rt-card:hover {
+                            transform: translateY(-4px);
+                            box-shadow: 0 10px 26px rgba(0, 0, 0, .1);
+                        }
+
+                        .rt-thumb {
+                            position: relative;
+                            display: block;
+                            height: 170px;
+                            overflow: hidden;
+                            background: #f2f4f7;
+                        }
+
+                        .rt-thumb img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            transition: transform .3s;
+                        }
+
+                        .rt-card:hover .rt-thumb img {
+                            transform: scale(1.05);
+                        }
+
+                        .rt-cat {
+                            position: absolute;
+                            top: 10px;
+                            left: 10px;
+                            background: #4aa4f8;
+                            color: #fff;
+                            font-size: 11px;
+                            font-weight: 700;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                        }
+
+                        .rt-body {
+                            padding: 14px 16px 16px;
+                            display: flex;
+                            flex-direction: column;
+                            flex: 1;
+                        }
+
+                        .rt-deadline {
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #e74c3c;
+                            margin-bottom: 8px;
+                        }
+
+                        .rt-name {
+                            font-size: 15px;
+                            font-weight: 600;
+                            line-height: 1.45;
+                            margin: 0 0 12px;
+                            flex: 1;
+                        }
+
+                        .rt-name a {
+                            color: #222;
+                            text-decoration: none;
+                        }
+
+                        .rt-name a:hover {
+                            color: var(--main-color, #3498db);
+                        }
+
+                        .rt-meta {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-top: 1px solid #f0f2f5;
+                            padding-top: 10px;
+                            font-size: 13px;
+                            color: #666;
+                        }
+
+                        .rt-meta .rt-country i {
+                            color: var(--main-color, #3498db);
+                            margin-right: 4px;
+                        }
+
+                        .rt-meta .rt-price {
+                            font-weight: 800;
+                            color: var(--main-color, #3498db);
+                        }
+
+                        .rt-meta .rt-price.free {
+                            color: #27ae60;
+                        }
+                    </style>
+                    <div class="row mt-5 pt-4" style="border-top:1px solid #eef1f5;">
+                        <div class="col-12">
+                            <h3 class="related-tenders-title">{{ __('Related Tenders') }}</h3>
+                            <div class="related-tenders-carousel owl-carousel owl-theme">
+                                @foreach ($relatedTenders as $rt)
+                                    <div class="rt-item">
+                                        <div class="rt-card">
+                                            <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}"
+                                                class="rt-thumb">
+                                                @if (!empty($rt->tender_image))
+                                                    <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
+                                                        alt="{{ $rt->title }}">
+                                                @else
+                                                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
+                                                @endif
+                                                @if ($rt->tenderCategory)
+                                                    <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
+                                                @endif
+                                            </a>
+                                            <div class="rt-body">
+                                                @if ($rt->submission_deadline)
+                                                    <div class="rt-deadline">
+                                                        <i class="far fa-clock"></i>
+                                                        {{ \Carbon\Carbon::parse($rt->submission_deadline)->format('d M Y') }}
+                                                    </div>
+                                                @endif
+                                                <h4 class="rt-name">
+                                                    <a href="{{ route('tender_details', ['slug' => $rt->slug]) }}">
+                                                        {{ Str::limit(convertUtf8($rt->title), 60) }}
+                                                    </a>
+                                                </h4>
+                                                <div class="rt-meta">
+                                                    <span class="rt-country">
+                                                        <i class="fas fa-map-marker-alt"></i> {{ $rt->country }}
+                                                    </span>
+                                                    <span
+                                                        class="rt-price {{ is_null($rt->current_price) ? 'free' : '' }}">
+                                                        @if (is_null($rt->current_price))
+                                                            {{ __('Free') }}
+                                                        @else
+                                                            {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($rt->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endif
 
         </div>
@@ -2766,4 +2909,36 @@ $preFlag = $preCountry['flag'] ?? '';
             });
         })();
     </script>
+    @if ($be->theme_version == 'dark')
+        <script>
+            (function() {
+                var track = document.getElementById('relTendersTrack');
+                if (!track) return;
+                var prev = document.getElementById('relTendersPrev');
+                var next = document.getElementById('relTendersNext');
+                var card = track.querySelector('.dark-tender-card');
+                function step() {
+                    return card ? card.getBoundingClientRect().width + 22 : 320;
+                }
+                function updateArrows() {
+                    prev.disabled = track.scrollLeft <= 2;
+                    next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+                }
+                prev.addEventListener('click', function() {
+                    track.scrollBy({
+                        left: -step(),
+                        behavior: 'smooth'
+                    });
+                });
+                next.addEventListener('click', function() {
+                    track.scrollBy({
+                        left: step(),
+                        behavior: 'smooth'
+                    });
+                });
+                track.addEventListener('scroll', updateArrows);
+                updateArrows();
+            })();
+        </script>
+    @endif
 @endsection

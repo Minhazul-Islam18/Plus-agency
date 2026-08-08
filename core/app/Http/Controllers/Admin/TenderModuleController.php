@@ -110,8 +110,8 @@ class TenderModuleController extends Controller
         $cleanup = $request->query('cleanup') == '1';
 
         $dest = $this->modulesDir();
-        $publicTenderDir = realpath(base_path('../assets/front/files/tender_modules'));
-        $lfmRoot         = realpath(base_path('../assets/lfm/files'));
+        $publicTenderDir = realpath(base_path(FRONT_TENDER_FILES_DIR));
+        $lfmRoot         = realpath(base_path(FRONT_LFM_FILES_DIR));
 
         $findInLfm = function ($name) use ($lfmRoot) {
             if (!$lfmRoot || !is_dir($lfmRoot)) return null;
@@ -194,9 +194,9 @@ class TenderModuleController extends Controller
                  . "<IfModule !mod_authz_core.c>\n    Order deny,allow\n    Deny from all\n</IfModule>\n";
 
         $dirs = [
-            base_path('../assets/front/files/tender_modules'),
-            base_path('../assets/front/invoices/tender'),
-            base_path('../assets/lfm/files'),
+            base_path(FRONT_TENDER_FILES_DIR),
+            base_path(rtrim(FRONT_TENDER_INVOICE_DIR, '/')),
+            base_path(FRONT_LFM_FILES_DIR),
         ];
 
         $result = [];
@@ -335,7 +335,7 @@ class TenderModuleController extends Controller
             $module = TenderModule::findOrFail($id);
 
             if (!empty($module->tender_file)) {
-                @unlink('assets/front/files/tender_modules/' . $module->tender_file);
+                @unlink(FRONT_TENDER_FILES_PATH . $module->tender_file);
             }
 
             $module->delete();

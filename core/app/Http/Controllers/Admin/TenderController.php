@@ -25,6 +25,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class TenderController extends Controller
 {
+    private const TENDER_SUBDIR = 'tenders/';
+    private const EXPERT_SUBDIR = 'tender_experts/';
     private function countries()
     {
         return [
@@ -336,7 +338,7 @@ class TenderController extends Controller
 
         if ($request->filled('tender_image')) {
             $filename = uniqid() . '.' . $extImage;
-            $dir = 'assets/front/img/tenders/';
+            $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
             @copy($image, $dir . $filename);
             $tender->tender_image = $filename;
@@ -344,7 +346,7 @@ class TenderController extends Controller
 
         if ($request->filled('expert_image')) {
             $filename = uniqid() . '.' . $extExpImage;
-            $dir = 'assets/front/img/tender_experts/';
+            $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
             @copy($expImage, $dir . $filename);
             $tender->expert_image = $filename;
@@ -460,7 +462,7 @@ class TenderController extends Controller
 
         if ($request->filled('tender_image')) {
             $filename = uniqid() . '.' . $extImage;
-            $dir = 'assets/front/img/tenders/';
+            $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
             @copy($image, $dir . $filename);
             $tender->tender_image = $filename;
@@ -468,7 +470,7 @@ class TenderController extends Controller
 
         if ($request->filled('expert_image')) {
             $filename = uniqid() . '.' . $extExpImage;
-            $dir = 'assets/front/img/tender_experts/';
+            $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
             @copy($expImage, $dir . $filename);
             $tender->expert_image = $filename;
@@ -499,10 +501,10 @@ class TenderController extends Controller
         $tender = Tender::findOrFail($request->tender_id);
 
         if (!empty($tender->tender_image)) {
-            @unlink('assets/front/img/tenders/' . $tender->tender_image);
+            @unlink(FRONT_IMG_PATH . self::TENDER_SUBDIR . $tender->tender_image);
         }
         if (!empty($tender->expert_image)) {
-            @unlink('assets/front/img/tender_experts/' . $tender->expert_image);
+            @unlink(FRONT_IMG_PATH . self::EXPERT_SUBDIR . $tender->expert_image);
         }
 
         $tender->delete();
@@ -518,10 +520,10 @@ class TenderController extends Controller
             $tender = Tender::findOrFail($id);
 
             if (!empty($tender->tender_image)) {
-                @unlink('assets/front/img/tenders/' . $tender->tender_image);
+                @unlink(FRONT_IMG_PATH . self::TENDER_SUBDIR . $tender->tender_image);
             }
             if (!empty($tender->expert_image)) {
-                @unlink('assets/front/img/tender_experts/' . $tender->expert_image);
+                @unlink(FRONT_IMG_PATH . self::EXPERT_SUBDIR . $tender->expert_image);
             }
 
             $tender->delete();
@@ -674,8 +676,8 @@ class TenderController extends Controller
             // Try multiple possible logo locations
             $candidates = [
                 storage_path('app/public/front/img/' . $bs->logo),
-                base_path('public/assets/front/img/' . $bs->logo),
-                base_path('../assets/front/img/' . $bs->logo),
+                base_path(FRONT_IMG_PUBLIC_DIR . $bs->logo),
+                base_path(FRONT_IMG_DIR . $bs->logo),
             ];
             foreach ($candidates as $abs) {
                 if (file_exists($abs)) {
@@ -720,7 +722,7 @@ class TenderController extends Controller
 
         // Fallback: check old assets path for invoices generated before the migration
         if (!file_exists($path)) {
-            $legacyPath = base_path('../assets/front/invoices/tender/' . $purchase->invoice);
+            $legacyPath = base_path(FRONT_TENDER_INVOICE_DIR . $purchase->invoice);
             if (file_exists($legacyPath)) {
                 $path = $legacyPath;
             } else {
@@ -822,11 +824,11 @@ class TenderController extends Controller
     {
         $purchase = TenderPurchase::findOrFail($request->purchase_id);
         if (!empty($purchase->receipt)) {
-            @unlink('assets/front/receipt/' . $purchase->receipt);
+            @unlink(FRONT_RECEIPT_PATH . $purchase->receipt);
         }
         if (!empty($purchase->invoice)) {
             @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
-            @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
+            @unlink(base_path(FRONT_TENDER_INVOICE_DIR . $purchase->invoice));
         }
 
         \App\TenderAuditLog::record('purchase_deleted', $purchase, 'Transaction deleted',
@@ -843,11 +845,11 @@ class TenderController extends Controller
         foreach ($request->ids as $id) {
             $purchase = TenderPurchase::findOrFail($id);
             if (!empty($purchase->receipt)) {
-                @unlink('assets/front/receipt/' . $purchase->receipt);
+                @unlink(FRONT_RECEIPT_PATH . $purchase->receipt);
             }
             if (!empty($purchase->invoice)) {
                 @unlink(storage_path('app/invoices/tender/' . $purchase->invoice));
-                @unlink(base_path('../assets/front/invoices/tender/' . $purchase->invoice));
+                @unlink(base_path(FRONT_TENDER_INVOICE_DIR . $purchase->invoice));
             }
 
             \App\TenderAuditLog::record('purchase_deleted', $purchase, 'Transaction deleted (bulk)',
@@ -891,7 +893,7 @@ class TenderController extends Controller
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
         ]);
 
-        $invoiceDir = base_path('../assets/admin/img/invoice/');
+        $invoiceDir = base_path(FRONT_ADMIN_IMG_DIR . 'invoice/');
         if (!is_dir($invoiceDir)) {
             mkdir($invoiceDir, 0775, true);
         }
@@ -966,7 +968,7 @@ class TenderController extends Controller
                 $url  = $request->input('tender_breadcrumb_bg');
                 $ext  = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
                 if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                    $bgDir = base_path('../assets/front/img/');
+                    $bgDir = base_path(FRONT_IMG_DIR);
                     if (!empty($bex->tender_breadcrumb_bg)) {
                         @unlink($bgDir . $bex->tender_breadcrumb_bg);
                     }
@@ -991,7 +993,7 @@ class TenderController extends Controller
         $bex      = $lang ? $lang->basic_extra : BasicExtra::first();
 
         if ($bex && $bex->tender_breadcrumb_bg) {
-            @unlink(base_path('../assets/front/img/' . $bex->tender_breadcrumb_bg));
+            @unlink(base_path(FRONT_IMG_DIR . $bex->tender_breadcrumb_bg));
             $bex->tender_breadcrumb_bg = null;
             $bex->save();
             return response()->json(['success' => true]);

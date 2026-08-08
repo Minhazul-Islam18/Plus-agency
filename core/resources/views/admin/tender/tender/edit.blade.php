@@ -22,7 +22,7 @@
 @endif
 
 @section('content')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" integrity="sha384-aQuvIWWIbpu/mSqULLDiUveyYiPoJzPKAWjUmGJ+Elm+N/LJhzfZqsutsfw870JS" crossorigin="anonymous">
 <style>
   .wa-code-select + .select2-container { flex-shrink: 0; }
   .wa-code-select + .select2-container .select2-selection--single {

@@ -146,7 +146,7 @@ return new class extends Migration
         // ---- Shared table: basic_settings_extra (tender toggles + settings) ----
         if (Schema::hasTable('basic_settings_extra')) {
             $this->addColumn('basic_settings_extra', 'is_tender', function (Blueprint $t) {
-                $t->tinyInteger('is_tender')->default(1)->after('is_course_rating')
+                $t->tinyInteger('is_tender')->default(1)
                     ->comment('1 - activate all pages related to tenders, 0 - deactivate');
             });
 

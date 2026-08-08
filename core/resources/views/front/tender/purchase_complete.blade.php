@@ -333,7 +333,8 @@
 @endsection
 
 @section('content')
-    <section class="pc-section">
+    <section class="pc-section @if ($be->theme_version == 'dark') dark-pc @endif"
+        @if ($be->theme_version == 'dark') data-particle-network @endif>
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
@@ -500,6 +501,20 @@
                                     {{ __('to get a new download link anytime.') }}
                                 </span>
                             </div>
+                        </div>
+                    @elseif ($be->theme_version == 'dark')
+                        {{-- Fallback if session expired (dark) --}}
+                        <div class="pc-card dark-pc-fallback">
+                            <div class="dark-pc-fallback-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <h3 class="dark-pc-fallback-title">{{ __('Request Submitted Successfully!') }}</h3>
+                            <p class="dark-pc-fallback-text">
+                                {{ __('Our team will review your request and contact you shortly.') }}</p>
+                            <a href="{{ route('tenders') }}" class="btn-pc-primary">{{ __('Browse More Tenders') }}</a>
                         </div>
                     @else
                         {{-- Fallback if session expired --}}

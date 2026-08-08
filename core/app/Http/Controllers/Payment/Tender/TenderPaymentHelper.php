@@ -308,8 +308,8 @@ trait TenderPaymentHelper
         if (!empty($bs->logo)) {
             foreach ([
                 storage_path('app/public/front/img/' . $bs->logo),
-                base_path('public/assets/front/img/' . $bs->logo),
-                base_path('../assets/front/img/' . $bs->logo),
+                base_path(FRONT_IMG_PUBLIC_DIR . $bs->logo),
+                base_path(FRONT_IMG_DIR . $bs->logo),
             ] as $path) {
                 if (file_exists($path)) {
                     $ext     = strtolower(pathinfo($path, PATHINFO_EXTENSION));

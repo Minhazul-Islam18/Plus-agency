@@ -66,7 +66,7 @@ class ServicesectionController extends Controller
         if ($request->filled('service_section_bg')) {
             // Delete old image if exists
             if ($be->service_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->service_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->service_section_bg));
             }
 
             $filename = uniqid() . '.' . $extServiceSectionBg;
@@ -74,7 +74,7 @@ class ServicesectionController extends Controller
             // Convert to absolute paths
             // assets folder is one level up from core directory
             $sourcePath = base_path('../' . $serviceSectionBg);
-            $destinationPath = base_path('../assets/front/img/' . $filename);
+            $destinationPath = base_path(FRONT_IMG_DIR . $filename);
 
             // Copy the file
             $copyResult = copy($sourcePath, $destinationPath);
@@ -84,7 +84,7 @@ class ServicesectionController extends Controller
         // Handle service section background image deletion (only if not uploading new one)
         elseif ($request->delete_service_section_bg == '1') {
             if ($be->service_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->service_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->service_section_bg));
                 $be->service_section_bg = null;
             }
         }

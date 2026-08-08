@@ -12,6 +12,7 @@ use Session;
 
 class PartnerController extends Controller
 {
+    private const IMG_SUBDIR = 'partners/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -73,7 +74,7 @@ class PartnerController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/partners/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $partner->image = $filename;
         }
 
@@ -115,9 +116,9 @@ class PartnerController extends Controller
         $partner->serial_number = $request->serial_number;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/partners/' . $partner->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $partner->image);
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/partners/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $partner->image = $filename;
         }
 
@@ -131,7 +132,7 @@ class PartnerController extends Controller
     {
 
         $partner = Partner::findOrFail($request->partner_id);
-        @unlink('assets/front/img/partners/' . $partner->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $partner->image);
         $partner->delete();
 
         Session::flash('success', 'Partner deleted successfully!');
@@ -169,17 +170,17 @@ class PartnerController extends Controller
 
         // Handle background image deletion
         if ($request->delete_background == '1') {
-            @unlink(base_path('../assets/front/img/' . $be->partner_bg));
+            @unlink(base_path(FRONT_IMG_DIR . $be->partner_bg));
             $be->partner_bg = null;
         }
 
         // Handle background image upload
         if ($request->filled('background')) {
             if ($be->partner_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->partner_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->partner_bg));
             }
             $filename = uniqid() . '.' . $extImage;
-            @copy(base_path('../' . $image), base_path('../assets/front/img/' . $filename));
+            @copy(base_path('../' . $image), base_path(FRONT_IMG_DIR . $filename));
             $be->partner_bg = $filename;
         }
 

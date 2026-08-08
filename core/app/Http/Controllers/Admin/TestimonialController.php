@@ -13,6 +13,7 @@ use Session;
 
 class TestimonialController extends Controller
 {
+    private const IMG_SUBDIR = 'testimonials/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->firstOrFail();
@@ -75,7 +76,7 @@ class TestimonialController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/testimonials/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $testimonial->image = $filename;
         }
 
@@ -121,9 +122,9 @@ class TestimonialController extends Controller
         $testimonial->serial_number = $request->serial_number;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/testimonials/' . $testimonial->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/testimonials/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $testimonial->image = $filename;
         }
         $testimonial->save();
@@ -176,7 +177,7 @@ class TestimonialController extends Controller
         if ($request->filled('testimonial_section_bg')) {
             // Delete old image if exists
             if ($be->testimonial_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->testimonial_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->testimonial_section_bg));
             }
 
             $filename = uniqid() . '.' . $extTestimonialSectionBg;
@@ -184,7 +185,7 @@ class TestimonialController extends Controller
             // Convert to absolute paths
             // assets folder is one level up from core directory
             $sourcePath = base_path('../' . $testimonialSectionBg);
-            $destinationPath = base_path('../assets/front/img/' . $filename);
+            $destinationPath = base_path(FRONT_IMG_DIR . $filename);
 
             // Copy the file
             copy($sourcePath, $destinationPath);
@@ -194,7 +195,7 @@ class TestimonialController extends Controller
         // Handle testimonial section background image deletion (only if not uploading new one)
         elseif ($request->delete_testimonial_section_bg == '1') {
             if ($be->testimonial_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->testimonial_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->testimonial_section_bg));
                 $be->testimonial_section_bg = null;
             }
         }
@@ -208,7 +209,7 @@ class TestimonialController extends Controller
     public function delete(Request $request)
     {
         $testimonial = Testimonial::findOrFail($request->testimonial_id);
-        @unlink('assets/front/img/testimonials/' . $testimonial->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->image);
         $testimonial->delete();
 
         Session::flash('success', 'Testimonial deleted successfully!');

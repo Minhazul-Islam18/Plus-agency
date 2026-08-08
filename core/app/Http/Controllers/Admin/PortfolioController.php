@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Validator;
 
 class PortfolioController extends Controller
 {
+    private const SLIDER_SUBDIR = 'portfolios/sliders/';
+    private const FEATURED_SUBDIR = 'portfolios/featured/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -45,7 +47,7 @@ class PortfolioController extends Controller
     public function sliderrmv(Request $request)
     {
         $pi = PortfolioImage::findOrFail($request->fileid);
-        @unlink('assets/front/img/portfolios/sliders/' . $pi->image);
+        @unlink(FRONT_IMG_PATH . self::SLIDER_SUBDIR . $pi->image);
         $pi->delete();
         return $pi->id;
     }
@@ -123,7 +125,7 @@ class PortfolioController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/portfolios/featured/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::FEATURED_SUBDIR . $filename);
             $in['featured_image'] = $filename;
         }
 
@@ -132,7 +134,7 @@ class PortfolioController extends Controller
         foreach ($sliders as $key => $slider) {
             $extSlider = pathinfo($slider, PATHINFO_EXTENSION);
             $filename = uniqid() . '.' . $extSlider;
-            @copy($slider, 'assets/front/img/portfolios/sliders/' . $filename);
+            @copy($slider, FRONT_IMG_PATH . self::SLIDER_SUBDIR . $filename);
 
             $pi = new PortfolioImage;
             $pi->portfolio_id = $portfolio->id;
@@ -150,7 +152,7 @@ class PortfolioController extends Controller
         $convImages = [];
 
         foreach ($images as $key => $image) {
-            $convImages[] = url("assets/front/img/portfolios/sliders/$image->image");
+            $convImages[] = url(FRONT_IMG_PATH . "portfolios/sliders/$image->image");
         }
 
         return $convImages;
@@ -226,9 +228,9 @@ class PortfolioController extends Controller
         $in['slug'] = $slug;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/portfolios/featured/' . $portfolio->featured_image);
+            @unlink(FRONT_IMG_PATH . self::FEATURED_SUBDIR . $portfolio->featured_image);
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/portfolios/featured/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::FEATURED_SUBDIR . $filename);
             $in['featured_image'] = $filename;
         }
 
@@ -239,14 +241,14 @@ class PortfolioController extends Controller
         foreach ($sliders as $key => $slider) {
             $extSlider = pathinfo($slider, PATHINFO_EXTENSION);
             $filename = uniqid() . '.' . $extSlider;
-            @copy($slider, 'assets/front/img/portfolios/sliders/' . $filename);
+            @copy($slider, FRONT_IMG_PATH . self::SLIDER_SUBDIR . $filename);
             $fileNames[] = $filename;
         }
 
         // delete & unlink previous slider images
         $pis = PortfolioImage::where('portfolio_id', $portfolio->id)->get();
         foreach ($pis as $key => $pi) {
-            @unlink('assets/front/img/portfolios/sliders/' . $pi->image);
+            @unlink(FRONT_IMG_PATH . self::SLIDER_SUBDIR . $pi->image);
             $pi->delete();
         }
 
@@ -266,10 +268,10 @@ class PortfolioController extends Controller
     {
         $portfolio = Portfolio::findOrFail($request->portfolio_id);
         foreach ($portfolio->portfolio_images as $key => $pi) {
-            @unlink('assets/front/img/portfolios/sliders/' . $pi->image);
+            @unlink(FRONT_IMG_PATH . self::SLIDER_SUBDIR . $pi->image);
             $pi->delete();
         }
-        @unlink('assets/front/img/portfolios/featured/' . $portfolio->featured_image);
+        @unlink(FRONT_IMG_PATH . self::FEATURED_SUBDIR . $portfolio->featured_image);
 
         $this->deleteFromMegaMenu($portfolio);
 
@@ -327,14 +329,14 @@ class PortfolioController extends Controller
         foreach ($ids as $id) {
             $portfolio = Portfolio::findOrFail($id);
             foreach ($portfolio->portfolio_images as $key => $pi) {
-                @unlink('assets/front/img/portfolios/sliders/' . $pi->image);
+                @unlink(FRONT_IMG_PATH . self::SLIDER_SUBDIR . $pi->image);
                 $pi->delete();
             }
         }
 
         foreach ($ids as $id) {
             $portfolio = Portfolio::findOrFail($id);
-            @unlink('assets/front/img/portfolios/featured/' . $portfolio->featured_image);
+            @unlink(FRONT_IMG_PATH . self::FEATURED_SUBDIR . $portfolio->featured_image);
 
             $this->deleteFromMegaMenu($portfolio);
 
@@ -391,9 +393,9 @@ class PortfolioController extends Controller
             $allowedExts = ['jpg', 'jpeg', 'png'];
             $extBg = pathinfo($request->portfolio_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
-                @unlink('assets/front/img/' . $bs->portfolio_breadcrumb_bg);
+                @unlink(FRONT_IMG_PATH . $bs->portfolio_breadcrumb_bg);
                 $filename = uniqid() . '.' . $extBg;
-                @copy($request->portfolio_breadcrumb_bg, 'assets/front/img/' . $filename);
+                @copy($request->portfolio_breadcrumb_bg, FRONT_IMG_PATH . $filename);
                 $bs->portfolio_breadcrumb_bg = $filename;
             }
         }
@@ -412,7 +414,7 @@ class PortfolioController extends Controller
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
 
         if ($bs && $bs->portfolio_breadcrumb_bg) {
-            @unlink('assets/front/img/' . $bs->portfolio_breadcrumb_bg);
+            @unlink(FRONT_IMG_PATH . $bs->portfolio_breadcrumb_bg);
             $bs->portfolio_breadcrumb_bg = null;
             $bs->save();
 

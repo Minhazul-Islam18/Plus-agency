@@ -105,7 +105,7 @@ class ApproachController extends Controller
         if ($request->filled('approach_section_bg')) {
             // Delete old image if exists
             if ($be->approach_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->approach_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->approach_section_bg));
             }
 
             $filename = uniqid() . '.' . $extApproachSectionBg;
@@ -113,7 +113,7 @@ class ApproachController extends Controller
             // Convert to absolute paths
             // assets folder is one level up from core directory
             $sourcePath = base_path('../' . $approachSectionBg);
-            $destinationPath = base_path('../assets/front/img/' . $filename);
+            $destinationPath = base_path(FRONT_IMG_DIR . $filename);
 
             // Copy the file
             copy($sourcePath, $destinationPath);
@@ -123,7 +123,7 @@ class ApproachController extends Controller
         // Handle approach section background image deletion (only if not uploading new one)
         elseif ($request->delete_approach_section_bg == '1') {
             if ($be->approach_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->approach_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->approach_section_bg));
                 $be->approach_section_bg = null;
             }
         }

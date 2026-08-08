@@ -16,6 +16,7 @@ use Auth;
 
 class UserController extends Controller
 {
+    private const IMG_SUBDIR = 'propics/';
     public function index()
     {
         $data['users'] = Admin::all();
@@ -78,7 +79,7 @@ class UserController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/admin/img/propics/' . $filename);
+            @copy($image, FRONT_ADMIN_IMG_PATH . self::IMG_SUBDIR . $filename);
             $user->image = $filename;
         }
 
@@ -214,9 +215,9 @@ class UserController extends Controller
         $user->role_id = $request->role;
 
         if ($request->filled('image')) {
-            @unlink('assets/admin/img/propics/' . $user->image);
+            @unlink(FRONT_ADMIN_IMG_PATH . self::IMG_SUBDIR . $user->image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/admin/img/propics/' . $filename);
+            @copy($image, FRONT_ADMIN_IMG_PATH . self::IMG_SUBDIR . $filename);
             $user->image = $filename;
         }
 
@@ -234,7 +235,7 @@ class UserController extends Controller
         }
 
         $user = Admin::findOrFail($request->user_id);
-        @unlink('assets/admin/img/propics/' . $user->image);
+        @unlink(FRONT_ADMIN_IMG_PATH . self::IMG_SUBDIR . $user->image);
         $user->delete();
 
         Session::flash('success', 'User deleted successfully!');

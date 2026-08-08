@@ -47,9 +47,9 @@ class GalleryCategoryController extends Controller
             $allowedExts = ['jpg', 'jpeg', 'png'];
             $extBg = pathinfo($request->gallery_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
-                @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
+                @unlink(FRONT_IMG_PATH . $bs->gallery_breadcrumb_bg);
                 $filename = uniqid() . '.' . $extBg;
-                @copy($request->gallery_breadcrumb_bg, 'assets/front/img/' . $filename);
+                @copy($request->gallery_breadcrumb_bg, FRONT_IMG_PATH . $filename);
                 $bs->gallery_breadcrumb_bg = $filename;
             }
         }
@@ -68,7 +68,7 @@ class GalleryCategoryController extends Controller
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
 
         if ($bs && $bs->gallery_breadcrumb_bg) {
-            @unlink('assets/front/img/' . $bs->gallery_breadcrumb_bg);
+            @unlink(FRONT_IMG_PATH . $bs->gallery_breadcrumb_bg);
             $bs->gallery_breadcrumb_bg = null;
             $bs->save();
 

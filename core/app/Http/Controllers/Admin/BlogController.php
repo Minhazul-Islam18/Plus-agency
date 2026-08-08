@@ -14,6 +14,7 @@ use Session;
 
 class BlogController extends Controller
 {
+    private const IMG_SUBDIR = 'blogs/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -89,7 +90,7 @@ class BlogController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/blogs/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $blog->main_image = $filename;
         }
 
@@ -150,9 +151,9 @@ class BlogController extends Controller
         $blog->serial_number = $request->serial_number;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/blogs/' . $blog->main_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $blog->main_image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/blogs/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $blog->main_image = $filename;
         }
 
@@ -188,7 +189,7 @@ class BlogController extends Controller
     {
 
         $blog = Blog::findOrFail($request->blog_id);
-        @unlink('assets/front/img/blogs/' . $blog->main_image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $blog->main_image);
 
         $this->deleteFromMegaMenu($blog);
 
@@ -204,7 +205,7 @@ class BlogController extends Controller
 
         foreach ($ids as $id) {
             $blog = Blog::findOrFail($id);
-            @unlink('assets/front/img/blogs/' . $blog->main_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $blog->main_image);
 
             $this->deleteFromMegaMenu($blog);
 

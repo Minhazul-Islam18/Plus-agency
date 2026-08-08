@@ -7,10 +7,11 @@ use App\Http\Controllers\Controller;
 
 class SummernoteController extends Controller
 {
+    private const IMG_SUBDIR = 'summernote/';
     public function upload(Request $request) {
         $img = $request->file('image');
         $filename = uniqid() . '.' . $img->getClientOriginalExtension();
-        $img->move('assets/front/img/summernote/', $filename);
+        $img->move(FRONT_IMG_PATH . self::IMG_SUBDIR, $filename);
 
         return url('/') . "/assets/front/img/summernote/" . $filename;
     }
@@ -29,8 +30,8 @@ class SummernoteController extends Controller
         foreach ($items as $key => $item) {
             $ext = pathinfo($item, PATHINFO_EXTENSION);
             $filename = uniqid() . '.' . $ext;
-            @copy($item, 'assets/front/img/summernote/' . $filename);
-            $urls[] = url('assets/front/img/summernote/' . $filename);
+            @copy($item, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
+            $urls[] = url(FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
         }
 
         return response()->json(['status' => 'success', 'urls' => $urls]);

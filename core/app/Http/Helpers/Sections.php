@@ -143,7 +143,7 @@ if (!function_exists('serviceCategorySection')) {
                 <div class='single-category'>";
                 if (!empty($scategory->image)) {
                     $scatsec .= "<div class='img-wrapper'>
-                    <img class='lazy' data-src='" . url("assets/front/img/service_category_icons/$scategory->image") . "' alt=''>
+                    <img class='lazy' data-src='" . url(FRONT_IMG_PATH . "service_category_icons/$scategory->image") . "' alt=''>
                     </div>";
                 }
                 $scatsec .= "<div class='text'>
@@ -184,7 +184,7 @@ if (!function_exists('servicesSection')) {
                 $servicesSec .= "<div class='col-lg-4 col-md-6 col-sm-8'>
                 <div class='services-item mt-30'>
                 <div class='services-thumb'>
-                <img class='lazy' data-src='" . url('assets/front/img/services/' . $service->main_image) . "' alt='service' />
+                <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'services/' . $service->main_image) . "' alt='service' />
                 </div>
                 <div class='services-content'>
                 <a class='title'";
@@ -226,7 +226,7 @@ if (!function_exists('portfoliosSection')) {
         if ($version == 'default' || $version == 'dark') {
             $portfoliosSec .= "<div class='case-carousel owl-carousel owl-theme'>";
             foreach ($portfolios as $key => $portfolio) {
-                $portfoliosSec .= "<div class='single-case single-case-bg-1 lazy' data-bg='" . url('assets/front/img/portfolios/featured/' . $portfolio->featured_image) . "'>
+                $portfoliosSec .= "<div class='single-case single-case-bg-1 lazy' data-bg='" . url(FRONT_IMG_PATH . 'portfolios/featured/' . $portfolio->featured_image) . "'>
                 <div class='outer-container'>
                 <div class='inner-container'>
                 <h4>";
@@ -262,7 +262,7 @@ if (!function_exists('teamSection')) {
             foreach ($members as $key => $member) {
                 $teamSec .= "<div class='single-team-member'>
                 <div class='team-img-wrapper'>
-                <img class='lazy' data-src='" . url('assets/front/img/members/' . $member->image) . "' alt=''>
+                <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'members/' . $member->image) . "' alt=''>
                 <div class='social-accounts'>
                 <ul class='social-account-lists'>";
                 if (!empty($member->facebook)) {
@@ -334,7 +334,7 @@ if (!function_exists('testimonialSection')) {
             $testimonialSec .= "<div class='testimonial-carousel owl-carousel owl-theme'>";
             foreach ($testimonials as $key => $testimonial) {
                 $testimonialSec .= "<div class='single-testimonial'>
-                <div class='img-wrapper'><img class='lazy' data-src='" . url('assets/front/img/testimonials/' . $testimonial->image) . "' alt=''></div>
+                <div class='img-wrapper'><img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'testimonials/' . $testimonial->image) . "' alt=''></div>
                 <div class='client-desc'>
                 <p class='comment'>" . convertUtf8($testimonial->comment) . "</p>
                 <h6 class='name'>" . convertUtf8($testimonial->name) . "</h6>
@@ -364,7 +364,7 @@ if (!function_exists('blogsSection')) {
             foreach ($blogs as $key => $blog) {
                 $blogSec .= "<div class='single-blog'>
                 <div class='blog-img-wrapper'>
-                <img src='" . url('assets/front/img/blogs/' . $blog->main_image) . "' alt=''>
+                <img src='" . url(FRONT_IMG_PATH . 'blogs/' . $blog->main_image) . "' alt=''>
                 </div>
                 <div class='blog-txt'>";
 
@@ -441,7 +441,7 @@ if (!function_exists('partnerSection')) {
                 $partnerSec .= "<a class='single-partner-item d-block' href='" . $partner->url . "' target='_blank'>
                 <div class='outer-container'>
                 <div class='inner-container'>
-                <img class='lazy' data-src='" . url('assets/front/img/partners/' . $partner->image) . "' alt=''>
+                <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'partners/' . $partner->image) . "' alt=''>
                 </div>
                 </div>
                 </a>";

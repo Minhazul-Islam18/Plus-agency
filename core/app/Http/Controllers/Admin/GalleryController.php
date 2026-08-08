@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 
 class GalleryController extends Controller
 {
+    private const IMG_SUBDIR = 'gallery/';
   public function index(Request $request)
   {
     $lang = Language::where('code', $request->language)->first();
@@ -104,8 +105,8 @@ class GalleryController extends Controller
 
     if ($request->filled('image')) {
       $filename = uniqid() . '.' . $extImage;
-      @mkdir('assets/front/img/gallery', 775, true);
-      @copy($image, 'assets/front/img/gallery/' . $filename);
+      @mkdir(FRONT_IMG_PATH . 'gallery', 775, true);
+      @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
       $gallery->image = $filename;
     }
 
@@ -162,9 +163,9 @@ class GalleryController extends Controller
     $gallery->category_id = $request->category_id;
 
     if ($request->filled('image')) {
-      @unlink('assets/front/img/gallery/' . $gallery->image);
+      @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $gallery->image);
       $filename = uniqid() . '.' . $extImage;
-      @copy($image, 'assets/front/img/gallery/' . $filename);
+      @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
       $gallery->image = $filename;
     }
 
@@ -178,7 +179,7 @@ class GalleryController extends Controller
   {
 
     $gallery = Gallery::findOrFail($request->gallery_id);
-    @unlink('assets/front/img/gallery/' . $gallery->image);
+    @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $gallery->image);
     $gallery->delete();
 
     Session::flash('success', 'Image deleted successfully!');
@@ -191,7 +192,7 @@ class GalleryController extends Controller
 
     foreach ($ids as $id) {
       $gallery = Gallery::findOrFail($id);
-      @unlink('assets/front/img/gallery/' . $gallery->image);
+      @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $gallery->image);
       $gallery->delete();
     }
 

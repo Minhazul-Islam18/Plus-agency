@@ -125,9 +125,9 @@ class StatisticsController extends Controller
         $be->statistics_overlay_opacity = $request->statistics_overlay_opacity;
 
         if ($request->filled('background_image')) {
-            @unlink('assets/front/img/' . $be->statistics_bg);
+            @unlink(FRONT_IMG_PATH . $be->statistics_bg);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/' . $filename);
+            @copy($image, FRONT_IMG_PATH . $filename);
 
             $be->statistics_bg = $filename;
         }
@@ -153,7 +153,7 @@ class StatisticsController extends Controller
         $be = BasicExtended::where('language_id', $langid)->first();
 
         if ($be && $be->statistics_bg) {
-            @unlink('assets/front/img/' . $be->statistics_bg);
+            @unlink(FRONT_IMG_PATH . $be->statistics_bg);
             $be->statistics_bg = null;
             $be->save();
 

@@ -13,6 +13,29 @@ use Validator;
 
 class PageController extends Controller
 {
+    private const IMG_SUBDIR = 'pages/';
+
+    /** Saves a breadcrumb_image (LFM path) into the pages img dir; returns the new filename, or null if none/invalid. */
+    private function saveBreadcrumbImage(Request $request): ?string
+    {
+        if (!$request->filled('breadcrumb_image')) {
+            return null;
+        }
+
+        $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
+        $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
+        if (!in_array(strtolower($extBg), $allowedExts)) {
+            return null;
+        }
+
+        $directory = FRONT_IMG_PATH . self::IMG_SUBDIR;
+        @mkdir($directory, 0775, true);
+        $filename = uniqid() . '.' . $extBg;
+        @copy($request->breadcrumb_image, $directory . $filename);
+
+        return $filename;
+    }
+
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -104,17 +127,8 @@ class PageController extends Controller
         $page->meta_description = $request->meta_description;
 
         // Handle breadcrumb image from file manager
-        if ($request->filled('breadcrumb_image')) {
-            $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
-            $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
-
-            if (in_array(strtolower($extBg), $allowedExts)) {
-                $directory = 'assets/front/img/pages/';
-                @mkdir($directory, 0775, true);
-                $filename = uniqid() . '.' . $extBg;
-                @copy($request->breadcrumb_image, $directory . $filename);
-                $page->breadcrumb_image = $filename;
-            }
+        if ($filename = $this->saveBreadcrumbImage($request)) {
+            $page->breadcrumb_image = $filename;
         }
 
         // Handle breadcrumb overlay settings
@@ -190,22 +204,11 @@ class PageController extends Controller
         $page->meta_description = $request->meta_description;
 
         // Handle breadcrumb image from file manager
-        if ($request->filled('breadcrumb_image')) {
-            $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
-            $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
-
-            if (in_array(strtolower($extBg), $allowedExts)) {
-                // Delete old image if exists
-                if ($page->breadcrumb_image) {
-                    @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
-                }
-
-                $directory = 'assets/front/img/pages/';
-                @mkdir($directory, 0775, true);
-                $filename = uniqid() . '.' . $extBg;
-                @copy($request->breadcrumb_image, $directory . $filename);
-                $page->breadcrumb_image = $filename;
+        if ($filename = $this->saveBreadcrumbImage($request)) {
+            if ($page->breadcrumb_image) {
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $page->breadcrumb_image);
             }
+            $page->breadcrumb_image = $filename;
         }
 
         // Handle breadcrumb overlay settings
@@ -227,7 +230,7 @@ class PageController extends Controller
         $page = Page::findOrFail($pageID);
         // Delete breadcrumb image if exists
         if ($page->breadcrumb_image) {
-            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $page->breadcrumb_image);
         }
         $page->delete();
         Session::flash('success', 'Page deleted successfully!');
@@ -242,7 +245,7 @@ class PageController extends Controller
             $page = Page::findOrFail($id);
             // Delete breadcrumb image if exists
             if ($page->breadcrumb_image) {
-                @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $page->breadcrumb_image);
             }
             $page->delete();
         }
@@ -256,7 +259,7 @@ class PageController extends Controller
         $page = Page::findOrFail($id);
 
         if ($page->breadcrumb_image) {
-            @unlink('assets/front/img/pages/' . $page->breadcrumb_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $page->breadcrumb_image);
             $page->breadcrumb_image = null;
             $page->save();
 
@@ -272,7 +275,7 @@ class PageController extends Controller
         $assets = [];
 
         foreach ($files as $key => $file) {
-            $directory = "assets/front/img/pagebuilder/";
+            $directory = FRONT_IMG_PATH . "pagebuilder/";
             @mkdir($directory, 0775, true);
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
             $file->move($directory, $filename);
@@ -304,7 +307,7 @@ class PageController extends Controller
         $image = str_replace(' ', '+', $image);
         $imageName = uniqid().'.'.'png';
 
-        $path = 'assets/front/img/pagebuilder/' . $imageName;
+        $path = FRONT_IMG_PATH . 'pagebuilder/' . $imageName;
         \File::put($path, base64_decode($image));
 
         $assets[] = [

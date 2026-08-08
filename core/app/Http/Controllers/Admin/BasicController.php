@@ -96,9 +96,9 @@ class BasicController extends Controller
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
             foreach ($bss as $key => $bs) {
-                @unlink('assets/front/img/' . $bs->logo);
+                @unlink(FRONT_IMG_PATH . $bs->logo);
                 $filename = uniqid() . '.' . $extLogo;
-                @copy($logo, 'assets/front/img/' . $filename);
+                @copy($logo, FRONT_IMG_PATH . $filename);
 
                 $bs->logo = $filename;
                 $bs->save();
@@ -110,9 +110,9 @@ class BasicController extends Controller
             $bss = BasicSetting::all();
 
             foreach ($bss as $key => $bs) {
-                @unlink('assets/front/img/' . $bs->email_logo);
+                @unlink(FRONT_IMG_PATH . $bs->email_logo);
                 $filename = uniqid() . '.' . $extEmailLogo;
-                @copy($emailLogo, 'assets/front/img/' . $filename);
+                @copy($emailLogo, FRONT_IMG_PATH . $filename);
 
                 $bs->email_logo = $filename;
                 $bs->save();
@@ -125,9 +125,9 @@ class BasicController extends Controller
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
             foreach ($bss as $key => $bs) {
-                @unlink('assets/front/img/' . $bs->favicon);
+                @unlink(FRONT_IMG_PATH . $bs->favicon);
                 $filename = uniqid() . '.' . $extFav;
-                @copy($favicon, 'assets/front/img/' . $filename);
+                @copy($favicon, FRONT_IMG_PATH . $filename);
 
                 $bs->favicon = $filename;
                 $bs->save();
@@ -140,9 +140,9 @@ class BasicController extends Controller
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
             foreach ($bss as $key => $bs) {
-                @unlink('assets/front/img/' . $bs->breadcrumb);
+                @unlink(FRONT_IMG_PATH . $bs->breadcrumb);
                 $filename = uniqid() . '.' . $extBread;
-                @copy($breadcrumb, 'assets/front/img/' . $filename);
+                @copy($breadcrumb, FRONT_IMG_PATH . $filename);
 
                 $bs->breadcrumb = $filename;
                 $bs->save();
@@ -232,13 +232,13 @@ class BasicController extends Controller
 
         if ($request->filled('preloader')) {
             $filename = uniqid() . '.' . $extPreloader;
-            @copy($preloader, 'assets/front/img/' . $filename);
+            @copy($preloader, FRONT_IMG_PATH . $filename);
         }
 
         $bexs = BasicExtra::all();
         foreach ($bexs as $key => $bex) {
             if ($request->filled('preloader')) {
-                @unlink('assets/front/img/' . $bex->preloader);
+                @unlink(FRONT_IMG_PATH . $bex->preloader);
                 $bex->preloader = $filename;
             }
 
@@ -279,22 +279,13 @@ class BasicController extends Controller
 
         $be = BasicExtended::first();
 
-        if ($be->theme_version == 'dark') {
-            $rules["secondary_base_color"] = 'nullable';
-        }
-
-
         $request->validate($rules);
 
         $bss = BasicSetting::all();
         foreach ($bss as $key => $bs) {
             $bs->website_title = $request->website_title;
             $bs->base_color = $request->base_color;
-
-            if ($be->theme_version != 'dark') {
-                $bs->secondary_base_color = $request->secondary_base_color;
-            }
-
+            $bs->secondary_base_color = $request->secondary_base_color;
 
             $bs->save();
         }
@@ -598,8 +589,8 @@ class BasicController extends Controller
         $request->validate($rules);
 
         if ($request->filled('maintenance')) {
-            @unlink('assets/front/img/maintainance.png');
-            @copy($maintenance, 'assets/front/img/maintainance.png');
+            @unlink(FRONT_IMG_PATH . 'maintainance.png');
+            @copy($maintenance, FRONT_IMG_PATH . 'maintainance.png');
         }
 
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
@@ -654,6 +645,7 @@ class BasicController extends Controller
             $bs->approach_section = $request->approach_section;
             $bs->statistics_section = $request->statistics_section;
             $bs->portfolio_section = $request->portfolio_section;
+            $bs->tender_section = $request->tender_section;
             $bs->testimonial_section = $request->testimonial_section;
             $bs->team_section = $request->team_section;
             $bs->call_to_action_section = $request->call_to_action_section;

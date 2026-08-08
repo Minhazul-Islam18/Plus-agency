@@ -12,7 +12,7 @@
     <script src="{{asset('assets/admin/js/plugin/pagebuilder/main.min.js')}}"></script>
     {{-- <script src="{{asset('assets/admin/js/plugin/pagebuilder/tui-image-editor.js')}}"></script> --}}
     <script src="{{asset('assets/admin/js/plugin/pagebuilder/plugins.min.js')}}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2/ckeditor.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2/ckeditor.js" integrity="sha384-0asuHIqJmZhzB6JMZ3lx+IELTuLiQbiy1c3XYZHZvoWIPbHxwwOSwEDrV6Az6PRz" crossorigin="anonymous"></script>
 
 
   </head>

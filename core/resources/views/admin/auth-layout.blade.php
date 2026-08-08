@@ -7,7 +7,7 @@
     <title>@yield('title', $bs->website_title)</title>
     <link rel="icon" href="{{ asset('assets/front/img/' . $bs->favicon) }}">
     <link rel="stylesheet" href="{{ asset('assets/admin/css/bootstrap.min.css') }}">
-    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/admin/css/login.css') }}">
     @yield('styles')

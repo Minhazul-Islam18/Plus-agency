@@ -404,8 +404,8 @@ class FindMyFilesController extends Controller
             if ($bs && !empty($bs->logo)) {
                 foreach ([
                     storage_path('app/public/front/img/' . $bs->logo),
-                    base_path('public/assets/front/img/' . $bs->logo),
-                    base_path('../assets/front/img/' . $bs->logo),
+                    base_path(FRONT_IMG_PUBLIC_DIR . $bs->logo),
+                    base_path(FRONT_IMG_DIR . $bs->logo),
                 ] as $p) {
                     if (file_exists($p)) {
                         $ext     = strtolower(pathinfo($p, PATHINFO_EXTENSION));

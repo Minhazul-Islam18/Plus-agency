@@ -11,6 +11,51 @@ use Session;
 
 class PopupController extends Controller
 {
+    private const IMG_SUBDIR = 'popups/';
+
+    /** Copies an already-uploaded (LFM) file into the popups img dir; returns the new filename. */
+    private function saveImage(string $sourcePath, string $ext): string
+    {
+        $filename = uniqid() . '.' . $ext;
+        $directory = FRONT_IMG_PATH . self::IMG_SUBDIR;
+        @mkdir($directory, 0775, true);
+        @copy($sourcePath, $directory . $filename);
+
+        return $filename;
+    }
+
+    /** Type-conditional fields shared identically by store() and update(). */
+    private function applyTypeConditionalFields(Popup $popup, Request $request, $type): void
+    {
+        if ($type == 2 || $type == 3) {
+            $popup->background_color = $request->background_color;
+            $popup->background_opacity = $request->background_opacity;
+        }
+
+        if ($type == 7) {
+            $popup->background_color = $request->background_color;
+        }
+
+        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
+            $popup->button_text = $request->button_text;
+            $popup->button_color = $request->button_color;
+        }
+
+        if ($type == 2 || $type == 4 || $type == 6 || $type == 7) {
+            $popup->button_url = $request->button_url;
+        }
+
+        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
+            $popup->title = $request->title;
+            $popup->text = $request->text;
+        }
+
+        if ($type == 6 || $type == 7) {
+            $popup->end_date = $request->end_date;
+            $popup->end_time = $request->end_time;
+        }
+    }
+
     public function index(Request $request) {
         $lang = Language::where('code', $request->language)->first();
         $lang_id = $lang->id;
@@ -122,55 +167,17 @@ class PopupController extends Controller
 
         if ($type == 1 || $type == 4 || $type == 5 || $type == 7) {
             if ($request->filled('image')) {
-                $filename = uniqid() .'.'. $extImage;
-
-                $directory = 'assets/front/img/popups/';
-                @mkdir($directory, 0775, true);
-                @copy($image, $directory . $filename);
-
-                $popup->image = $filename;
+                $popup->image = $this->saveImage($image, $extImage);
             }
         }
 
         if ($type == 2 || $type == 3 || $type == 6) {
             if ($request->filled('background_image')) {
-                $filename = uniqid() .'.'. $extBackground;
-
-                $directory = 'assets/front/img/popups/';
-                @mkdir($directory, 0775, true);
-                @copy($background, $directory . $filename);
-
-                $popup->background_image = $filename;
+                $popup->background_image = $this->saveImage($background, $extBackground);
             }
         }
 
-        if ($type == 2 || $type == 3) {
-            $popup->background_color = $request->background_color;
-            $popup->background_opacity = $request->background_opacity;
-        }
-
-        if ($type == 7) {
-            $popup->background_color = $request->background_color;
-        }
-
-        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
-            $popup->button_text = $request->button_text;
-            $popup->button_color = $request->button_color;
-        }
-
-        if ($type == 2 || $type == 4 || $type == 6 || $type == 7) {
-            $popup->button_url = $request->button_url;
-        }
-
-        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
-            $popup->title = $request->title;
-            $popup->text = $request->text;
-        }
-
-        if ($type == 6 || $type == 7) {
-            $popup->end_date = $request->end_date;
-            $popup->end_time = $request->end_time;
-        }
+        $this->applyTypeConditionalFields($popup, $request, $type);
 
         $popup->save();
 
@@ -263,59 +270,19 @@ class PopupController extends Controller
 
         if ($type == 1 || $type == 4 || $type == 5 || $type == 7) {
             if ($request->filled('image')) {
-                @unlink('assets/front/img/popups/' . $popup->image);
-
-                $filename = uniqid() .'.'. $extImage;
-
-                $directory = 'assets/front/img/popups/';
-                @mkdir($directory, 0775, true);
-                @copy($image, $directory . $filename);
-
-                $popup->image = $filename;
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->image);
+                $popup->image = $this->saveImage($image, $extImage);
             }
         }
 
         if ($type == 2 || $type == 3 || $type == 6) {
             if ($request->filled('background_image')) {
-                @unlink('assets/front/img/popups/' . $popup->background_image);
-
-                $filename = uniqid() .'.'. $extBackground;
-
-                $directory = 'assets/front/img/popups/';
-                @mkdir($directory, 0775, true);
-                @copy($background, $directory . $filename);
-
-                $popup->background_image = $filename;
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->background_image);
+                $popup->background_image = $this->saveImage($background, $extBackground);
             }
         }
 
-        if ($type == 2 || $type == 3) {
-            $popup->background_color = $request->background_color;
-            $popup->background_opacity = $request->background_opacity;
-        }
-
-        if ($type == 7) {
-            $popup->background_color = $request->background_color;
-        }
-
-        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
-            $popup->button_text = $request->button_text;
-            $popup->button_color = $request->button_color;
-        }
-
-        if ($type == 2 || $type == 4 || $type == 6 || $type == 7) {
-            $popup->button_url = $request->button_url;
-        }
-
-        if ($type == 2 || $type == 3 || $type == 4 || $type == 5 || $type == 6 || $type == 7) {
-            $popup->title = $request->title;
-            $popup->text = $request->text;
-        }
-
-        if ($type == 6 || $type == 7) {
-            $popup->end_date = $request->end_date;
-            $popup->end_time = $request->end_time;
-        }
+        $this->applyTypeConditionalFields($popup, $request, $type);
 
         $popup->save();
 
@@ -328,8 +295,8 @@ class PopupController extends Controller
     {
 
         $popup = Popup::findOrFail($request->popup_id);
-        @unlink('assets/front/img/popups/' . $popup->image);
-        @unlink('assets/front/img/popups/' . $popup->background_image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->background_image);
         $popup->delete();
 
         Session::flash('success', 'Popup deleted successfully!');
@@ -342,8 +309,8 @@ class PopupController extends Controller
 
         foreach ($ids as $id) {
             $popup = Popup::findOrFail($id);
-            @unlink('assets/front/img/popups/' . $popup->image);
-            @unlink('assets/front/img/popups/' . $popup->background_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $popup->background_image);
             $popup->delete();
         }
 

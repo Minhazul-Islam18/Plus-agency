@@ -66,16 +66,16 @@ class BlogsectionController extends Controller
 
         // Handle background image deletion
         if ($request->delete_background == '1') {
-            @unlink(base_path('../assets/front/img/' . $be->blog_bg));
+            @unlink(base_path(FRONT_IMG_DIR . $be->blog_bg));
             $be->blog_bg = null;
         }
 
         if ($request->filled('background')) {
             if ($be->blog_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->blog_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->blog_bg));
             }
             $filename = uniqid() . '.' . $extBackground;
-            @copy(base_path('../' . $background), base_path('../assets/front/img/' . $filename));
+            @copy(base_path('../' . $background), base_path(FRONT_IMG_DIR . $filename));
             $be->blog_bg = $filename;
         }
 

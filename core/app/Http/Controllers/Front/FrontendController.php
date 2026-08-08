@@ -24,11 +24,13 @@ use App\Member;
 use App\Blog;
 use App\Partner;
 use App\Service;
+use App\DarkHeroSetting;
 use App\Archive;
 use App\Bcategory;
 use App\Subscriber;
 use App\Language;
 use App\Admin;
+use App\Tender;
 use App\BasicExtra;
 use App\FAQCategory;
 use App\Home;
@@ -67,9 +69,16 @@ class FrontendController extends Controller
         $bex = $currentLang?->basic_extra;
         $lang_id = $currentLang?->id;
 
+        // Tender card price formatting (same variable name as Front\TenderController).
+        $data['bse'] = $bex;
+
         $data['sliders'] = Slider::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
         $data['features'] = Feature::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
         $version = $be?->theme_version;
+
+        if ($version == 'dark') {
+            $data['darkHero'] = DarkHeroSetting::where('language_id', $lang_id)->first();
+        }
 
         // if home page page builder is disabled
         if ($bex?->home_page_pagebuilder == 0) {
@@ -87,6 +96,7 @@ class FrontendController extends Controller
                     'blogs' => Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get(),
                     'partners' => Partner::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'scategories' => Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
+                    'tenders' => Tender::where('language_id', $lang_id)->where('is_featured', 1)->where('status', 1)->orderBy('id', 'DESC')->limit(10)->get(),
                 ];
 
                 if (!serviceCategory()) {
@@ -136,6 +146,7 @@ class FrontendController extends Controller
             return $query->where('language_id', $currentLang->id);
         })->orderBy('serial_number', 'ASC')->paginate(6);
 
+        $data['servicesCount'] = Service::where('language_id', $currentLang->id)->count();
 
         $version = $be->theme_version;
 
@@ -143,6 +154,33 @@ class FrontendController extends Controller
             $data['version'] = $version == 'dark' ? 'default' : $version;
             return view('front.services', $data);
         }
+    }
+
+    public function loadMoreServiceCategories(Request $request)
+    {
+        $langId = (int) $request->query('lang');
+        $offset = max(0, (int) $request->query('offset', 0));
+        $perPage = 6;
+
+        $query = Scategory::where('language_id', $langId)
+            ->where('feature', 1)
+            ->where('status', 1)
+            ->orderBy('serial_number', 'ASC');
+
+        $total = $query->count();
+        $scategories = $query->skip($offset)->take($perPage)->get();
+
+        $html = view('front.default.partials.dark.service-category-cards', [
+            'scategories' => $scategories,
+            'startIndex' => $offset,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'next_offset' => $offset + $scategories->count(),
+            'has_more' => ($offset + $scategories->count()) < $total,
+            'total' => $total,
+        ]);
     }
 
     public function paymentInstruction(Request $request)
@@ -455,9 +493,47 @@ class FrontendController extends Controller
 
         $subsc = new Subscriber;
         $subsc->email = $request->email;
+        $subsc->unsubscribe_token = \Illuminate\Support\Str::random(48);
         $subsc->save();
 
         return "success";
+    }
+
+    /**
+     * One-click unsubscribe (token from the newsletter email — no login,
+     * no re-entering an email, works "at any time" per the requirement).
+     */
+    public function unsubscribeByToken($token)
+    {
+        Subscriber::where('unsubscribe_token', $token)->delete();
+
+        if (session()->has('lang')) {
+            $currentLang = Language::where('code', session()->get('lang'))->first();
+        } else {
+            $currentLang = Language::where('is_default', 1)->first();
+        }
+
+        $version = $currentLang->basic_extended->theme_version;
+        if ($version == 'dark') {
+            $version = 'default';
+        }
+
+        return view('front.unsubscribe', ['version' => $version]);
+    }
+
+    /**
+     * Fallback for a subscriber who doesn't have a recent email handy:
+     * unsubscribe by typing the address back in. Always responds the same
+     * way regardless of whether the email was actually found, so this
+     * can't be used to probe whether an address is subscribed.
+     */
+    public function unsubscribeByEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        Subscriber::where('email', $request->email)->delete();
+
+        return back()->with('success', __('If that address was subscribed, it has been removed.'));
     }
 
     public function team()

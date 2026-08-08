@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 
 class ServiceController extends Controller
 {
+    private const IMG_SUBDIR = 'services/';
 
     public function settings(Request $request)
     {
@@ -43,9 +44,9 @@ class ServiceController extends Controller
             $allowedExts = ['jpg', 'jpeg', 'png'];
             $extBg = pathinfo($request->service_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
-                @unlink('assets/front/img/' . $bs->service_breadcrumb_bg);
+                @unlink(FRONT_IMG_PATH . $bs->service_breadcrumb_bg);
                 $filename = uniqid() . '.' . $extBg;
-                @copy($request->service_breadcrumb_bg, 'assets/front/img/' . $filename);
+                @copy($request->service_breadcrumb_bg, FRONT_IMG_PATH . $filename);
                 $bs->service_breadcrumb_bg = $filename;
             }
         }
@@ -68,7 +69,7 @@ class ServiceController extends Controller
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
 
         if ($bs && $bs->service_breadcrumb_bg) {
-            @unlink('assets/front/img/' . $bs->service_breadcrumb_bg);
+            @unlink(FRONT_IMG_PATH . $bs->service_breadcrumb_bg);
             $bs->service_breadcrumb_bg = null;
             $bs->save();
 
@@ -163,7 +164,7 @@ class ServiceController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/services/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $service->main_image = $filename;
         }
 
@@ -250,9 +251,9 @@ class ServiceController extends Controller
         $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/services/' . $service->main_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $service->main_image);
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, 'assets/front/img/services/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $service->main_image = $filename;
         }
 
@@ -304,7 +305,7 @@ class ServiceController extends Controller
     public function delete(Request $request)
     {
         $service = Service::findOrFail($request->service_id);
-        @unlink('assets/front/img/services/' . $service->main_image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $service->main_image);
 
         $this->deleteFromMegaMenu($service);
 
@@ -320,7 +321,7 @@ class ServiceController extends Controller
 
         foreach ($ids as $id) {
             $service = Service::findOrFail($id);
-            @unlink('assets/front/img/services/' . $service->main_image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $service->main_image);
 
             $this->deleteFromMegaMenu($service);
 

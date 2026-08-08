@@ -12,6 +12,7 @@ use Session;
 
 class ScategoryController extends Controller
 {
+    private const IMG_SUBDIR = 'service_category_icons/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -72,7 +73,7 @@ class ScategoryController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/service_category_icons/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $scategory->image = $filename;
         }
 
@@ -118,9 +119,9 @@ class ScategoryController extends Controller
         $scategory->serial_number = $request->serial_number;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/service_category_icons/' . $scategory->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $scategory->image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/service_category_icons/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $scategory->image = $filename;
         }
 
@@ -138,7 +139,7 @@ class ScategoryController extends Controller
             Session::flash('warning', 'First, delete all the services under this category!');
             return back();
         }
-        @unlink('assets/front/img/service_category_icons/' . $scategory->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $scategory->image);
 
         $this->deleteFromMegaMenu($scategory);
 
@@ -187,7 +188,7 @@ class ScategoryController extends Controller
 
         foreach ($ids as $id) {
             $scategory = Scategory::findOrFail($id);
-            @unlink('assets/front/img/service_category_icons/' . $scategory->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $scategory->image);
 
             $this->deleteFromMegaMenu($scategory);
 

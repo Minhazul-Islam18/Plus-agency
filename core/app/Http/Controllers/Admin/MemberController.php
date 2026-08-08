@@ -13,6 +13,7 @@ use Session;
 
 class MemberController extends Controller
 {
+    private const IMG_SUBDIR = 'members/';
     /**
      * Combine the picked dial code with the national number for wa.me,
      * tolerating whatever the admin actually typed in the number field:
@@ -136,7 +137,7 @@ class MemberController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/members/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $member->image = $filename;
         }
 
@@ -191,9 +192,9 @@ class MemberController extends Controller
         $member->whatsapp = $this->whatsappValue($request);
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/members/' . $member->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $member->image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/members/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $member->image = $filename;
         }
 
@@ -239,16 +240,16 @@ class MemberController extends Controller
 
         // Handle background image deletion
         if ($request->delete_background == '1') {
-            @unlink(base_path('../assets/front/img/' . $bs->team_bg));
+            @unlink(base_path(FRONT_IMG_DIR . $bs->team_bg));
             $bs->team_bg = null;
         }
 
         if (($version == 'default' || $version == 'dark') && $request->filled('background')) {
             if ($bs->team_bg) {
-                @unlink(base_path('../assets/front/img/' . $bs->team_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $bs->team_bg));
             }
             $filename = uniqid() .'.'. $extBackground;
-            @copy(base_path('../' . $background), base_path('../assets/front/img/' . $filename));
+            @copy(base_path('../' . $background), base_path(FRONT_IMG_DIR . $filename));
             $bs->team_bg = $filename;
         }
 
@@ -270,7 +271,7 @@ class MemberController extends Controller
     {
 
         $member = Member::findOrFail($request->member_id);
-        @unlink('assets/front/img/members/' . $member->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $member->image);
         $member->delete();
 
         Session::flash('success', 'Member deleted successfully!');

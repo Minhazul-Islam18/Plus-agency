@@ -55,9 +55,9 @@ class FooterController extends Controller
         $bs->copyright_text = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->copyright_text);
 
         if ($request->filled('footer_logo')) {
-            @unlink('assets/front/img/' . $bs->footer_logo);
+            @unlink(FRONT_IMG_PATH . $bs->footer_logo);
             $filename = uniqid() .'.'. $extFooterLogo;
-            @copy($footerLogo, 'assets/front/img/' . $filename);
+            @copy($footerLogo, FRONT_IMG_PATH . $filename);
             $bs->footer_logo = $filename;
         }
 

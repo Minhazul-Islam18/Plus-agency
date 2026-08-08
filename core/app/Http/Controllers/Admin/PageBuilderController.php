@@ -329,7 +329,7 @@ class PageBuilderController extends Controller
             $introsec .= "</div>
                         </div>
                         <div class='col-lg-6 " . ($rtl == 1 ? 'pr-lg-0' : 'pl-lg-0') . " px-md-3 px-0'>
-                            <div class='intro-bg' style='background-image: url(" . url('assets/front/img/' . $bs->intro_bg) . ");background-size: cover;'>
+                            <div class='intro-bg' style='background-image: url(" . url(FRONT_IMG_PATH . $bs->intro_bg) . ");background-size: cover;'>
                                 <a id='play-video' class='video-play-button' href='" . $bs->intro_section_video_link . "'>
                                     <span></span>
                                 </a>
@@ -410,7 +410,7 @@ class PageBuilderController extends Controller
                                                     <div class='single-category'>";
                                     if (!empty($scategory->image)) {
                                         $scatsec .= "<div class='img-wrapper'>
-                                                                <img class='lazy' data-src='" . url("assets/front/img/service_category_icons/$scategory->image") . "' alt=''>
+                                                                <img class='lazy' data-src='" . url(FRONT_IMG_PATH . "service_category_icons/$scategory->image") . "' alt=''>
                                                             </div>";
                                     }
                                     $scatsec .= "<div class='text'>
@@ -457,7 +457,7 @@ class PageBuilderController extends Controller
                                 $servicesSec .= "<div class='col-lg-4 col-md-6 col-sm-8'>
                                         <div class='services-item mt-30'>
                                             <div class='services-thumb'>
-                                                <img class='lazy' data-src='" . url('assets/front/img/services/' . $service->main_image) . "' alt='service' />
+                                                <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'services/' . $service->main_image) . "' alt='service' />
                                             </div>
                                             <div class='services-content'>
                                                 <a class='title'";
@@ -509,7 +509,7 @@ class PageBuilderController extends Controller
 
                             <div class='row case-carousel'>";
                 foreach ($portfolios as $key => $portfolio) {
-                    $portfoliosSec .= "<div class='col-lg-3 mx-0 single-case single-case-bg-1 lazy' data-bg='" . url('assets/front/img/portfolios/featured/' . $portfolio->featured_image) . "'>
+                    $portfoliosSec .= "<div class='col-lg-3 mx-0 single-case single-case-bg-1 lazy' data-bg='" . url(FRONT_IMG_PATH . 'portfolios/featured/' . $portfolio->featured_image) . "'>
                                         <div class='outer-container'>
                                             <div class='inner-container'>
                                             <h4>";
@@ -535,7 +535,7 @@ class PageBuilderController extends Controller
 
 
             // Team Section (Default Version)
-            $teamSec = "<div class='team-section section-padding pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url('assets/front/img/' . $bs->team_bg) . ");background-size:cover;'>
+            $teamSec = "<div class='team-section section-padding pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url(FRONT_IMG_PATH . $bs->team_bg) . ");background-size:cover;'>
                 <div class='team-content'>
                 <div class='container'>
                     <div class='row justify-content-center text-center'>
@@ -555,7 +555,7 @@ class PageBuilderController extends Controller
                 foreach ($members as $key => $member) {
                     $teamSec .= "<div class='single-team-member col-lg-3 mx-0'>
                                 <div class='team-img-wrapper'>
-                                    <img class='lazy' data-src='" . url('assets/front/img/members/' . $member->image) . "' alt=''>
+                                    <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'members/' . $member->image) . "' alt=''>
                                     <div class='social-accounts'>
                                         <ul class='social-account-lists'>";
                     if (!empty($member->facebook)) {
@@ -588,7 +588,7 @@ class PageBuilderController extends Controller
 
 
             // Statistics Section (Default Version)
-            $statisticSec = "<div class='statistics-section pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url('assets/front/img/' . $be->statistics_bg) . ");background-size:cover;' id='statisticsSection'>
+            $statisticSec = "<div class='statistics-section pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url(FRONT_IMG_PATH . $be->statistics_bg) . ");background-size:cover;' id='statisticsSection'>
                 <div class='statistics-container' data-gjs-draggable='false' data-gjs-editable='false' data-gjs-removable='false' data-gjs-propagate=" . '["removable","editable","draggable"]' . ">
                     <div class='container'>
                         <statistics-section>
@@ -638,7 +638,7 @@ class PageBuilderController extends Controller
                                     <div class='testimonial-carousel row'>";
                     foreach ($testimonials as $key => $testimonial) {
                         $testimonialSec .= "<div class='single-testimonial col-6 mx-0'>
-                                                <div class='img-wrapper'><img class='lazy' data-src='" . url('assets/front/img/testimonials/' . $testimonial->image) . "' alt=''></div>
+                                                <div class='img-wrapper'><img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'testimonials/' . $testimonial->image) . "' alt=''></div>
                                                 <div class='client-desc'>
                                                     <p class='comment'>" . convertUtf8($testimonial->comment) . "</p>
                                                     <h6 class='name'>" . convertUtf8($testimonial->name) . "</h6>
@@ -677,7 +677,7 @@ class PageBuilderController extends Controller
                     foreach ($blogs as $key => $blog) {
                         $blogSec .= "<div class='single-blog col-lg-4 mx-0'>
                                         <div class='blog-img-wrapper'>
-                                            <img data-src='" . url('assets/front/img/blogs/' . $blog->main_image) . "' alt='' class='lazy'>
+                                            <img data-src='" . url(FRONT_IMG_PATH . 'blogs/' . $blog->main_image) . "' alt='' class='lazy'>
                                         </div>
                                         <div class='blog-txt'>";
 
@@ -706,7 +706,7 @@ class PageBuilderController extends Controller
 
 
 
-            $ctaSec = "<div class='cta-section pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url('assets/front/img/' . $bs->cta_bg) . "); background-size:cover;'>
+            $ctaSec = "<div class='cta-section pb-mb30 lazy " . ($rtl == 1 ? 'pb-rtl' : '') . "' style='background-image: url(" . url(FRONT_IMG_PATH . $bs->cta_bg) . "); background-size:cover;'>
                 <div class='container'>
                     <div class='cta-content'>
                         <div class='row'>
@@ -741,7 +741,7 @@ class PageBuilderController extends Controller
                         $partnerSec .= "<a class='single-partner-item d-block col-lg-3 mx-0' href='" . $partner->url . "' target='_blank'>
                                                 <div class='outer-container'>
                                                     <div class='inner-container'>
-                                                        <img class='lazy' data-src='" . url('assets/front/img/partners/' . $partner->image) . "' alt=''>
+                                                        <img class='lazy' data-src='" . url(FRONT_IMG_PATH . 'partners/' . $partner->image) . "' alt=''>
                                                     </div>
                                                 </div>
                                             </a>";

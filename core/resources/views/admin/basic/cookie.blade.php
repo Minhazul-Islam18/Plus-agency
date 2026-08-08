@@ -90,7 +90,7 @@
                 </div>
                 <div class="form-group">
                   <label for="">Cookie Alert Text **</label>
-                  <textarea class="form-control summernote" name="cookie_alert_text" rows="3" placeholder="Enter Cookie Alert Text" data-height="100">{{convertHtml($abe->cookie_alert_text)}}</textarea>
+                  <textarea class="form-control summernote-cookie" name="cookie_alert_text" rows="3" placeholder="Enter Cookie Alert Text" data-height="100">{{convertHtml($abe->cookie_alert_text)}}</textarea>
                   <p id="errcontent" class="mb-0 text-danger em"></p>
                   @if ($errors->has('cookie_alert_text'))
                     <p class="mb-0 text-danger">{{$errors->first('cookie_alert_text')}}</p>
@@ -112,6 +112,20 @@
       </div>
     </div>
   </div>
+@endsection
 
+@section('scripts')
+  <script>
+    $('.summernote-cookie').summernote({
+      height: $('.summernote-cookie').data('height') || 100,
+      dialogsInBody: true,
+      toolbar: [
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['para', ['ul', 'ol']],
+        ['insert', ['link']],
+        ['view', ['codeview']]
+      ]
+    });
+  </script>
 @endsection
 

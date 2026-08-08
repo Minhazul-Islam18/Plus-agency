@@ -48,9 +48,9 @@ class ContactController extends Controller
             $extBg = pathinfo($request->contact_breadcrumb_bg, PATHINFO_EXTENSION);
 
             if (in_array($extBg, $allowedExts)) {
-                @unlink('assets/front/img/' . $bs->contact_breadcrumb_bg);
+                @unlink(FRONT_IMG_PATH . $bs->contact_breadcrumb_bg);
                 $filename = uniqid() . '.' . $extBg;
-                @copy($request->contact_breadcrumb_bg, 'assets/front/img/' . $filename);
+                @copy($request->contact_breadcrumb_bg, FRONT_IMG_PATH . $filename);
                 $bs->contact_breadcrumb_bg = $filename;
             }
         }
@@ -73,7 +73,7 @@ class ContactController extends Controller
     public function deleteContactBg($langid)
     {
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
-        @unlink('assets/front/img/' . $bs->contact_breadcrumb_bg);
+        @unlink(FRONT_IMG_PATH . $bs->contact_breadcrumb_bg);
         $bs->contact_breadcrumb_bg = NULL;
         $bs->save();
 

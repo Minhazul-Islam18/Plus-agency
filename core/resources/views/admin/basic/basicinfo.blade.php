@@ -146,15 +146,13 @@
                     </div>
                     <div class="col-lg-6">
 
-                        @if ($abe->theme_version != 'dark')
-                            <div class="form-group">
-                                <label>Secondary Base Color Code **</label>
-                                <input class="jscolor form-control ltr" name="secondary_base_color" value="{{$abs->secondary_base_color}}">
-                                @if ($errors->has('secondary_base_color'))
-                                    <p class="mb-0 text-danger">{{$errors->first('secondary_base_color')}}</p>
-                                @endif
-                            </div>
-                        @endif
+                        <div class="form-group">
+                            <label>{{ $abe->theme_version == 'dark' ? 'Gradient / Glow Color Code **' : 'Secondary Base Color Code **' }}</label>
+                            <input class="jscolor form-control ltr" name="secondary_base_color" value="{{$abs->secondary_base_color}}">
+                            @if ($errors->has('secondary_base_color'))
+                                <p class="mb-0 text-danger">{{$errors->first('secondary_base_color')}}</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
 

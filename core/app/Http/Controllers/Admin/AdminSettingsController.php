@@ -91,22 +91,22 @@ class AdminSettingsController extends Controller
         $aps->features = $features;
 
         if ($request->filled('login_logo')) {
-            @unlink('assets/front/img/' . $aps->login_logo);
+            @unlink(FRONT_IMG_PATH . $aps->login_logo);
             $filename = uniqid() . '.' . $extLogo;
-            @copy($logo, 'assets/front/img/' . $filename);
+            @copy($logo, FRONT_IMG_PATH . $filename);
             $aps->login_logo = $filename;
         } elseif ($request->boolean('clear_login_logo')) {
-            @unlink('assets/front/img/' . $aps->login_logo);
+            @unlink(FRONT_IMG_PATH . $aps->login_logo);
             $aps->login_logo = null;
         }
 
         if ($request->filled('login_bg_image')) {
-            @unlink('assets/front/img/' . $aps->login_bg_image);
+            @unlink(FRONT_IMG_PATH . $aps->login_bg_image);
             $filename = uniqid() . '.' . $extBg;
-            @copy($bgImage, 'assets/front/img/' . $filename);
+            @copy($bgImage, FRONT_IMG_PATH . $filename);
             $aps->login_bg_image = $filename;
         } elseif ($request->boolean('clear_login_bg_image')) {
-            @unlink('assets/front/img/' . $aps->login_bg_image);
+            @unlink(FRONT_IMG_PATH . $aps->login_bg_image);
             $aps->login_bg_image = null;
         }
 

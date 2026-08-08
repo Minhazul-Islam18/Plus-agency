@@ -3,6 +3,28 @@
 use App\BasicExtra;
 use App\Page;
 
+// Asset directory constants. Two forms per logical directory: the bare
+// public-URL-relative form (used directly, e.g. LFM uploads) and the
+// base_path()-relative form (prefixed '../', used where code needs an
+// absolute filesystem path, e.g. realpath()/htaccess-guard writes).
+foreach ([
+    'FRONT_IMG_PATH'          => 'assets/front/img/',
+    'FRONT_IMG_DIR'           => '../assets/front/img/',
+    'FRONT_IMG_PUBLIC_DIR'    => 'public/assets/front/img/',
+    'FRONT_ADMIN_IMG_PATH'    => 'assets/admin/img/',
+    'FRONT_ADMIN_IMG_DIR'     => '../assets/admin/img/',
+    'FRONT_INVOICES_PATH'     => 'assets/front/invoices/',
+    'FRONT_RECEIPT_PATH'      => 'assets/front/receipt/',
+    'FRONT_TENDER_INVOICE_DIR' => '../assets/front/invoices/tender/',
+    'FRONT_TENDER_FILES_DIR'  => '../assets/front/files/tender_modules',
+    'FRONT_TENDER_FILES_PATH' => 'assets/front/files/tender_modules/',
+    'FRONT_LFM_FILES_DIR'     => '../assets/lfm/files',
+] as $name => $value) {
+    if (! defined($name)) {
+        define($name, $value);
+    }
+}
+
 if (! function_exists('setEnvironmentValue')) {
     function setEnvironmentValue(array $values)
     {

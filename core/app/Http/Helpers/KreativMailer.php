@@ -22,8 +22,8 @@ class KreativMailer {
 
         $candidates = [
             storage_path('app/public/front/img/' . $filename),
-            base_path('public/assets/front/img/' . $filename),
-            base_path('../assets/front/img/' . $filename),
+            base_path(FRONT_IMG_PUBLIC_DIR . $filename),
+            base_path(FRONT_IMG_DIR . $filename),
         ];
 
         foreach ($candidates as $path) {
@@ -162,6 +162,18 @@ class KreativMailer {
         if (array_key_exists('locked_until', $data)) {
             $body = preg_replace("/{locked_until}/", $data['locked_until'], $body);
         }
+        // Admin-authored freeform text (newsletter subject/content) — str_replace,
+        // never preg_replace, so a stray '$1' or backslash in what the admin typed
+        // can't be misread as a regex backreference in the replacement.
+        if (array_key_exists('newsletter_subject', $data)) {
+            $body = str_replace('{newsletter_subject}', $data['newsletter_subject'], $body);
+        }
+        if (array_key_exists('newsletter_content', $data)) {
+            $body = str_replace('{newsletter_content}', $data['newsletter_content'], $body);
+        }
+        if (array_key_exists('unsubscribe_link', $data)) {
+            $body = str_replace('{unsubscribe_link}', $data['unsubscribe_link'], $body);
+        }
 
         if (session()->has('lang')) {
             $currentLang = Language::where('code', session()->get('lang'))->first();
@@ -198,15 +210,15 @@ class KreativMailer {
 
             // Attachments
             if (array_key_exists('attachment', $data) && $data['type'] == 'productOrder') {
-                $mail->addAttachment('assets/front/invoices/product/' . $data['attachment']);
+                $mail->addAttachment(FRONT_INVOICES_PATH . 'product/' . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'packageSubscription') {
-                $mail->addAttachment('assets/front/invoices/' . $data['attachment']);
+                $mail->addAttachment(FRONT_INVOICES_PATH . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'packageOrder') {
-                $mail->addAttachment('assets/front/invoices/' . $data['attachment']);
+                $mail->addAttachment(FRONT_INVOICES_PATH . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'courseEnroll') {
-                $mail->addAttachment('assets/front/invoices/course/' . $data['attachment']);
+                $mail->addAttachment(FRONT_INVOICES_PATH . 'course/' . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'donation') {
-                $mail->addAttachment('assets/front/invoices/' . $data['attachment']);
+                $mail->addAttachment(FRONT_INVOICES_PATH . $data['attachment']);
             } elseif (array_key_exists('attachment', $data) && $data['type'] == 'tenderDownloadLink') {
                 if (file_exists($data['attachment'])) {
                     $mail->addAttachment($data['attachment'], $data['attachmentName'] ?? basename($data['attachment']));

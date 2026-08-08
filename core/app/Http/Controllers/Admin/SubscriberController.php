@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\BasicExtended;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-use App\Subscriber;
+use App\Http\Helpers\KreativMailer;
 use App\BasicSetting;
-use App\Mail\ContactMail;
+use App\NewsletterLog;
+use App\Subscriber;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Session;
-use Mail;
 
 class SubscriberController extends Controller
 {
@@ -26,7 +24,8 @@ class SubscriberController extends Controller
     }
 
     public function mailsubscriber() {
-      return view('admin.subscribers.mail');
+      $data['subscribers'] = Subscriber::orderBy('id', 'DESC')->get();
+      return view('admin.subscribers.mail', $data);
     }
 
     public function subscsendmail(Request $request) {
@@ -37,64 +36,69 @@ class SubscriberController extends Controller
 
       $request->validate([
         'subject' => 'required',
-        'message' => 'required'
+        'message' => 'required',
+        'recipient_type' => 'required|in:general,personal',
+        'subscriber_ids' => 'required_if:recipient_type,personal|array',
       ]);
 
       $sub = $request->subject;
       $msg = $request->message;
 
-      $subscs = Subscriber::all();
+      $subscs = $request->recipient_type == 'personal'
+          ? Subscriber::whereIn('id', $request->subscriber_ids)->get()
+          : Subscriber::all();
+
+      if ($subscs->isEmpty()) {
+          $request->session()->flash('warning', "No subscriber found!");
+          return back();
+      }
+
       $settings = BasicSetting::first();
-      $from = $settings->contact_mail;
 
-      $be = BasicExtended::first();
+      $mailer = new KreativMailer;
+      $sent = 0;
+      $failed = 0;
 
+      foreach ($subscs as $subsc) {
+          $ok = $mailer->mailFromAdmin([
+              'toMail'              => $subsc->email,
+              'toName'              => $subsc->email,
+              'website_title'       => $settings->website_title,
+              'newsletter_subject'  => $sub,
+              'newsletter_content'  => $msg,
+              'unsubscribe_link'    => route('front.unsubscribe.token', $subsc->unsubscribe_token),
+              'templateType'        => 'newsletter',
+          ]);
 
-        $mail = new PHPMailer(true);
+          if ($ok) {
+              $sent++;
+          } else {
+              $failed++;
+          }
+      }
 
-        if ($be->is_smtp == 1) {
-            try {
-                //Server settings
-                // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
-                $mail->isSMTP();                                            // Send using SMTP
-                $mail->Host       = $be->smtp_host;                    // Set the SMTP server to send through
-                $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-                $mail->Username   = $be->smtp_username;                     // SMTP username
-                $mail->Password   = $be->smtp_password;                               // SMTP password
-                $mail->SMTPSecure = $be->encryption;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-                $mail->Port       = $be->smtp_port;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+      $admin = Auth::guard('admin')->user();
+      NewsletterLog::create([
+          'subject'         => $sub,
+          'message'         => $msg,
+          'recipient_count' => $sent,
+          'failed_count'    => $failed,
+          'sent_by'         => $admin->id ?? null,
+          'sent_by_name'    => $admin->username ?? null,
+      ]);
 
-                //Recipients
-                $mail->setFrom($be->from_mail, $be->from_name);
-
-                foreach ($subscs as $key => $subsc) {
-                    $mail->addAddress($subsc->email);     // Add a recipient
-                }
-            } catch (Exception $e) {
-                // die($e->getMessage());
-            }
-        } else {
-            try {
-
-                //Recipients
-                $mail->setFrom($be->from_mail, $be->from_name);
-                foreach ($subscs as $key => $subsc) {
-                    $mail->addAddress($subsc->email);     // Add a recipient
-                }
-            } catch (Exception $e) {
-                // die($e->getMessage());
-            }
-        }
-
-        // Content
-        $mail->isHTML(true);                                  // Set email format to HTML
-        $mail->Subject = $sub;
-        $mail->Body    = $msg;
-
-        $mail->send();
-
-      Session::flash('success', 'Mail sent successfully!');
+      if ($failed > 0) {
+          Session::flash('warning', "Newsletter sent to {$sent} subscriber(s), {$failed} failed — check the mail logs.");
+      } else {
+          Session::flash('success', "Newsletter sent to {$sent} subscriber(s) successfully!");
+      }
       return back();
+    }
+
+    public function history(Request $request)
+    {
+        $data['logs'] = NewsletterLog::orderBy('id', 'DESC')->paginate(10);
+        return view('admin.subscribers.history', $data);
     }
 
     public function delete(Request $request)

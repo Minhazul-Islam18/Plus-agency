@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('portfolios', function (Blueprint $table) {
-            $table->integer('cost_of_service')->nullable()->after('website_link');
+            if (!Schema::hasColumn('portfolios', 'cost_of_service')) {
+                $table->integer('cost_of_service')->nullable()->after('website_link');
+            }
             $table->string('client_name', 1000)->change();
         });
     }
@@ -23,7 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('portfolios', function (Blueprint $table) {
-            $table->dropColumn('cost_of_service');
+            if (Schema::hasColumn('portfolios', 'cost_of_service')) {
+                $table->dropColumn('cost_of_service');
+            }
             $table->string('client_name', 255)->change();
         });
     }

@@ -14,7 +14,9 @@ class AddStatusToFeaturesTable extends Migration
     public function up()
     {
         Schema::table('features', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->after('serial_number');
+            if (!Schema::hasColumn('features', 'status')) {
+                $table->tinyInteger('status')->default(1)->after('serial_number');
+            }
         });
     }
 
@@ -26,7 +28,9 @@ class AddStatusToFeaturesTable extends Migration
     public function down()
     {
         Schema::table('features', function (Blueprint $table) {
-            $table->dropColumn('status');
+            if (Schema::hasColumn('features', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 }

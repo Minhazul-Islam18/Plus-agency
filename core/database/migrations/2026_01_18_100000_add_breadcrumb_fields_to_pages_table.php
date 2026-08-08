@@ -14,9 +14,15 @@ class AddBreadcrumbFieldsToPagesTable extends Migration
     public function up()
     {
         Schema::table('pages', function (Blueprint $table) {
-            $table->string('breadcrumb_image', 100)->nullable();
-            $table->string('breadcrumb_overlay_color', 20)->nullable();
-            $table->decimal('breadcrumb_overlay_opacity', 3, 2)->nullable();
+            if (!Schema::hasColumn('pages', 'breadcrumb_image')) {
+                $table->string('breadcrumb_image', 100)->nullable();
+            }
+            if (!Schema::hasColumn('pages', 'breadcrumb_overlay_color')) {
+                $table->string('breadcrumb_overlay_color', 20)->nullable();
+            }
+            if (!Schema::hasColumn('pages', 'breadcrumb_overlay_opacity')) {
+                $table->decimal('breadcrumb_overlay_opacity', 3, 2)->nullable();
+            }
         });
     }
 

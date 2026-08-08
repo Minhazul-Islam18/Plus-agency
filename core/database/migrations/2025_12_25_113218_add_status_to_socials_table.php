@@ -14,7 +14,9 @@ class AddStatusToSocialsTable extends Migration
     public function up()
     {
         Schema::table('socials', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->after('serial_number');
+            if (!Schema::hasColumn('socials', 'status')) {
+                $table->tinyInteger('status')->default(1)->after('serial_number');
+            }
         });
     }
 
@@ -26,7 +28,9 @@ class AddStatusToSocialsTable extends Migration
     public function down()
     {
         Schema::table('socials', function (Blueprint $table) {
-            $table->dropColumn('status');
+            if (Schema::hasColumn('socials', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 }

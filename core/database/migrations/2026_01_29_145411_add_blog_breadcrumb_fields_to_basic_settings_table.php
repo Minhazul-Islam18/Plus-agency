@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('basic_settings', function (Blueprint $table) {
-            $table->string('blog_breadcrumb_bg')->nullable()->after('gallery_breadcrumb_overlay_opacity');
-            $table->string('blog_breadcrumb_overlay_color', 20)->nullable()->default('000000')->after('blog_breadcrumb_bg');
-            $table->decimal('blog_breadcrumb_overlay_opacity', 3, 2)->nullable()->default(0.5)->after('blog_breadcrumb_overlay_color');
+            if (!Schema::hasColumn('basic_settings', 'blog_breadcrumb_bg')) {
+                $table->string('blog_breadcrumb_bg')->nullable()->after('gallery_breadcrumb_overlay_opacity');
+            }
+            if (!Schema::hasColumn('basic_settings', 'blog_breadcrumb_overlay_color')) {
+                $table->string('blog_breadcrumb_overlay_color', 20)->nullable()->default('000000')->after('blog_breadcrumb_bg');
+            }
+            if (!Schema::hasColumn('basic_settings', 'blog_breadcrumb_overlay_opacity')) {
+                $table->decimal('blog_breadcrumb_overlay_opacity', 3, 2)->nullable()->default(0.5)->after('blog_breadcrumb_overlay_color');
+            }
         });
     }
 

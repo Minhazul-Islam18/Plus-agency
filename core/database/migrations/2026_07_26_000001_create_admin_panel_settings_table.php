@@ -16,6 +16,10 @@ class CreateAdminPanelSettingsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('admin_panel_settings')) {
+            return;
+        }
+
         Schema::create('admin_panel_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('language_id')->nullable();

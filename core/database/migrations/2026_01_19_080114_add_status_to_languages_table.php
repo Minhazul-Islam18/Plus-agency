@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('languages', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->after('rtl');
+            if (!Schema::hasColumn('languages', 'status')) {
+                $table->tinyInteger('status')->default(1)->after('rtl');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('languages', function (Blueprint $table) {
-            $table->dropColumn('status');
+            if (Schema::hasColumn('languages', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 };

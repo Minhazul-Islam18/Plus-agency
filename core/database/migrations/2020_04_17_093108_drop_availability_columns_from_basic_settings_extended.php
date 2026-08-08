@@ -14,7 +14,7 @@ class DropAvailabilityColumnsFromBasicSettingsExtended extends Migration
     public function up()
     {
         Schema::table('basic_settings_extended', function (Blueprint $table) {
-            $table->dropColumn(['is_order_package', 'is_packages', 'is_career', 'is_calendar', 'is_rss']);
+            $table->dropColumn(['is_order_package', 'is_packages', 'is_career', 'is_calendar']);
         });
     }
 
@@ -30,7 +30,6 @@ class DropAvailabilityColumnsFromBasicSettingsExtended extends Migration
             $table->tinyInteger('is_packages')->default(1);
             $table->tinyInteger('is_career')->default(1);
             $table->tinyInteger('is_calendar')->default(1);
-            $table->tinyInteger('is_rss')->default(1);
         });
     }
 }

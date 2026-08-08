@@ -14,9 +14,15 @@ class AddContactBreadcrumbFieldsToBasicSettingsTable extends Migration
     public function up()
     {
         Schema::table('basic_settings', function (Blueprint $table) {
-            $table->string('contact_breadcrumb_bg', 50)->nullable()->after('contact_subtitle');
-            $table->string('contact_breadcrumb_overlay_color', 20)->nullable()->after('contact_breadcrumb_bg');
-            $table->decimal('contact_breadcrumb_overlay_opacity', 3, 2)->nullable()->after('contact_breadcrumb_overlay_color');
+            if (!Schema::hasColumn('basic_settings', 'contact_breadcrumb_bg')) {
+                $table->string('contact_breadcrumb_bg', 50)->nullable()->after('contact_subtitle');
+            }
+            if (!Schema::hasColumn('basic_settings', 'contact_breadcrumb_overlay_color')) {
+                $table->string('contact_breadcrumb_overlay_color', 20)->nullable()->after('contact_breadcrumb_bg');
+            }
+            if (!Schema::hasColumn('basic_settings', 'contact_breadcrumb_overlay_opacity')) {
+                $table->decimal('contact_breadcrumb_overlay_opacity', 3, 2)->nullable()->after('contact_breadcrumb_overlay_color');
+            }
         });
     }
 

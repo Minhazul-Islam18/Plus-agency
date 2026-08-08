@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('faqs', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->after('serial_number');
+            if (!Schema::hasColumn('faqs', 'status')) {
+                $table->tinyInteger('status')->default(1)->after('serial_number');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('faqs', function (Blueprint $table) {
-            $table->dropColumn('status');
+            if (Schema::hasColumn('faqs', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 };

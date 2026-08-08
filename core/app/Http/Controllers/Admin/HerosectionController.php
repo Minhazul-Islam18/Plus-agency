@@ -30,6 +30,7 @@ class HerosectionController extends Controller
 
         $rules = [
             'hero_section_title' => 'nullable',
+            'hero_rotating_titles' => 'nullable',
             'hero_section_title_font_size' => 'required|integer|digits_between:1,3',
             'hero_section_text' => 'nullable',
             'hero_section_text_font_size' => 'required|integer|digits_between:1,3',
@@ -58,13 +59,14 @@ class HerosectionController extends Controller
 
         $bs = BS::where('language_id', $langid)->firstOrFail();
         $bs->hero_section_title = $request->hero_section_title;
+        $bs->hero_rotating_titles = $request->hero_rotating_titles;
         $bs->hero_section_text = $request->hero_section_text;
         $bs->hero_section_button_text = $request->hero_section_button_text;
         $bs->hero_section_button_url = $request->hero_section_button_url;
         if ($request->filled('image')) {
-            @unlink('assets/front/img/' . $bs->hero_bg);
+            @unlink(FRONT_IMG_PATH . $bs->hero_bg);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/' . $filename);
+            @copy($image, FRONT_IMG_PATH . $filename);
 
             $bs->hero_bg = $filename;
         }

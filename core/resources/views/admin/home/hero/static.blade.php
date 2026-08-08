@@ -122,6 +122,16 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                          <label for="">Rotating Titles <small class="text-muted">(Dark theme only — one per line, cycles with a flip animation after the Title above. Leave empty to show just the Title.)</small></label>
+                          <textarea class="form-control" name="hero_rotating_titles" rows="3" placeholder="e.g.&#10;Trusted Partner For Growth&#10;Smart Strategy For Wealth">{{$abs->hero_rotating_titles}}</textarea>
+                          <p id="errhero_rotating_titles" class="em text-danger mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
                     <div class="col-lg-6">
                         <div class="form-group">
                         <label for="">Text</label>

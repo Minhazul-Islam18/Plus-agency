@@ -110,6 +110,14 @@
                     </div>
                 </div>
 
+                @if (!empty($abe->theme_version) && $abe->theme_version == 'dark')
+                <div class="form-group">
+                  <label for="">Badge Text</label>
+                  <input name="cta_section_badge" class="form-control" maxlength="40" value="{{$abs->cta_section_badge}}" placeholder="e.g. Let's talk">
+                  <p class="text-warning mb-0">Small pill label shown above the CTA text (dark theme only). Leave blank to hide it.</p>
+                  <p id="errcta_section_badge" class="em text-danger mb-0"></p>
+                </div>
+                @endif
                 <div class="form-group">
                   <label for="">Text **</label>
                   <input name="cta_section_text" class="form-control" value="{{$abs->cta_section_text}}">

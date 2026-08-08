@@ -61,20 +61,31 @@
                                         </select>
                                     </div>
                                 </div>
+                                @if ($abe->theme_version != 'dark')
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label for="">Select a Home Version</label>
                                         <select name="home_version" class="form-control">
-                                            <option value="" selected disabled>Select a Home Version</option>
+                                            <option value="" disabled {{ !in_array($bs->home_version, ['static', 'slider', 'video']) ? 'selected' : '' }}>Select a Home Version</option>
                                             <option value="static" {{$bs->home_version == 'static' ? 'selected' : ''}}>Static</option>
                                             <option value="slider" {{$bs->home_version == 'slider' ? 'selected' : ''}}>Slider</option>
                                             <option value="video" {{$bs->home_version == 'video' ? 'selected' : ''}}>Video</option>
-                                            <option value="water" {{$bs->home_version == 'water' ? 'selected' : ''}}>Water</option>
-                                            <option value="particles" {{$bs->home_version == 'particles' ? 'selected' : ''}}>Particles</option>
-                                            <option value="parallax" {{$bs->home_version == 'parallax' ? 'selected' : ''}}>Parallax</option>
                                         </select>
                                     </div>
                                 </div>
+                                @else
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label for="">Select a Home Version</label>
+                                        <select name="home_version" class="form-control">
+                                            <option value="" disabled {{ !in_array($bs->home_version, ['static', 'slider']) ? 'selected' : '' }}>Select a Home Version</option>
+                                            <option value="static" {{$bs->home_version == 'static' ? 'selected' : ''}}>Static (signature hero)</option>
+                                            <option value="slider" {{$bs->home_version == 'slider' ? 'selected' : ''}}>Slider</option>
+                                        </select>
+                                        <p class="text-warning mb-0">Dark theme's <strong>Slider</strong> pulls from the same <strong>Sliders</strong> content below (image, title, text, button) — the other Home Version options are light-theme only.</p>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                         </form>
                     </div>

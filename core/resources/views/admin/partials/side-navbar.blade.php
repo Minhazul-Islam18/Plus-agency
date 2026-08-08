@@ -294,9 +294,13 @@
 
 @elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/settings') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/subscribers') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/history') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/statistics') active
 
 @elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers') active
-@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') active @endif">
+@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers/history') active @endif">
                         <a data-toggle="collapse" href="#usersManagement">
                             <i class="la flaticon-users"></i>
                             <p>Users Management</p>
@@ -307,9 +311,13 @@
 
 @elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/settings') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/subscribers') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/history') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/statistics') show
 
 @elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') show @endif"
+@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers/history') show @endif"
                             id="usersManagement">
                             <ul class="nav nav-collapse">
 
@@ -326,14 +334,20 @@
                                 <li
                                     class="
 @if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/settings') selected
-@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') selected @endif">
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') selected
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/subscribers') selected
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/history') selected
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/statistics') selected @endif">
                                     <a data-toggle="collapse" href="#pushNotification">
                                         <span class="sub-item">Push Notification</span>
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
 @if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/settings') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') show @endif"
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/send') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/subscribers') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/history') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/pushnotification/statistics') show @endif"
                                         id="pushNotification">
                                         <ul class="nav nav-collapse subnav">
                                             <li class="@if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/settings') active @endif">
@@ -346,6 +360,21 @@
                                                     <span class="sub-item">Send Notification</span>
                                                 </a>
                                             </li>
+                                            <li class="@if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/subscribers') active @endif">
+                                                <a href="{{ route('admin.pushnotification.subscribers') }}">
+                                                    <span class="sub-item">Subscribers</span>
+                                                </a>
+                                            </li>
+                                            <li class="@if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/history') active @endif">
+                                                <a href="{{ route('admin.pushnotification.history') }}">
+                                                    <span class="sub-item">Notification History</span>
+                                                </a>
+                                            </li>
+                                            <li class="@if (request()->path() == config('app.admin_prefix','admin').'/pushnotification/statistics') active @endif">
+                                                <a href="{{ route('admin.pushnotification.statistics') }}">
+                                                    <span class="sub-item">Statistics</span>
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </li>
@@ -354,14 +383,16 @@
                                 <li
                                     class="
 @if (request()->path() == config('app.admin_prefix','admin').'/subscribers') selected
-@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') selected @endif">
+@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') selected
+@elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers/history') selected @endif">
                                     <a data-toggle="collapse" href="#subscribers">
                                         <span class="sub-item">Subscribers</span>
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
 @if (request()->path() == config('app.admin_prefix','admin').'/subscribers') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') show @endif"
+@elseif(request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/subscribers/history') show @endif"
                                         id="subscribers">
                                         <ul class="nav nav-collapse subnav">
                                             <li class="@if (request()->path() == config('app.admin_prefix','admin').'/subscribers') active @endif">
@@ -372,6 +403,11 @@
                                             <li class="@if (request()->path() == config('app.admin_prefix','admin').'/mailsubscriber') active @endif">
                                                 <a href="{{ route('admin.mailsubscriber') }}">
                                                     <span class="sub-item">Mail to Subscribers</span>
+                                                </a>
+                                            </li>
+                                            <li class="@if (request()->path() == config('app.admin_prefix','admin').'/subscribers/history') active @endif">
+                                                <a href="{{ route('admin.subscribers.history') }}">
+                                                    <span class="sub-item">Newsletter History</span>
                                                 </a>
                                             </li>
                                         </ul>

@@ -97,13 +97,14 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="{{ $isDarkTheme ? 'col-lg-12' : 'col-lg-6' }}">
                                 <div class="form-group">
                                     <label for="">Title </label>
                                     <input type="text" class="form-control" name="title" value="{{$slider->title}}" placeholder="Enter Title">
                                     <p id="errtitle" class="text-danger mb-0 em"></p>
                                 </div>
                             </div>
+                            @unless ($isDarkTheme)
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="">Title Font Size **</label>
@@ -111,17 +112,19 @@
                                     <p id="errtitle_font_size" class="em text-danger mb-0"></p>
                                 </div>
                             </div>
+                            @endunless
                         </div>
 
 
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="{{ $isDarkTheme ? 'col-lg-12' : 'col-lg-6' }}">
                                 <div class="form-group">
                                     <label for="">Text </label>
                                     <input type="text" class="form-control" name="text" value="{{$slider->text}}" placeholder="Enter Text">
                                     <p id="errtext" class="text-danger mb-0 em"></p>
                                 </div>
                             </div>
+                            @unless ($isDarkTheme)
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="">Text Font Size **</label>
@@ -129,17 +132,19 @@
                                     <p id="errtext_font_size" class="em text-danger mb-0"></p>
                                 </div>
                             </div>
+                            @endunless
                         </div>
 
 
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="{{ $isDarkTheme ? 'col-lg-12' : 'col-lg-6' }}">
                                 <div class="form-group">
                                     <label for="">Button Text </label>
                                     <input type="text" class="form-control" name="button_text" value="{{$slider->button_text}}" placeholder="Enter Button Text">
                                     <p id="errbutton_text" class="text-danger mb-0 em"></p>
                                 </div>
                             </div>
+                            @unless ($isDarkTheme)
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="">Button Text Font Size **</label>
@@ -147,6 +152,7 @@
                                     <p id="errbutton_text_font_size" class="em text-danger mb-0"></p>
                                 </div>
                             </div>
+                            @endunless
                         </div>
 
 

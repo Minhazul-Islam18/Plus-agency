@@ -17,7 +17,7 @@ class CreateFeaturesTable extends Migration
             $table->bigIncrements('id');
             $table->integer('language_id')->default(0);
             $table->string('icon', 255)->nullable();
-            $table->string('title', 50)->nullable();
+            $table->string('title', 80)->nullable();
             $table->string('color', 20)->nullable();
             $table->integer('serial_number')->default(0);
         });

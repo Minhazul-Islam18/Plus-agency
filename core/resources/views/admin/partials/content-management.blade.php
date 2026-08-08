@@ -4,6 +4,7 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/introsection') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') active
 @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) active
@@ -22,6 +23,7 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/partners') active
 @elseif(request()->is(config('app.admin_prefix','admin').'/partner/*/edit')) active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/portfoliosection') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/tendersection') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/blogsection') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/member/create') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/sections') active
@@ -67,6 +69,7 @@
     @elseif(request()->path() == config('app.admin_prefix','admin').'/introsection') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
     @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show
@@ -85,6 +88,7 @@
     @elseif(request()->path() == config('app.admin_prefix','admin').'/partners') show
     @elseif(request()->is(config('app.admin_prefix','admin').'/partner/*/edit')) show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/portfoliosection') show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/tendersection') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/blogsection') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/member/create') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/sections') show
@@ -130,6 +134,7 @@
             @elseif(request()->path() == config('app.admin_prefix','admin').'/introsection') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') selected
+            @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') selected
             @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) selected
@@ -148,6 +153,7 @@
             @elseif(request()->path() == config('app.admin_prefix','admin').'/partners') selected
             @elseif(request()->is(config('app.admin_prefix','admin').'/partner/*/edit')) selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/portfoliosection') selected
+            @elseif(request()->path() == config('app.admin_prefix','admin').'/tendersection') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/blogsection') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/member/create') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/sections') selected @endif">
@@ -160,6 +166,7 @@
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/introsection') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') show
+                @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
                 @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show
@@ -178,6 +185,7 @@
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/partners') show
                 @elseif(request()->is(config('app.admin_prefix','admin').'/partner/*/edit')) show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/portfoliosection') show
+                @elseif(request()->path() == config('app.admin_prefix','admin').'/tendersection') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/blogsection') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/member/create') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/sections') show @endif"
@@ -188,6 +196,7 @@
                         @if (request()->path() == config('app.admin_prefix','admin').'/herosection/static') selected
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') selected
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') selected
+                        @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') selected
                         @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) selected @endif">
                             <a data-toggle="collapse" href="#herosection">
                                 <span class="sub-item">Hero Section</span>
@@ -197,15 +206,29 @@
                         @if (request()->path() == config('app.admin_prefix','admin').'/herosection/static') show
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
+                        @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
                         @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show @endif"
                                 id="herosection">
                                 <ul class="nav nav-collapse subnav">
-                                    <li class="@if (request()->path() == config('app.admin_prefix','admin').'/herosection/static') active @endif">
-                                        <a
-                                            href="{{ route('admin.herosection.static') . '?language=' . $default->code }}">
-                                            <span class="sub-item">Static Version</span>
-                                        </a>
-                                    </li>
+                                    {{-- Static & Video are light-theme-only variants. Dark theme's
+                                         own "Static" is the signature-hero settings page (separate
+                                         DarkHeroSetting model) rather than herosection.static. Slider
+                                         is shared between both themes — same model/admin page either
+                                         way — so it always shows regardless of theme. --}}
+                                    @if ($be->theme_version == 'dark')
+                                        <li class="@if (request()->path() == config('app.admin_prefix','admin').'/darkhero') active @endif">
+                                            <a href="{{ route('admin.darkhero.index') . '?language=' . $default->code }}">
+                                                <span class="sub-item">Static Version</span>
+                                            </a>
+                                        </li>
+                                    @else
+                                        <li class="@if (request()->path() == config('app.admin_prefix','admin').'/herosection/static') active @endif">
+                                            <a
+                                                href="{{ route('admin.herosection.static') . '?language=' . $default->code }}">
+                                                <span class="sub-item">Static Version</span>
+                                            </a>
+                                        </li>
+                                    @endif
                                     <li
                                         class="
                             @if (request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') active
@@ -214,12 +237,14 @@
                                             <span class="sub-item">Slider Version</span>
                                         </a>
                                     </li>
-                                    <li class="@if (request()->path() == config('app.admin_prefix','admin').'/herosection/video') active @endif">
-                                        <a
-                                            href="{{ route('admin.herosection.video') . '?language=' . $default->code }}">
-                                            <span class="sub-item">Video Version</span>
-                                        </a>
-                                    </li>
+                                    @if ($be->theme_version != 'dark')
+                                        <li class="@if (request()->path() == config('app.admin_prefix','admin').'/herosection/video') active @endif">
+                                            <a
+                                                href="{{ route('admin.herosection.video') . '?language=' . $default->code }}">
+                                                <span class="sub-item">Video Version</span>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </div>
                         </li>
@@ -277,6 +302,13 @@
                             <li class="@if (request()->path() == config('app.admin_prefix','admin').'/portfoliosection') active @endif">
                                 <a href="{{ route('admin.portfoliosection.index') . '?language=' . $default->code }}">
                                     <span class="sub-item">Portfolio Section</span>
+                                </a>
+                            </li>
+                        @endif
+                        @if ($bex?->home_page_pagebuilder == 0)
+                            <li class="@if (request()->path() == config('app.admin_prefix','admin').'/tendersection') active @endif">
+                                <a href="{{ route('admin.tendersection.index') . '?language=' . $default->code }}">
+                                    <span class="sub-item">Tenders Section</span>
                                 </a>
                             </li>
                         @endif

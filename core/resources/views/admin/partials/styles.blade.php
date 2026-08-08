@@ -11,7 +11,7 @@
 </script>
 
 <!-- CSS Files -->
-<link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+<link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 <link rel="stylesheet" href="{{asset('assets/admin/css/fontawesome-iconpicker.min.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/dropzone.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/jquery.dm-uploader.min.css')}}">

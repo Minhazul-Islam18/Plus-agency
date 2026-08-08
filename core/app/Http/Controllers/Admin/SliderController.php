@@ -12,6 +12,7 @@ use Session;
 
 class SliderController extends Controller
 {
+    private const IMG_SUBDIR = 'sliders/';
     public function index(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
@@ -26,7 +27,19 @@ class SliderController extends Controller
     public function edit($id)
     {
         $data['slider'] = Slider::findOrFail($id);
+        $data['isDarkTheme'] = $this->isDarkTheme($data['slider']->language_id);
         return view('admin.home.hero.slider.edit', $data);
+    }
+
+    /**
+     * Title/text/button font-size fields only apply to the light theme's
+     * inline-styled slider markup — the dark theme's hero slider uses its
+     * own fixed clamp() typography and never reads these fields at all.
+     */
+    private function isDarkTheme($languageId): bool
+    {
+        $lang = Language::find($languageId);
+        return (bool) ($lang && $lang->basic_extended && $lang->basic_extended->theme_version == 'dark');
     }
 
     public function store(Request $request)
@@ -39,15 +52,17 @@ class SliderController extends Controller
             'language_id.required' => 'The language field is required'
         ];
 
+        $fontSizeRule = $this->isDarkTheme($request->language_id) ? 'nullable|integer|digits_between:1,3' : 'required|integer|digits_between:1,3';
+
         $rules = [
             'language_id' => 'required',
             'image' => 'required',
             'title' => 'nullable',
-            'title_font_size' => 'required|integer|digits_between:1,3',
+            'title_font_size' => $fontSizeRule,
             'text' => 'nullable',
-            'text_font_size' => 'required|integer|digits_between:1,3',
+            'text_font_size' => $fontSizeRule,
             'button_text' => 'nullable',
-            'button_text_font_size' => 'required|integer|digits_between:1,3',
+            'button_text_font_size' => $fontSizeRule,
             'button_url' => 'nullable|max:255',
             'serial_number' => 'required|integer',
         ];
@@ -81,7 +96,7 @@ class SliderController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/sliders/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $slider->image = $filename;
         }
 
@@ -98,13 +113,16 @@ class SliderController extends Controller
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
+        $slider = Slider::findOrFail($request->slider_id);
+        $fontSizeRule = $this->isDarkTheme($slider->language_id) ? 'nullable|integer|digits_between:1,3' : 'required|integer|digits_between:1,3';
+
         $rules = [
             'title' => 'nullable',
-            'title_font_size' => 'required|integer|digits_between:1,3',
+            'title_font_size' => $fontSizeRule,
             'text' => 'nullable',
-            'text_font_size' => 'required|integer|digits_between:1,3',
+            'text_font_size' => $fontSizeRule,
             'button_text' => 'nullable',
-            'button_text_font_size' => 'required|integer|digits_between:1,3',
+            'button_text_font_size' => $fontSizeRule,
             'button_url' => 'nullable|max:255',
             'serial_number' => 'required|integer',
         ];
@@ -125,14 +143,13 @@ class SliderController extends Controller
             return response()->json($validator->errors());
         }
 
-        $slider = Slider::findOrFail($request->slider_id);
         $slider->title = $request->title;
         $slider->title_font_size = $request->title_font_size;
 
         if ($request->filled('image')) {
-            @unlink('assets/front/img/sliders/' . $slider->image);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $slider->image);
             $filename = uniqid() .'.'. $extImage;
-            @copy($image, 'assets/front/img/sliders/' . $filename);
+            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $slider->image = $filename;
         }
 
@@ -153,7 +170,7 @@ class SliderController extends Controller
     {
 
         $slider = Slider::findOrFail($request->slider_id);
-        @unlink('assets/front/img/sliders/' . $slider->image);
+        @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $slider->image);
         $slider->delete();
 
         Session::flash('success', 'Slider deleted successfully!');

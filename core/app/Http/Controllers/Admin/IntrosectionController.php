@@ -40,6 +40,7 @@ class IntrosectionController extends Controller
             'intro_section_button_text' => 'nullable|max:15',
             'intro_section_button_url' => 'nullable|max:255',
             'intro_section_video_link' => 'nullable',
+            'intro_section_video_text' => 'nullable|max:30',
             'intro_overlay_color' => 'required',
             'intro_overlay_opacity' => 'required|numeric|max:1|min:0'
         ];
@@ -90,19 +91,20 @@ class IntrosectionController extends Controller
             $videoLink = substr($videoLink, 0, strpos($videoLink, "&"));
         }
         $bs->intro_section_video_link = $videoLink;
+        $bs->intro_section_video_text = $request->intro_section_video_text;
 
         // Handle image deletion
         if ($request->delete_image == '1') {
-            @unlink(base_path('../assets/front/img/' . $bs->intro_bg));
+            @unlink(base_path(FRONT_IMG_DIR . $bs->intro_bg));
             $bs->intro_bg = null;
         }
 
         if ($request->filled('image')) {
             if ($bs->intro_bg) {
-                @unlink(base_path('../assets/front/img/' . $bs->intro_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $bs->intro_bg));
             }
             $filename = uniqid() . '.' . $extImage;
-            @copy(base_path('../' . $image), base_path('../assets/front/img/' . $filename));
+            @copy(base_path('../' . $image), base_path(FRONT_IMG_DIR . $filename));
 
             $bs->intro_bg = $filename;
         }
@@ -119,7 +121,7 @@ class IntrosectionController extends Controller
         if ($request->filled('intro_section_bg')) {
             // Delete old image if exists
             if ($be->intro_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->intro_section_bg));
             }
 
             $filename = uniqid() . '.' . $extIntroSectionBg;
@@ -127,7 +129,7 @@ class IntrosectionController extends Controller
             // Convert to absolute paths
             // assets folder is one level up from core directory
             $sourcePath = base_path('../' . $introSectionBg);
-            $destinationPath = base_path('../assets/front/img/' . $filename);
+            $destinationPath = base_path(FRONT_IMG_DIR . $filename);
 
             // Copy the file
             $copyResult = copy($sourcePath, $destinationPath);
@@ -140,15 +142,15 @@ class IntrosectionController extends Controller
         // Handle intro section background image deletion (only if not uploading new one)
         elseif ($request->delete_intro_section_bg == '1') {
             if ($be->intro_section_bg) {
-                @unlink(base_path('../assets/front/img/' . $be->intro_section_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $be->intro_section_bg));
                 $be->intro_section_bg = null;
             }
         }
 
         if ($request->filled('image_2')) {
-            @unlink(base_path('../assets/front/img/' . $be->intro_bg2));
+            @unlink(base_path(FRONT_IMG_DIR . $be->intro_bg2));
             $filename = uniqid() . '.' . $extImage2;
-            @copy(base_path('../' . $image2), base_path('../assets/front/img/' . $filename));
+            @copy(base_path('../' . $image2), base_path(FRONT_IMG_DIR . $filename));
 
             $be->intro_bg2 = $filename;
         }

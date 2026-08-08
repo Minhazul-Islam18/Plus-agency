@@ -86,6 +86,34 @@
 
             <div class="card">
                 <div class="card-header">
+                    <div class="card-title">Section Heading <small class="text-muted">(dark theme only)</small></div>
+                </div>
+                <div class="card-body">
+                    <form id="ajaxFormSection" action="{{ route('admin.feature.section.update', $lang_id) }}" method="post" onsubmit="return false;">
+                        @csrf
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="">Eyebrow</label>
+                                    <input type="text" class="form-control" name="feature_section_title" value="{{ $abs->feature_section_title ?? '' }}" placeholder="e.g. Areas of Expertise">
+                                    <p id="errfeature_section_title" class="em text-danger mb-0"></p>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="">Heading</label>
+                                    <input type="text" class="form-control" name="feature_section_subtitle" value="{{ $abs->feature_section_subtitle ?? '' }}" placeholder="e.g. Four disciplines, one integrated advisory practice.">
+                                    <p id="errfeature_section_subtitle" class="em text-danger mb-0"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="submitBtnSection" class="btn btn-success">Update</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
                     <div class="row">
                         <div class="col-lg-4">
                             <div class="card-title d-inline-block">Features</div>
@@ -253,6 +281,43 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            $('#submitBtnSection').on('click', function(e) {
+                $(e.target).attr('disabled', true);
+                $(".request-loader").addClass("show");
+                var form = document.getElementById('ajaxFormSection');
+                var fd = new FormData(form);
+
+                $.ajax({
+                    url: $("#ajaxFormSection").attr('action'),
+                    method: $("#ajaxFormSection").attr('method'),
+                    data: fd,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        $(e.target).attr('disabled', false);
+                        $(".request-loader").removeClass("show");
+                        $(".em").each(function() { $(this).html(''); });
+
+                        if (data == "success") {
+                            location.reload();
+                        } else if (typeof data.error != 'undefined') {
+                            bootnotify('Please fix the errors below.', 'Validation Error!', 'danger');
+                            for (let x in data) {
+                                if (x == 'error') continue;
+                                var el = document.getElementById('err' + x);
+                                if (el) el.innerHTML = data[x][0];
+                            }
+                        }
+                    },
+                    error: function(error) {
+                        $(".em").each(function() { $(this).html(''); });
+                        bootnotify('Something went wrong. Please try again.', 'Error!', 'danger');
+                        $(".request-loader").removeClass("show");
+                        $(e.target).attr('disabled', false);
+                    }
+                });
+            });
+
             $('.icp').on('iconpickerSelected', function(event) {
                 $("#inputIcon").val($(".iconpicker-component").find('i').attr('class'));
             });

@@ -6,6 +6,7 @@ use Validator;
 use App\Feature;
 use App\Language;
 use App\BasicExtended;
+use App\BasicSetting;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
@@ -18,8 +19,30 @@ class FeatureController extends Controller
         $lang_id = $lang->id;
         $data['features'] = Feature::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
         $data['lang_id'] = $lang_id;
+        $data['abs'] = BasicSetting::where('language_id', $lang_id)->first();
 
         return view('admin.home.feature.index', $data);
+    }
+
+    public function updateSection(Request $request, $langid)
+    {
+        $rules = [
+            'feature_section_title' => 'nullable',
+            'feature_section_subtitle' => 'nullable',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->feature_section_title = $request->feature_section_title;
+        $bs->feature_section_subtitle = $request->feature_section_subtitle;
+        $bs->save();
+
+        Session::flash('success', 'Features section heading updated successfully!');
+        return 'success';
     }
 
     public function edit($id)
@@ -43,7 +66,7 @@ class FeatureController extends Controller
         $rules = [
             'language_id' => 'required',
             'icon' => 'required',
-            'title' => 'required|max:50',
+            'title' => 'required|max:80',
             'color' => 'required',
             'serial_number' => 'required|integer',
         ];
@@ -70,7 +93,7 @@ class FeatureController extends Controller
     {
         $rules = [
             'icon' => 'required',
-            'title' => 'required|max:50',
+            'title' => 'required|max:80',
             'color' => 'required',
             'serial_number' => 'required|integer',
         ];

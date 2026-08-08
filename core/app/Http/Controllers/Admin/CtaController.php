@@ -30,6 +30,7 @@ class CtaController extends Controller
 
         $rules = [
             'cta_section_text' => 'required|max:80',
+            'cta_section_badge' => 'nullable|max:40',
             'cta_section_button_text' => 'required|max:15',
             'cta_section_button_url' => 'required|max:255',
             'cta_overlay_color' => 'required',
@@ -50,19 +51,25 @@ class CtaController extends Controller
 
         $bs = BS::where('language_id', $langid)->firstOrFail();
         $bs->cta_section_text = $request->cta_section_text;
+        // Field is only rendered in the form for dark theme — don't let a
+        // light-theme save (where it's simply absent from the POST body)
+        // silently wipe a previously-set badge value.
+        if ($request->has('cta_section_badge')) {
+            $bs->cta_section_badge = $request->cta_section_badge;
+        }
         $bs->cta_section_button_text = $request->cta_section_button_text;
         $bs->cta_section_button_url = $request->cta_section_button_url;
 
         if ($request->filled('background')) {
-            @unlink('assets/front/img/' . $bs->cta_bg);
+            @unlink(FRONT_IMG_PATH . $bs->cta_bg);
             $filename = uniqid() .'.'. $extBackground;
-            @copy($background, 'assets/front/img/' . $filename);
+            @copy($background, FRONT_IMG_PATH . $filename);
             $bs->cta_bg = $filename;
         }
         // Handle CTA background image deletion (only if not uploading new one)
         elseif ($request->delete_cta_bg == '1') {
             if ($bs->cta_bg) {
-                @unlink(base_path('../assets/front/img/' . $bs->cta_bg));
+                @unlink(base_path(FRONT_IMG_DIR . $bs->cta_bg));
                 $bs->cta_bg = null;
             }
         }

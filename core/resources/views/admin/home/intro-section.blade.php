@@ -189,6 +189,16 @@
                                             <p id="errintro_section_video_link" class="em text-danger mb-0"></p>
                                         </div>
                                     </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="">Video Tag Text </label>
+                                            <input type="text" class="form-control"
+                                                name="intro_section_video_text"
+                                                value="{{ $abs->intro_section_video_text }}"
+                                                placeholder="e.g. Watch our story">
+                                            <p id="errintro_section_video_text" class="em text-danger mb-0"></p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">

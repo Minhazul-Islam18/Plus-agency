@@ -14,6 +14,13 @@
                 hideCookieDialog();
             }
 
+            // Deny sets no cookie at all — the dialog simply hides for this
+            // page load and reappears on the visitor's next visit, since
+            // nothing was persisted to remember the choice.
+            function denyCookies() {
+                hideCookieDialog();
+            }
+
             function cookieExists(name) {
                 return (document.cookie.split('; ').indexOf(name + '=' + COOKIE_VALUE) !== -1);
             }
@@ -46,8 +53,15 @@
                 buttons[i].addEventListener('click', consentWithCookies);
             }
 
+            const denyButtons = document.getElementsByClassName('js-cookie-consent-deny');
+
+            for (let i = 0; i < denyButtons.length; ++i) {
+                denyButtons[i].addEventListener('click', denyCookies);
+            }
+
             return {
                 consentWithCookies: consentWithCookies,
+                denyCookies: denyCookies,
                 hideCookieDialog: hideCookieDialog
             };
         })();

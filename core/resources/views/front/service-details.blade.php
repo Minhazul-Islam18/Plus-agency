@@ -25,7 +25,58 @@
 
 @section('content')
 
+@if ($be->theme_version == 'dark')
+    <!--    dark service details section start   -->
+    <div class="dark-svcp-section">
+        <div class="dark-svcp-inner @if ($service->sidebar != 1) dark-svcp-inner--full @endif">
+            <div>
+                <div class="dark-svcd-panel">
+                    <div class="dark-service-details">
+                        {!! replaceBaseUrl(convertUtf8($service->content)) !!}
+                    </div>
+                </div>
+            </div>
+            @if ($service->sidebar == 1)
+                <div>
+                    <div class="dark-svcp-widget">
+                        <form class="dark-svcp-search" action="{{ route('front.services') }}">
+                            <input name="category" type="hidden" value="{{ request()->input('category') }}">
+                            <input name="term" type="text" placeholder="{{ __('Search Services') }}"
+                                value="{{ request()->input('term') }}">
+                            <button type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+                        </form>
+                    </div>
 
+                    @if (serviceCategory())
+                        <div class="dark-svcp-widget">
+                            <h4>{{ __('Categories') }}</h4>
+                            <ul class="dark-svcp-cat-list">
+                                @foreach ($scats as $key => $scat)
+                                    <li class="{{ !empty($service->scategory) && $service->scategory->id == $scat->id ? 'is-active' : '' }}">
+                                        <a href="{{ route('front.services', ['category' => $scat->id, 'term' => request()->input('term')]) }}">{{ convertUtf8($scat->name) }}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div class="dark-svcp-widget dark-svcp-newsletter">
+                        <span class="dark-bc-eyebrow">{{ __('SUBSCRIBE') }}</span>
+                        <h4 class="dark-svcp-newsletter-title">{{ __('SUBSCRIBE FOR NEWSLETTER') }}</h4>
+                        <form id="subscribeForm" class="dark-svcp-newsletter-form" action="{{ route('front.subscribe') }}"
+                            method="POST">
+                            @csrf
+                            <input name="email" type="email" placeholder="{{ __('Email') }}">
+                            <button type="submit">{{ __('Subscribe') }}</button>
+                        </form>
+                        <p id="erremail" class="text-danger mb-0 err-email"></p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+    <!--    dark service details section end   -->
+@else
     <!--    services details section start   -->
     <div class="pt-115 pb-110 service-details-section">
         <div class="container">
@@ -85,5 +136,6 @@
         </div>
     </div>
     <!--    services details section end   -->
+@endif
 
 @endsection

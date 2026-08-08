@@ -25,7 +25,7 @@
 
 @section('content')
   <!--   FAQ section start   -->
-  <section class="faq-area-v1 pt-120 pb-120">
+  <section class="faq-area-v1 pt-120 pb-120 @if ($be->theme_version == 'dark') dark-faq-section @endif">
     <div class="container">
       <div class="row">
 
@@ -39,7 +39,7 @@
                         <ul class="nav nav-tabs" id="myTab">
                         @foreach ($categories as $category)
                             <li class="nav-item" role="presentation">
-                            <a class="nav-link {{ $loop->iteration == 1 ? 'show active' : '' }}" data-toggle="tab" href="{{ '#category' . $category->id }}" role="tab" aria-selected="true">{{ $category->name }}</a>
+                            <a class="nav-link {{ $loop->iteration == 1 ? 'show active' : '' }}" data-toggle="tab" href="{{ '#category' . $category->id }}" role="tab" aria-selected="true">{{ $category->name }}@if ($be->theme_version == 'dark')<span class="dark-faq-rail-count">{{ str_pad(\App\Faq::where('category_id', $category->id)->where('status', 1)->count(), 2, '0', STR_PAD_LEFT) }} {{ __('questions') }}</span>@endif</a>
                             </li>
                         @endforeach
                         </ul>
@@ -75,12 +75,18 @@
                     </div>
                     </div>
                 </div>
+                @elseif ($be->theme_version == 'dark')
+                <div class="col-lg-12">
+                    <div class="dark-svcp-empty">
+                        <h3 class="text-center">{{ __('No FAQ Found!') }}</h3>
+                    </div>
+                </div>
                 @endif
 
           @else
 
             @if (count($faqs) == 0)
-            <div class="col-lg-8 offset-lg-2 py-y bg-light">
+            <div class="col-lg-8 offset-lg-2 py-y @if ($be->theme_version == 'dark') dark-svcp-empty @else bg-light @endif">
                 <h3 class="text-center">{{ __('No FAQ Found!') }}</h3>
             </div>
             @else

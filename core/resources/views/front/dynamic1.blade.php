@@ -25,6 +25,21 @@
 
 @section('content')
 
+@if ($be->theme_version == 'dark')
+    <!--   dark custom page section start   -->
+    <div class="dark-svcp-section">
+        <div class="dark-svcp-inner dark-svcp-inner--full">
+            <div>
+                <div class="dark-svcd-panel">
+                    <div class="dark-service-details">
+                        {!! replaceBaseUrl($page->body) !!}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--   dark custom page section end   -->
+@else
     <!--   about company section start   -->
     <div class="about-company-section pt-115 pb-80">
         <div class="container">
@@ -36,4 +51,5 @@
         </div>
     </div>
     <!--   about company section end   -->
+@endif
 @endsection

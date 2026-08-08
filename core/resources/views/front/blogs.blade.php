@@ -29,9 +29,132 @@
 @section('breadcrumb-overlay-opacity', $bs->blog_breadcrumb_overlay_opacity)
 @endif
 
+@if ($be->theme_version == 'dark')
+  @section('breadcrumb-ledger')
+    <div class="dark-bc-ledger-item">
+      <span class="dark-bc-ledger-num">{{ str_pad($blogs->total(), 2, '0', STR_PAD_LEFT) }}</span>
+      <span class="dark-bc-ledger-label">{{ __('Articles Published') }}</span>
+    </div>
+    <div class="dark-bc-ledger-item">
+      <span class="dark-bc-ledger-num">{{ str_pad(count($bcats), 2, '0', STR_PAD_LEFT) }}</span>
+      <span class="dark-bc-ledger-label">{{ __('Categories Covered') }}</span>
+    </div>
+  @endsection
+@endif
+
 @section('content')
 
+@if ($be->theme_version == 'dark')
+  <!--    dark blog page start   -->
+  <div class="dark-svcp-section">
+    <div class="dark-svcp-inner">
+      <div>
+        @if (count($blogs) == 0)
+          <div class="dark-svcp-empty">
+            <h3>{{ __('NO BLOG FOUND') }}</h3>
+          </div>
+        @else
+          @foreach ($blogs as $key => $blog)
+            @php
+              $blogDate = !empty($currentLang) ? \Carbon\Carbon::parse($blog->created_at)->locale($currentLang->code) : \Carbon\Carbon::parse($blog->created_at)->locale('en');
+            @endphp
+            @if ($key == 0)
+              <div class="dark-blogp-feat">
+                <div class="dark-blogp-feat-img">
+                  <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
+                </div>
+                <div class="dark-blogp-feat-body">
+                  <div class="dark-blogp-meta">
+                    <span>{{ __('Admin') }}</span><span class="dot"></span><span class="date">{{ $blogDate->translatedFormat('jS F, Y') }}</span>
+                  </div>
+                  <h2><a href="{{ route('front.blogdetails', [$blog->slug]) }}">{{ strlen($blog->title) > 90 ? mb_substr($blog->title, 0, 90, 'utf-8') . '...' : $blog->title }}</a></h2>
+                  <p>{!! strlen(strip_tags($blog->content)) > 150 ? mb_substr(strip_tags($blog->content), 0, 150, 'utf-8') . '...' : strip_tags($blog->content) !!}</p>
+                  <a href="{{ route('front.blogdetails', [$blog->slug]) }}" class="dark-blogp-link">{{ __('Read More') }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                </div>
+              </div>
+              <div class="dark-blogp-grid">
+            @endif
 
+            @if ($key > 0)
+              <div class="dark-blogp-card">
+                <div class="dark-blogp-card-img">
+                  <span class="dark-blogp-date-badge"><span class="d">{{ $blogDate->format('d') }}</span><span class="m">{{ $blogDate->translatedFormat('M') }}</span></span>
+                  <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
+                </div>
+                <div class="dark-blogp-card-body">
+                  <h3><a href="{{ route('front.blogdetails', [$blog->slug]) }}">{{ strlen($blog->title) > 60 ? mb_substr($blog->title, 0, 60, 'utf-8') . '...' : $blog->title }}</a></h3>
+                  <p>{!! strlen(strip_tags($blog->content)) > 90 ? mb_substr(strip_tags($blog->content), 0, 90, 'utf-8') . '...' : strip_tags($blog->content) !!}</p>
+                  <a href="{{ route('front.blogdetails', [$blog->slug]) }}" class="dark-blogp-link">{{ __('Read More') }} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                </div>
+              </div>
+            @endif
+          @endforeach
+          </div>
+        @endif
+
+        @if ($blogs->hasPages())
+          <nav class="dark-svcp-pagination">
+            {{ $blogs->appends(['term' => request()->input('term'), 'month' => request()->input('month'), 'year' => request()->input('year'), 'category' => request()->input('category')])->links('vendor.pagination.dark-glass') }}
+          </nav>
+        @endif
+      </div>
+
+      <div>
+        <div class="dark-svcp-widget">
+          <form class="dark-svcp-search" action="{{ route('front.blogs', ['category' => request()->input('category'), 'month' => request()->input('month'), 'year' => request()->input('year')]) }}" method="GET">
+            <input name="category" type="hidden" value="{{ request()->input('category') }}">
+            <input name="month" type="hidden" value="{{ request()->input('month') }}">
+            <input name="year" type="hidden" value="{{ request()->input('year') }}">
+            <input name="term" type="text" placeholder="{{ __('Search Blogs') }}" value="{{ request()->input('term') }}">
+            <button type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+          </form>
+        </div>
+
+        <div class="dark-svcp-widget">
+          <h4>{{ __('Categories') }}</h4>
+          <ul class="dark-svcp-cat-list">
+            @foreach ($bcats as $key => $bcat)
+              <li class="{{ request()->input('category') == $bcat->slug ? 'is-active' : '' }}">
+                <a href="{{ route('front.blogs', ['term' => request()->input('term'), 'category' => $bcat->slug, 'month' => request()->input('month'), 'year' => request()->input('year')]) }}">{{ convertUtf8($bcat->name) }}</a>
+              </li>
+            @endforeach
+          </ul>
+        </div>
+
+        <div class="dark-svcp-widget">
+          <h4>{{ __('Archives') }}</h4>
+          <ul class="dark-blogp-archive-list">
+            @foreach ($archives as $key => $archive)
+              @php
+                $myArr = explode('-', $archive->date);
+                $monthNum = $myArr[0];
+                $dateObj = DateTime::createFromFormat('!m', $monthNum);
+                $monthName = $dateObj->format('F');
+                $monthName = !empty($currentLang) ? \Carbon\Carbon::parse($monthName)->locale($currentLang->code) : \Carbon\Carbon::parse($monthName)->locale('en');
+                $yearLabel = !empty($currentLang) ? \Carbon\Carbon::parse($myArr[1])->locale($currentLang->code) : \Carbon\Carbon::parse($myArr[1])->locale('en');
+              @endphp
+              <li class="dark-blogp-archive-item {{ request()->input('month') == $myArr[0] && request()->input('year') == $myArr[1] ? 'is-active' : '' }}">
+                <a href="{{ route('front.blogs', ['term' => request()->input('term'), 'category' => request()->input('category'), 'month' => $myArr[0], 'year' => $myArr[1]]) }}">{{ $monthName->translatedFormat('F') }} {{ $yearLabel->translatedFormat('Y') }}</a>
+              </li>
+            @endforeach
+          </ul>
+        </div>
+
+        <div class="dark-svcp-widget dark-svcp-newsletter">
+          <span class="dark-bc-eyebrow">{{ __('SUBSCRIBE') }}</span>
+          <h4 class="dark-svcp-newsletter-title">{{ __('SUBSCRIBE FOR NEWSLETTER') }}</h4>
+          <form id="subscribeForm" class="dark-svcp-newsletter-form" action="{{ route('front.subscribe') }}" method="POST">
+            @csrf
+            <input name="email" type="email" placeholder="{{ __('Email') }}">
+            <button type="submit">{{ __('Subscribe') }}</button>
+          </form>
+          <p id="erremail" class="text-danger mb-0 err-email"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--    dark blog page end   -->
+@else
   <!--    blog lists start   -->
   <div class="blog-lists section-padding">
      <div class="container">
@@ -162,4 +285,5 @@
      </div>
   </div>
   <!--    blog lists end   -->
+@endif
 @endsection

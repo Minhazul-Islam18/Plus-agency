@@ -238,7 +238,8 @@
 @endsection
 
 @section('content')
-<section class="fmf-dl-section">
+<section class="fmf-dl-section @if ($be->theme_version == 'dark') dark-fmf-dl @endif"
+    @if ($be->theme_version == 'dark') data-particle-network @endif>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-7 col-md-9">

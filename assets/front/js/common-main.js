@@ -23,24 +23,24 @@ function popupAnnouncement($this) {
                         sessionStorage.setItem('closedPopups', JSON.stringify(closedPopups));
     
                         // console.log('closed', $this.data('popup_id'));
-                        if ($this.next('.popup-wrapper').length > 0) {
-                            popupAnnouncement($this.next('.popup-wrapper'));
+                        if ($this.next('.popup-wrapper:not(.dark-popup)').length > 0) {
+                            popupAnnouncement($this.next('.popup-wrapper:not(.dark-popup)'));
                         }
                     }
                 }
             }, 0);
         }, popupDelay);
     } else {
-        if ($this.next('.popup-wrapper').length > 0) {
-            popupAnnouncement($this.next('.popup-wrapper'));
+        if ($this.next('.popup-wrapper:not(.dark-popup)').length > 0) {
+            popupAnnouncement($this.next('.popup-wrapper:not(.dark-popup)'));
         }
     }
 }
 
 $(window).on('load', function() {
 
-    if ($(".popup-wrapper").length > 0) {
-        $firstPopup = $(".popup-wrapper").eq(0);
+    if ($(".popup-wrapper:not(.dark-popup)").length > 0) {
+        $firstPopup = $(".popup-wrapper:not(.dark-popup)").eq(0);
         popupAnnouncement($firstPopup);
     }
     initSW();
@@ -161,6 +161,13 @@ function storePushSubscription(pushSubscription) {
 (function ($) {
     "use strict";
 
+    // syotimer's built-in word list only has 3-letter locale keys, not the
+    // site's 2-letter language codes (document.documentElement.lang) — map
+    // between them, falling back to English for any language not covered.
+    var syotimerLangMap = { en: 'eng', pt: 'por', fr: 'fra', tr: 'tur', ar: 'ara' };
+    var siteLang = (document.documentElement.lang || 'en').toLowerCase();
+    var timerLang = syotimerLangMap[siteLang] || 'eng';
+
     $('.offer-timer').each(function() {
         let $this = $(this);
         let d = new Date($this.data('end_date'));
@@ -177,6 +184,7 @@ function storePushSubscription(pushSubscription) {
             day: da,
             hour: hr,
             minute: min,
+            lang: timerLang,
         });
     });
 

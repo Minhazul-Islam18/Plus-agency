@@ -5,6 +5,7 @@
   action="{{ $notify_url }}"
   method="POST"
 >
+  @csrf
   <input
     type="hidden"
     name="razorpay_payment_id"

@@ -773,7 +773,8 @@
 @endsection
 
 @section('content')
-    <section class="fmf-section">
+    <section class="fmf-section @if ($be->theme_version == 'dark') dark-fmf @endif"
+        @if ($be->theme_version == 'dark') data-particle-network @endif>
         <div class="container">
 
             {{-- Page intro --}}

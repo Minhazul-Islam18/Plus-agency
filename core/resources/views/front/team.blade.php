@@ -25,6 +25,38 @@
 
 @section('content')
 
+@if ($be->theme_version == 'dark')
+  <!--   dark team page start   -->
+  <div class="dark-svcp-section">
+    <div class="dark-team-grid">
+      @foreach ($members as $key => $member)
+        <div class="dark-team-member">
+          <img class="team-img" src="{{ asset('assets/front/img/members/' . $member->image) }}" alt="">
+          <span class="team-scrim"></span>
+          <div class="team-social">
+            @if (!empty($member->facebook))
+              <a href="{{ $member->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            @endif
+            @if (!empty($member->twitter))
+              <a href="{{ $member->twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+            @endif
+            @if (!empty($member->linkedin))
+              <a href="{{ $member->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            @endif
+            @if (!empty($member->whatsapp_link))
+              <a href="{{ $member->whatsapp_link }}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            @endif
+          </div>
+          <div class="team-info">
+            <h3>{{ convertUtf8($member->name) }}</h3>
+            <p>{{ convertUtf8($member->rank) }}</p>
+          </div>
+        </div>
+      @endforeach
+    </div>
+  </div>
+  <!--   dark team page end   -->
+@else
   <!--   team page start   -->
   <div class="team-page">
     <div class="container">
@@ -62,4 +94,5 @@
     </div>
   </div>
   <!--   team page end   -->
+@endif
 @endsection

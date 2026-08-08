@@ -279,6 +279,48 @@
             });
         }
 
+        // tender carousel initialization
+        var tenderCarousel = $('.tender-carousel');
+        if (tenderCarousel.length > 0) {
+            // Disable lazy loading for carousel items to prevent cloning issues
+            tenderCarousel.find('img.lazy').each(function() {
+                var dataSrc = $(this).attr('data-src');
+                if (dataSrc) {
+                    $(this).attr('src', dataSrc);
+                    $(this).removeClass('lazy');
+                }
+            });
+
+            tenderCarousel.owlCarousel({
+                loop: true,
+                dots: false,
+                margin: 22,
+                autoplay: true,
+                smartSpeed: 1000,
+                slideBy: 1,
+                startPosition: 0,
+                autoplayTimeout: 5000,
+                autoplayHoverPause: true,
+                nav: true,
+                rtl: rtl == 1 ? true : false,
+                navText: ["<i class='flaticon-left-arrow'></i>", "<i class='flaticon-right-arrow'></i>"],
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    768: {
+                        items: 2
+                    },
+                    992: {
+                        items: 2
+                    },
+                    1200: {
+                        items: 3
+                    }
+                }
+            });
+        }
+
         // language dropdown toggle on clicking button
         $('.language-btn').on('click', function(event) {
             event.preventDefault();
@@ -292,10 +334,13 @@
         });
 
 
-        // slicknav initialization
-        $('#mainMenu').slicknav({
-            prependTo: '#mobileMenu'
-        });
+        // slicknav initialization — skipped when the dark-theme custom
+        // offcanvas menu is present (dark-offcanvas-fx.js drives that one).
+        if (!document.getElementById('darkOcPanel')) {
+            $('#mainMenu').slicknav({
+                prependTo: '#mobileMenu'
+            });
+        }
 
         // Back to top
         $('.back-to-top').on('click', function() {
@@ -413,7 +458,12 @@
     // the page's own critical-path resources.
     $(window).on('load', function() {
         if ($("#bgndVideo").length > 0) {
-            $("#bgndVideo").YTPlayer();
+            try {
+                $("#bgndVideo").YTPlayer();
+            } catch (e) {
+                // A malformed/unrecognised video link shouldn't be able to
+                // break anything else running on window 'load'.
+            }
         }
     });
 }(jQuery));

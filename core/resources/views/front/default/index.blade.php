@@ -53,7 +53,9 @@
 
 @section('content')
   <!--   hero area start   -->
-  @if ($bs->home_version == 'static')
+  @if ($be->theme_version == 'dark')
+    @includeif('front.default.partials.dark.hero')
+  @elseif ($bs->home_version == 'static')
     @includeif('front.default.partials.static')
   @elseif ($bs->home_version == 'slider')
     @includeif('front.default.partials.slider')
@@ -69,6 +71,9 @@
   <!--   hero area end    -->
 
 
+  @if ($be->theme_version == 'dark')
+    @includeif('front.default.partials.dark.intro')
+  @else
   <div class="intro-section {{ count($features) > 0 ? 'has-features' : '' }}">
       <div class="intro-section-backdrop"></div>
       <div class="container" style="position: relative; z-index: 2;">
@@ -98,6 +103,7 @@
 
       </div>
   </div>
+  @endif
 
   @if (!empty($home->html))
   {!! convertHtml(convertUtf8($home->html)) !!}

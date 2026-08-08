@@ -510,7 +510,7 @@ ul.language-dropdown li:last-child a {
      so max-width/max-height (which only cap an existing size) render it at
      ~0. Fixed box + contain works for any file type. */
   width: 150px;
-  height: 95px;
+  height: auto;
   object-fit: contain;
 }
 #mobileMenu {
@@ -1586,6 +1586,15 @@ a.contact-btn:hover::after {
   background-image: url(../img/case/header-bg.jpg);
 }
 
+.case-section {
+  padding: 116px 0 90px;
+}
+
+.tender-showcase-section {
+  padding: 116px 0 90px;
+  background-color: #f7f7f7;
+}
+
 .case-carousel {
   position: relative;
 }
@@ -2033,6 +2042,101 @@ a.readmore-btn::after {
 a.readmore-btn:hover::after {
   opacity: 1;
   right: 12px;
+}
+.tender-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  margin: 4px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.tender-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+.tender-card .card-img {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+}
+.tender-card .card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+.tender-card:hover .card-img img {
+  transform: scale(1.06);
+}
+.tender-card .card-img .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.6));
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+}
+.tender-card .card-img .cat-badge {
+  background: #25d06f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-decoration: none;
+}
+.tender-card .card-img .deadline-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(231, 76, 60, 0.9);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.tender-card .card-body {
+  padding: 18px 20px;
+}
+.tender-card .card-body h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  font-family: "Source Serif Pro", serif;
+}
+.tender-card .card-body h4 a {
+  color: #38383c;
+  text-decoration: none;
+  transition: 0.3s;
+}
+.tender-card .card-body h4 a:hover {
+  color: #25d06f;
+}
+.tender-card .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #777;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  margin-top: 10px;
+}
+.tender-card .meta .country {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tender-card .meta .price {
+  font-weight: 700;
+  font-size: 16px;
+  color: #25d06f;
+}
+.tender-card .meta .price.free {
+  color: #27ae60;
 }
 .partner-section .top-border {
   border-top: 2px solid #dbddde;
@@ -3549,4 +3653,7 @@ a#cartIcon span.length {
   .hero-txt span {
     font-size: 16px;
   }
+}
+.floating-wpp {
+  z-index: 9999 !important;
 }

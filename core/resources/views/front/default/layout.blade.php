@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $currentLang->code ?? 'en' }}">
 
 <head>
     <!--Start of Google Analytics script-->
@@ -30,13 +30,13 @@
     <!-- bootstrap css -->
     <link rel="stylesheet" href="{{ asset('assets/front/css/bootstrap.min.css') }}">
     <!-- plugin css -->
-    <link rel="stylesheet" href="{{ asset('assets/front/css/plugin.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/front/css/plugin.min.css') }}">
 
     <!-- main css -->
     <link rel="stylesheet" href="{{ asset_v('assets/front/css/style.css') }}">
 
     <!-- common css -->
-    <link rel="stylesheet" href="{{ asset('assets/front/css/common-style.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('assets/front/css/common-style.css') }}">
     @yield('styles')
 
     @if ($bs->is_tawkto == 1 || $bex?->is_whatsapp == 1)
@@ -77,16 +77,20 @@
 
     @if ($be->theme_version == 'dark')
         <!-- dark version css -->
-        <link rel="stylesheet" href="{{ asset('assets/front/css/dark.css') }}">
+        <link rel="stylesheet" href="{{ asset_v('assets/front/css/dark.css') }}">
         <!-- dark version base color change -->
         <link href="{{ url('/') }}/assets/front/css/dark-base-color.php?color={{ $bs->base_color }}"
             rel="stylesheet">
+        <!-- dark glass theme: centralized CSS vars driven by admin base/secondary color -->
+        <link href="{{ url('/') }}/assets/front/css/dark-glass-vars.php?color={{ $bs->base_color }}&color2={{ $bs->secondary_base_color }}"
+            rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset_v('assets/front/css/dark-glass.css') }}">
     @endif
 
     @if ($rtl == 1)
         <!-- RTL css -->
-        <link rel="stylesheet" href="{{ asset('assets/front/css/rtl.css') }}">
-        <link rel="stylesheet" href="{{ asset('assets/front/css/pb-rtl.css') }}">
+        <link rel="stylesheet" href="{{ asset_v('assets/front/css/rtl.css') }}">
+        <link rel="stylesheet" href="{{ asset_v('assets/front/css/pb-rtl.css') }}">
     @endif
     <!-- jquery js -->
     <script src="{{ asset('assets/front/js/jquery-3.3.1.min.js') }}"></script>
@@ -115,6 +119,53 @@
 <body @if ($rtl == 1) dir="rtl" @endif>
 
     <!--   header area start   -->
+    @if ($be->theme_version == 'dark')
+    <div class="header-area header-absolute dark-header-shell @yield('no-breadcrumb')">
+        <div class="support-bar-area dark-utility-strip">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 support-contact-info d-flex align-items-center">
+                        @if (!empty($bs->support_email))
+                            <span class="address"><i class="far fa-envelope"></i> <a href="mailto:{{ $bs->support_email }}">{{ $bs->support_email }}</a></span>
+                        @endif
+                        @if (!empty($bs->support_phone))
+                            <span class="phone"><i class="flaticon-chat"></i> <a href="tel:{{ preg_replace('/\s+/', '', $bs->support_phone) }}">{{ $bs->support_phone }}</a></span>
+                        @endif
+                    </div>
+                    <div class="col-lg-6 {{ $rtl == 1 ? 'text-left' : 'text-right' }}">
+                        <ul class="social-links">
+                            @foreach ($socials as $key => $social)
+                                <li><a target="_blank" href="{{ $social->url }}"><i
+                                            class="{{ $social->icon }}"></i></a></li>
+                            @endforeach
+                        </ul>
+
+                        @if (!empty($currentLang) && count($langs) > 1)
+                            <div class="language">
+                                <a class="language-btn" href="#"><i class="flaticon-worldwide"></i>
+                                    {{ convertUtf8($currentLang->name) }}</a>
+                                <ul class="language-dropdown">
+                                    @foreach ($langs as $key => $lang)
+                                        <li><a
+                                                href='{{ route('changeLanguage', $lang->code) }}'>{{ convertUtf8($lang->name) }}</a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="dark-nav-bar">
+                @includeIf('front.default.partials.navbar')
+            </div>
+        </div>
+    </div>
+    @else
     <div class="header-area header-absolute @yield('no-breadcrumb')">
         <div class="container">
             <div class="support-bar-area">
@@ -154,31 +205,53 @@
 
         </div>
     </div>
+    @endif
     <!--   header area end   -->
 
 
-    @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation'))
+    @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation') && !request()->routeIs('front.unsubscribe.token'))
         <!--   breadcrumb area start   -->
-        <div class="breadcrumb-area cases lazy" data-bg="@yield('breadcrumb-bg', asset('assets/front/img/' . $bs->breadcrumb))"
-            style="background-size:cover; background-position: center center;">
-            <div class="container">
-                <div class="breadcrumb-txt">
-                    <div class="row">
-                        <div class="col-xl-7 col-lg-8 col-sm-10">
-                            <span>@yield('breadcrumb-title')</span>
-                            <h1>@yield('breadcrumb-subtitle')</h1>
-                            <ul class="breadcumb">
-                                <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
-                                <li>@yield('breadcrumb-link')</li>
-                            </ul>
+        @if ($be->theme_version == 'dark')
+            <div class="dark-breadcrumb-hero">
+                <span class="dark-bc-watermark">@yield('breadcrumb-link')</span>
+                <div class="dark-bc-inner">
+                    <div class="dark-bc-text">
+                        <span class="dark-bc-eyebrow">@yield('breadcrumb-title')</span>
+                        <h1>@yield('breadcrumb-subtitle')</h1>
+                        <ul class="dark-bc-trail">
+                            <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
+                            <li class="current">@yield('breadcrumb-link')</li>
+                        </ul>
+                    </div>
+                    @hasSection('breadcrumb-ledger')
+                        <div class="dark-bc-ledger">
+                            @yield('breadcrumb-ledger')
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @else
+            <div class="breadcrumb-area cases lazy" data-bg="@yield('breadcrumb-bg', asset('assets/front/img/' . $bs->breadcrumb))"
+                style="background-size:cover; background-position: center center;">
+                <div class="container">
+                    <div class="breadcrumb-txt">
+                        <div class="row">
+                            <div class="col-xl-7 col-lg-8 col-sm-10">
+                                <span>@yield('breadcrumb-title')</span>
+                                <h1>@yield('breadcrumb-subtitle')</h1>
+                                <ul class="breadcumb">
+                                    <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
+                                    <li>@yield('breadcrumb-link')</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="breadcrumb-area-overlay"
+                    style="background-color: #@yield('breadcrumb-overlay-color', $be->breadcrumb_overlay_color);opacity: @yield('breadcrumb-overlay-opacity', $be->breadcrumb_overlay_opacity);">
+                </div>
             </div>
-            <div class="breadcrumb-area-overlay"
-                style="background-color: #@yield('breadcrumb-overlay-color', $be->breadcrumb_overlay_color);opacity: @yield('breadcrumb-overlay-opacity', $be->breadcrumb_overlay_opacity);">
-            </div>
-        </div>
+        @endif
         <!--   breadcrumb area end    -->
     @endif
 
@@ -187,9 +260,12 @@
 
 
     <!--    footer section start   -->
-    <footer class="footer-section">
+    <footer class="footer-section @if ($be->theme_version == 'dark') dark-footer-shell @endif">
         <div class="container">
             @if (!($bex?->home_page_pagebuilder == 0 && $bs->top_footer_section == 0))
+                @if ($be->theme_version == 'dark')
+                    @includeif('front.default.partials.dark.footer')
+                @else
                 <div class="top-footer-section">
                     <div class="row">
                         <div class="col-lg-4 col-md-12">
@@ -283,7 +359,7 @@
                                         @endphp
                                         <span>
                                             @foreach ($mails as $mail)
-                                                {{ $mail }}
+                                                <a href="mailto:{{ trim($mail) }}">{{ $mail }}</a>
                                                 @if (!$loop->last)
                                                     ,
                                                 @endif
@@ -295,9 +371,28 @@
                         </div>
                     </div>
                 </div>
+                @endif
             @endif
 
             @if (!($bex?->home_page_pagebuilder == 0 && $bs->copyright_section == 0))
+                @if ($be->theme_version == 'dark')
+                    @php
+                        $legalPages = \App\Page::where('language_id', $currentLang->id ?? null)
+                            ->whereIn('slug', ['Politique-de-confidentialité', 'Termes-&-Conditions'])
+                            ->get(['id', 'title', 'slug']);
+                    @endphp
+                    <div class="copyright-section dark-copyright-section">
+                        <span class="dark-copyright-text">{!! replaceBaseUrl(convertUtf8($bs->copyright_text)) !!}</span>
+                        @if ($legalPages->count())
+                            <div class="dark-copyright-links">
+                                @foreach ($legalPages as $key => $page)
+                                    <a href="{{ route('front.dynamicPage', [$page->slug]) }}">{{ !empty($page->title) ? convertUtf8($page->title) : str_replace('-', ' ', $page->slug) }}</a>
+                                    @if (!$loop->last)<span class="dark-copyright-dot"></span>@endif
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @else
                 <div class="copyright-section">
                     <div class="row">
                         <div class="col-sm-12 text-center">
@@ -305,6 +400,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             @endif
         </div>
     </footer>
@@ -316,9 +412,17 @@
 
     <!--====== PRELOADER PART START ======-->
     @if ($bex?->preloader_status == 1)
-        <div id="preloader">
+        <div id="preloader" class="@if ($be->theme_version == 'dark') dark-preloader @endif">
             <div class="loader revolve">
-                <img src="{{ asset('assets/front/img/' . $bex?->preloader) }}" alt="">
+                @if ($be->theme_version == 'dark')
+                    <span class="dark-preloader-ring"></span>
+                    <span class="dark-preloader-glow"></span>
+                    <span class="dark-preloader-mark">
+                        <img src="{{ asset('assets/front/img/' . $bex?->preloader) }}" alt="">
+                    </span>
+                @else
+                    <img src="{{ asset('assets/front/img/' . $bex?->preloader) }}" alt="">
+                @endif
             </div>
         </div>
     @endif
@@ -326,6 +430,12 @@
 
     <!-- back to top area start -->
     <div class="back-to-top">
+        @if ($be->theme_version == 'dark')
+            <svg class="dark-btt-ring" viewBox="0 0 46 46">
+                <circle class="dark-btt-ring-track" cx="23" cy="23" r="20"></circle>
+                <circle class="dark-btt-ring-progress" cx="23" cy="23" r="20"></circle>
+            </svg>
+        @endif
         <i class="fas fa-chevron-up"></i>
     </div>
     <!-- back to top area end -->
@@ -356,11 +466,47 @@
     <!-- bootstrap js -->
     <script src="{{ asset('assets/front/js/bootstrap.min.js') }}"></script>
     <!-- Plugin js -->
-    <script src="{{ asset('assets/front/js/plugin.min.js') }}"></script>
+    <script src="{{ asset_v('assets/front/js/plugin.min.js') }}"></script>
     <!-- main js -->
-    <script src="{{ asset('assets/front/js/main.js') }}"></script>
+    <script src="{{ asset_v('assets/front/js/main.js') }}"></script>
+    @if ($be->theme_version == 'dark')
+        <!-- dark glass theme: mouse-reactive particle network (self-guards on [data-particle-network]) -->
+        <script src="{{ asset_v('assets/front/js/particle-network.js') }}"></script>
+        <!-- dark glass theme: scroll-triggered stagger reveal (self-guards on .reveal-stagger) -->
+        <script src="{{ asset_v('assets/front/js/dark-reveal.js') }}"></script>
+        <!-- dark glass theme: hero mouse-tracking glow blob + flip-cycling titles -->
+        <script src="{{ asset_v('assets/front/js/dark-hero-fx.js') }}"></script>
+        <!-- dark glass theme: hero slider variant — keyboard/drag nav, autoplay progress (self-guards on #darkHeroSlider) -->
+        <script src="{{ asset_v('assets/front/js/dark-hero-slider-fx.js') }}"></script>
+        <!-- dark glass theme: intro-section video lightbox (self-guards on #darkIntroPlayBtn) -->
+        <script src="{{ asset_v('assets/front/js/dark-intro-fx.js') }}"></script>
+        <!-- dark glass theme: services card-grid Load More (self-guards on #darkSvcLoadMoreBtn) -->
+        <script src="{{ asset_v('assets/front/js/dark-services-fx.js') }}"></script>
+        <!-- dark glass theme: approach step-list scroll-active highlight (self-guards on [data-approach-step]) -->
+        <script src="{{ asset_v('assets/front/js/dark-approach-fx.js') }}"></script>
+        <!-- dark glass theme: statistics counter animation (self-guards on [data-stat]) -->
+        <script src="{{ asset_v('assets/front/js/dark-statistics-fx.js') }}"></script>
+        <!-- dark glass theme: portfolio carousel custom nav wired to Owl's API (self-guards on [data-case-nav]) -->
+        <script src="{{ asset_v('assets/front/js/dark-portfolio-fx.js') }}"></script>
+        <!-- dark glass theme: tenders carousel + live deadline countdown (self-guards on [data-deadline] / .dark-tender-carousel) -->
+        <script src="{{ asset_v('assets/front/js/dark-tenders-fx.js') }}"></script>
+        <!-- dark glass theme: team carousel with capped items (self-guards on .dark-team-carousel) -->
+        <script src="{{ asset_v('assets/front/js/dark-team-fx.js') }}"></script>
+        <!-- dark glass theme: testimonials carousel with capped items (self-guards on .dark-testi-carousel) -->
+        <script src="{{ asset_v('assets/front/js/dark-testimonials-fx.js') }}"></script>
+        <!-- dark glass theme: partners carousel, own smoother/slower pacing (self-guards on .dark-partner-carousel) -->
+        <script src="{{ asset_v('assets/front/js/dark-partners-fx.js') }}"></script>
+        <!-- dark glass theme: blog carousel with capped items (self-guards on .dark-blog-carousel) -->
+        <script src="{{ asset_v('assets/front/js/dark-blog-fx.js') }}"></script>
+        <!-- dark glass theme: back-to-top scroll-progress ring (self-guards on .dark-btt-ring) -->
+        <script src="{{ asset_v('assets/front/js/dark-scrolltop-fx.js') }}"></script>
+        <!-- dark glass theme: custom announcement-popup engine, replaces magnific-popup (self-guards on .popup-wrapper.dark-popup) -->
+        <script src="{{ asset_v('assets/front/js/dark-popup-fx.js') }}"></script>
+        <!-- dark glass theme: custom mobile offcanvas menu, replaces slicknav (self-guards on #darkOcPanel) -->
+        <script src="{{ asset_v('assets/front/js/dark-offcanvas-fx.js') }}"></script>
+    @endif
     <!-- pagebuilder custom js -->
-    <script src="{{ asset('assets/front/js/common-main.js') }}" defer></script>
+    <script src="{{ asset_v('assets/front/js/common-main.js') }}" defer></script>
 
     {{-- Footer "Useful Links" — long link names truncate to ~2 lines with a
          Show more / Show less toggle right after the visible text. Swapping
@@ -388,6 +534,21 @@
             var $p = $toggle.closest('p');
             var $short = $p.find('.footer-text-short');
             var $full = $p.find('.footer-text-full');
+            var expanded = $full.is(':visible');
+
+            $short.toggle(expanded);
+            $full.toggle(!expanded);
+            $toggle.text(expanded ? @json(__('Show more')) : @json(__('Show less')));
+        });
+
+        {{-- Testimonial card comment — same short/full swap + Show more/Show less
+             style as the footer toggles, instead of a hard CSS ellipsis clamp. --}}
+        $(document).on('click', '.testi-comment-toggle', function(e) {
+            e.preventDefault();
+            var $toggle = $(this);
+            var $p = $toggle.closest('.comment');
+            var $short = $p.find('.testi-comment-short');
+            var $full = $p.find('.testi-comment-full');
             var expanded = $full.is(':visible');
 
             $short.toggle(expanded);
@@ -476,6 +637,7 @@
         {!! $bs->addthis_script !!}
     @endif
     <!--End of AddThis script-->
+    @stack('dark-offcanvas')
 </body>
 
 </html>

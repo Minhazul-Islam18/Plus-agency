@@ -28,7 +28,93 @@
     @section('breadcrumb-overlay-opacity', $bs->portfolio_breadcrumb_overlay_opacity)
 @endif
 
+@if ($be->theme_version == 'dark')
+    @section('breadcrumb-ledger')
+        <div class="dark-bc-ledger-item">
+            <span class="dark-bc-ledger-num">{{ str_pad($portfolios->total(), 2, '0', STR_PAD_LEFT) }}</span>
+            <span class="dark-bc-ledger-label">{{ __('Completed Projects') }}</span>
+        </div>
+        @if (serviceCategory())
+            <div class="dark-bc-ledger-item">
+                <span class="dark-bc-ledger-num">{{ str_pad(count($scats), 2, '0', STR_PAD_LEFT) }}</span>
+                <span class="dark-bc-ledger-label">{{ __('Categories Covered') }}</span>
+            </div>
+        @endif
+    @endsection
+@endif
+
 @section('content')
+
+@if ($be->theme_version == 'dark')
+    <!--    dark portfolios page start   -->
+    <div class="dark-pf-layout">
+        @if (serviceCategory())
+            <nav class="dark-pf-rail">
+                <span class="dark-pf-rail-label">{{ __('Categories') }}</span>
+                <ul class="dark-pf-rail-list">
+                    <li class="dark-pf-rail-item {{ empty($category) ? 'is-active' : '' }}">
+                        <a href="{{ route('front.portfolios') }}">
+                            {{ __('All Projects') }}
+                            <span class="dark-pf-rail-count">{{ str_pad(\App\Portfolio::where('language_id', $currentLang->id)->count(), 2, '0', STR_PAD_LEFT) }}</span>
+                        </a>
+                    </li>
+                    @foreach ($scats as $key => $scat)
+                        @php
+                            $scatPortfolioCount = \App\Portfolio::where('language_id', $currentLang->id)
+                                ->whereHas('service', function ($q) use ($scat) {
+                                    $q->where('scategory_id', $scat->id);
+                                })
+                                ->count();
+                        @endphp
+                        <li class="dark-pf-rail-item {{ !empty($category) && $category->id == $scat->id ? 'is-active' : '' }}">
+                            <a href="{{ route('front.portfolios', ['category' => $scat->id]) }}">
+                                {{ convertUtf8($scat->name) }}
+                                <span class="dark-pf-rail-count">{{ str_pad($scatPortfolioCount, 2, '0', STR_PAD_LEFT) }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </nav>
+        @endif
+
+        <div>
+            @if (count($portfolios) == 0)
+                <div class="dark-svcp-empty">
+                    <h3>{{ __('NO PORTFOLIO FOUND') }}</h3>
+                </div>
+            @else
+                <div class="dark-pf-grid">
+                    @foreach ($portfolios as $key => $portfolio)
+                        <a class="dark-pf-card" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
+                            <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
+                            <span class="dark-pf-scrim"></span>
+                            @if (!empty($portfolio->service->scategory))
+                                <span class="dark-pf-tag">{{ convertUtf8($portfolio->service->scategory->name) }}</span>
+                            @endif
+                            <div class="dark-pf-body">
+                                @if (!empty($portfolio->service))
+                                    <div class="service">{{ convertUtf8($portfolio->service->title) }}</div>
+                                @endif
+                                <h3>{{ strlen($portfolio->title) > 60 ? mb_substr($portfolio->title, 0, 60, 'utf-8') . '...' : $portfolio->title }}</h3>
+                                <span class="dark-pf-link">
+                                    {{ __('View Project') }}
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                                </span>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
+            @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator && $portfolios->hasPages())
+                <nav class="dark-pf-pagination">
+                    {{ $portfolios->appends(['category' => request()->input('category')])->links('vendor.pagination.dark-glass') }}
+                </nav>
+            @endif
+        </div>
+    </div>
+    <!--    dark portfolios page end   -->
+@else
     <!--    case lists start   -->
     <div class="case-lists section-padding case-page pt-120 pb-110" id="masonry-portfolio">
         <div class="container">
@@ -64,6 +150,8 @@
                     @else
                         @foreach ($portfolios as $key => $portfolio)
                             @php
+                                $categoryName = '';
+
                                 if (!empty($portfolio->service->scategory)) {
                                     $portfolioCategory = $portfolio->service->scategory;
 
@@ -106,31 +194,34 @@
         </div>
     </div>
     <!--    case lists end   -->
+@endif
 @endsection
 
 @section('scripts')
-    <script>
-        $('#masonry-portfolio').imagesLoaded(function() {
-            // items on button click
-            $('.filter-btn').on('click', 'li', function() {
-                var filterValue = $(this).attr('data-filter');
-                $grid.isotope({
-                    filter: filterValue
+    @if ($be->theme_version != 'dark')
+        <script>
+            $('#masonry-portfolio').imagesLoaded(function() {
+                // items on button click
+                $('.filter-btn').on('click', 'li', function() {
+                    var filterValue = $(this).attr('data-filter');
+                    $grid.isotope({
+                        filter: filterValue
+                    });
+                });
+                // menu active class
+                $('.filter-btn li').on('click', function(e) {
+                    $(this).siblings('.active').removeClass('active');
+                    $(this).addClass('active');
+                    e.preventDefault();
+                });
+                var $grid = $('.masonry-row').isotope({
+                    itemSelector: '.portfolio-column',
+                    percentPosition: true,
+                    masonry: {
+                        columnWidth: 0
+                    }
                 });
             });
-            // menu active class
-            $('.filter-btn li').on('click', function(e) {
-                $(this).siblings('.active').removeClass('active');
-                $(this).addClass('active');
-                e.preventDefault();
-            });
-            var $grid = $('.masonry-row').isotope({
-                itemSelector: '.portfolio-column',
-                percentPosition: true,
-                masonry: {
-                    columnWidth: 0
-                }
-            });
-        });
-    </script>
+        </script>
+    @endif
 @endsection

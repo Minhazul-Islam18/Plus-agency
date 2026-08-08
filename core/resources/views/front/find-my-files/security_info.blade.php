@@ -100,78 +100,154 @@
 @endsection
 
 @section('content')
-<section class="fmf-sv-section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-7 col-md-9">
+@if ($be->theme_version == 'dark')
+    <section class="dark-sv-section" data-particle-network>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
 
-                <h1 class="fmf-sv-title">{{ __('Server-side verification') }}</h1>
+                    <div class="dark-sv-hero">
+                        <div class="dark-sv-badge">
+                            <svg viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 4.5-3.1 8.7-7 10-3.9-1.3-7-5.5-7-10V6l7-4z" /><path d="M9 12l2 2 4-4" /></svg>
+                        </div>
+                        <span class="dark-sv-eyebrow">{{ __('Secure File Recovery') }}</span>
+                        <h1>{{ __('Server-side verification') }}</h1>
+                        <p>{{ __('How your request for the secure download link was checked before we sent it.') }}</p>
+                        <div class="dark-sv-stat"><b>6/6</b><span>{{ __('Checks Passed') }}</span></div>
+                    </div>
 
-                <div class="fmf-sv-card">
-
-                    <span class="fmf-sv-label" style="padding:14px 28px 0; display:block;">
-                        {{ __('Secure files access verification') }}
-                    </span>
-
-                    {{-- Item 1 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('CAPTCHA successfully verified') }}
+                    <div class="dark-sv-ledger-label">{{ __('Verification Ledger') }}</div>
+                    <div class="dark-sv-ledger">
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">01</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('CAPTCHA successfully verified') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
+                        </div>
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">02</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('Email format and order reference validated') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
+                        </div>
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">03</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('Attempt threshold respected') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
+                        </div>
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">04</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('Valid file access record found') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
+                        </div>
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">05</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('Payment status confirmed') }}</div>
+                                <div class="dark-sv-detail">{{ __('paid') }} · {{ __('not refunded') }} · {{ __('not cancelled') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
+                        </div>
+                        <div class="dark-sv-row">
+                            <span class="dark-sv-num">06</span>
+                            <div class="dark-sv-body">
+                                <div class="dark-sv-title">{{ __('Rate-limit & abuse checks passed') }}</div>
+                                <div class="dark-sv-detail">{{ __('per-IP and per-email request throttling') }}</div>
+                            </div>
+                            <span class="dark-sv-status">{{ __('Passed') }}</span>
                         </div>
                     </div>
 
-                    {{-- Item 2 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('Email format and order reference validated') }}
-                        </div>
-                    </div>
-
-                    {{-- Item 3 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('Attempt threshold respected') }}
-                        </div>
-                    </div>
-
-                    {{-- Item 4 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('Valid file access record found') }}
-                        </div>
-                    </div>
-
-                    {{-- Item 5 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('Payment status confirmed') }}
-                            <span style="color:#6b7280; font-size:13px;">({{ __('paid, not refunded, not cancelled') }})</span>
-                        </div>
-                    </div>
-
-                    {{-- Item 6 --}}
-                    <div class="fmf-sv-item">
-                        <span class="fmf-sv-check">✓</span>
-                        <div class="fmf-sv-item-text">
-                            {{ __('Rate-limit & abuse checks passed') }}
-                            <span style="color:#6b7280; font-size:13px;">({{ __('per-IP and per-email request throttling') }})</span>
-                        </div>
+                    <div class="dark-sv-back-wrap">
+                        <a href="{{ route('find_my_files') }}" class="dark-sv-back">
+                            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>{{ __('Back to Secure File Recovery') }}
+                        </a>
                     </div>
 
                 </div>
-                {{-- /card --}}
-
-                <div class="fmf-sv-back">
-                    ← <a href="{{ route('find_my_files') }}">{{ __('Back to Secure File Recovery') }}</a>
-                </div>
-
             </div>
         </div>
-    </div>
-</section>
+    </section>
+@else
+    <section class="fmf-sv-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7 col-md-9">
+
+                    <h1 class="fmf-sv-title">{{ __('Server-side verification') }}</h1>
+
+                    <div class="fmf-sv-card">
+
+                        <span class="fmf-sv-label" style="padding:14px 28px 0; display:block;">
+                            {{ __('Secure files access verification') }}
+                        </span>
+
+                        {{-- Item 1 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('CAPTCHA successfully verified') }}
+                            </div>
+                        </div>
+
+                        {{-- Item 2 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('Email format and order reference validated') }}
+                            </div>
+                        </div>
+
+                        {{-- Item 3 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('Attempt threshold respected') }}
+                            </div>
+                        </div>
+
+                        {{-- Item 4 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('Valid file access record found') }}
+                            </div>
+                        </div>
+
+                        {{-- Item 5 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('Payment status confirmed') }}
+                                <span style="color:#6b7280; font-size:13px;">({{ __('paid, not refunded, not cancelled') }})</span>
+                            </div>
+                        </div>
+
+                        {{-- Item 6 --}}
+                        <div class="fmf-sv-item">
+                            <span class="fmf-sv-check">✓</span>
+                            <div class="fmf-sv-item-text">
+                                {{ __('Rate-limit & abuse checks passed') }}
+                                <span style="color:#6b7280; font-size:13px;">({{ __('per-IP and per-email request throttling') }})</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    {{-- /card --}}
+
+                    <div class="fmf-sv-back">
+                        ← <a href="{{ route('find_my_files') }}">{{ __('Back to Secure File Recovery') }}</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+@endif
 @endsection

@@ -13,6 +13,9 @@ class Guest extends Model
 
     protected $fillable = [
         'endpoint',
+        'device',
+        'browser',
+        'status',
     ];
 
     /**

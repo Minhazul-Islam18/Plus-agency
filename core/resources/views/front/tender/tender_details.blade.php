@@ -2093,8 +2093,8 @@ $preFlag = $preCountry['flag'] ?? '';
                                                     <span class="position">{{ $tender->expert_position }}</span>
                                                 @endif
                                                 @if ($tender->expert_details)
-                                                    <div class="text-box">
-                                                        <p>{{ $tender->expert_details }}</p>
+                                                    <div class="text-box @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                        {!! $tender->expert_details !!}
                                                     </div>
                                                 @endif
                                                 <div class="expert-contact-btns">

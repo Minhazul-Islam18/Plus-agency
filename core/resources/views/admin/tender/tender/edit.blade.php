@@ -227,7 +227,7 @@
                                 {{-- Expert Details --}}
                                 <div class="form-group">
                                     <label>Expert Details **</label>
-                                    <textarea class="form-control" name="expert_details" rows="5" placeholder="Enter Expert Details">{{ $tender->expert_details }}</textarea>
+                                    <textarea class="form-control summernote" name="expert_details" rows="5" placeholder="Enter Expert Details">{{ $tender->expert_details }}</textarea>
                                     <p id="errexpert_details" class="mb-0 text-danger em"></p>
                                 </div>
 

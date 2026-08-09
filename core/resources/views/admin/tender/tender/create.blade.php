@@ -220,7 +220,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
               {{-- Expert Details --}}
               <div class="form-group">
                 <label>Expert Details **</label>
-                <textarea class="form-control" name="expert_details" rows="5"
+                <textarea class="form-control summernote" name="expert_details" rows="5"
                   placeholder="Enter Expert Details"></textarea>
                 <p id="errexpert_details" class="mb-0 text-danger em"></p>
               </div>

@@ -1468,16 +1468,55 @@
                                 </div>
 
                                 <div id="panel-contact_support" style="display:none;">
-                                    <h6>{{ __('Contact Support') }}</h6>
-                                    <div class="fmf-method-placeholder">
-                                        <i class="far fa-envelope"></i>
-                                        <p style="font-size:14px; color:#6b7280; margin:0;">
-                                            {{ __('Please use the') }}
-                                            <a href="{{ route('front.contact') }}"
-                                                style="color:#3b6cf8;">{{ __('contact page') }}</a>
-                                            {{ __('to reach our support team.') }}
-                                        </p>
-                                    </div>
+                                    @if ($be->theme_version == 'dark')
+                                        @php
+                                            $fmfCsMail = !empty($bex->contact_mails ?? null) ? trim(explode(',', $bex->contact_mails)[0]) : null;
+                                            $fmfCsPhone = !empty($bex->contact_numbers ?? null) ? trim(explode(',', $bex->contact_numbers)[0]) : null;
+                                        @endphp
+                                        <div class="dark-fmf-contact">
+                                            <span class="dark-fmf-contact-glow"></span>
+                                            <div class="dark-fmf-contact-icon">
+                                                <span class="dark-fmf-contact-ring"></span>
+                                                <span class="dark-fmf-contact-ring dark-fmf-contact-ring--2"></span>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V8z" /><path d="M3 8l9 6 9-6" /></svg>
+                                            </div>
+                                            <h6 class="dark-fmf-contact-title">{{ __('Need a hand?') }}</h6>
+                                            <p class="dark-fmf-contact-text">
+                                                {{ __('Our support team can help verify your purchase and resend your download link.') }}
+                                            </p>
+                                            @if ($fmfCsMail || $fmfCsPhone)
+                                                <div class="dark-fmf-contact-channels">
+                                                    @if ($fmfCsMail)
+                                                        <a href="mailto:{{ $fmfCsMail }}" class="dark-fmf-contact-chip">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V8z" /><path d="M3 8l9 6 9-6" /></svg>
+                                                            <span>{{ $fmfCsMail }}</span>
+                                                        </a>
+                                                    @endif
+                                                    @if ($fmfCsPhone)
+                                                        <a href="tel:{{ preg_replace('/\s+/', '', $fmfCsPhone) }}" class="dark-fmf-contact-chip">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>
+                                                            <span>{{ $fmfCsPhone }}</span>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                            <a href="{{ route('front.contact') }}" class="dark-fmf-contact-cta">
+                                                <span>{{ __('Visit Contact Page') }}</span>
+                                                <i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg></i>
+                                            </a>
+                                        </div>
+                                    @else
+                                        <h6>{{ __('Contact Support') }}</h6>
+                                        <div class="fmf-method-placeholder">
+                                            <i class="far fa-envelope"></i>
+                                            <p style="font-size:14px; color:#6b7280; margin:0;">
+                                                {{ __('Please use the') }}
+                                                <a href="{{ route('front.contact') }}"
+                                                    style="color:#3b6cf8;">{{ __('contact page') }}</a>
+                                                {{ __('to reach our support team.') }}
+                                            </p>
+                                        </div>
+                                    @endif
                                 </div>
 
                             </div>

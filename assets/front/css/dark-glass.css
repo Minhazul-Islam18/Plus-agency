@@ -7911,7 +7911,7 @@ button.dark-cookie-consent__deny:hover {
 .dark-tender-details .content-box h4 {
   display: none;
 }
-.dark-tender-details .content-box > div {
+.dark-tender-details .content-box > div:not(.expert-wrap) {
   font-size: 14.5px;
   line-height: 1.85;
   color: rgba(255, 255, 255, 0.6);
@@ -8050,32 +8050,52 @@ button.dark-cookie-consent__deny:hover {
 
 /* expert tab */
 .dark-tender-details .expert-wrap {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 22px;
-  max-width: 560px;
-  padding: 26px;
-  border-radius: 20px;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  border-radius: 22px;
+  overflow: hidden;
   background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
 }
 .dark-tender-details .expert-wrap .thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  position: relative;
+  flex: 0 0 280px;
+  min-height: 320px;
+  border-radius: 0;
   overflow: hidden;
-  flex-shrink: 0;
+  background: #0c1420;
 }
 .dark-tender-details .expert-wrap .thumb img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.dark-tender-details .expert-wrap:hover .thumb img {
+  transform: scale(1.08);
+}
+.dark-tender-details .expert-wrap .thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(9, 13, 22, 0.05), rgba(9, 13, 22, 0.45) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 .dark-tender-details .dark-td-avatar-fallback {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  position: relative;
+  flex: 0 0 280px;
+  min-height: 320px;
+  border-radius: 0;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #04101f;
   display: flex;
@@ -8083,31 +8103,81 @@ button.dark-cookie-consent__deny:hover {
   justify-content: center;
   font-family: "Fraunces", Georgia, serif;
   font-weight: 900;
-  font-size: 22px;
+  font-size: 64px;
+}
+.dark-tender-details .expert-wrap .content {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 38px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dark-tender-details .expert-wrap .expert-eyebrow {
+  display: block;
+  font-family: "Plex Mono", monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 10px;
 }
 .dark-tender-details .expert-wrap .content h4 {
   font-family: "Fraunces", Georgia, serif;
-  font-size: 18px;
+  font-size: 26px;
   font-weight: 700;
   color: #fff;
-  margin: 0 0 4px;
+  margin: 0 0 10px;
+  line-height: 1.2;
 }
 .dark-tender-details .expert-wrap .position {
-  display: block;
+  display: inline-block;
+  width: fit-content;
+  padding: 5px 14px;
+  border-radius: 100px;
+  background: rgba(var(--accent-2-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-2-rgb), 0.3);
   font-family: "Plex Mono", monospace;
-  font-size: 11.5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--accent-2);
-  margin-bottom: 14px;
+  margin-bottom: 20px;
+}
+.dark-tender-details .expert-wrap .text-box {
+  margin-bottom: 22px;
 }
 .dark-tender-details .expert-wrap .text-box p {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 14px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 12px;
 }
 .dark-tender-details .expert-contact-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+@media (max-width: 767px) {
+  .dark-tender-details .expert-wrap {
+    flex-direction: column;
+  }
+  .dark-tender-details .expert-wrap .thumb,
+  .dark-tender-details .dark-td-avatar-fallback {
+    flex-basis: auto;
+    width: 100%;
+    min-height: 220px;
+  }
+  .dark-tender-details .expert-wrap .thumb::after {
+    background: linear-gradient(180deg, rgba(9, 13, 22, 0.05), rgba(9, 13, 22, 0.55) 100%);
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark-tender-details .expert-wrap .content {
+    padding: 28px 24px 32px;
+  }
 }
 .dark-tender-details .btn-whatsapp {
   display: inline-flex;

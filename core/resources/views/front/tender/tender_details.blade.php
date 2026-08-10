@@ -14,22 +14,35 @@
         .expert-wrap {
             display: flex;
             gap: 24px;
-            align-items: flex-start;
+            align-items: stretch;
         }
 
         .expert-wrap .thumb {
-            flex-shrink: 0;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
+            position: relative;
+            flex: 0 0 200px;
+            min-height: 200px;
+            border-radius: 18px;
             overflow: hidden;
-            border: 4px solid #f0f0f0;
         }
 
         .expert-wrap .thumb img {
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        @media (max-width: 575px) {
+            .expert-wrap {
+                flex-direction: column;
+            }
+
+            .expert-wrap .thumb {
+                flex-basis: auto;
+                width: 100%;
+                min-height: 220px;
+            }
         }
 
         .expert-wrap .content h4 {
@@ -2088,6 +2101,9 @@ $preFlag = $preCountry['flag'] ?? '';
                                                 </div>
                                             @endif
                                             <div class="content">
+                                                @if ($be->theme_version == 'dark')
+                                                    <span class="expert-eyebrow">{{ __('Tendering Expert') }}</span>
+                                                @endif
                                                 <h4>{{ $tender->expert_name }}</h4>
                                                 @if ($tender->expert_position)
                                                     <span class="position">{{ $tender->expert_position }}</span>

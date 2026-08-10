@@ -183,6 +183,14 @@ class KreativMailer {
 
         $be = $currentLang->basic_extended;
 
+        // Replace {placeholder} tokens in the subject the same way as the body
+        $subject = $temp->email_subject;
+        foreach ($data as $key => $value) {
+            if (is_scalar($value)) {
+                $subject = str_replace('{' . $key . '}', $value, $subject);
+            }
+        }
+
         $mail = new PHPMailer(true);
 
 
@@ -246,14 +254,6 @@ class KreativMailer {
             // Content
             $mail->isHTML(true);
 
-            // Replace {placeholder} tokens in the subject the same way as the body
-            $subject = $temp->email_subject;
-            foreach ($data as $key => $value) {
-                if (is_scalar($value)) {
-                    $subject = str_replace('{' . $key . '}', $value, $subject);
-                }
-            }
-
             $mail->Subject = $subject;
             $mail->Body    = $body;
 
@@ -268,6 +268,42 @@ class KreativMailer {
             ]);
 
             return false;
+        }
+    }
+
+    /**
+     * Fires a one-off test email through whatever SMTP values are currently in
+     * the admin form (not necessarily saved yet), so "Send Test Email" can
+     * verify host/port/username/password before committing them. Works for
+     * any SMTP provider, including Resend's SMTP relay (smtp.resend.com,
+     * username "resend", password = API key).
+     */
+    public static function sendTestSmtp(array $config, string $toMail): array
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = $config['smtp_host'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $config['smtp_username'];
+            $mail->Password   = $config['smtp_password'];
+            $mail->SMTPSecure = $config['encryption'];
+            $mail->Port       = $config['smtp_port'];
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom($config['from_mail'], $config['from_name']);
+            $mail->addAddress($toMail);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'SMTP test email';
+            $mail->Body    = '<p>This is a test email sent from your admin panel\'s SMTP settings. If you received this, SMTP is configured correctly.</p>';
+
+            $mail->send();
+
+            return ['success' => true, 'message' => 'Test email sent successfully.'];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $mail->ErrorInfo ?: $e->getMessage()];
         }
     }
 

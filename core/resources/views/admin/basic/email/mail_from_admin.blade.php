@@ -113,6 +113,21 @@
                         <p class="mb-0 text-danger">{{$errors->first('from_name')}}</p>
                     @endif
                 </div>
+                <hr>
+                <div class="form-group">
+                    <label>Send Test Email</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="smtpTestEmail" placeholder="you@example.com">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-primary" id="smtpTestBtn">Send Test</button>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Sends using the SMTP fields above as currently filled in (doesn't need to be
+                        saved first). Using Resend? Set SMTP Host to <code>smtp.resend.com</code>,
+                        Username to <code>resend</code>, Password to your Resend API key.
+                    </small>
+                </div>
               </div>
             </div>
           </div>
@@ -130,4 +145,62 @@
     </div>
   </div>
 
+@endsection
+
+@section('scripts')
+    <script>
+        $(document).on('click', '#smtpTestBtn', function() {
+            var $btn = $(this);
+            var email = $('#smtpTestEmail').val();
+
+            if (!email) {
+                swal({
+                    title: 'Enter an email',
+                    text: 'Type an address to send the test email to.',
+                    icon: 'warning',
+                    button: 'OK'
+                });
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Sending…');
+
+            $.ajax({
+                url: '{{ route('admin.mailfromadmin.test') }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    test_email: email,
+                    smtp_host: $('[name="smtp_host"]').val(),
+                    smtp_port: $('[name="smtp_port"]').val(),
+                    encryption: $('[name="encryption"]').val(),
+                    smtp_username: $('[name="smtp_username"]').val(),
+                    smtp_password: $('[name="smtp_password"]').val(),
+                    from_mail: $('[name="from_mail"]').val(),
+                    from_name: $('[name="from_name"]').val()
+                },
+                success: function(response) {
+                    swal({
+                        title: response.success ? 'Sent!' : 'Failed',
+                        text: response.message,
+                        icon: response.success ? 'success' : 'error',
+                        button: 'OK'
+                    });
+                },
+                error: function(xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ||
+                        'Test email failed to send.';
+                    swal({
+                        title: 'Failed',
+                        text: msg,
+                        icon: 'error',
+                        button: 'OK'
+                    });
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Send Test');
+                }
+            });
+        });
+    </script>
 @endsection

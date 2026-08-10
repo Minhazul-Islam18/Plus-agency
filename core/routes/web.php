@@ -184,6 +184,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         // Admin Email Settings Routes
         Route::get('/mail-from-admin', 'Admin\EmailController@mailFromAdmin')->name('admin.mailFromAdmin');
         Route::post('/mail-from-admin/update', 'Admin\EmailController@updateMailFromAdmin')->name('admin.mailfromadmin.update');
+        Route::post('/mail-from-admin/test', 'Admin\EmailController@testSmtp')->name('admin.mailfromadmin.test');
         Route::get('/mail-to-admin', 'Admin\EmailController@mailToAdmin')->name('admin.mailToAdmin');
         Route::post('/mail-to-admin/update', 'Admin\EmailController@updateMailToAdmin')->name('admin.mailtoadmin.update');
         Route::get('/email-templates', 'Admin\EmailController@templates')->name('admin.email.templates');

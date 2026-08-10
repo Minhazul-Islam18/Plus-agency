@@ -28,6 +28,7 @@
         "phpmailer/phpmailer": "^6.9",
         "rachidlaasri/laravel-installer": "^4.1",
         "razorpay/razorpay": "2.*",
+        "resend/resend-php": "^1.7",
         "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-cookie-consent": "^3.3",
         "spatie/laravel-sitemap": "^7.2",

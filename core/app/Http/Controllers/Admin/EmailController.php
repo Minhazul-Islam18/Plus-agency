@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\BasicExtended;
 use App\EmailTemplate;
+use App\Http\Helpers\KreativMailer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Session;
@@ -52,6 +53,26 @@ class EmailController extends Controller
 
         Session::flash('success', 'SMTP configuration updated successfully!');
         return back();
+    }
+
+    public function testSmtp(Request $request)
+    {
+        $request->validate([
+            'test_email'    => 'required|email',
+            'smtp_host'     => 'required|string',
+            'smtp_port'     => 'required',
+            'encryption'    => 'nullable|string',
+            'smtp_username' => 'required|string',
+            'smtp_password' => 'required|string',
+            'from_mail'     => 'required|email',
+            'from_name'     => 'required|string',
+        ]);
+
+        $result = KreativMailer::sendTestSmtp($request->only([
+            'smtp_host', 'smtp_port', 'encryption', 'smtp_username', 'smtp_password', 'from_mail', 'from_name',
+        ]), $request->test_email);
+
+        return response()->json($result);
     }
 
     public function mailToAdmin() {

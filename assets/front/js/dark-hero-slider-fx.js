@@ -127,10 +127,13 @@
 
     hero.addEventListener("pointerdown", function (e) {
         // Skip drag entirely when the press starts on a real control (arrow
-        // buttons, rail items) — calling setPointerCapture unconditionally
-        // would redirect the pointerup that follows away from the button,
-        // so the button's native click never fires.
-        if (e.target.closest(".dark-hslider-arrow, .dark-hslider-rail-item")) return;
+        // buttons, rail items, the slide's CTA link) — calling
+        // setPointerCapture unconditionally would redirect the pointerup
+        // that follows away from the element, so its native click never
+        // fires. Chromium enforces this redirect strictly (button/link dead
+        // in Chrome/Edge); Firefox is lenient about it, which is why this
+        // only ever showed up in Chromium browsers.
+        if (e.target.closest(".dark-hslider-arrow, .dark-hslider-rail-item, .dark-hslider-cta")) return;
 
         dragging = true;
         startX = e.clientX;

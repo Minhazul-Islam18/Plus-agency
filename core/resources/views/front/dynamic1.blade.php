@@ -27,8 +27,8 @@
 
 @if ($be->theme_version == 'dark')
     <!--   dark custom page section start   -->
-    <div class="dark-svcp-section">
-        <div class="dark-svcp-inner dark-svcp-inner--full">
+    <div class="dark-svcp-section dark-custom-page-section" data-particle-network data-particle-density="dense">
+        <div class="dark-svcp-inner dark-svcp-inner--full dark-custom-page-inner">
             <div>
                 <div class="dark-svcd-panel">
                     <div class="dark-service-details">

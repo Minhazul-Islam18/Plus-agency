@@ -23,8 +23,13 @@
         var rafId = null;
 
         var isMobile = window.matchMedia('(max-width: 767px)').matches;
-        var COUNT = isMobile ? 42 : 95;
-        var LINK_DIST = isMobile ? 120 : 165;
+        // Per-instance opt-in: data-particle-density="dense" on the same
+        // element as data-particle-network. Every other instance (hero,
+        // find-my-files, tender purchase-complete) keeps the original count
+        // — only whichever container explicitly asks for "dense" gets more.
+        var dense = container.getAttribute('data-particle-density') === 'dense';
+        var COUNT = dense ? (isMobile ? 160 : 500) : (isMobile ? 42 : 95);
+        var LINK_DIST = dense ? (isMobile ? 130 : 180) : (isMobile ? 120 : 165);
         var REPEL_DIST = isMobile ? 80 : 110;
 
         function resize() {

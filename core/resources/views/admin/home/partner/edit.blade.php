@@ -92,6 +92,11 @@
                     </div>
                 </div>
                 <div class="form-group">
+                  <label for="">Partner Name **</label>
+                  <input type="text" class="form-control" name="name" value="{{$partner->name}}" placeholder="Enter Partner Name">
+                  <p id="errname" class="text-danger mb-0 em"></p>
+                </div>
+                <div class="form-group">
                   <label for="">URL **</label>
                   <input type="text" class="form-control ltr" name="url" value="{{$partner->url}}" placeholder="Enter URL of social media account">
                   <p id="errurl" class="text-danger mb-0 em"></p>

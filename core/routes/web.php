@@ -387,6 +387,8 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/partner/{id}/edit', 'Admin\PartnerController@edit')->name('admin.partner.edit');
         Route::post('/partner/update', 'Admin\PartnerController@update')->name('admin.partner.update');
         Route::post('/partner/delete', 'Admin\PartnerController@delete')->name('admin.partner.delete');
+        Route::post('/partner/bulk-delete', 'Admin\PartnerController@bulkDelete')->name('admin.partner.bulk.delete');
+        Route::post('/partner/status', 'Admin\PartnerController@status')->name('admin.partner.status');
         Route::post('/partner/{langid}/section-update', 'Admin\PartnerController@sectionUpdate')->name('admin.partner.section.update');
 
         // Admin Member Routes

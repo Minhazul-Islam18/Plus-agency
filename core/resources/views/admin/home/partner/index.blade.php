@@ -3,9 +3,55 @@
 @php
 $selLang = \App\Language::where('code', request()->input('language'))->first();
 @endphp
-@if(!empty($selLang) && $selLang->rtl == 1)
 @section('styles')
 <style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+    }
+    input:checked+.slider {
+        background-color: #1572E8;
+    }
+    input:focus+.slider {
+        box-shadow: 0 0 1px #1572E8;
+    }
+    input:checked+.slider:before {
+        transform: translateX(26px);
+    }
+    .slider.round {
+        border-radius: 24px;
+    }
+    .slider.round:before {
+        border-radius: 50%;
+    }
+    @if(!empty($selLang) && $selLang->rtl == 1)
     form:not(.modal-form) input,
     form:not(.modal-form) textarea,
     form:not(.modal-form) select,
@@ -16,9 +62,9 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
         direction: rtl;
         text-align: right;
     }
+    @endif
 </style>
 @endsection
-@endif
 
 @section('content')
 <div class="page-header">
@@ -143,6 +189,8 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     </div>
                     <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
                         <a href="#" class="btn btn-primary float-lg-right float-left" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Add Partner</a>
+                        <button class="btn btn-danger float-lg-right float-left btn-sm mr-2 d-none bulk-delete"
+                            data-href="{{ route('admin.partner.bulk.delete') }}"><i class="flaticon-interface-5"></i> Delete</button>
                     </div>
                 </div>
             </div>
@@ -152,34 +200,63 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         @if (count($partners) == 0)
                         <h3 class="text-center">NO PARTNER FOUND</h3>
                         @else
-                        <div class="row">
-                            @foreach ($partners as $key => $partner)
-                            <div class="col-md-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <img src="{{asset('assets/front/img/partners/'.$partner->image)}}" alt="" style="width:100%;">
-                                    </div>
-                                    <div class="card-footer text-center">
-                                        <a class="btn btn-secondary btn-sm mr-2" href="{{route('admin.partner.edit', $partner->id) . '?language=' . request()->input('language')}}">
-                                            <span class="btn-label">
-                                                <i class="fas fa-edit"></i>
-                                            </span>
-                                            Edit
-                                        </a>
-                                        <form class="deleteform d-inline-block" action="{{route('admin.partner.delete')}}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="partner_id" value="{{$partner->id}}">
-                                            <button type="submit" class="btn btn-danger btn-sm deletebtn">
+                        <div class="table-responsive">
+                            <table class="table table-striped mt-3" id="basic-datatables">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            <input type="checkbox" class="bulk-check" data-val="all">
+                                        </th>
+                                        <th scope="col">Partner</th>
+                                        <th scope="col">Logo</th>
+                                        <th scope="col">Link</th>
+                                        <th scope="col">Serial Number</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($partners as $key => $partner)
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="bulk-check" data-val="{{$partner->id}}">
+                                        </td>
+                                        <td>{{$partner->name}}</td>
+                                        <td>
+                                            <img src="{{asset('assets/front/img/partners/'.$partner->image)}}" alt="{{$partner->name}}" width="80">
+                                        </td>
+                                        <td>
+                                            <a href="{{$partner->url}}" target="_blank" rel="noopener">{{$partner->url}}</a>
+                                        </td>
+                                        <td>{{$partner->serial_number}}</td>
+                                        <td>
+                                            <label class="switch">
+                                                <input type="checkbox" class="status-toggle" data-id="{{$partner->id}}" {{$partner->status == 1 ? 'checked' : ''}}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-secondary btn-sm" href="{{route('admin.partner.edit', $partner->id) . '?language=' . request()->input('language')}}">
                                                 <span class="btn-label">
-                                                    <i class="fas fa-trash"></i>
+                                                    <i class="fas fa-edit"></i>
                                                 </span>
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
+                                                Edit
+                                            </a>
+                                            <form class="deleteform d-inline-block" action="{{route('admin.partner.delete')}}" method="post">
+                                                @csrf
+                                                <input type="hidden" name="partner_id" value="{{$partner->id}}">
+                                                <button type="submit" class="btn btn-danger btn-sm deletebtn">
+                                                    <span class="btn-label">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                         @endif
                     </div>
@@ -231,6 +308,11 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         @endforeach
                     </select>
                     <p id="errlanguage_id" class="mb-0 text-danger em"></p>
+                </div>
+                <div class="form-group">
+                    <label for="">Partner Name **</label>
+                    <input type="text" class="form-control" name="name" value="" placeholder="Enter Partner Name">
+                    <p id="errname" class="mb-0 text-danger em"></p>
                 </div>
                 <div class="form-group">
                     <label for="">URL **</label>
@@ -303,6 +385,50 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
     };
 
     $(document).ready(function() {
+
+        // Use event delegation for status toggle to work with paginated rows
+        $(document).on('change', '.status-toggle', function() {
+            let status = $(this).is(':checked') ? 1 : 0;
+            let id = $(this).data('id');
+
+            $.ajax({
+                url: '{{ route('admin.partner.status') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: id,
+                    status: status
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $.notify({
+                            title: 'Success',
+                            message: 'Status updated successfully!',
+                            icon: 'fa fa-check'
+                        }, {
+                            type: 'success',
+                            placement: { from: 'top', align: 'right' },
+                            showProgressbar: true,
+                            time: 1000,
+                            delay: 3000
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    $.notify({
+                        title: 'Error',
+                        message: 'Error updating status!',
+                        icon: 'fa fa-times'
+                    }, {
+                        type: 'danger',
+                        placement: { from: 'top', align: 'right' },
+                        showProgressbar: true,
+                        time: 1000,
+                        delay: 3000
+                    });
+                }
+            });
+        });
 
         // Show delete button on hover for partner background
         $('#thumbPreview2').hover(

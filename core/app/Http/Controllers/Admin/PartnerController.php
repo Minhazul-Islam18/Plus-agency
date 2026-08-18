@@ -37,7 +37,7 @@ class PartnerController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -46,6 +46,7 @@ class PartnerController extends Controller
 
         $rules = [
             'language_id' => 'required',
+            'name' => 'required|max:255',
             'image' => 'required',
             'url' => 'required|max:255',
             'serial_number' => 'required|integer',
@@ -69,6 +70,7 @@ class PartnerController extends Controller
 
         $partner = new Partner;
         $partner->language_id = $request->language_id;
+        $partner->name = $request->name;
         $partner->url = $request->url;
         $partner->serial_number = $request->serial_number;
 
@@ -87,10 +89,11 @@ class PartnerController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
+            'name' => 'required|max:255',
             'url' => 'required|max:255',
             'serial_number' => 'required|integer',
         ];
@@ -112,6 +115,7 @@ class PartnerController extends Controller
         }
 
         $partner = Partner::findOrFail($request->partner_id);
+        $partner->name = $request->name;
         $partner->url = $request->url;
         $partner->serial_number = $request->serial_number;
 
@@ -139,10 +143,33 @@ class PartnerController extends Controller
         return back();
     }
 
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+
+        foreach ($ids as $id) {
+            $partner = Partner::findOrFail($id);
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $partner->image);
+            $partner->delete();
+        }
+
+        Session::flash('success', 'Partner deleted successfully!');
+        return "success";
+    }
+
+    public function status(Request $request)
+    {
+        $partner = Partner::findOrFail($request->id);
+        $partner->status = $request->status;
+        $partner->save();
+
+        return response()->json(['success' => true]);
+    }
+
     public function sectionUpdate(Request $request, $langid)
     {
         $image = $request->background;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

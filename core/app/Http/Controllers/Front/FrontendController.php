@@ -94,7 +94,7 @@ class FrontendController extends Controller
                     'faqs' => Faq::orderBy('serial_number', 'ASC')->get(),
                     'members' => Member::where('language_id', $lang_id)->where('feature', 1)->get(),
                     'blogs' => Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get(),
-                    'partners' => Partner::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
+                    'partners' => Partner::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
                     'scategories' => Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
                     'tenders' => Tender::where('language_id', $lang_id)->where('is_featured', 1)->where('status', 1)->orderBy('id', 'DESC')->limit(10)->get(),
                 ];

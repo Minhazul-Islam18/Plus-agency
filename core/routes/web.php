@@ -653,6 +653,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/tender/module/delete', 'Admin\TenderModuleController@delete')->name('admin.tender.module.delete');
         Route::post('/tender/module/bulk_delete', 'Admin\TenderModuleController@bulkDelete')->name('admin.tender.module.bulk_delete');
         Route::post('/tender/module/status', 'Admin\TenderModuleController@status')->name('admin.tender.module.status');
+        Route::get('/tender/module/{id}/file', 'Admin\TenderModuleController@viewFile')->name('admin.tender.module.file');
 
         // Admin Tender Section Routes
         Route::get('/tender/module/{id}/sections', 'Admin\TenderSectionController@index')->name('admin.tender.module.section.index');

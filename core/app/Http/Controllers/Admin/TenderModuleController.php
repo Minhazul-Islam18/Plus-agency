@@ -346,6 +346,28 @@ class TenderModuleController extends Controller
         return 'success';
     }
 
+    /** Stream a module's stored file for admin verification (inline for PDFs, download otherwise). */
+    public function viewFile($id)
+    {
+        $module = TenderModule::findOrFail($id);
+
+        if (empty($module->tender_file)) {
+            abort(404);
+        }
+
+        $path = $this->modulesDir() . '/' . $module->tender_file;
+        if (!is_file($path)) {
+            abort(404);
+        }
+
+        $ext        = strtolower(pathinfo($module->tender_file, PATHINFO_EXTENSION));
+        $disposition = $ext === 'pdf' ? 'inline' : 'attachment';
+
+        return response()->file($path, [
+            'Content-Disposition' => $disposition . '; filename="' . $module->tender_file . '"',
+        ]);
+    }
+
     public function status(Request $request)
     {
         $module         = TenderModule::findOrFail($request->id);

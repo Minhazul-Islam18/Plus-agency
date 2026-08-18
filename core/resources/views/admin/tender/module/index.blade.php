@@ -410,6 +410,9 @@
                                     <div id="fileName2" class="file-name"></div>
                                     <span id="fileExt2" class="file-ext-badge other"></span>
                                 </div>
+                                <a id="fileView2" href="#" target="_blank" class="btn-clear-file" title="View current file" style="display:none;">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                                 <button type="button" class="btn-clear-file" onclick="clearFile(2)" title="Remove">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -547,6 +550,7 @@
             $('#fileInput' + serial).val('');
             $('#fileDetail' + serial).hide();
             $('#noFile' + serial).show();
+            $('#fileView' + serial).hide();
         }
 
         var allowedExts = ['zip', 'rar', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
@@ -577,6 +581,7 @@
             }
 
             $('#fileInput' + serial).val(item.url);
+            $('#fileView' + serial).hide();
             renderFileCard(serial, item.name);
         };
 
@@ -635,6 +640,13 @@
                 $('#editModal').data('pending-summary', summary);
                 $('#fileInput2').val('');
                 renderFileCard(2, file || null);
+
+                if (file) {
+                    var viewUrl = '{{ route('admin.tender.module.file', ['id' => '__ID__']) }}'.replace('__ID__', id);
+                    $('#fileView2').attr('href', viewUrl).show();
+                } else {
+                    $('#fileView2').hide();
+                }
             });
 
             $('#editModal').on('shown.bs.modal', function() {

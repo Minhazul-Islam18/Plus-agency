@@ -20,8 +20,17 @@
 <link rel="stylesheet" href="{{asset('assets/admin/css/bootstrap-datepicker.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/jquery.timepicker.min.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/select2.min.css')}}">
-<link rel="stylesheet" href="{{asset('assets/admin/css/summernote-bs4.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/atlantis.min.css')}}">
 <link rel="stylesheet" href="{{asset('assets/admin/css/custom.css')}}">
+{{-- Loaded last, after the admin theme: every Summernote toolbar button is
+     rendered as <button class="note-btn btn btn-light btn-sm">, so it always
+     carries Bootstrap's generic .btn/.btn-light/.btn-sm classes alongside its
+     own .note-btn. With this stylesheet loading before atlantis.min.css, the
+     theme's generic .btn rules won every cascade tie and reskinned the
+     toolbar buttons/icons out from under the editor. Loading it last (not
+     touching any selector outside its own .note-* namespace, so nothing
+     else in admin is affected) lets Summernote's own button/icon sizing win
+     instead. --}}
+<link rel="stylesheet" href="{{asset('assets/admin/css/summernote-bs4.css')}}">
 
 @yield('styles')

@@ -4,7 +4,7 @@
 @foreach ($modules as $module)
     @if (is_null($module->cost))
         {{-- Free module → click to download --}}
-        <a @if (!empty($module->tender_file)) href="{{ asset('assets/front/files/tender_modules/' . $module->tender_file) }}" download
+        <a @if (!empty($module->tender_file)) href="{{ route('tender.module.download.free', $module->id) }}"
            @else
              href="#" @endif
             class="module-badge free-badge" title="{{ __('Free – click to download') }}">

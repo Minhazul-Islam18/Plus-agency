@@ -68,6 +68,7 @@ Route::get('/health', 'HealthController')->name('health')->middleware('throttle:
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit')->middleware('throttle:10,1');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
 Route::post('/tender/paid-modules', 'Front\TenderController@paidModules')->name('tender.paid_modules')->middleware('throttle:30,1');
+Route::get('/tender/module/{module}/download', 'Front\TenderController@downloadFreeModule')->name('tender.module.download.free')->middleware('throttle:30,1');
 
 // Tender online payment gateways
 Route::post('/tender/payment/stripe',           'Payment\Tender\StripeController@process')->name('tender.payment.stripe');

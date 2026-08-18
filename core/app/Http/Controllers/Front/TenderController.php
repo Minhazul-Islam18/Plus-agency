@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\BasicExtra;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\KreativMailer;
 use App\Language;
 use App\OfflineGateway;
 use App\PaymentGateway;
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use App\Http\Helpers\KreativMailer;
 
 class TenderController extends Controller
 {
@@ -390,6 +390,33 @@ class TenderController extends Controller
             'paid_module_ids' => $paidIds,
             'all_paid'        => $allPaid,
         ]);
+    }
+
+    /**
+     * Free module download. Module files live in secure, non-public storage
+     * (storage/app/tender_modules — see TenderModuleController::importTenderFile),
+     * not under the public /assets tree, so this streams the file through the
+     * app instead of linking straight to a public asset URL (which no longer
+     * exists there for any file uploaded under the current flow, and 403'd for
+     * spaces/accents in the filename either way).
+     */
+    public function downloadFreeModule(TenderModule $module)
+    {
+        if (!is_null($module->cost) || empty($module->tender_file)) {
+            abort(404);
+        }
+
+        $modulesDir = env('FMF_MODULES_PATH', storage_path('app/tender_modules'));
+        $filePath   = rtrim($modulesDir, '/') . '/' . $module->tender_file;
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        $ext      = pathinfo($module->tender_file, PATHINFO_EXTENSION);
+        $safeName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $module->name) . '.' . $ext;
+
+        return response()->download($filePath, $safeName);
     }
 
     public function purchaseComplete()

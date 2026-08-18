@@ -25,7 +25,7 @@ class HerosectionController extends Controller
     public function update(Request $request, $langid)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

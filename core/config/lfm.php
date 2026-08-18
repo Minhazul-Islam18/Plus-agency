@@ -57,6 +57,7 @@ return [
                 'image/png',
                 'image/gif',
                 'image/webp',
+                'image/avif',
                 'image/svg+xml',
                 'application/pdf',
                 'application/zip',
@@ -87,6 +88,7 @@ return [
                 'image/png',
                 'image/gif',
                 'image/webp',
+                'image/avif',
                 'image/svg+xml',
             ],
         ],
@@ -144,6 +146,7 @@ return [
         'image/pjpeg',
         'image/png',
         'image/webp',
+        'image/avif',
     ],
 
     'thumb_img_width'          => 200, // px
@@ -168,6 +171,7 @@ return [
         'jpeg' => 'JPEG Image',
         'png'  => 'PNG Image',
         'webp' => 'WebP Image',
+        'avif' => 'AVIF Image',
         'ppt'  => 'Microsoft PowerPoint',
         'pptx' => 'Microsoft PowerPoint',
     ],

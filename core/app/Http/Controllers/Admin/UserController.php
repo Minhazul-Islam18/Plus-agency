@@ -42,7 +42,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -171,7 +171,7 @@ class UserController extends Controller
 
         $user = Admin::findOrFail($request->user_id);
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

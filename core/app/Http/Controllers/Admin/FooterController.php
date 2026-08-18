@@ -24,7 +24,7 @@ class FooterController extends Controller
     public function update(Request $request, $langid)
     {
         $footerLogo = $request->footer_logo;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extFooterLogo = pathinfo($footerLogo, PATHINFO_EXTENSION);
 
         $rules = [

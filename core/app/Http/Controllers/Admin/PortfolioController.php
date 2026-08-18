@@ -59,7 +59,7 @@ class PortfolioController extends Controller
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -166,7 +166,7 @@ class PortfolioController extends Controller
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -390,7 +390,7 @@ class PortfolioController extends Controller
         $bs->portfolio_breadcrumb_overlay_opacity = $request->portfolio_breadcrumb_overlay_opacity;
 
         if ($request->filled('portfolio_breadcrumb_bg')) {
-            $allowedExts = ['jpg', 'jpeg', 'png'];
+            $allowedExts = ['jpg', 'jpeg', 'png', 'avif'];
             $extBg = pathinfo($request->portfolio_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
                 @unlink(FRONT_IMG_PATH . $bs->portfolio_breadcrumb_bg);

@@ -22,7 +22,7 @@ class PageController extends Controller
             return null;
         }
 
-        $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'webp', 'avif');
         $extBg = pathinfo($request->breadcrumb_image, PATHINFO_EXTENSION);
         if (!in_array(strtolower($extBg), $allowedExts)) {
             return null;

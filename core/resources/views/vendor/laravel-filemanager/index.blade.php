@@ -142,7 +142,7 @@
                         <input type='hidden' name='_token' value='{{csrf_token()}}'>
                     </form>
                     <p class="text-warning mb-0 mt-3">** Maximum File Size 10 MB [Make sure max upload size in your server config is >= 10MB]</p>
-                    <p class="text-warning mb-0">** png, jpg, jpeg, svg, gif, pdf, zip, txt, mp4 files are allowed</p>
+                    <p class="text-warning mb-0">** png, jpg, jpeg, svg, gif, webp, avif, pdf, zip, txt, mp4 files are allowed</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary w-100" data-dismiss="modal">{{ trans('laravel-filemanager::lfm.btn-close') }}</button>

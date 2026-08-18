@@ -50,6 +50,24 @@ class AppServiceProvider extends ServiceProvider
   {
     Paginator::useBootstrap();
 
+    // Admin-configurable LFM upload size caps (admin/basicinfo) override the
+    // static defaults in config/lfm.php, so admins can raise/lower the limit
+    // without a code deploy. Wrapped in try/catch since this table may not
+    // exist yet during a fresh install's initial migrate.
+    try {
+      $bex = BasicExtra::first();
+      if ($bex) {
+        if (!empty($bex->lfm_max_image_size_mb)) {
+          config(['lfm.folder_categories.image.max_size' => (int) $bex->lfm_max_image_size_mb * 1024]);
+        }
+        if (!empty($bex->lfm_max_file_size_mb)) {
+          config(['lfm.folder_categories.file.max_size' => (int) $bex->lfm_max_file_size_mb * 1024]);
+        }
+      }
+    } catch (\Exception $e) {
+      // table not ready yet (fresh install) — fall back to config/lfm.php defaults
+    }
+
     try {
       $socials = Cache::remember('global_socials', now()->addMinutes(30), function () {
         return Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();

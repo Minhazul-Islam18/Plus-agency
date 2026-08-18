@@ -23,6 +23,44 @@ class BasicController extends Controller
         return view('admin.basic.file-manager');
     }
 
+    public function updateImageSettings(Request $request)
+    {
+        $request->validate([
+            'image_convert_enabled' => 'required|in:0,1',
+            'image_convert_format' => 'required|in:webp,avif',
+            'image_convert_quality' => 'required|integer|min:1|max:100',
+        ]);
+
+        $bexs = BasicExtra::all();
+        foreach ($bexs as $bex) {
+            $bex->image_convert_enabled = $request->image_convert_enabled;
+            $bex->image_convert_format = $request->image_convert_format;
+            $bex->image_convert_quality = $request->image_convert_quality;
+            $bex->save();
+        }
+
+        Session::flash('success', 'Image optimization settings updated successfully!');
+        return back();
+    }
+
+    public function updateUploadLimits(Request $request)
+    {
+        $request->validate([
+            'lfm_max_image_size_mb' => 'required|integer|min:1|max:500',
+            'lfm_max_file_size_mb' => 'required|integer|min:1|max:500',
+        ]);
+
+        $bexs = BasicExtra::all();
+        foreach ($bexs as $bex) {
+            $bex->lfm_max_image_size_mb = $request->lfm_max_image_size_mb;
+            $bex->lfm_max_file_size_mb = $request->lfm_max_file_size_mb;
+            $bex->save();
+        }
+
+        Session::flash('success', 'Upload size limits updated successfully!');
+        return back();
+    }
+
     public function logo()
     {
         $data['abs'] = BasicSetting::first();
@@ -37,7 +75,7 @@ class BasicController extends Controller
         $favicon = $request->favicon;
         $breadcrumb = $request->breadcrumb;
 
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         // Email clients (Outlook especially) largely don't render inline SVG
         // regardless of markup — the email logo must be a raster format.
         $allowedEmailExts = array('jpg', 'png', 'jpeg');
@@ -209,7 +247,7 @@ class BasicController extends Controller
     public function updatepreloader(Request $request)
     {
         $preloader = $request->preloader;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'gif', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'avif');
         $extPreloader = pathinfo($preloader, PATHINFO_EXTENSION);
 
         $rules = [
@@ -571,7 +609,7 @@ class BasicController extends Controller
     public function updatemaintainance(Request $request, $langid)
     {
         $maintenance = $request->maintenance;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'webp', 'avif');
         $extLogo = pathinfo($maintenance, PATHINFO_EXTENSION);
 
         $rules = [];

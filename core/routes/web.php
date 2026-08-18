@@ -165,6 +165,8 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
 
         // Admin File Manager Routes
         Route::get('/file-manager', 'Admin\BasicController@fileManager')->name('admin.file-manager');
+        Route::post('/file-manager/image-settings', 'Admin\BasicController@updateImageSettings')->name('admin.file-manager.image-settings');
+        Route::post('/file-manager/upload-limits', 'Admin\BasicController@updateUploadLimits')->name('admin.file-manager.upload-limits');
 
         // Admin Logo Routes
         Route::get('/logo', 'Admin\BasicController@logo')->name('admin.logo');

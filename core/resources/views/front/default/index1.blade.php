@@ -523,11 +523,13 @@
                         <div class="row">
                             <div class="team-carousel common-carousel owl-carousel owl-theme">
                                 @foreach ($members as $key => $member)
-                                    <div class="single-team-member">
+                                    <div class="single-team-member team-clickable" data-member-id="{{ $member->id }}"
+                                        role="button" tabindex="0">
                                         <div class="team-img-wrapper">
                                             <img class="lazy"
                                                 data-src="{{ asset('assets/front/img/members/' . $member->image) }}"
                                                 alt="">
+                                            <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>
                                             <div class="social-accounts">
                                                 <ul class="social-account-lists">
                                                     @if (!empty($member->facebook))
@@ -564,6 +566,7 @@
                 </div>
             </div>
             <!--    team section end   -->
+            @include('front.partials.team-member-modal')
         @endif
 
 

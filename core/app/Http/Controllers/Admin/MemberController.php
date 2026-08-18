@@ -90,7 +90,7 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -103,9 +103,11 @@ class MemberController extends Controller
             'image' => 'required',
             'name' => 'required|max:50',
             'rank' => 'required|max:50',
+            'details' => 'nullable',
             'facebook' => 'nullable|max:50',
             'twitter' => 'nullable|max:50',
             'linkedin' => 'nullable|max:50',
+            'email' => 'nullable|email|max:255',
             'whatsapp_number' => 'nullable|max:20',
             'whatsapp_number_code' => 'required_with:whatsapp_number',
         ];
@@ -133,7 +135,9 @@ class MemberController extends Controller
         $member->facebook = $request->facebook;
         $member->twitter = $request->twitter;
         $member->linkedin = $request->linkedin;
+        $member->email = $request->email;
         $member->whatsapp = $this->whatsappValue($request);
+        $member->details = $request->details;
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
@@ -150,15 +154,17 @@ class MemberController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
             'name' => 'required|max:50',
             'rank' => 'required|max:50',
+            'details' => 'nullable',
             'facebook' => 'nullable|max:50',
             'twitter' => 'nullable|max:50',
             'linkedin' => 'nullable|max:50',
+            'email' => 'nullable|email|max:255',
             'whatsapp_number' => 'nullable|max:20',
             'whatsapp_number_code' => 'required_with:whatsapp_number',
         ];
@@ -189,7 +195,9 @@ class MemberController extends Controller
         $member->facebook = $request->facebook;
         $member->twitter = $request->twitter;
         $member->linkedin = $request->linkedin;
+        $member->email = $request->email;
         $member->whatsapp = $this->whatsappValue($request);
+        $member->details = $request->details;
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $member->image);
@@ -211,7 +219,7 @@ class MemberController extends Controller
 
         if ($version == 'default' || $version == 'dark') {
             $background = $request->background;
-            $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp');
+            $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
             $extBackground = pathinfo($background, PATHINFO_EXTENSION);
         }
 

@@ -29,9 +29,10 @@
 
             <div class="dark-team-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
                 @foreach ($members as $key => $member)
-                    <div class="dark-team-member">
+                    <div class="dark-team-member team-clickable" data-member-id="{{ $member->id }}" role="button" tabindex="0">
                         <img class="team-img" src="{{ asset('assets/front/img/members/' . $member->image) }}" alt="">
                         <span class="team-scrim"></span>
+                        <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>
                         <div class="team-social">
                             @if (!empty($member->facebook))
                                 <a href="{{ $member->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -56,3 +57,4 @@
         </div>
     </div>
 </div>
+@include('front.partials.team-member-modal')

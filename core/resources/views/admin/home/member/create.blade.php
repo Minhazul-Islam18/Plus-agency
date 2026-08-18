@@ -104,6 +104,11 @@
                   <p id="errtwitter" class="mb-0 text-danger em"></p>
                 </div>
                 <div class="form-group">
+                  <label for="">Email</label>
+                  <input type="email" class="form-control ltr" name="email" value="" placeholder="Enter email address">
+                  <p id="erremail" class="mb-0 text-danger em"></p>
+                </div>
+                <div class="form-group">
                   <label for="">WhatsApp</label>
                   @include('admin.partials.country-code-picker', [
                       'codeInputId' => 'memberWhatsappCode',
@@ -118,6 +123,11 @@
                   <label for="">Linkedin</label>
                   <input type="text" class="form-control ltr" name="linkedin" value="" placeholder="Enter linkedin url">
                   <p id="errlinkedin" class="mb-0 text-danger em"></p>
+                </div>
+                <div class="form-group">
+                  <label for="">Details <span class="text-muted">(Experience, career, role, responsibilities — shown in the member's profile popup)</span></label>
+                  <textarea class="form-control summernote" name="details" data-height="220" placeholder="Enter member details"></textarea>
+                  <p id="errdetails" class="mb-0 text-danger em"></p>
                 </div>
               </form>
             </div>

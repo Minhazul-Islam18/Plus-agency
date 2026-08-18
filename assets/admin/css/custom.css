@@ -497,4 +497,34 @@ a.d-block {
 .messages-container .item-list img {
   max-width: 100%;
 }
+
+/* Client Feedback: Show button read/unread state */
+.feedback-show-btn.btn-unread {
+  background: #F25961 !important;
+  border-color: #F25961 !important;
+  color: #ffffff !important;
+  position: relative;
+}
+.feedback-show-btn.btn-unread::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #F25961;
+  animation: feedbackDotPulse 1.5s infinite;
+}
+@keyframes feedbackDotPulse {
+  0% { box-shadow: 0 0 0 0 rgba(242, 89, 97, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(242, 89, 97, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 89, 97, 0); }
+}
+.feedback-show-btn.btn-read {
+  background: #31CE36 !important;
+  border-color: #31CE36 !important;
+  color: #ffffff !important;
+}
 /* Laravel File Manager CSS */

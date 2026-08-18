@@ -56,7 +56,7 @@
                     </thead>
                     <tbody>
                       @foreach ($feedbacks as $feedback)
-                      <tr>
+                      <tr id="feedback-row-{{ $feedback->id }}">
                         <td>
                           <input type="checkbox" class="bulk-check" data-val="{{$feedback->id}}">
                         </td>
@@ -68,7 +68,11 @@
                         <td class="text-capitalize">{{ $sub }}</td>
                         <td>{{ $feedback->rating }}</td>
                         <td>
-                          <a class="btn btn-sm btn-info" href="#" data-toggle="modal" data-target="#feedbackModal{{ $feedback->id }}">Show</a>
+                          <a class="btn btn-sm {{ $feedback->is_read ? 'btn-read' : 'btn-unread' }} feedback-show-btn" href="#" data-toggle="modal"
+                            data-target="#feedbackModal{{ $feedback->id }}"
+                            data-read="{{ $feedback->is_read ? 1 : 0 }}"
+                            data-mark-read-url="{{ route('admin.feedback.markRead', $feedback->id) }}"
+                            data-row="feedback-row-{{ $feedback->id }}">Show</a>
                         </td>
                         <td>
                           <form class="deleteform d-inline-block" action="{{route('admin.delete_feedback')}}" method="post">

@@ -16,6 +16,20 @@ class FeedbackController extends Controller
     return view('admin.feedback.client_feedback', compact('feedbacks'));
   }
 
+  public function markRead(Request $request, $id)
+  {
+    $feedback = Feedback::findOrFail($id);
+
+    if (!$feedback->is_read) {
+      $feedback->is_read = true;
+      $feedback->save();
+    }
+
+    return response()->json([
+      'unread_count' => Feedback::where('is_read', 0)->count(),
+    ]);
+  }
+
   public function deleteFeedback(Request $request)
   {
     Feedback::findOrFail($request->feedback_id)->delete();

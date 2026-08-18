@@ -735,10 +735,13 @@
 
                 @if (empty($admin->role) || (!empty($permissions) && in_array('Client Feedbacks', $permissions)))
                     {{-- Client Feedbacks --}}
+                    @php($unreadFeedbackCount = \App\Feedback::where('is_read', 0)->count())
                     <li class="nav-item @if (request()->path() == config('app.admin_prefix','admin').'/feedbacks') active @endif">
                         <a href="{{ route('admin.client_feedbacks') }}">
                             <i class="fas fa-pen-fancy"></i>
-                            <p>Client Feedbacks</p>
+                            <p>Client Feedbacks
+                                <span id="feedbackUnreadBadge" class="badge badge-danger p-1 sidenav-badge" @if ($unreadFeedbackCount == 0) style="display:none;" @endif>{{ $unreadFeedbackCount }}</span>
+                            </p>
                         </a>
                     </li>
                 @endif

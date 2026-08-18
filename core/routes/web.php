@@ -742,6 +742,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/feedbacks', 'Admin\FeedbackController@feedbacks')->name('admin.client_feedbacks');
         Route::post('/delete_feedback', 'Admin\FeedbackController@deleteFeedback')->name('admin.delete_feedback');
         Route::post('/feedback/bulk-delete', 'Admin\FeedbackController@bulkDelete')->name('admin.feedback.bulk.delete');
+        Route::post('/feedback/{id}/read', 'Admin\FeedbackController@markRead')->name('admin.feedback.markRead');
     });
 
     Route::group(['middleware' => 'checkpermission:Contact Messages'], function () {

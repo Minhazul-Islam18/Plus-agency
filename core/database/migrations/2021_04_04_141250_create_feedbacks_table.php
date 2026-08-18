@@ -20,6 +20,10 @@ class CreateFeedbacksTable extends Migration
       $table->string('subject');
       $table->unsignedMediumInteger('rating');
       $table->text('feedback');
+      // Read/unread state for the admin inbox: unread rows highlight orange,
+      // read rows green; sidebar badge counts unread. Set true when an admin
+      // opens the Show modal (Admin\FeedbackController@markRead).
+      $table->boolean('is_read')->default(false);
       $table->timestamps();
     });
   }

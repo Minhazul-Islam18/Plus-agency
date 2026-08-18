@@ -13,6 +13,11 @@ class Feedback extends Model
     'email',
     'subject',
     'rating',
-    'feedback'
+    'feedback',
+    'is_read',
+  ];
+
+  protected $casts = [
+    'is_read' => 'boolean',
   ];
 }

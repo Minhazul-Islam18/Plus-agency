@@ -887,7 +887,29 @@ $(function ($) {
       items.forEach(function(item) {
           $("#" + id).summernote('insertImage', item);
       });
-  };  
+  };
   // LFM scripts END
+
+  /* ===== Client Feedback: mark read on Show, live badge/row update ===== */
+  $(document).on('click', '.feedback-show-btn', function () {
+    var $btn = $(this);
+    if ($btn.data('read') == 1) {
+      return;
+    }
+    $btn.data('read', 1);
+
+    $.post($btn.data('mark-read-url'), {
+      _token: $('meta[name="csrf-token"]').attr('content')
+    }).done(function (res) {
+      $btn.removeClass('btn-unread').addClass('btn-read');
+
+      var $badge = $('#feedbackUnreadBadge');
+      if (res.unread_count > 0) {
+        $badge.text(res.unread_count).show();
+      } else {
+        $badge.hide();
+      }
+    });
+  });
 
 });

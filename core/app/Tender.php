@@ -23,6 +23,7 @@ class Tender extends Model
         'tender_image',
         'video_link',
         'overview',
+        'expert_member_id',
         'expert_name',
         'expert_position',
         'expert_details',
@@ -41,6 +42,11 @@ class Tender extends Model
     public function language()
     {
         return $this->belongsTo('App\Language');
+    }
+
+    public function expertMember()
+    {
+        return $this->belongsTo('App\Member', 'expert_member_id');
     }
 
     public function tenderModules()

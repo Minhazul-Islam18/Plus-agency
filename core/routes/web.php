@@ -618,6 +618,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/tenders', 'Admin\TenderController@index')->name('admin.tender.index');
         Route::get('/tender/create', 'Admin\TenderController@create')->name('admin.tender.create');
         Route::get('/tender/{langId}/get_categories', 'Admin\TenderController@getCategories');
+        Route::get('/tender/{langId}/get_members', 'Admin\TenderController@getMembers');
         Route::post('/tender/store', 'Admin\TenderController@store')->name('admin.tender.store');
         Route::get('/tender/{id}/edit', 'Admin\TenderController@edit')->name('admin.tender.edit');
         Route::post('/tender/update', 'Admin\TenderController@update')->name('admin.tender.update');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\BasicExtra;
+use App\Member;
 use App\SecureToken;
 use App\Tender;
 use App\TenderCategory;
@@ -233,8 +234,11 @@ class TenderController extends Controller
         $tender_categories = $language
             ? TenderCategory::where('language_id', $language->id)->where('status', 1)->orderBy('serial_number')->get()
             : collect([]);
+        $members = $language
+            ? Member::where('language_id', $language->id)->orderBy('name')->get()
+            : collect([]);
 
-        return view('admin.tender.tender.create', compact('countries', 'tender_categories', 'language'));
+        return view('admin.tender.tender.create', compact('countries', 'tender_categories', 'members', 'language'));
     }
 
     public function getCategories($langId)
@@ -246,12 +250,17 @@ class TenderController extends Controller
         return $tender_categories;
     }
 
+    public function getMembers($langId)
+    {
+        return Member::where('language_id', $langId)->orderBy('name')->get();
+    }
+
     public function store(Request $request)
     {
         $slug = slug_create($request->title);
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
-        $allowedExts = ['jpg', 'png', 'jpeg', 'svg'];
+        $allowedExts = ['jpg', 'png', 'jpeg', 'svg', 'avif'];
         $extImage    = pathinfo($image, PATHINFO_EXTENSION);
         $extExpImage = pathinfo($expImage, PATHINFO_EXTENSION);
 
@@ -272,14 +281,21 @@ class TenderController extends Controller
             ],
             'submission_deadline' => 'required|after_or_equal:today',
             'overview'            => 'required',
+            'expert_source'       => 'required|in:custom,member',
+            'expert_member_id'    => 'required_if:expert_source,member|nullable|exists:members,id',
             'expert_name'         => 'required',
             'expert_position'     => 'required',
             'expert_details'      => 'required',
             'expert_whatsapp'     => 'required',
             'expert_email'        => 'required|email',
             'tender_image'        => 'required',
-            'expert_image'        => 'required',
         ];
+
+        // Expert image: required for a custom expert (no photo to fall back on);
+        // optional for a team member since store() copies the member's own photo.
+        if ($request->expert_source !== 'member') {
+            $rules['expert_image'] = 'required';
+        }
 
         if ($request->filled('tender_image')) {
             $rules['tender_image'] = [
@@ -350,6 +366,16 @@ class TenderController extends Controller
             @mkdir($dir, 0775, true);
             @copy($expImage, $dir . $filename);
             $tender->expert_image = $filename;
+        } elseif ($request->expert_source === 'member') {
+            $member = Member::find($request->expert_member_id);
+            if ($member && !empty($member->image)) {
+                $srcExt   = pathinfo($member->image, PATHINFO_EXTENSION);
+                $filename = uniqid() . '.' . $srcExt;
+                $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
+                @mkdir($dir, 0775, true);
+                @copy(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename);
+                $tender->expert_image = $filename;
+            }
         }
 
         $link = $request->video_link;
@@ -359,12 +385,13 @@ class TenderController extends Controller
             $tender->video_link = $link;
         }
 
-        $tender->overview        = $request->overview;
-        $tender->expert_name     = $request->expert_name;
-        $tender->expert_position = $request->expert_position;
-        $tender->expert_details  = $request->expert_details;
-        $tender->expert_whatsapp = $request->expert_whatsapp;
-        $tender->expert_email    = $request->expert_email;
+        $tender->overview          = $request->overview;
+        $tender->expert_member_id  = $request->expert_source === 'member' ? $request->expert_member_id : null;
+        $tender->expert_name       = $request->expert_name;
+        $tender->expert_position   = $request->expert_position;
+        $tender->expert_details    = $request->expert_details;
+        $tender->expert_whatsapp   = $request->expert_whatsapp;
+        $tender->expert_email      = $request->expert_email;
         $tender->save();
 
         Session::flash('success', 'Tender Added Successfully');
@@ -381,8 +408,9 @@ class TenderController extends Controller
             ->get();
 
         $countries = $this->countries();
+        $members = Member::where('language_id', $tender->language_id)->orderBy('name')->get();
 
-        return view('admin.tender.tender.edit', compact('tender', 'tender_categories', 'countries'));
+        return view('admin.tender.tender.edit', compact('tender', 'tender_categories', 'members', 'countries'));
     }
 
     public function update(Request $request)
@@ -393,7 +421,7 @@ class TenderController extends Controller
 
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
-        $allowedExts = ['jpg', 'png', 'jpeg', 'svg'];
+        $allowedExts = ['jpg', 'png', 'jpeg', 'svg', 'avif'];
         $extImage    = pathinfo($image, PATHINFO_EXTENSION);
         $extExpImage = pathinfo($expImage, PATHINFO_EXTENSION);
 
@@ -403,6 +431,8 @@ class TenderController extends Controller
             'title'               => 'required|max:255',
             'submission_deadline' => 'required|after_or_equal:today',
             'overview'            => 'required',
+            'expert_source'       => 'required|in:custom,member',
+            'expert_member_id'    => 'required_if:expert_source,member|nullable|exists:members,id',
             'expert_name'         => 'required',
             'expert_position'     => 'required',
             'expert_details'      => 'required',
@@ -474,6 +504,16 @@ class TenderController extends Controller
             @mkdir($dir, 0775, true);
             @copy($expImage, $dir . $filename);
             $tender->expert_image = $filename;
+        } elseif ($request->expert_source === 'member' && (int) $request->expert_member_id !== (int) $tender->expert_member_id) {
+            $member = Member::find($request->expert_member_id);
+            if ($member && !empty($member->image)) {
+                $srcExt   = pathinfo($member->image, PATHINFO_EXTENSION);
+                $filename = uniqid() . '.' . $srcExt;
+                $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
+                @mkdir($dir, 0775, true);
+                @copy(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename);
+                $tender->expert_image = $filename;
+            }
         }
 
         $link = $request->video_link;
@@ -483,12 +523,13 @@ class TenderController extends Controller
             $tender->video_link = $link;
         }
 
-        $tender->overview        = $request->overview;
-        $tender->expert_name     = $request->expert_name;
-        $tender->expert_position = $request->expert_position;
-        $tender->expert_details  = $request->expert_details;
-        $tender->expert_whatsapp = $request->expert_whatsapp;
-        $tender->expert_email    = $request->expert_email;
+        $tender->overview          = $request->overview;
+        $tender->expert_member_id  = $request->expert_source === 'member' ? $request->expert_member_id : null;
+        $tender->expert_name       = $request->expert_name;
+        $tender->expert_position   = $request->expert_position;
+        $tender->expert_details    = $request->expert_details;
+        $tender->expert_whatsapp   = $request->expert_whatsapp;
+        $tender->expert_email      = $request->expert_email;
         $tender->save();
 
         Session::flash('success', 'Tender Updated Successfully');
@@ -967,7 +1008,7 @@ class TenderController extends Controller
             if ($request->filled('tender_breadcrumb_bg')) {
                 $url  = $request->input('tender_breadcrumb_bg');
                 $ext  = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
-                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'avif'])) {
                     $bgDir = base_path(FRONT_IMG_DIR);
                     if (!empty($bex->tender_breadcrumb_bg)) {
                         @unlink($bgDir . $bex->tender_breadcrumb_bg);

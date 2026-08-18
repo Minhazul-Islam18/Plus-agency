@@ -44,6 +44,9 @@ return new class extends Migration
                 $table->string('tender_image')->nullable();
                 $table->string('video_link')->nullable();
                 $table->longText('overview');
+                // Set when the expert was picked from Team Members (source of the
+                // autofilled fields below); null when entered as a custom expert.
+                $table->unsignedBigInteger('expert_member_id')->nullable();
                 $table->string('expert_name');
                 $table->string('expert_position');
                 $table->text('expert_details');
@@ -55,6 +58,12 @@ return new class extends Migration
                 // modules/prices are still being set up), 1 = Active (visible).
                 $table->tinyInteger('status')->default(0);
                 $table->timestamps();
+            });
+        }
+
+        if (Schema::hasTable('tenders') && !Schema::hasColumn('tenders', 'expert_member_id')) {
+            Schema::table('tenders', function (Blueprint $table) {
+                $table->unsignedBigInteger('expert_member_id')->nullable()->after('overview');
             });
         }
 

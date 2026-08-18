@@ -197,6 +197,41 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <p id="erroverview" class="mb-0 text-danger em"></p>
               </div>
 
+              {{-- Expert Source --}}
+              <div class="form-group">
+                <label>Public Procurement Expert Source **</label>
+                <div>
+                  <label class="radio-inline mr-4">
+                    <input type="radio" name="expert_source" id="expertSourceMember" value="member">
+                    Select from Team Members
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="expert_source" id="expertSourceCustom" value="custom" checked>
+                    Custom Entry
+                  </label>
+                </div>
+                <p id="errexpert_source" class="mb-0 text-danger em"></p>
+              </div>
+
+              <div class="form-group" id="expertMemberWrap">
+                <label>Team Member **</label>
+                <select id="expertMemberSelect" name="expert_member_id" class="form-control">
+                  <option value="" selected disabled>Select Team Member</option>
+                  @foreach ($members as $m)
+                    <option value="{{ $m->id }}"
+                      data-position="{{ e($m->rank) }}"
+                      data-details="{{ $m->details }}"
+                      data-whatsapp="{{ e(preg_replace('/\D/', '', $m->whatsapp ?? '')) }}"
+                      data-email="{{ e($m->email) }}"
+                      data-image="{{ !empty($m->image) ? asset('assets/front/img/members/' . $m->image) : '' }}">
+                      {{ $m->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <p class="mb-0 text-warning" style="font-size:11px;"><i class="fas fa-info-circle"></i> Fields below are pre-filled from the selected member — you can still edit them for this tender.</p>
+                <p id="errexpert_member_id" class="mb-0 text-danger em"></p>
+              </div>
+
               {{-- Expert Name & Position --}}
               <div class="row">
                 <div class="col-md-6">
@@ -364,7 +399,39 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
       templateSelection: function(o) { return waFlagTemplate(o, true); },
     });
 
-    // Load categories when language changes
+    // Expert source toggle
+    function toggleExpertSource() {
+      $('#expertMemberWrap').toggle($('#expertSourceMember').is(':checked'));
+    }
+    $('input[name=expert_source]').on('change', toggleExpertSource);
+    toggleExpertSource();
+
+    // Autofill expert fields from the selected team member (still editable after)
+    $('#expertMemberSelect').on('change', function () {
+      var opt = $(this).find('option:selected');
+      $('input[name=expert_name]').val(opt.text().trim());
+      $('input[name=expert_position]').val(opt.data('position') || '');
+
+      var details = opt.data('details') || '';
+      var $details = $('textarea[name=expert_details]');
+      $details.val(details);
+      if ($details.next('.note-editor').length) {
+        $details.summernote('code', details);
+      }
+
+      var wa = opt.data('whatsapp') || '';
+      if (wa) { $('#waFull').val(wa); }
+
+      $('input[name=expert_email]').val(opt.data('email') || '');
+
+      var img = opt.data('image');
+      if (img) {
+        $('#thumbPreview2').html('<img src="' + img + '" alt="Expert Image">');
+        $('#fileInput2').val(img);
+      }
+    });
+
+    // Load categories + team members when language changes
     $("#language").on('change', function () {
       var langId = $(this).val();
       $("#tender_category_id").removeAttr('disabled');
@@ -379,6 +446,27 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
           });
         }
         $("#tender_category_id").html(options);
+      });
+
+      $.get("{{ url('/') }}/admin/tender/" + langId + "/get_members", function (data) {
+        var $select = $("#expertMemberSelect").empty();
+        $select.append($('<option>', { value: '', selected: true, disabled: true, text: 'Select Team Member' }));
+        if (data.length === 0) {
+          $select.append($('<option>', { value: '', disabled: true, text: 'No Team Member Exists' }));
+        } else {
+          $.each(data, function (i, m) {
+            var img = m.image ? "{{ asset('assets/front/img/members') }}/" + m.image : '';
+            $select.append($('<option>', {
+              value: m.id,
+              text: m.name || '',
+              'data-position': m.rank || '',
+              'data-details': m.details || '',   // raw HTML preserved — set via summernote('code', ...) on select
+              'data-whatsapp': (m.whatsapp || '').replace(/\D/g, ''),
+              'data-email': m.email || '',
+              'data-image': img
+            }));
+          });
+        }
       });
 
       // RTL check

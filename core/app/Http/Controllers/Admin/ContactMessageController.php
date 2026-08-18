@@ -64,6 +64,9 @@ class ContactMessageController extends Controller
 
     $admin = Auth::guard('admin')->user();
     $adminName = trim($admin->first_name . ' ' . $admin->last_name);
+    if ($adminName === '') {
+      $adminName = $admin->username ?: $admin->email;
+    }
 
     $mailer = new KreativMailer;
 
@@ -77,6 +80,11 @@ class ContactMessageController extends Controller
       'website_title'       => $bs->website_title,
       'templateType'        => 'contact_admin_reply',
       'type'                => 'contactAdminReply',
+      // Reply arrives from (and Reply-To's back to) the admin who actually
+      // wrote it, not the site's generic global from_mail — see
+      // KreativMailer::mailFromAdmin() for the from_email handling.
+      'from_email'          => $admin->email,
+      'from_name'           => $adminName,
     ]);
 
     if ($sent) {

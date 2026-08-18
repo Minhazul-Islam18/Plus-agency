@@ -213,7 +213,18 @@ class KreativMailer {
             $mail->CharSet = 'UTF-8';
 
             //Recipients
-            $mail->setFrom($be->from_mail, $be->from_name);
+            // Contact-message replies (and anything else that names an acting
+            // admin) send from that admin's own mailbox — the visitor should
+            // see and be able to reply to the person who actually wrote the
+            // message, not the site's generic global address. Every other
+            // email type (invoices, OTPs, newsletters...) has no from_email
+            // in $data and keeps using the global from_mail/from_name as before.
+            if (!empty($data['from_email'])) {
+                $mail->setFrom($data['from_email'], $data['from_name'] ?? $data['from_email']);
+                $mail->addReplyTo($data['from_email'], $data['from_name'] ?? $data['from_email']);
+            } else {
+                $mail->setFrom($be->from_mail, $be->from_name);
+            }
             $mail->addAddress($data['toMail'], $data['toName']);
 
             // Attachments

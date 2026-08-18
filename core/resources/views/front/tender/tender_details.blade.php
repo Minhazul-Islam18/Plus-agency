@@ -101,7 +101,7 @@
 
         .tender-thumb-box img {
             width: 100%;
-            max-height: 320px;
+            /* max-height: 320px; */
             object-fit: cover;
             display: block;
             position: relative;
@@ -712,9 +712,9 @@
 
         /* ── Check plans section ── */
         /* "Already purchased" entry point — a full-width, animated CTA banner so
-               buyers returning for their files can't miss it (the old plain text link
-               did). Gradient body, a continuous shine sweep, a pulsing download icon
-               and a looping arrow nudge; hover deepens the shadow and lifts it. */
+                   buyers returning for their files can't miss it (the old plain text link
+                   did). Gradient body, a continuous shine sweep, a pulsing download icon
+                   and a looping arrow nudge; hover deepens the shadow and lifts it. */
         .downloads-cta {
             position: relative;
             display: flex;
@@ -1016,11 +1016,11 @@
         }
 
         /* Admin-authored WYSIWYG content (tender overview, module description,
-           etc. — anything rendered inside .content-box) — the sitewide
-           "ol, ul { list-style: none; }" reset strips bullets/numbers from
-           any <ul>/<ol> a moderator types, with nothing restoring them here.
-           .content-box is the shared ancestor for the Overview, Modules, and
-           Expert tabs, so this covers all three instead of just modules. */
+               etc. — anything rendered inside .content-box) — the sitewide
+               "ol, ul { list-style: none; }" reset strips bullets/numbers from
+               any <ul>/<ol> a moderator types, with nothing restoring them here.
+               .content-box is the shared ancestor for the Overview, Modules, and
+               Expert tabs, so this covers all three instead of just modules. */
         .content-box ul,
         .content-box ol {
             padding-left: 20px;
@@ -1043,9 +1043,9 @@
         }
 
         /* .module-sections-list is its own icon-based checklist (see below) —
-           exclude it from the WYSIWYG bullet restoration above; ".content-box
-           ul" alone would otherwise outrank ".module-sections-list"'s plain
-           class selector and put bullets back next to the check icons. */
+               exclude it from the WYSIWYG bullet restoration above; ".content-box
+               ul" alone would otherwise outrank ".module-sections-list"'s plain
+               class selector and put bullets back next to the check icons. */
         .content-box ul.module-sections-list {
             list-style: none;
             padding: 0;
@@ -1255,8 +1255,7 @@
 @endif
 
 @section('content')
-    <section
-        class="course-details-section pt-120 pb-120 @if ($be->theme_version == 'dark') dark-tender-details @endif">
+    <section class="course-details-section pt-120 pb-120 @if ($be->theme_version == 'dark') dark-tender-details @endif">
         <div class="container">
 
             @if (session('success'))
@@ -1857,9 +1856,9 @@ $preFlag = $preCountry['flag'] ?? '';
                                         </div>
                                         <div class="col-12">
                                             <div
-                                            class="gateway-instruction @if ($be->theme_version == 'dark') dark-service-details @endif">
-                                            {!! replaceBaseUrl($ogw->instructions) !!}
-                                        </div>
+                                                class="gateway-instruction @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                {!! replaceBaseUrl($ogw->instructions) !!}
+                                            </div>
                                         </div>
                                         @if ($ogw->is_receipt == 1)
                                             <div class="col-12 mb-3">
@@ -1921,15 +1920,23 @@ $preFlag = $preCountry['flag'] ?? '';
                                 </button>
                             </form>
                         @else
-                            {{-- Free tender: contact expert buttons --}}
-                            {{-- <div class="expert-contact-btns">
-                                @if (!empty($tender->expert_whatsapp))
-                                    <a href="https://wa.me/{{ $waDigits }}"
-                                        class="btn-whatsapp" target="_blank">
-                                        <i class="fab fa-whatsapp"></i> {{ __('WhatsApp Expert') }}
-                                    </a>
-                                @endif
-                            </div> --}}
+                            {{-- Free tender: contact expert buttons, so the space below the
+                                 price isn't left empty when there's no purchase form to show. --}}
+                            @if (!empty($tender->expert_whatsapp) || !empty($tender->expert_email))
+                                <div class="expert-contact-btns">
+                                    @if (!empty($tender->expert_whatsapp))
+                                        <a href="https://wa.me/{{ $waDigits }}" class="btn-whatsapp"
+                                            target="_blank">
+                                            <i class="fab fa-whatsapp"></i> {{ __('WhatsApp Expert') }}
+                                        </a>
+                                    @endif
+                                    @if (!empty($tender->expert_email))
+                                        <a href="mailto:{{ $tender->expert_email }}" class="btn-phone">
+                                            <i class="fas fa-envelope"></i> {{ __('Email Expert') }}
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
                         @endif
 
                         @if ($isExpired)
@@ -2023,7 +2030,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                 <div class="content-box">
                                     <h4>{{ __('Tender Overview') }}</h4>
                                     <div
-                                        class="@if ($be->theme_version == 'dark') dark-service-details @endif">
+                                        class="tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
                                         {!! $tender->overview !!}
                                     </div>
                                 </div>
@@ -2053,7 +2060,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                                 <div id="module-body-{{ $module->id }}" class="collapse module-body">
                                                     @if (!empty($module->summary))
                                                         <div
-                                                            class="mb-3 @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                            class="mb-3 tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
                                                             {!! $module->summary !!}
                                                         </div>
                                                     @endif
@@ -2109,7 +2116,8 @@ $preFlag = $preCountry['flag'] ?? '';
                                                     <span class="position">{{ $tender->expert_position }}</span>
                                                 @endif
                                                 @if ($tender->expert_details)
-                                                    <div class="text-box @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                    <div
+                                                        class="text-box tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
                                                         {!! $tender->expert_details !!}
                                                     </div>
                                                 @endif
@@ -2150,14 +2158,14 @@ $preFlag = $preCountry['flag'] ?? '';
                             <span class="dark-td-related-label">{{ __('Related Tenders') }}</span>
                             <div class="dark-td-related-arrows">
                                 <button type="button" id="relTendersPrev" aria-label="Previous">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.2">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.2">
                                         <path d="M15 6l-6 6 6 6" />
                                     </svg>
                                 </button>
                                 <button type="button" id="relTendersNext" aria-label="Next">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2.2">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.2">
                                         <path d="M9 6l6 6-6 6" />
                                     </svg>
                                 </button>
@@ -2175,20 +2183,22 @@ $preFlag = $preCountry['flag'] ?? '';
                                         @if ($rtHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}');" @endif>
                                         @if (!$rtHasImage)
                                             <svg viewBox="0 0 24 24">
-                                                <path
-                                                    d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
+                                                <path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
                                                 <path d="M15 3v4h4" />
                                                 <path d="M9 12h6M9 16h6M9 8h2" />
                                             </svg>
                                         @endif
                                         @if (!empty($rt->tenderCategory))
-                                            <span class="dark-tender-cat">{{ convertUtf8($rt->tenderCategory->name) }}</span>
+                                            <span
+                                                class="dark-tender-cat">{{ convertUtf8($rt->tenderCategory->name) }}</span>
                                         @endif
                                         @if ($rt->submission_deadline)
                                             <div class="dark-tender-countdown"
                                                 data-deadline="{{ \Carbon\Carbon::parse($rt->submission_deadline)->toIso8601String() }}">
-                                                <span class="unit"><b data-d>00</b><span>{{ __('d') }}</span></span>
-                                                <span class="unit"><b data-h>00</b><span>{{ __('h') }}</span></span>
+                                                <span class="unit"><b
+                                                        data-d>00</b><span>{{ __('d') }}</span></span>
+                                                <span class="unit"><b
+                                                        data-h>00</b><span>{{ __('h') }}</span></span>
                                             </div>
                                         @endif
                                     </div>
@@ -2196,8 +2206,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                         <h3>{{ Str::limit(convertUtf8($rt->title), 60) }}</h3>
                                         <div class="dark-tender-meta">
                                             <span><svg viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
+                                                    <path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
                                                     <circle cx="12" cy="9" r="2.5" />
                                                 </svg>{{ $rt->country }}</span>
                                         </div>
@@ -2347,7 +2356,8 @@ $preFlag = $preCountry['flag'] ?? '';
                                                     <img src="{{ asset('assets/front/img/tenders/' . $rt->tender_image) }}"
                                                         alt="{{ $rt->title }}">
                                                 @else
-                                                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
+                                                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}"
+                                                        alt="">
                                                 @endif
                                                 @if ($rt->tenderCategory)
                                                     <span class="rt-cat">{{ $rt->tenderCategory->name }}</span>
@@ -2885,12 +2895,12 @@ $preFlag = $preCountry['flag'] ?? '';
                 }
 
                 var errMsg = {
-                    'validation':     '{{ __('Please enter a valid email address.') }}',
+                    'validation': '{{ __('Please enter a valid email address.') }}',
                     'email_mismatch': '{{ __('This email does not match the order for this registration number. Enter the email used for the purchase.') }}',
-                    'rate_limited':   '{{ __('Too many requests. Please wait a few minutes and try again.') }}',
-                    'regen_limit':    '{{ __('You have reached the limit of new links for today. Please try again tomorrow.') }}',
-                    'email_failed':   '{{ __('The email could not be sent right now. Please try again shortly or contact support.') }}',
-                    'suspended':      '{{ __('This order is under verification. Please contact ICA.') }}'
+                    'rate_limited': '{{ __('Too many requests. Please wait a few minutes and try again.') }}',
+                    'regen_limit': '{{ __('You have reached the limit of new links for today. Please try again tomorrow.') }}',
+                    'email_failed': '{{ __('The email could not be sent right now. Please try again shortly or contact support.') }}',
+                    'suspended': '{{ __('This order is under verification. Please contact ICA.') }}'
                 };
 
                 $btn.prop('disabled', true);
@@ -2902,7 +2912,8 @@ $preFlag = $preCountry['flag'] ?? '';
                         _token: $('#paymentGatewayForm input[name="_token"]').val(),
                         email: email,
                         tender_id: tenderId,
-                        company_registration_no: (($('#companyRegNo').val() || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
+                        company_registration_no: (($('#companyRegNo').val() || '').toUpperCase()
+                            .replace(/[^A-Z0-9]/g, ''))
                     },
                     success: function(res) {
                         if (res.status === 'success') {
@@ -2911,7 +2922,8 @@ $preFlag = $preCountry['flag'] ?? '';
                         } else {
                             $btn.prop('disabled', false);
                             $('#emailNewLinkMsg')
-                                .text(errMsg[res.type] || '{{ __('Could not send. Try again shortly.') }}')
+                                .text(errMsg[res.type] ||
+                                    '{{ __('Could not send. Try again shortly.') }}')
                                 .css('color', '#dc2626');
                         }
                     },
@@ -2933,9 +2945,11 @@ $preFlag = $preCountry['flag'] ?? '';
                 var prev = document.getElementById('relTendersPrev');
                 var next = document.getElementById('relTendersNext');
                 var card = track.querySelector('.dark-tender-card');
+
                 function step() {
                     return card ? card.getBoundingClientRect().width + 22 : 320;
                 }
+
                 function updateArrows() {
                     prev.disabled = track.scrollLeft <= 2;
                     next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;

@@ -7239,7 +7239,9 @@ section.single-causes-section {
 .about-company-section ul,
 .blog-details ul,
 .case-details ul,
-.service-details ul {
+.service-details ul,
+.tender-wysiwyg ul,
+.gateway-instruction ul {
   list-style: disc;
   padding-left: revert;
 }
@@ -7247,9 +7249,33 @@ section.single-causes-section {
 .about-company-section ol,
 .blog-details ol,
 .case-details ol,
-.service-details ol {
+.service-details ol,
+.tender-wysiwyg ol,
+.gateway-instruction ol {
     list-style: decimal;
     padding-left: revert;
+}
+
+/* Admin-pasted WYSIWYG content can carry hardcoded-width embeds (a fixed
+   width="640" YouTube iframe was one real case) that blow past the
+   container on mobile — force them back inside the layout regardless of
+   their own width/height attributes. height:auto only on img (safe,
+   preserves aspect ratio); iframe keeps its authored height — forcing
+   height:auto there tends to collapse video embeds instead of scaling them. */
+.about-company-section iframe,
+.blog-details iframe,
+.case-details iframe,
+.service-details iframe,
+.tender-wysiwyg iframe {
+    max-width: 100%;
+}
+.about-company-section img,
+.blog-details img,
+.case-details img,
+.service-details img,
+.tender-wysiwyg img {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Popup css */
@@ -8433,4 +8459,549 @@ div#particles-js canvas {
 .pricing-page .single-pricing-table {
     margin-bottom: 40px;
 }
+
+/* START: Team member profile popup
+   Profile-card layout: fixed gradient banner + circular avatar that overlaps
+   the banner/scroll boundary, single scrollable region underneath for
+   name/rank/socials/bio. Deliberately NOT a side-by-side photo+text split —
+   that made the photo stretch to match however long the bio was. Here the
+   photo has one fixed size no matter what, and only the text region ever
+   scrolls, so the modal always fits the viewport. */
+.team-clickable {
+    cursor: pointer;
+}
+/* Hover affordance: cards are clickable to open the profile modal, but
+   nothing about a plain photo card signals that on its own. Light theme
+   already had a corner-frame draw-in effect built for .single-team-member
+   (::before/::after, see above) — reused rather than duplicated. A small
+   icon-only badge "unfurls" (scale + rotate) dead center as the second half
+   of the cue; deliberately no text label — a text pill read as generic/
+   clunky, this reads as a discreet "expand" affordance instead. */
+.team-view-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 25;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.4) rotate(-135deg);
+    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.team-view-hint i {
+    font-size: 15px;
+}
+.team-clickable:hover .team-view-hint,
+.team-clickable:focus-visible .team-view-hint {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+}
+
+/* FAQ (light theme): category list can run much longer than whichever
+   category's answers are currently open, so a static sidebar ends early and
+   leaves the rest of the page scroll empty underneath it. Scoped to the FAQ
+   page, not the shared .sidebar class Blog also uses — Blog doesn't have
+   this same short-content/long-list mismatch. The card itself stays a fixed
+   height and stays put (sticky) — only the <ul> list scrolls inside it, so
+   "Categories" stays visible as a pinned header instead of scrolling away
+   with the rest of the card. */
+.faq-area-v1 .sidebar {
+    position: sticky;
+    top: 40px;
+}
+.faq-area-v1 .blog-sidebar-widgets.category-widget {
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+.faq-area-v1 .category-lists.job {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+.faq-area-v1 .category-lists.job ul {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Dark theme has no equivalent corner-frame yet — add the same draw-in
+   language as light's .single-team-member for a matching hover cue, both
+   marks kept on the left edge and clear of the top ~90px band the name/rank
+   text occupies at the bottom: the right edge is permanently claimed by the
+   always-visible .team-social rail background, and the bottom is permanently
+   claimed by .team-info's text, so a true opposite-corner pair isn't safe
+   here the way it is on the plain light-theme card. */
+.dark-team-member::before,
+.dark-team-member::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    z-index: 10;
+    width: 22px;
+    height: 22px;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+}
+.dark-team-member::before {
+    top: 14px;
+    border-top: 2px solid var(--accent-2, #25d06f);
+    border-left: 2px solid var(--accent-2, #25d06f);
+    transform: translate(6px, 6px);
+}
+.dark-team-member::after {
+    bottom: 92px;
+    border-bottom: 2px solid var(--accent-2, #25d06f);
+    border-left: 2px solid var(--accent-2, #25d06f);
+    transform: translate(6px, -6px);
+}
+.dark-team-member:hover::before,
+.dark-team-member:hover::after {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+.team-profile-modal .modal-dialog {
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+}
+.team-profile-modal .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    max-height: 85vh;
+    max-height: 85dvh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+}
+.team-profile-modal .close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+    line-height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    opacity: 1;
+    text-shadow: none;
+    font-size: 20px;
+    transition: background 0.25s ease, transform 0.25s ease;
+}
+.team-profile-modal .close:hover {
+    background: rgba(255, 255, 255, 0.32);
+    transform: rotate(90deg);
+}
+
+.team-modal-banner {
+    position: relative;
+    flex: 0 0 auto;
+    height: 108px;
+    background: linear-gradient(135deg, #0f2e28 0%, #157a56 55%, #25d06f 100%);
+    overflow: visible;
+}
+.team-modal-banner-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 55%);
+    pointer-events: none;
+}
+.team-modal-avatar-wrap {
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    margin-left: -72.5px;
+    width: 145px;
+    height: 145px;
+    border-radius: 50%;
+    padding: 4px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+    transform: translate(0, 0) scale(1);
+    transform-origin: top left;
+    will-change: transform;
+    /* transform-only animation (translate + scale), never top/left/width/height —
+       those are layout properties and thrash layout+paint every frame, which is
+       what read as "ghosting"; transform is compositor-only and stays smooth. */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Scrolled past the banner: avatar collapses to a small top-left badge,
+   restores to the centered position when scrolled back to top. --collapse-x
+   is set by JS (assets/front/js/team-modal.js) from the banner's actual
+   rendered width, since the resting position is centered (%-based) but the
+   collapsed target is a fixed px offset — the two can't be reconciled with
+   CSS alone across viewport widths. */
+#teamMemberModal.is-avatar-collapsed .team-modal-avatar-wrap {
+    transform: translate(var(--collapse-x, -82px), -14px) scale(0.386207);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+/* Name + designation next to the collapsed avatar — only visible once the
+   avatar has shrunk into the corner, so the banner still reads clearly.
+   Sized to use the banner's spare height/width, not squeezed small. */
+.team-modal-banner-title {
+    position: absolute;
+    top: 22px;
+    left: 86px;
+    right: 50px;
+    height: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;
+    pointer-events: none;
+}
+#teamMemberModal.is-avatar-collapsed .team-modal-banner-title {
+    opacity: 1;
+    transform: translateY(0);
+}
+.team-modal-banner-name {
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.team-modal-banner-rank {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.team-modal-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.team-modal-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding: 85px 44px 40px;
+    background: #fff;
+}
+.team-modal-heading {
+    text-align: center;
+}
+.team-modal-heading h3 {
+    margin: 0 0 2px;
+    font-size: 22px;
+    font-weight: 700;
+}
+.team-modal-rank {
+    display: block;
+    color: #25d06f;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+.team-modal-socials {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.team-modal-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f1f1f1;
+    color: #333;
+    transition: 0.25s;
+}
+.team-modal-socials a:hover {
+    background: #25d06f;
+    color: #fff;
+    transform: translateY(-2px);
+}
+.team-modal-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.team-modal-contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #666;
+    transition: 0.25s;
+}
+.team-modal-contact-item i {
+    color: #25d06f;
+    width: 14px;
+    text-align: center;
+}
+.team-modal-contact-item:hover {
+    color: #25d06f;
+}
+.team-modal-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #25d06f 20%, #25d06f 80%, transparent);
+    opacity: 0.6;
+    margin: 24px 0;
+}
+.team-modal-details {
+    line-height: 1.85;
+    color: #666;
+    text-align: left;
+}
+.team-modal-details h1,
+.team-modal-details h2,
+.team-modal-details h3,
+.team-modal-details h4,
+.team-modal-details h5,
+.team-modal-details h6 {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #1a1a1a;
+    margin: 22px 0 10px;
+}
+.team-modal-details h1:first-child,
+.team-modal-details h2:first-child,
+.team-modal-details h3:first-child,
+.team-modal-details h4:first-child,
+.team-modal-details h5:first-child,
+.team-modal-details h6:first-child {
+    margin-top: 0;
+}
+.team-modal-details p {
+    margin: 0 0 12px;
+}
+.team-modal-details strong {
+    color: #1a1a1a;
+}
+.team-modal-details ul,
+.team-modal-details ol {
+    padding-left: 20px;
+    margin: 0 0 12px;
+}
+.team-modal-details ul {
+    list-style: disc;
+}
+.team-modal-details ol {
+    list-style: decimal;
+}
+.team-modal-details li {
+    margin-bottom: 4px;
+}
+.team-modal-details:empty::before {
+    content: "No additional details added yet.";
+    color: #aaa;
+    font-style: italic;
+}
+@media (max-width: 575px) {
+    .team-profile-modal .modal-dialog {
+        max-width: calc(100% - 24px);
+    }
+    .team-modal-scroll {
+        padding: 85px 24px 32px;
+    }
+}
+/* END: Team member profile popup */
 /* END: Pricing Section CSS */
+
+/* START: Portfolio (light theme) mobile Categories filter offcanvas */
+body.pf-oc-lock {
+    overflow: hidden !important;
+}
+.pf-oc-trigger {
+    display: none;
+}
+.pf-oc-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    background: rgba(10, 10, 10, 0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease, background .35s ease;
+}
+.pf-oc-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    background: rgba(10, 10, 10, 0.55);
+}
+.pf-oc-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    width: min(320px, 86vw);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .4s cubic-bezier(.19,1,.22,1);
+    box-shadow: -20px 0 50px -15px rgba(0, 0, 0, 0.35);
+}
+.pf-oc-panel.is-open {
+    transform: translateX(0);
+}
+.pf-oc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #eee;
+    flex: 0 0 auto;
+    font-weight: 600;
+    font-size: 16px;
+}
+.pf-oc-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e2e2;
+    background: #fafafa;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.pf-oc-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 22px 24px;
+}
+.pf-oc-nav .sidebar {
+    margin: 0;
+}
+/* #pfOcBody: Blog's panel has a fixed Search top slot and fixed Newsletter
+   bottom slot around a scrolling middle (Categories/Archives); Portfolio/
+   FAQ only ever populate the middle slot, which then simply fills/scrolls
+   the whole body as before. */
+#pfOcBody {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+.pf-oc-fixed-top {
+    flex: 0 0 auto;
+    padding: 10px 22px;
+    border-bottom: 1px solid #eee;
+}
+/* Compact clone of the search widget — the sidebar's roomy field is
+   oversized for this cramped fixed slot. */
+.pf-oc-fixed-top .searchbar input[type="text"] {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+}
+.pf-oc-fixed-top .searchbar button {
+    padding: 6px 10px !important;
+}
+.pf-oc-scroll-mid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 22px;
+}
+.pf-oc-fixed-bottom {
+    flex: 0 0 auto;
+    padding: 10px 22px 12px;
+    border-top: 1px solid #eee;
+}
+/* Compact clone of the newsletter widget — drop the "SUBSCRIBE" eyebrow
+   and title text (redundant in a cramped fixed slot, email + button say
+   enough) and shrink the form itself. */
+.pf-oc-fixed-bottom .subscribe-section > span,
+.pf-oc-fixed-bottom .subscribe-section > h3 {
+    display: none;
+}
+.pf-oc-fixed-bottom .subscribe-form .form-element {
+    margin-bottom: 8px;
+}
+.pf-oc-fixed-bottom .subscribe-form input[type="email"] {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+}
+.pf-oc-fixed-bottom .subscribe-form input[type="submit"] {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+}
+/* Cloned widget(s) lose their standalone card chrome in here — the panel
+   already provides that framing. On single-widget panels (.pf-oc-single:
+   Portfolio/FAQ, just Categories) the widget's own heading also duplicates
+   the panel's title in .pf-oc-head, so it's hidden; multi-widget panels
+   (Blog: Search/Categories/Archives/Newsletter) keep each heading since
+   the panel title alone can't label all of them. */
+.pf-oc-nav .blog-sidebar-widgets,
+.pf-oc-nav .category-lists,
+.pf-oc-nav .subscribe-section,
+.pf-oc-nav .searchbar-form-section {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: 0;
+}
+.pf-oc-panel.pf-oc-single .category-lists h4 {
+    display: none;
+}
+/* Multi-widget panels (Blog): separate Categories/Archives inside the
+   scrolling middle now that each widget's own card border/padding is gone
+   — Search/Newsletter get their border from .pf-oc-fixed-top/-bottom instead. */
+.pf-oc-scroll-mid > .blog-sidebar-widgets + .blog-sidebar-widgets {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #eee;
+}
+@media (max-width: 991px) {
+    #pfCatSource {
+        display: none;
+    }
+    .pf-oc-trigger {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 24px;
+        padding: 12px 18px;
+        background: #f7f7f7;
+        border: 1px solid #ececec;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+}
+/* END: Portfolio (light theme) mobile Categories filter offcanvas */

@@ -3824,6 +3824,17 @@ a.proceed-checkout-btn:hover {
     display: none;
   }
 }
+/* padding-top:156px (above) reserves room for the absolutely-positioned
+   header (.header-absolute) sitting on top of this section — sized for the
+   full desktop header, utility strip included. That strip is hidden below
+   991px (its contact/socials/language info moves into the offcanvas menu
+   instead — see .dark-utility-strip), leaving only the ~85px compact nav
+   row, so the same 156px left a large dead gap above the heading on mobile. */
+@media (max-width: 991px) {
+  .dark-breadcrumb-hero {
+    padding-top: 50px;
+  }
+}
 
 /* =====================================================================
    Services listing page (dark theme) — /services
@@ -3844,6 +3855,33 @@ a.proceed-checkout-btn:hover {
 .dark-svcp-inner--full {
   grid-template-columns: 1fr;
   max-width: 900px;
+}
+/* Custom (admin-authored) pages: a bit wider than the 900px prose column
+   Blog/Service details use (long WYSIWYG pages read better with more room),
+   plus the particle-network background find-my-files already has — needs
+   its own stacking context above the injected canvas (z-index:0), the same
+   way .dark-hero-inner sits above the hero's canvas. Two-class selector
+   (not source order) guarantees this wins over .dark-svcp-inner--full's
+   900px regardless of stylesheet position. */
+.dark-svcp-inner--full.dark-custom-page-inner {
+  max-width: 1160px;
+  position: relative;
+  z-index: 2;
+}
+/* Same glow-blob background find-my-files (.dark-fmf) uses — scoped to this
+   modifier class, not the bare .dark-svcp-section other pages (services,
+   blog, portfolio-details...) also render with. */
+.dark-custom-page-section {
+  background: radial-gradient(
+      ellipse 900px 600px at 12% -10%,
+      rgba(var(--accent-rgb), 0.14),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 800px 700px at 100% 10%,
+      rgba(var(--accent-2-rgb), 0.1),
+      transparent 55%
+    ) !important;
 }
 
 /* ---- WYSIWYG content panel (service/blog details) ---- */
@@ -3893,6 +3931,14 @@ a.proceed-checkout-btn:hover {
   height: auto;
   border-radius: 14px;
   margin: 8px 0;
+}
+/* Admin-pasted content can carry a hardcoded-width embed (a fixed
+   width="640" YouTube iframe was one real case) that blows past the
+   container on mobile — cap it regardless of its own width attribute.
+   Height is left alone (forcing height:auto tends to collapse video
+   embeds instead of scaling them). */
+.dark-service-details iframe {
+  max-width: 100%;
 }
 .dark-service-details ul,
 .dark-service-details ol {
@@ -4054,6 +4100,51 @@ a.proceed-checkout-btn:hover {
   }
   .dark-svcp-inner {
     grid-template-columns: 1fr;
+  }
+  .dark-svcp-section {
+    padding: 35px 24px 140px;
+  }
+}
+
+/* ---- Portfolio / Blog / FAQ: mobile Categories offcanvas (reuses
+   .dark-oc-* panel/backdrop/close styling from the header's mobile menu —
+   same slide-in pattern, just an independent panel per page). #pfCatSource
+   wraps whatever's being pulled into the drawer on a given page (portfolio:
+   the whole sidebar column; blog/faq: just the Categories widget, search/
+   archives/newsletter stay put) — id is unique per page, safe to target
+   generically here. ---- */
+.dark-pf-oc-trigger {
+  display: none;
+}
+@media (max-width: 860px) {
+  /* Inline copy duplicates into the offcanvas panel on mobile — hide the
+     source so it's not shown twice. */
+  #pfCatSource {
+    display: none;
+  }
+  .dark-pf-oc-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 1320px;
+    margin: 0 auto 28px;
+    padding: 12px 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: #fff;
+    font-family: "Plex Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  .dark-pf-oc-trigger svg {
+    width: 16px;
+    height: 16px;
+    color: var(--accent-2);
+    flex-shrink: 0;
   }
 }
 
@@ -4423,82 +4514,40 @@ a.proceed-checkout-btn:hover {
   background: #090d16;
 }
 
-/* ---- category rail (binder-tab index, dot-marker line) ---- */
-.dark-faq-section .sidebar-widget-area .categories-widget {
-  background: transparent;
-  border: none;
-  padding: 0;
+/* Category sidebar now reuses .dark-svcp-widget/.dark-svcp-cat-list —
+   the same pattern as the dark Blog/Services pages — no FAQ-specific
+   sidebar CSS needed any more, except sticking it: FAQ's category list can
+   run much longer than the entries in whichever category is open (e.g. one
+   category with 3 short answers next to a 15-category list), so a static
+   sidebar just ends early and leaves the rest of the scroll empty. Scoped to
+   the FAQ page specifically rather than the shared .dark-svcp-widget class,
+   since Blog/Services don't have this same short-content/long-list mismatch.
+   The card itself stays a fixed height and stays put (sticky) — only the
+   <ul> list scrolls inside it, so "CATÉGORIES" stays visible as a pinned
+   header instead of scrolling away with the rest of the card. */
+.dark-faq-section .dark-svcp-inner > div:last-child {
   position: sticky;
   top: 40px;
+  align-self: start;
 }
-.dark-faq-section .nav-tabs {
-  border-bottom: none !important;
+.dark-faq-section .dark-svcp-widget {
+  max-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
-  position: relative;
-  margin: 0;
-  padding: 0 0 0 22px;
-  border-left: 1px solid var(--glass-border);
 }
-.dark-faq-section .nav-tabs .nav-item {
-  position: relative;
-  margin: 0 0 4px;
-}
-.dark-faq-section .nav-tabs .nav-item::before {
-  content: "";
-  position: absolute;
-  left: -26.5px;
-  top: 19px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #090d16;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  transition: background 0.25s ease, border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-.dark-faq-section .nav-tabs .nav-item:has(.nav-link.active)::before {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 4px rgba(var(--accent-2-rgb), 0.18);
-}
-.dark-faq-section .nav-tabs .nav-link {
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 12px 4px !important;
-  margin: 0 !important;
-  display: flex !important;
-  flex-direction: column;
-  align-items: flex-start;
-  font-family: "Plex Sans", sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.65) !important;
-  background: transparent !important;
-  transition: color 0.2s ease;
-}
-.dark-faq-section .nav-tabs .nav-link:hover {
-  color: #fff !important;
-}
-.dark-faq-section .nav-tabs .nav-link.active {
-  color: #fff !important;
-  font-weight: 600;
-}
-.dark-faq-section .nav-tabs .nav-link .dark-faq-rail-count {
-  display: block;
-  font-family: "Plex Mono", monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.03em;
-  color: rgba(255, 255, 255, 0.35);
-  margin-top: 2px;
-  font-weight: 400;
-}
-.dark-faq-section .nav-tabs .nav-link.active .dark-faq-rail-count {
-  color: var(--accent-2);
+.dark-faq-section .dark-svcp-cat-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ---- entries (flowing dossier list — no card chrome, border-bottom divided) ---- */
-.dark-faq-section .faq-details-wrapper,
+/* .faq-details-wrapper (categorized layout) fills its full dark-svcp-inner
+   grid column now — capping its own width here on top of the grid's fixed
+   340px sidebar track+gap left extra dead whitespace before the sidebar
+   that didn't match Blog/Services' identical grid. .faq-section (the
+   non-categorized 2-column layout, its own separate full-width container)
+   keeps the 760px cap. */
 .dark-faq-section .faq-section {
   max-width: 760px;
 }
@@ -4609,39 +4658,6 @@ a.proceed-checkout-btn:hover {
   margin: 0;
   padding-left: 20px;
   color: inherit !important;
-}
-@media (max-width: 991px) {
-  .dark-faq-section .sidebar-widget-area .categories-widget {
-    position: static;
-  }
-  .dark-faq-section .nav-tabs {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-    border-left: none;
-    padding-left: 0;
-    margin-bottom: 40px;
-  }
-  .dark-faq-section .nav-tabs .nav-item::before {
-    display: none;
-  }
-  .dark-faq-section .nav-tabs .nav-link {
-    padding: 10px 18px !important;
-    border-radius: 100px !important;
-    border: 1px solid var(--glass-border) !important;
-    background: var(--glass-bg) !important;
-  }
-  .dark-faq-section .nav-tabs .nav-link.active {
-    background: linear-gradient(
-      135deg,
-      var(--accent),
-      var(--accent-2)
-    ) !important;
-    color: #04101f !important;
-  }
-  .dark-faq-section .nav-tabs .nav-link.active .dark-faq-rail-count {
-    color: #04101f !important;
-  }
 }
 @media (max-width: 600px) {
   .dark-faq-section .card-body {
@@ -5359,6 +5375,9 @@ button.dark-sheet-submit[type="submit"]:active {
   border-radius: 14px;
   margin: 8px 0;
 }
+.dark-article-prose iframe {
+  max-width: 100%;
+}
 .dark-article-prose h1,
 .dark-article-prose h2,
 .dark-article-prose h3,
@@ -5371,6 +5390,12 @@ button.dark-sheet-submit[type="submit"]:active {
 .dark-article-prose ul,
 .dark-article-prose ol {
   padding-left: 22px;
+}
+.dark-article-prose ul {
+  list-style: disc;
+}
+.dark-article-prose ol {
+  list-style: decimal;
 }
 .dark-article-prose li {
   margin-bottom: 8px;
@@ -5411,134 +5436,12 @@ button.dark-sheet-submit[type="submit"]:active {
 }
 
 /* =====================================================================
-   Portfolios page (dark theme) — /portfolios. Sticky sidebar category
-   rail (dot-marker index, real per-category counts) + image-forward
-   case grid with hover-reveal overlays. A pill/tab filter row was tried
-   first and rejected — it breaks down once the category count grows
-   (wraps raggedly, or hides options off a scroll strip). A vertical
-   rail scales to any count via ordinary page scroll.
+   Portfolios page (dark theme) — /portfolios. Now uses the same
+   .dark-svcp-section/.dark-svcp-inner + .dark-svcp-widget/.dark-svcp-cat-list
+   right-sidebar pattern as Blog/Services/FAQ (was previously a bespoke
+   left-side sticky rail with dot-marker index — replaced for site-wide
+   sidebar consistency). Only the case grid below is still page-specific.
    ===================================================================== */
-.dark-pf-layout {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 76px 24px 150px;
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 54px;
-  align-items: start;
-}
-.dark-pf-rail {
-  position: sticky;
-  top: 40px;
-}
-.dark-pf-rail-label {
-  display: block;
-  font-family: "Plex Mono", monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
-  padding-bottom: 16px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--glass-border);
-}
-.dark-pf-rail-list {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 20px;
-  border-left: 1px solid var(--glass-border);
-}
-.dark-pf-rail-item {
-  position: relative;
-  margin-bottom: 2px;
-}
-.dark-pf-rail-item::before {
-  content: "";
-  position: absolute;
-  left: -24.5px;
-  top: 15px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #090d16;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  transition: background 0.25s ease, border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-.dark-pf-rail-item.is-active::before {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
-  box-shadow: 0 0 0 4px rgba(var(--accent-2-rgb), 0.18);
-}
-.dark-pf-rail-item a {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  padding: 11px 4px;
-  font-family: "Plex Sans", sans-serif;
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.65);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-.dark-pf-rail-item a:hover {
-  text-decoration: none;
-  color: #fff;
-}
-.dark-pf-rail-item.is-active a {
-  color: #fff;
-  font-weight: 600;
-}
-.dark-pf-rail-count {
-  flex-shrink: 0;
-  font-family: "Plex Mono", monospace;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
-}
-.dark-pf-rail-item.is-active .dark-pf-rail-count {
-  color: var(--accent-2);
-}
-@media (max-width: 860px) {
-  .dark-pf-layout {
-    grid-template-columns: 1fr;
-  }
-  .dark-pf-rail {
-    position: static;
-  }
-  .dark-pf-rail-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    border-left: none;
-    padding-left: 0;
-  }
-  .dark-pf-rail-item {
-    margin-bottom: 0;
-  }
-  .dark-pf-rail-item::before {
-    display: none;
-  }
-  .dark-pf-rail-item a {
-    padding: 9px 16px;
-    border-radius: 100px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-  }
-  .dark-pf-rail-item.is-active a {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    border-color: transparent;
-  }
-  .dark-pf-rail-item.is-active a,
-  .dark-pf-rail-item.is-active .dark-pf-rail-count {
-    color: #04101f !important;
-  }
-  .dark-pf-rail-count {
-    display: none;
-  }
-}
 
 /* ---- case grid ---- */
 .dark-pf-grid {
@@ -8087,7 +7990,11 @@ button.dark-cookie-consent__deny:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(9, 13, 22, 0.05), rgba(9, 13, 22, 0.45) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(9, 13, 22, 0.05),
+    rgba(9, 13, 22, 0.45) 100%
+  );
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
@@ -8171,7 +8078,11 @@ button.dark-cookie-consent__deny:hover {
     min-height: 220px;
   }
   .dark-tender-details .expert-wrap .thumb::after {
-    background: linear-gradient(180deg, rgba(9, 13, 22, 0.05), rgba(9, 13, 22, 0.55) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(9, 13, 22, 0.05),
+      rgba(9, 13, 22, 0.55) 100%
+    );
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -8868,7 +8779,11 @@ button.dark-cookie-consent__deny:hover {
   width: 260px;
   height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--accent-2-rgb), 0.22), transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-2-rgb), 0.22),
+    transparent 70%
+  );
   pointer-events: none;
 }
 .dark-fmf-contact-icon {
@@ -8946,7 +8861,8 @@ button.dark-cookie-consent__deny:hover {
   font-family: "Plex Mono", monospace;
   font-size: 12.5px;
   text-decoration: none !important;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-fmf-contact-chip svg {
   width: 14px;
@@ -9944,6 +9860,91 @@ body.dark-oc-lock {
   overflow-y: auto;
   padding: 8px 8px 20px;
 }
+/* #pfOcBody only (not the header menu's own .dark-oc-nav, which needs its
+   plain scrolling-list behavior untouched) — Blog's panel has a fixed
+   Search top slot and fixed Newsletter bottom slot around a scrolling
+   middle (Categories/Archives); Portfolio/FAQ only ever populate the
+   middle slot, which then simply fills/scrolls the whole body as before. */
+#pfOcBody {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.pf-oc-fixed-top {
+  flex: 0 0 auto;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* Compact clone of .dark-svcp-search — the sidebar's roomy pill is
+   oversized for this cramped fixed slot. */
+.pf-oc-fixed-top .dark-svcp-search {
+  padding: 4px 4px 4px 14px;
+}
+.pf-oc-fixed-top .dark-svcp-search input[type="text"] {
+  padding: 6px 0 !important;
+}
+.pf-oc-fixed-top .dark-svcp-search button {
+  width: 30px;
+  height: 30px;
+}
+.pf-oc-fixed-top .dark-svcp-search button svg {
+  width: 13px;
+  height: 13px;
+}
+.pf-oc-scroll-mid {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+.pf-oc-fixed-bottom {
+  flex: 0 0 auto;
+  padding: 12px 20px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* Compact clone of .dark-svcp-newsletter — drop the "SUBSCRIBE" eyebrow
+   and title text (redundant in a cramped fixed slot, email + button say
+   enough) and shrink the form itself. */
+.pf-oc-fixed-bottom .dark-bc-eyebrow,
+.pf-oc-fixed-bottom .dark-svcp-newsletter-title {
+  display: none;
+}
+.pf-oc-fixed-bottom .dark-svcp-newsletter-form {
+  padding: 4px 4px 4px 14px;
+}
+.pf-oc-fixed-bottom .dark-svcp-newsletter-form input[type="email"] {
+  padding: 6px 0 !important;
+}
+.pf-oc-fixed-bottom .dark-svcp-newsletter-form button[type="submit"] {
+  padding: 7px 14px !important;
+}
+
+/* Cloned .dark-svcp-widget(s) lose their standalone card chrome in here —
+   the panel itself already provides that framing. On single-widget panels
+   (.pf-oc-single: Portfolio/FAQ, just Categories) the widget's own heading
+   also duplicates the panel's title in .dark-oc-head, so it's hidden;
+   multi-widget panels (Blog: Search/Categories/Archives/Newsletter) keep
+   each heading since the panel title alone can't label all of them. */
+.dark-oc-nav .dark-svcp-widget {
+  background: none;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+.dark-oc-panel.pf-oc-single .dark-svcp-widget h4 {
+  display: none;
+}
+/* Multi-widget panels (Blog): separate the stacked sections now that each
+   widget's own card border/padding is gone. */
+.dark-oc-nav .dark-svcp-widget + .dark-svcp-widget {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
 .dark-oc-item {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -10401,4 +10402,87 @@ body.dark-oc-lock {
   .dark-sv-status {
     display: none;
   }
+}
+
+/* ---------- Team member profile popup (dark glass) ---------- */
+.dark-team-profile-modal .modal-content {
+  background: rgba(10, 25, 20, 0.94);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+}
+.dark-team-profile-modal .close {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.dark-team-profile-modal .close:hover {
+  background: var(--accent);
+  color: #05100d;
+}
+.dark-team-profile-modal .team-modal-banner {
+  background: linear-gradient(
+      135deg,
+      rgba(var(--accent-rgb), 0.55) 0%,
+      rgba(var(--accent-2-rgb), 0.45) 100%
+    ),
+    #05100d;
+  border-bottom: 1px solid var(--glass-border);
+}
+.dark-team-profile-modal .team-modal-avatar-wrap {
+  background: #0a1914;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--glass-border);
+}
+.dark-team-profile-modal .team-modal-scroll {
+  background: transparent;
+}
+.dark-team-profile-modal .team-modal-heading h3 {
+  color: #fff;
+}
+.dark-team-profile-modal .team-modal-rank {
+  color: var(--accent-2);
+}
+.dark-team-profile-modal .team-modal-socials a {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.dark-team-profile-modal .team-modal-socials a:hover {
+  background: var(--accent);
+  color: #05100d;
+}
+.dark-team-profile-modal .team-modal-contact-item {
+  color: rgba(255, 255, 255, 0.75);
+}
+.dark-team-profile-modal .team-modal-contact-item i {
+  color: var(--accent-2);
+}
+.dark-team-profile-modal .team-modal-contact-item:hover {
+  color: var(--accent-2);
+}
+/* Same accent/accent-2 two-tone gradient as the homepage section-seam
+   divider (.dark-section-seam::before), instead of a flat grey line. */
+.dark-team-profile-modal .team-modal-divider {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    var(--accent-2),
+    transparent
+  );
+  opacity: 0.85;
+}
+.dark-team-profile-modal .team-modal-details {
+  color: rgba(255, 255, 255, 0.75);
+}
+.dark-team-profile-modal .team-modal-details h1,
+.dark-team-profile-modal .team-modal-details h2,
+.dark-team-profile-modal .team-modal-details h3,
+.dark-team-profile-modal .team-modal-details h4,
+.dark-team-profile-modal .team-modal-details h5,
+.dark-team-profile-modal .team-modal-details h6,
+.dark-team-profile-modal .team-modal-details strong {
+  color: #fff;
+}
+.dark-team-profile-modal .team-modal-details:empty::before {
+  color: rgba(255, 255, 255, 0.4);
 }

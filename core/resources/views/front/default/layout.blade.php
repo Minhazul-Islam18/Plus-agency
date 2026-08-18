@@ -469,6 +469,8 @@
     <script src="{{ asset_v('assets/front/js/plugin.min.js') }}"></script>
     <!-- main js -->
     <script src="{{ asset_v('assets/front/js/main.js') }}"></script>
+    <!-- team member profile popup (self-guards on .team-clickable) -->
+    <script src="{{ asset_v('assets/front/js/team-modal.js') }}"></script>
     @if ($be->theme_version == 'dark')
         <!-- dark glass theme: mouse-reactive particle network (self-guards on [data-particle-network]) -->
         <script src="{{ asset_v('assets/front/js/particle-network.js') }}"></script>
@@ -593,13 +595,16 @@
     <!--Start of subscribe functionality-->
     <script>
         $(document).ready(function() {
-            $("#subscribeForm, #footerSubscribeForm").on('submit', function(e) {
-                // console.log($(this).attr('id'));
-
+            // Delegated (not a direct .on() bind) + FormData built from `this`
+            // (not a getElementById(id) re-lookup) — the Blog page's mobile
+            // Categories offcanvas clones this form with its id stripped (to
+            // avoid a duplicate id), so both the id-based selector match and
+            // the getElementById lookup would silently miss/misfire on that
+            // clone otherwise.
+            $(document).on('submit', '#subscribeForm, #footerSubscribeForm', function(e) {
                 e.preventDefault();
 
-                let formId = $(this).attr('id');
-                let fd = new FormData(document.getElementById(formId));
+                let fd = new FormData(this);
                 let $this = $(this);
 
                 $.ajax({

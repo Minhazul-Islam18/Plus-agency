@@ -46,151 +46,171 @@
 @section('content')
 
 @if ($be->theme_version == 'dark')
-    <!--    dark portfolios page start   -->
-    <div class="dark-pf-layout">
+    <!--    dark portfolios page start: same right-sidebar pattern as Blog/Services/FAQ   -->
+    <div class="dark-svcp-section dark-pf-section">
         @if (serviceCategory())
-            <nav class="dark-pf-rail">
-                <span class="dark-pf-rail-label">{{ __('Categories') }}</span>
-                <ul class="dark-pf-rail-list">
-                    <li class="dark-pf-rail-item {{ empty($category) ? 'is-active' : '' }}">
-                        <a href="{{ route('front.portfolios') }}">
-                            {{ __('All Projects') }}
-                            <span class="dark-pf-rail-count">{{ str_pad(\App\Portfolio::where('language_id', $currentLang->id)->count(), 2, '0', STR_PAD_LEFT) }}</span>
-                        </a>
-                    </li>
-                    @foreach ($scats as $key => $scat)
-                        @php
-                            $scatPortfolioCount = \App\Portfolio::where('language_id', $currentLang->id)
-                                ->whereHas('service', function ($q) use ($scat) {
-                                    $q->where('scategory_id', $scat->id);
-                                })
-                                ->count();
-                        @endphp
-                        <li class="dark-pf-rail-item {{ !empty($category) && $category->id == $scat->id ? 'is-active' : '' }}">
-                            <a href="{{ route('front.portfolios', ['category' => $scat->id]) }}">
-                                {{ convertUtf8($scat->name) }}
-                                <span class="dark-pf-rail-count">{{ str_pad($scatPortfolioCount, 2, '0', STR_PAD_LEFT) }}</span>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </nav>
+            <button type="button" class="dark-pf-oc-trigger" id="pfOcToggle" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" /></svg>
+                {{ __('Categories') }}
+            </button>
         @endif
-
-        <div>
-            @if (count($portfolios) == 0)
-                <div class="dark-svcp-empty">
-                    <h3>{{ __('NO PORTFOLIO FOUND') }}</h3>
-                </div>
-            @else
-                <div class="dark-pf-grid">
-                    @foreach ($portfolios as $key => $portfolio)
-                        <a class="dark-pf-card" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
-                            <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
-                            <span class="dark-pf-scrim"></span>
-                            @if (!empty($portfolio->service->scategory))
-                                <span class="dark-pf-tag">{{ convertUtf8($portfolio->service->scategory->name) }}</span>
-                            @endif
-                            <div class="dark-pf-body">
-                                @if (!empty($portfolio->service))
-                                    <div class="service">{{ convertUtf8($portfolio->service->title) }}</div>
+        <div class="dark-svcp-inner">
+            <div>
+                @if (count($portfolios) == 0)
+                    <div class="dark-svcp-empty">
+                        <h3>{{ __('NO PORTFOLIO FOUND') }}</h3>
+                    </div>
+                @else
+                    <div class="dark-pf-grid">
+                        @foreach ($portfolios as $key => $portfolio)
+                            <a class="dark-pf-card" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
+                                <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
+                                <span class="dark-pf-scrim"></span>
+                                @if (!empty($portfolio->service->scategory))
+                                    <span class="dark-pf-tag">{{ convertUtf8($portfolio->service->scategory->name) }}</span>
                                 @endif
-                                <h3>{{ strlen($portfolio->title) > 60 ? mb_substr($portfolio->title, 0, 60, 'utf-8') . '...' : $portfolio->title }}</h3>
-                                <span class="dark-pf-link">
-                                    {{ __('View Project') }}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                                </span>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
+                                <div class="dark-pf-body">
+                                    @if (!empty($portfolio->service))
+                                        <div class="service">{{ convertUtf8($portfolio->service->title) }}</div>
+                                    @endif
+                                    <h3>{{ strlen($portfolio->title) > 60 ? mb_substr($portfolio->title, 0, 60, 'utf-8') . '...' : $portfolio->title }}</h3>
+                                    <span class="dark-pf-link">
+                                        {{ __('View Project') }}
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                                    </span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
 
-            @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator && $portfolios->hasPages())
-                <nav class="dark-pf-pagination">
-                    {{ $portfolios->appends(['category' => request()->input('category')])->links('vendor.pagination.dark-glass') }}
-                </nav>
-            @endif
-        </div>
-    </div>
-    <!--    dark portfolios page end   -->
-@else
-    <!--    case lists start   -->
-    <div class="case-lists section-padding case-page pt-120 pb-110" id="masonry-portfolio">
-        <div class="container">
+                @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator && $portfolios->hasPages())
+                    <nav class="dark-pf-pagination">
+                        {{ $portfolios->appends(['category' => request()->input('category')])->links('vendor.pagination.dark-glass') }}
+                    </nav>
+                @endif
+            </div>
+
             @if (serviceCategory())
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="filter-nav text-center mb-15">
-                            <ul class="filter-btn">
-                                <li data-filter="*" class="active">All</li>
-                                @foreach ($scats as $key => $scat)
-                                    @php
-                                        $filterValue = '.' . strtolower($scat->name);
-
-                                        if (str_contains($filterValue, ' ')) {
-                                            $filterValue = str_replace(' ', '-', $filterValue);
-                                        }
-                                    @endphp
-
-                                    <li data-filter="{{ $filterValue }}">{{ convertUtf8($scat->name) }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                <div id="pfCatSource">
+                    <div class="dark-svcp-widget">
+                        <h4>{{ __('Categories') }}</h4>
+                        <ul class="dark-svcp-cat-list">
+                            <li class="{{ empty($category) ? 'is-active' : '' }}">
+                                <a href="{{ route('front.portfolios') }}">{{ __('All Projects') }}</a>
+                            </li>
+                            @foreach ($scats as $key => $scat)
+                                <li class="{{ !empty($category) && $category->id == $scat->id ? 'is-active' : '' }}">
+                                    <a href="{{ route('front.portfolios', ['category' => $scat->id]) }}">{{ convertUtf8($scat->name) }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             @endif
+        </div>
 
-            <div class="cases masonry-row">
-                <div class="row">
-                    @if (count($portfolios) == 0)
-                        <div class="col-lg-12 py-5 bg-light text-center mb-4">
-                            <h3>{{ __('NO PORTFOLIO FOUND') }}</h3>
-                        </div>
-                    @else
-                        @foreach ($portfolios as $key => $portfolio)
-                            @php
-                                $categoryName = '';
+        @if (serviceCategory())
+            {{-- Mobile categories filter offcanvas: JS clones #pfCatSource into #pfOcBody --}}
+            <div class="dark-oc-backdrop" id="pfOcBackdrop"></div>
+            <nav class="dark-oc-panel pf-oc-single" id="pfOcPanel">
+                <div class="dark-oc-head">
+                    <span class="dark-oc-head-logo">{{ __('Categories') }}</span>
+                    <button type="button" class="dark-oc-close" id="pfOcClose" aria-label="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+                    </button>
+                </div>
+                <div class="dark-oc-nav" id="pfOcBody"></div>
+            </nav>
+        @endif
+    </div>
+    <!--    dark portfolios page end   -->
+@else
+    <!--    case lists start: same right-sidebar pattern as Blog/Services/FAQ.
+         Category filtering moved from client-side isotope (which only
+         reshuffled the current page's 9 results and never actually changed
+         ?category=, so pagination + filter together were broken) to the same
+         server-filtered link pattern already used for the dark theme and for
+         Blog/Services — plain Bootstrap grid, no isotope needed any more.   -->
+    <div class="case-lists section-padding case-page pt-120 pb-110">
+        <div class="container">
+            @if (serviceCategory())
+                <button type="button" class="pf-oc-trigger" id="pfOcToggle" aria-expanded="false">
+                    <i class="fas fa-filter"></i> {{ __('Categories') }}
+                </button>
+            @endif
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="row">
+                        @if (count($portfolios) == 0)
+                            <div class="col-md-12 py-5 bg-light text-center mb-4">
+                                <h3>{{ __('NO PORTFOLIO FOUND') }}</h3>
+                            </div>
+                        @else
+                            @foreach ($portfolios as $key => $portfolio)
+                                <div class="col-md-6">
+                                    <div class="single-case lazy"
+                                        data-bg="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}">
+                                        <div class="outer-container">
+                                            <div class="inner-container">
+                                                <h4>{{ strlen($portfolio->title) > 25 ? mb_substr($portfolio->title, 0, 25, 'utf-8') . '...' : $portfolio->title }}
+                                                </h4>
+                                                @if (!empty($portfolio->service))
+                                                    <p>{{ $portfolio->service->title }}</p>
+                                                @endif
 
-                                if (!empty($portfolio->service->scategory)) {
-                                    $portfolioCategory = $portfolio->service->scategory;
-
-                                    $categoryName = strtolower($portfolioCategory->name);
-
-                                    if (str_contains($categoryName, ' ')) {
-                                        $categoryName = str_replace(' ', '-', $categoryName);
-                                    }
-                                }
-                            @endphp
-
-                            <div class="col-lg-4 col-md-6 portfolio-column {{ $categoryName }}">
-                                <div class="single-case lazy"
-                                    data-bg="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}">
-                                    <div class="outer-container">
-                                        <div class="inner-container">
-                                            <h4>{{ strlen($portfolio->title) > 25 ? mb_substr($portfolio->title, 0, 25, 'utf-8') . '...' : $portfolio->title }}
-                                            </h4>
-                                            @if (!empty($portfolio->service))
-                                                <p>{{ $portfolio->service->title }}</p>
-                                            @endif
-
-                                            <a href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}"
-                                                class="readmore-btn"><span>{{ __('Read More') }}</span></a>
+                                                <a href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}"
+                                                    class="readmore-btn"><span>{{ __('Read More') }}</span></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            @endforeach
+                        @endif
+                    </div>
+                    @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator && $portfolios->hasPages())
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ $portfolios->appends(['category' => request()->input('category')])->links() }}
                             </div>
-                        @endforeach
+                        </div>
                     @endif
                 </div>
-                @if ($portfolios instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                    <div class="col-lg-12">
-                        {{ $portfolios->appends(['category' => request()->input('category')])->links() }}
+
+                @if (serviceCategory())
+                    <div class="col-lg-4" id="pfCatSource">
+                        <div class="sidebar">
+                            <div class="blog-sidebar-widgets category-widget">
+                                <div class="category-lists job">
+                                    <h4>{{ __('Categories') }}</h4>
+                                    <ul>
+                                        <li class="single-category {{ empty($category) ? 'active' : '' }}">
+                                            <a href="{{ route('front.portfolios') }}">{{ __('All Projects') }}</a>
+                                        </li>
+                                        @foreach ($scats as $key => $scat)
+                                            <li class="single-category {{ !empty($category) && $category->id == $scat->id ? 'active' : '' }}">
+                                                <a href="{{ route('front.portfolios', ['category' => $scat->id]) }}">{{ convertUtf8($scat->name) }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>
 
-
+            @if (serviceCategory())
+                {{-- Mobile categories filter offcanvas: JS clones #pfCatSource into #pfOcBody --}}
+                <div class="pf-oc-backdrop" id="pfOcBackdrop"></div>
+                <nav class="pf-oc-panel pf-oc-single" id="pfOcPanel">
+                    <div class="pf-oc-head">
+                        <span>{{ __('Categories') }}</span>
+                        <button type="button" class="pf-oc-close" id="pfOcClose" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="pf-oc-nav" id="pfOcBody"></div>
+                </nav>
+            @endif
         </div>
     </div>
     <!--    case lists end   -->
@@ -198,30 +218,6 @@
 @endsection
 
 @section('scripts')
-    @if ($be->theme_version != 'dark')
-        <script>
-            $('#masonry-portfolio').imagesLoaded(function() {
-                // items on button click
-                $('.filter-btn').on('click', 'li', function() {
-                    var filterValue = $(this).attr('data-filter');
-                    $grid.isotope({
-                        filter: filterValue
-                    });
-                });
-                // menu active class
-                $('.filter-btn li').on('click', function(e) {
-                    $(this).siblings('.active').removeClass('active');
-                    $(this).addClass('active');
-                    e.preventDefault();
-                });
-                var $grid = $('.masonry-row').isotope({
-                    itemSelector: '.portfolio-column',
-                    percentPosition: true,
-                    masonry: {
-                        columnWidth: 0
-                    }
-                });
-            });
-        </script>
-    @endif
+    <script src="{{ asset_v('assets/front/js/category-offcanvas.js') }}"></script>
 @endsection
+

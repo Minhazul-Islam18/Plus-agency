@@ -47,6 +47,10 @@
 @if ($be->theme_version == 'dark')
   <!--    dark blog page start   -->
   <div class="dark-svcp-section">
+    <button type="button" class="dark-pf-oc-trigger" id="pfOcToggle" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" /></svg>
+        {{ __('Sidebar') }}
+    </button>
     <div class="dark-svcp-inner">
       <div>
         @if (count($blogs) == 0)
@@ -99,8 +103,8 @@
         @endif
       </div>
 
-      <div>
-        <div class="dark-svcp-widget">
+      <div id="pfCatSource">
+        <div class="dark-svcp-widget" data-pf-pin="top">
           <form class="dark-svcp-search" action="{{ route('front.blogs', ['category' => request()->input('category'), 'month' => request()->input('month'), 'year' => request()->input('year')]) }}" method="GET">
             <input name="category" type="hidden" value="{{ request()->input('category') }}">
             <input name="month" type="hidden" value="{{ request()->input('month') }}">
@@ -121,6 +125,7 @@
           </ul>
         </div>
 
+        @if (count($archives) > 0)
         <div class="dark-svcp-widget">
           <h4>{{ __('Archives') }}</h4>
           <ul class="dark-blogp-archive-list">
@@ -139,8 +144,9 @@
             @endforeach
           </ul>
         </div>
+        @endif
 
-        <div class="dark-svcp-widget dark-svcp-newsletter">
+        <div class="dark-svcp-widget dark-svcp-newsletter" data-pf-pin="bottom">
           <span class="dark-bc-eyebrow">{{ __('SUBSCRIBE') }}</span>
           <h4 class="dark-svcp-newsletter-title">{{ __('SUBSCRIBE FOR NEWSLETTER') }}</h4>
           <form id="subscribeForm" class="dark-svcp-newsletter-form" action="{{ route('front.subscribe') }}" method="POST">
@@ -152,12 +158,26 @@
         </div>
       </div>
     </div>
+
+    <div class="dark-oc-backdrop" id="pfOcBackdrop"></div>
+    <nav class="dark-oc-panel" id="pfOcPanel">
+        <div class="dark-oc-head">
+            <span class="dark-oc-head-logo">{{ __('Sidebar') }}</span>
+            <button type="button" class="dark-oc-close" id="pfOcClose" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+            </button>
+        </div>
+        <div class="dark-oc-nav" id="pfOcBody"></div>
+    </nav>
   </div>
   <!--    dark blog page end   -->
 @else
   <!--    blog lists start   -->
   <div class="blog-lists section-padding">
      <div class="container">
+        <button type="button" class="pf-oc-trigger" id="pfOcToggle" aria-expanded="false">
+            <i class="fas fa-filter"></i> {{ __('Sidebar') }}
+        </button>
         <div class="row">
            <div class="col-lg-8">
               <div class="row">
@@ -210,8 +230,8 @@
            </div>
            <!--    blog sidebar section start   -->
            <div class="col-lg-4">
-              <div class="sidebar">
-                 <div class="blog-sidebar-widgets">
+              <div class="sidebar" id="pfCatSource">
+                 <div class="blog-sidebar-widgets" data-pf-pin="top">
                     <div class="searchbar-form-section">
                        <form action="{{route('front.blogs', ['category' => request()->input('category'), 'month' => request()->input('month'), 'year' => request()->input('year')])}}" method="GET">
                           <div class="searchbar">
@@ -234,6 +254,7 @@
                        </ul>
                     </div>
                  </div>
+                 @if (count($archives) > 0)
                  <div class="blog-sidebar-widgets category-widget">
                     <div class="category-lists job">
                        <h4>{{__('Archives')}}</h4>
@@ -268,7 +289,8 @@
                        </ul>
                     </div>
                  </div>
-                 <div class="subscribe-section">
+                 @endif
+                 <div class="subscribe-section" data-pf-pin="bottom">
                     <span>{{__('SUBSCRIBE')}}</span>
                     <h3>{{__('SUBSCRIBE FOR NEWSLETTER')}}</h3>
                     <form id="subscribeForm" class="subscribe-form" action="{{route('front.subscribe')}}" method="POST">
@@ -282,8 +304,21 @@
            </div>
            <!--    blog sidebar section end   -->
         </div>
+
+        <div class="pf-oc-backdrop" id="pfOcBackdrop"></div>
+        <nav class="pf-oc-panel" id="pfOcPanel">
+            <div class="pf-oc-head">
+                <span>{{ __('Sidebar') }}</span>
+                <button type="button" class="pf-oc-close" id="pfOcClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="pf-oc-nav" id="pfOcBody"></div>
+        </nav>
      </div>
   </div>
   <!--    blog lists end   -->
 @endif
+@endsection
+
+@section('scripts')
+    <script src="{{ asset_v('assets/front/js/category-offcanvas.js') }}"></script>
 @endsection

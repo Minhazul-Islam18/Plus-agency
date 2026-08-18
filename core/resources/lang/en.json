@@ -18,6 +18,7 @@
     "Contact Us": "Contact Us",
     "Service Details": "Service details",
     "Categories": "Categories",
+    "Sidebar": "Sidebar",
     "Search Services": "Search Services",
     "SUBSCRIBE": "Subscribe",
     "SUBSCRIBE FOR NEWSLETTER": "Subscribe for newsletter",
@@ -671,5 +672,10 @@
     "Something went wrong. Please try again.": "Something went wrong. Please try again.",
     "Need a hand?": "Need a hand?",
     "Our support team can help verify your purchase and resend your download link.": "Our support team can help verify your purchase and resend your download link.",
-    "Visit Contact Page": "Visit Contact Page"
+    "Visit Contact Page": "Visit Contact Page",
+    "Articles Published": "Articles Published",
+    "Categories Covered": "Categories Covered",
+    "All Projects": "All Projects",
+    "Completed Projects": "Completed Projects",
+    "min read": "min read"
 }

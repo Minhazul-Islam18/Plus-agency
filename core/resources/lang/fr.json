@@ -17,6 +17,7 @@
     "Contact Us": "Contactez-nous",
     "Service Details": "Détails du service",
     "Categories": "Catégories",
+    "Sidebar": "Barre latérale",
     "Search Services": "Rechercher des services",
     "SUBSCRIBE": "S’ABONNER",
     "SUBSCRIBE FOR NEWSLETTER": "S’ABONNER À LA NEWSLETTER",
@@ -445,5 +446,10 @@
     "Back to Homepage": "Retour à l'accueil",
     "You have been resubscribed successfully!": "Vous avez été réabonné avec succès !",
     "This email is already subscribed or invalid.": "Cet e-mail est déjà abonné ou invalide.",
-    "Something went wrong. Please try again.": "Une erreur s'est produite. Veuillez réessayer."
+    "Something went wrong. Please try again.": "Une erreur s'est produite. Veuillez réessayer.",
+    "Articles Published": "Articles publiés",
+    "Categories Covered": "Catégories couvertes",
+    "All Projects": "Tous les projets",
+    "Completed Projects": "Projets réalisés",
+    "min read": "min de lecture"
 }

@@ -28,6 +28,18 @@ return new class extends Migration
             });
         }
 
+        // Some existing installs have this table stuck on latin1 (predates the
+        // connection's utf8mb4 default) — that rejects emoji and 4-byte UTF-8
+        // with a hard SQL error under strict mode. Convert it if found.
+        if (Schema::hasTable('tender_categories') && DB::getDriverName() === 'mysql') {
+            $collation = DB::selectOne(
+                "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tender_categories'"
+            );
+            if ($collation && stripos($collation->TABLE_COLLATION, 'utf8mb4') !== 0) {
+                DB::statement('ALTER TABLE `tender_categories` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            }
+        }
+
         if (!Schema::hasTable('tenders')) {
             Schema::create('tenders', function (Blueprint $table) {
                 $table->bigIncrements('id');

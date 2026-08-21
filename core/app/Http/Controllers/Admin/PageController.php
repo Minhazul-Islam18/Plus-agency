@@ -136,7 +136,7 @@ class PageController extends Controller
         $page->breadcrumb_overlay_opacity = $request->breadcrumb_overlay_opacity;
 
         if ($bex->custom_page_pagebuilder == 0) {
-            $page->body = $request->body;
+            $page->body = clean($request->body);
         }
         $page->save();
 
@@ -216,7 +216,7 @@ class PageController extends Controller
         $page->breadcrumb_overlay_opacity = $request->breadcrumb_overlay_opacity;
 
         if ($bex->custom_page_pagebuilder == 0) {
-            $page->body = $request->body;
+            $page->body = clean($request->body);
         }
         $page->save();
 

@@ -137,7 +137,7 @@ class MemberController extends Controller
         $member->linkedin = $request->linkedin;
         $member->email = $request->email;
         $member->whatsapp = $this->whatsappValue($request);
-        $member->details = $request->details;
+        $member->details = clean($request->details);
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
@@ -197,7 +197,7 @@ class MemberController extends Controller
         $member->linkedin = $request->linkedin;
         $member->email = $request->email;
         $member->whatsapp = $this->whatsappValue($request);
-        $member->details = $request->details;
+        $member->details = clean($request->details);
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $member->image);

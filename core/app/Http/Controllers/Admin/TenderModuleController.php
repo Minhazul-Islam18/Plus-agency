@@ -233,7 +233,7 @@ class TenderModuleController extends Controller
         $module->tender_id = $request->tender_id;
         $module->name     = $request->name;
         $module->cost     = $request->cost ?: null;
-        $module->summary  = $request->summary;
+        $module->summary  = clean($request->summary);
 
         if ($request->filled('tender_file')) {
             try {
@@ -271,7 +271,7 @@ class TenderModuleController extends Controller
         $module          = TenderModule::findOrFail($request->module_id);
         $module->name    = $request->name;
         $module->cost    = $request->cost ?: null;
-        $module->summary = $request->summary;
+        $module->summary = clean($request->summary);
 
         if ($request->filled('tender_file')) {
             try {

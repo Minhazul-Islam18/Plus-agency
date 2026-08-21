@@ -112,7 +112,7 @@ class EmailController extends Controller
     public function templateUpdate(Request $request, $id) {
         $template = EmailTemplate::find($id);
         $template->email_subject = $request->email_subject;
-        $template->email_body = $request->email_body;
+        $template->email_body = clean($request->email_body);
         $template->save();
 
         Session::flash('success', 'Email Template updated successfully!');

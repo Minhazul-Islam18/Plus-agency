@@ -121,7 +121,7 @@ class PortfolioController extends Controller
         $in = $request->all();
         $in['language_id'] = $request->language_id;
         $in['slug'] = $slug;
-        $in['content'] = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $in['content'] = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
@@ -224,7 +224,7 @@ class PortfolioController extends Controller
 
         $in = $request->all();
         $portfolio = Portfolio::findOrFail($request->portfolio_id);
-        $in['content'] = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $in['content'] = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
         $in['slug'] = $slug;
 
         if ($request->filled('image')) {

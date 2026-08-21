@@ -252,7 +252,7 @@ class GatewayController extends Controller
         }
 
         $in = $request->all();
-        $in['instructions'] = str_replace(url('/') . '/' . FRONT_IMG_PATH, '{base_url}/' . FRONT_IMG_PATH, $request->instructions);
+        $in['instructions'] = clean(str_replace(url('/') . '/' . FRONT_IMG_PATH, '{base_url}/' . FRONT_IMG_PATH, $request->instructions));
 
         OfflineGateway::create($in);
 
@@ -275,7 +275,7 @@ class GatewayController extends Controller
         }
 
         $in = $request->except('_token', 'ogateway_id');
-        $in['instructions'] = str_replace(url('/') . '/' . FRONT_IMG_PATH, '{base_url}/' . FRONT_IMG_PATH, $request->instructions);
+        $in['instructions'] = clean(str_replace(url('/') . '/' . FRONT_IMG_PATH, '{base_url}/' . FRONT_IMG_PATH, $request->instructions));
 
         OfflineGateway::where('id', $request->ogateway_id)->update($in);
 

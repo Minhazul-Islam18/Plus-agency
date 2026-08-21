@@ -52,7 +52,7 @@ class FooterController extends Controller
         $bs = BS::where('language_id', $langid)->firstOrFail();
         $bs->footer_text = $request->footer_text;
         $bs->newsletter_text = $request->newsletter_text;
-        $bs->copyright_text = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->copyright_text);
+        $bs->copyright_text = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->copyright_text));
 
         if ($request->filled('footer_logo')) {
             @unlink(FRONT_IMG_PATH . $bs->footer_logo);

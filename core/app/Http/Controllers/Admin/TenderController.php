@@ -385,11 +385,11 @@ class TenderController extends Controller
             $tender->video_link = $link;
         }
 
-        $tender->overview          = $request->overview;
+        $tender->overview          = clean($request->overview);
         $tender->expert_member_id  = $request->expert_source === 'member' ? $request->expert_member_id : null;
         $tender->expert_name       = $request->expert_name;
         $tender->expert_position   = $request->expert_position;
-        $tender->expert_details    = $request->expert_details;
+        $tender->expert_details    = clean($request->expert_details);
         $tender->expert_whatsapp   = $request->expert_whatsapp;
         $tender->expert_email      = $request->expert_email;
         $tender->save();
@@ -523,11 +523,11 @@ class TenderController extends Controller
             $tender->video_link = $link;
         }
 
-        $tender->overview          = $request->overview;
+        $tender->overview          = clean($request->overview);
         $tender->expert_member_id  = $request->expert_source === 'member' ? $request->expert_member_id : null;
         $tender->expert_name       = $request->expert_name;
         $tender->expert_position   = $request->expert_position;
-        $tender->expert_details    = $request->expert_details;
+        $tender->expert_details    = clean($request->expert_details);
         $tender->expert_whatsapp   = $request->expert_whatsapp;
         $tender->expert_email      = $request->expert_email;
         $tender->save();
@@ -963,7 +963,7 @@ class TenderController extends Controller
                 }
             }
 
-            $bex->invoice_footer_address = $request->invoice_footer_address;
+            $bex->invoice_footer_address = clean($request->invoice_footer_address);
 
             // Watermark settings (global — same on every language row)
             $bex->tender_watermark_enabled   = $request->input('tender_watermark_enabled', 1);

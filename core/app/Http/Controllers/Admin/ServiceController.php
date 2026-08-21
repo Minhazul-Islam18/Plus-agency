@@ -178,7 +178,7 @@ class ServiceController extends Controller
         $service->meta_description = $request->meta_description;
         $service->meta_keywords = $request->meta_keywords;
         $service->serial_number = $request->serial_number;
-        $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $service->content = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
         $service->save();
 
         Session::flash('success', 'Service added successfully!');
@@ -248,7 +248,7 @@ class ServiceController extends Controller
         $service->serial_number = $request->serial_number;
         $service->meta_keywords = $request->meta_keywords;
         $service->meta_description = $request->meta_description;
-        $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $service->content = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $service->main_image);

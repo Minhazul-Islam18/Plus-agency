@@ -42,7 +42,7 @@ class SubscriberController extends Controller
       ]);
 
       $sub = $request->subject;
-      $msg = $request->message;
+      $msg = clean($request->message);
 
       $subscs = $request->recipient_type == 'personal'
           ? Subscriber::whereIn('id', $request->subscriber_ids)->get()

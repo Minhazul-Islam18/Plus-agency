@@ -83,7 +83,7 @@ class BlogController extends Controller
         $blog->title = $request->title;
         $blog->slug = $slug;
         $blog->bcategory_id = $request->category;
-        $blog->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $blog->content = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
         $blog->serial_number = $request->serial_number;
@@ -145,7 +145,7 @@ class BlogController extends Controller
         $blog->title = $request->title;
         $blog->slug = $slug;
         $blog->bcategory_id = $request->category;
-        $blog->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content);
+        $blog->content = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
         $blog->serial_number = $request->serial_number;

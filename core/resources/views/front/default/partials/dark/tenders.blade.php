@@ -10,7 +10,7 @@
         </div>
     @endif
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="dark-tender-head reveal-stagger" style="--d:.05s">
+        <div class="dark-tender-head reveal-text" style="--d:.05s">
             <div class="dark-tender-head-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->tender_section_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->tender_section_text) }}</h2>
@@ -30,9 +30,9 @@
             </div>
         </div>
 
-        <div class="dark-tender-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
+        <div class="dark-tender-carousel dark-glass-carousel owl-carousel owl-theme">
             @foreach ($tenders as $key => $tender)
-                <a href="{{ route('tender_details', [$tender->slug]) }}" class="dark-tender-card">
+                <a href="{{ route('tender_details', [$tender->slug]) }}" class="dark-tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <div class="dark-tender-thumb @if (empty($tender->tender_image)) no-image @endif"
                         @if (!empty($tender->tender_image)) style="background-image: url('{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}');" @endif>
                         @if (empty($tender->tender_image))

@@ -10,7 +10,7 @@
         </div>
     @endif
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="dark-testi-head reveal-stagger" style="--d:.05s">
+        <div class="dark-testi-head reveal-text" style="--d:.05s">
             <div class="dark-testi-head-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->testimonial_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->testimonial_subtitle) }}</h2>
@@ -23,9 +23,9 @@
             @endif
         </div>
 
-        <div class="dark-testi-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
+        <div class="dark-testi-carousel dark-glass-carousel owl-carousel owl-theme">
             @foreach ($testimonials as $key => $testimonial)
-                <div class="dark-testimonial-card">
+                <div class="dark-testimonial-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <div class="img-wrapper">
                         <img src="{{ asset('assets/front/img/testimonials/' . $testimonial->image) }}" alt="">
                     </div>

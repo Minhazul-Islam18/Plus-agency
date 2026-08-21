@@ -6,7 +6,7 @@
         </div>
     @endif
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="dark-blog-head reveal-stagger" style="--d:.05s">
+        <div class="dark-blog-head reveal-text" style="--d:.05s">
             <div class="dark-blog-head-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->blog_section_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->blog_section_subtitle) }}</h2>
@@ -26,9 +26,9 @@
             </div>
         </div>
 
-        <div class="dark-blog-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
+        <div class="dark-blog-carousel dark-glass-carousel owl-carousel owl-theme">
             @foreach ($blogs as $key => $blog)
-                <a href="{{ route('front.blogdetails', [$blog->slug, $blog->id]) }}" class="dark-blog-card">
+                <a href="{{ route('front.blogdetails', [$blog->slug, $blog->id]) }}" class="dark-blog-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <div class="blog-img-wrapper">
                         <img src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
                         @php

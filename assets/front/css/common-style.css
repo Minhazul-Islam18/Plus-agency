@@ -7832,6 +7832,15 @@ select {
   color: #212121;
   font-weight: 600;
   font-size: 18px;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.faq-area-v1 .faq-details-wrapper .card .card-header:hover {
+  background-color: #f0f0f0;
+}
+
+.faq-area-v1 .faq-details-wrapper .card .card-header[aria-expanded=true]:hover {
+  background-color: #61dc96;
 }
 
 .faq-area-v1 .faq-details-wrapper .card .card-header .toggle_btn {
@@ -7842,21 +7851,31 @@ select {
   content: '\f067';
   font-weight: 600;
   font-family: 'Font Awesome 5 Free';
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .faq-area-v1 .faq-details-wrapper .card .card-header[aria-expanded=true] {
   background-color: #61dc96;
   color: #fff;
+  box-shadow: 0 6px 18px rgba(97, 220, 150, 0.35);
 }
 
 .faq-area-v1 .faq-details-wrapper .card .card-header[aria-expanded=true] .toggle_btn:after {
   content: '\f068';
+  transform: rotate(180deg);
 }
 
 .faq-area-v1 .faq-details-wrapper .card .card-body {
   border: 1px solid #f9f9f9;
   border-top: none;
   padding: 15px 20px;
+  animation: faqBodyFade 0.35s ease-out;
+}
+
+@keyframes faqBodyFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .faq-area-v1 .faq-details-wrapper .card .card-body p {
@@ -9005,3 +9024,142 @@ body.pf-oc-lock {
     }
 }
 /* END: Portfolio (light theme) mobile Categories filter offcanvas */
+/* Scroll-triggered stagger reveal — shared by both themes (driven by
+   assets/front/js/dark-reveal.js, name predates this becoming shared). */
+.reveal-stagger {
+  opacity: 0;
+  transform: translateY(28px) scale(0.97);
+  filter: blur(6px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s ease-out;
+  transition-delay: var(--d, 0s);
+  will-change: opacity, transform, filter;
+}
+.reveal-stagger.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-stagger {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* Component-specific reveal variants — same is-visible toggle/JS as
+   .reveal-stagger above, different motion per component type. */
+
+/* Section headers / eyebrow+title text — no blur/scale, blur reads badly
+   on text and scale distorts type. */
+.reveal-text {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  transition-delay: var(--d, 0s);
+}
+.reveal-text.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Cards inside grids/carousels — springy pop-in, staggered by --d per item.
+   This is the "layout animation": a set arriving together, not one block. */
+.reveal-card {
+  opacity: 0;
+  transform: translateY(20px) scale(0.92);
+  transition: opacity 0.55s ease-out,
+              transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-delay: var(--d, 0s);
+  will-change: opacity, transform;
+}
+.reveal-card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Large single media/prose panels — slide in from the side they sit on. */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--d, 0s);
+}
+.reveal-left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--d, 0s);
+}
+.reveal-right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* CTA panels — one dramatic beat, not a drive-by fade. */
+.reveal-cta {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--d, 0s);
+}
+.reveal-cta.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Footer / low-priority utility blocks — quiet, no scale/blur. */
+.reveal-fade {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+  transition-delay: var(--d, 0s);
+}
+.reveal-fade.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Approach / "How We Work" timeline — steps reveal in sequence, each
+   item's connector line grows just after that item appears. */
+.reveal-timeline-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  transition-delay: var(--d, 0s);
+}
+.reveal-timeline-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-timeline-item .dark-approach-line {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.45s ease-out;
+  transition-delay: calc(var(--d, 0s) + 0.25s);
+}
+.reveal-timeline-item.is-visible .dark-approach-line {
+  transform: scaleY(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-text,
+  .reveal-card,
+  .reveal-left,
+  .reveal-right,
+  .reveal-cta,
+  .reveal-fade,
+  .reveal-timeline-item,
+  .reveal-timeline-item .dark-approach-line {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -61,7 +61,7 @@
 
                 <h1 class="dark-article-title">{{ convertUtf8($blog->title) }}</h1>
 
-                <div class="dark-article-prose">
+                <div class="dark-article-prose reveal-left">
                     {!! replaceBaseUrl(convertUtf8($blog->content)) !!}
                 </div>
 
@@ -140,7 +140,7 @@
     <div class="blog-details-section section-padding">
         <div class="container">
             <div class="row">
-                <div class="{{ $blog->sidebar == 1 ? 'col-lg-7' : 'col-12' }}">
+                <div class="{{ $blog->sidebar == 1 ? 'col-lg-7' : 'col-12' }} reveal-left">
                     <div class="blog-details">
                         <img class="blog-details-img-1 lazy"
                             data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">

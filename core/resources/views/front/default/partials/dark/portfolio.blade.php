@@ -10,7 +10,7 @@
         </div>
     @endif
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="dark-case-head reveal-stagger" style="--d:.05s">
+        <div class="dark-case-head reveal-text" style="--d:.05s">
             <div class="dark-case-head-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->portfolio_section_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->portfolio_section_text) }}</h2>
@@ -30,9 +30,9 @@
             </div>
         </div>
 
-        <div class="dark-case-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
+        <div class="dark-case-carousel dark-glass-carousel owl-carousel owl-theme">
             @foreach ($portfolios as $key => $portfolio)
-                <a href="{{ route('front.portfoliodetails', [$portfolio->slug, $portfolio->id]) }}" class="dark-case-card">
+                <a href="{{ route('front.portfoliodetails', [$portfolio->slug, $portfolio->id]) }}" class="dark-case-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <img class="dark-case-img" src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
                     <span class="dark-case-scrim"></span>
                     <span class="dark-case-num">{{ sprintf('%02d', $key + 1) }}</span>

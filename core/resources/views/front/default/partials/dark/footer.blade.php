@@ -2,7 +2,7 @@
     <span class="dark-footer-mesh dark-footer-mesh--a"></span>
     <span class="dark-footer-mesh dark-footer-mesh--b"></span>
 
-    <div class="dark-footer-grid reveal-stagger" style="--d:.05s">
+    <div class="dark-footer-grid reveal-fade">
 
         <div class="dark-footer-about">
             <div class="footer-logo-wrapper">

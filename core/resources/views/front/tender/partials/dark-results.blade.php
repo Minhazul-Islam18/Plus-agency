@@ -6,11 +6,11 @@
     </div>
 @else
     <div class="dark-tp-grid">
-        @foreach ($tenders as $tender)
+        @foreach ($tenders as $key => $tender)
             @php
                 $tenderHasImage = !empty($tender->tender_image) && file_exists(base_path('../assets/front/img/tenders/' . $tender->tender_image));
             @endphp
-            <a href="{{ route('tender_details', ['slug' => $tender->slug]) }}" class="dark-tender-card">
+            <a href="{{ route('tender_details', ['slug' => $tender->slug]) }}" class="dark-tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                 <div class="dark-tender-thumb @if (!$tenderHasImage) no-image @endif"
                     @if ($tenderHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}');" @endif>
                     @if (!$tenderHasImage)

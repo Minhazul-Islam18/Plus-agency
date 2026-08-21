@@ -11,7 +11,7 @@
     @endif
     <div class="container" style="position: relative; z-index: 2;">
         <div class="row align-items-center">
-            <div class="col-lg-5 dark-approach-lead-col reveal-stagger" style="--d:.05s">
+            <div class="col-lg-5 dark-approach-lead-col reveal-text" style="--d:.05s">
                 <span class="section-eyebrow">{{ convertUtf8($bs->approach_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->approach_subtitle) }}</h2>
                 @if (!empty($bs->approach_button_url) && !empty($bs->approach_button_text))
@@ -21,9 +21,9 @@
                 @endif
             </div>
             <div class="col-lg-7">
-                <ol class="dark-approach-lists reveal-stagger" style="--d:.2s">
+                <ol class="dark-approach-lists reveal-timeline">
                     @foreach ($points as $key => $point)
-                        <li class="dark-approach-item @if ($key == 0) is-active @endif" data-approach-step>
+                        <li class="dark-approach-item reveal-timeline-item @if ($key == 0) is-active @endif" style="--d:{{ $key * 0.15 }}s" data-approach-step>
                             <div class="dark-approach-rail">
                                 <span class="dark-approach-icon">
                                     <i class="{{ $point->icon }}"></i>

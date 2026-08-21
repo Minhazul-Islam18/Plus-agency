@@ -64,7 +64,7 @@
         </div>
 
         <div class="dark-contact-split">
-            <div>
+            <div class="reveal-left">
                 <span class="dark-bc-eyebrow dark-cf-eyebrow">{{ __('Contact Us') }}</span>
                 <div class="dark-cf-head">
                     <h2>{{ convertUtf8($bs->contact_form_subtitle) }}</h2>
@@ -121,7 +121,7 @@
                 </form>
             </div>
 
-            <div class="dark-map-wrap">
+            <div class="dark-map-wrap reveal-right">
                 <iframe src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q={{ $bex->latitude }},%20{{ $bex->longitude }}+(ICA)&amp;t=&amp;z={{ $bex->map_zoom }}&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"></iframe>
                 <div class="dark-map-pin-card">
                     <div class="dark-map-pin-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg></div>
@@ -183,7 +183,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-6 reveal-left">
                     <span class="section-title">{{convertUtf8($bs->contact_form_title)}}</span>
                     <h2 class="section-summary">{{convertUtf8($bs->contact_form_subtitle)}}</h2>
                     <form action="{{route('front.sendmail')}}" class="contact-form" method="POST">
@@ -242,7 +242,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 reveal-right">
                     <div class="map-wrapper">
                         <div id="map">
                             <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q={{$bex->latitude}},%20{{$bex->longitude}}+(My%20Business%20Name)&amp;t=&amp;z={{$bex->map_zoom}}&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"></iframe>

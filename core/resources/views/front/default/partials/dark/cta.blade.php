@@ -9,7 +9,7 @@
         <div style="position: absolute; inset: 0; z-index: 0; pointer-events: none; background-color: #{{ $be->cta_overlay_color ?? '000000' }}; opacity: {{ $be->cta_overlay_opacity ?? '0.6' }};"></div>
     @endif
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="glass-panel dark-cta-content reveal-stagger" style="--d:.05s">
+        <div class="glass-panel dark-cta-content reveal-cta">
             <span class="dark-cta-grid-texture"></span>
             <span class="dark-cta-mesh"></span>
 

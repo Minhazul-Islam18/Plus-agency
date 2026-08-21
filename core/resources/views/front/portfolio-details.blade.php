@@ -104,7 +104,7 @@
                     </div>
                 @endif
 
-                <div class="dark-pd-prose dark-service-details">
+                <div class="dark-pd-prose dark-service-details reveal-left">
                     {!! replaceBaseUrl(convertUtf8($portfolio->content)) !!}
                 </div>
             </div>
@@ -202,7 +202,7 @@
                         <a id="singleMagnificSs{{ $pi->id }}" class="single-magnific-ss d-none"
                             href="{{ asset('assets/front/img/portfolios/sliders/' . $pi->image) }}"></a>
                     @endforeach
-                    <div class="case-details">
+                    <div class="case-details reveal-left">
                         {!! replaceBaseUrl(convertUtf8($portfolio->content)) !!}
                     </div>
                 </div>

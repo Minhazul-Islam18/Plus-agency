@@ -63,7 +63,7 @@
               $blogDate = !empty($currentLang) ? \Carbon\Carbon::parse($blog->created_at)->locale($currentLang->code) : \Carbon\Carbon::parse($blog->created_at)->locale('en');
             @endphp
             @if ($key == 0)
-              <div class="dark-blogp-feat">
+              <div class="dark-blogp-feat reveal-left">
                 <div class="dark-blogp-feat-img">
                   <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
                 </div>
@@ -80,7 +80,7 @@
             @endif
 
             @if ($key > 0)
-              <div class="dark-blogp-card">
+              <div class="dark-blogp-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                 <div class="dark-blogp-card-img">
                   <span class="dark-blogp-date-badge"><span class="d">{{ $blogDate->format('d') }}</span><span class="m">{{ $blogDate->translatedFormat('M') }}</span></span>
                   <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
@@ -190,7 +190,7 @@
                 @else
                   @foreach ($blogs as $key => $blog)
                     <div class="col-md-6">
-                       <div class="single-blog">
+                       <div class="single-blog reveal-card" style="--d:{{ ($key % 2) * 0.1 }}s">
                           <div class="blog-img-wrapper">
                              <img class="lazy" data-src="{{asset('assets/front/img/blogs/'.$blog->main_image)}}" alt="">
                           </div>

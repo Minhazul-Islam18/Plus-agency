@@ -40,7 +40,7 @@
     @if ($be->theme_version == 'dark')
         @includeif('front.default.partials.dark.intro')
     @else
-    <div class="intro-section {{ $bs->feature_section == 1 ? 'has-features' : '' }}">
+    <div class="intro-section reveal-stagger {{ $bs->feature_section == 1 ? 'has-features' : '' }}">
         <div class="intro-section-backdrop"
             @if (!empty($be->intro_section_bg)) style="background-image: url('{{ asset('assets/front/img/' . $be->intro_section_bg) }}');" @endif>
             @if (!empty($be->intro_section_bg))
@@ -176,7 +176,7 @@
                     @endif
                     <div class="container" style="position: relative; z-index: 2;">
                         <div class="row text-center">
-                            <div class="col-lg-6 offset-lg-3">
+                            <div class="col-lg-6 offset-lg-3 reveal-text">
                                 <span class="section-title">{{ convertUtf8($bs->service_section_title) }}</span>
                                 <h2 class="section-summary">{{ convertUtf8($bs->service_section_subtitle) }}</h2>
                             </div>
@@ -184,9 +184,9 @@
                     </div>
                     <div class="container" style="position: relative; z-index: 2;">
                         <div class="row justify-content-center">
-                            @foreach ($services as $service)
+                            @foreach ($services as $key => $service)
                                 <div class="col-lg-4 col-md-6 col-sm-8">
-                                    <div class="services-item mt-30">
+                                    <div class="services-item mt-30 reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                                         <div class="services-thumb">
                                             <img class="lazy"
                                                 data-src="{{ asset('assets/front/img/services/' . $service->main_image) }}"
@@ -235,7 +235,7 @@
                     @endif
                     <div class="container" style="position: relative; z-index: 2;">
                         <div class="row text-center">
-                            <div class="col-lg-6 offset-lg-3">
+                            <div class="col-lg-6 offset-lg-3 reveal-text">
                                 <span class="section-title">{{ convertUtf8($bs->service_section_title) }}</span>
                                 <h2 class="section-summary">{{ convertUtf8($bs->service_section_subtitle) }}</h2>
                             </div>
@@ -245,7 +245,7 @@
                         <div class="row">
                             @foreach ($scategories as $key => $scategory)
                                 <div class="col-xl-3 col-lg-4 col-sm-6">
-                                    <div class="single-category">
+                                    <div class="single-category reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s">
                                         @if (!empty($scategory->image))
                                             <div class="img-wrapper">
                                                 <img class="lazy"
@@ -293,7 +293,7 @@
                 @endif
                 <div class="container" style="position: relative; z-index: 2;">
                     <div class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 reveal-text">
                             <div class="approach-summary">
                                 <span class="section-title">{{ convertUtf8($bs->approach_title) }}</span>
                                 <h2 class="section-summary">{{ convertUtf8($bs->approach_subtitle) }}</h2>
@@ -304,9 +304,9 @@
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <ul class="approach-lists">
+                            <ul class="approach-lists reveal-timeline">
                                 @foreach ($points as $key => $point)
-                                    <li class="single-approach">
+                                    <li class="single-approach reveal-timeline-item" style="--d:{{ $key * 0.15 }}s">
                                         <div class="approach-icon-wrapper"><i class="{{ $point->icon }}"></i></div>
                                         <div class="approach-text">
                                             <h4>{{ convertUtf8($point->title) }}</h4>
@@ -346,7 +346,7 @@
                 @endif
                 <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
-                        <div class="col-lg-6 offset-lg-3">
+                        <div class="col-lg-6 offset-lg-3 reveal-text">
                             <span class="section-title">{{ convertUtf8($bs->tender_section_title) }}</span>
                             <h2 class="section-summary">{{ convertUtf8($bs->tender_section_text) }}</h2>
                         </div>
@@ -357,7 +357,7 @@
                         <div class="col-md-12">
                             <div class="tender-carousel owl-carousel owl-theme common-carousel">
                                 @foreach ($tenders as $key => $tender)
-                                    <div class="tender-card">
+                                    <div class="tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                                         <div class="card-img">
                                             @if (!empty($tender->tender_image))
                                                 <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}"
@@ -431,7 +431,7 @@
                     <div class="container">
                         <div class="row no-gutters">
                             @foreach ($statistics as $key => $statistic)
-                                <div class="col-lg-3 col-md-6">
+                                <div class="col-lg-3 col-md-6 reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s">
                                     <div class="round" data-value="1" data-number="{{ convertUtf8($statistic->quantity) }}"
                                         data-size="200" data-thickness="6"
                                         data-fill="{
@@ -465,7 +465,7 @@
                 @endif
                 <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
-                        <div class="col-lg-6 offset-lg-3">
+                        <div class="col-lg-6 offset-lg-3 reveal-text">
                             <span class="section-title">{{ convertUtf8($bs->portfolio_section_title) }}</span>
                             <h2 class="section-summary">{{ convertUtf8($bs->portfolio_section_text) }}</h2>
                         </div>
@@ -476,8 +476,8 @@
                         <div class="col-md-12">
                             <div class="case-carousel owl-carousel owl-theme">
                                 @foreach ($portfolios as $key => $portfolio)
-                                    <div class="single-case single-case-bg-1"
-                                        style="background-image: url('{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}');">
+                                    <div class="single-case single-case-bg-1 reveal-card"
+                                        style="--d:{{ ($key % 3) * 0.1 }}s; background-image: url('{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}');">
                                         <div class="outer-container">
                                             <div class="inner-container">
                                                 <h4>{{ strlen($portfolio->title) > 36 ? mb_substr($portfolio->title, 0, 36, 'utf-8') . '...' : $portfolio->title }}
@@ -515,7 +515,7 @@
                 <div class="team-content" style="position: relative; z-index: 2;">
                     <div class="container">
                         <div class="row text-center">
-                            <div class="col-lg-6 offset-lg-3">
+                            <div class="col-lg-6 offset-lg-3 reveal-text">
                                 <span class="section-title">{{ convertUtf8($bs->team_section_title) }}</span>
                                 <h2 class="section-summary">{{ convertUtf8($bs->team_section_subtitle) }}</h2>
                             </div>
@@ -523,7 +523,7 @@
                         <div class="row">
                             <div class="team-carousel common-carousel owl-carousel owl-theme">
                                 @foreach ($members as $key => $member)
-                                    <div class="single-team-member team-clickable" data-member-id="{{ $member->id }}"
+                                    <div class="single-team-member team-clickable reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s" data-member-id="{{ $member->id }}"
                                         role="button" tabindex="0">
                                         <div class="team-img-wrapper">
                                             <img class="lazy"
@@ -584,7 +584,7 @@
                         <div class="col-md-12">
                             <div class="partner-carousel owl-carousel owl-theme common-carousel">
                                 @foreach ($partners as $key => $partner)
-                                    <a class="single-partner-item d-block" href="{{ $partner->url }}" target="_blank">
+                                    <a class="single-partner-item d-block reveal-card" style="--d:{{ ($key % 5) * 0.06 }}s" href="{{ $partner->url }}" target="_blank">
                                         <div class="outer-container">
                                             <div class="inner-container">
                                                 <img class="lazy"
@@ -618,7 +618,7 @@
                 @endif
                 <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
-                        <div class="col-lg-6 offset-lg-3">
+                        <div class="col-lg-6 offset-lg-3 reveal-text">
                             <span class="section-title">{{ convertUtf8($bs->testimonial_title) }}</span>
                             <h2 class="section-summary">{{ convertUtf8($bs->testimonial_subtitle) }}</h2>
                         </div>
@@ -627,7 +627,7 @@
                         <div class="col-md-12">
                             <div class="testimonial-carousel owl-carousel owl-theme">
                                 @foreach ($testimonials as $key => $testimonial)
-                                    <div class="single-testimonial">
+                                    <div class="single-testimonial reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                                         <div class="img-wrapper"><img class="lazy"
                                                 data-src="{{ asset('assets/front/img/testimonials/' . $testimonial->image) }}"
                                                 alt=""></div>
@@ -658,14 +658,14 @@
                 @endif
                 <div class="container" style="position: relative; z-index: 2;">
                     <div class="row text-center">
-                        <div class="col-lg-6 offset-lg-3">
+                        <div class="col-lg-6 offset-lg-3 reveal-text">
                             <span class="section-title">{{ convertUtf8($bs->blog_section_title) }}</span>
                             <h2 class="section-summary">{{ convertUtf8($bs->blog_section_subtitle) }}</h2>
                         </div>
                     </div>
                     <div class="blog-carousel owl-carousel owl-theme common-carousel">
                         @foreach ($blogs as $key => $blog)
-                            <div class="single-blog">
+                            <div class="single-blog reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                                 <div class="blog-img-wrapper">
                                     <img class="lazy"
                                         data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}"
@@ -707,7 +707,7 @@
 
         @if ($bs->call_to_action_section == 1)
             <!--    call to action section start    -->
-            <div class="cta-section"
+            <div class="cta-section reveal-cta"
                 style="background-image: url('{{ asset('assets/front/img/' . $bs->cta_bg) }}'); background-size: cover; position: relative; overflow: hidden;">
                 @if (!empty($bs->cta_bg))
                     <div class="cta-overlay"

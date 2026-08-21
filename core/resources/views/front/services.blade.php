@@ -58,7 +58,7 @@
                 @else
                     <div class="dark-svcp-grid">
                         @foreach ($services as $key => $service)
-                            <div class="dark-svcp-card">
+                            <div class="dark-svcp-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                                 <div class="dark-svcp-img-wrap">
                                     <span class="dark-svcp-num">{{ str_pad($key + 1 + ($services->currentPage() - 1) * $services->perPage(), 2, '0', STR_PAD_LEFT) }}</span>
                                     <img class="lazy"
@@ -145,7 +145,7 @@
                         @else
                             @foreach ($services as $key => $service)
                                 <div class="col-md-6">
-                                    <div class="single-service">
+                                    <div class="single-service reveal-card" style="--d:{{ ($key % 2) * 0.1 }}s">
                                         <div class="service-img-wrapper">
                                             <img class="lazy"
                                                 data-src="{{ asset('assets/front/img/services/' . $service->main_image) }}"

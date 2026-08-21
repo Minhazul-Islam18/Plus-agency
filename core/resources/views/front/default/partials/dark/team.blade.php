@@ -7,7 +7,7 @@
     @endif
     <div class="team-content" style="position: relative; z-index: 2;">
         <div class="container">
-            <div class="dark-team-head reveal-stagger" style="--d:.05s">
+            <div class="dark-team-head reveal-text" style="--d:.05s">
                 <div class="dark-team-head-text">
                     <span class="section-eyebrow">{{ convertUtf8($bs->team_section_title) }}</span>
                     <h2 class="gradient-shine-heading">{{ convertUtf8($bs->team_section_subtitle) }}</h2>
@@ -27,9 +27,9 @@
                 </div>
             </div>
 
-            <div class="dark-team-carousel dark-glass-carousel owl-carousel owl-theme reveal-stagger" style="--d:.15s">
+            <div class="dark-team-carousel dark-glass-carousel owl-carousel owl-theme">
                 @foreach ($members as $key => $member)
-                    <div class="dark-team-member team-clickable" data-member-id="{{ $member->id }}" role="button" tabindex="0">
+                    <div class="dark-team-member team-clickable reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s" data-member-id="{{ $member->id }}" role="button" tabindex="0">
                         <img class="team-img" src="{{ asset('assets/front/img/members/' . $member->image) }}" alt="">
                         <span class="team-scrim"></span>
                         <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>

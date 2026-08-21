@@ -11,7 +11,7 @@
     @endif
     <div class="container" style="position: relative; z-index: 2;">
         <div class="row text-center">
-            <div class="col-lg-6 offset-lg-3">
+            <div class="col-lg-6 offset-lg-3 reveal-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->service_section_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->service_section_subtitle) }}</h2>
             </div>
@@ -23,9 +23,9 @@
         $darkSvcFirstPage = $scategories->take($darkSvcPerPage);
     @endphp
     <div class="container">
-        <div class="dark-svc-grid reveal-stagger" style="--d:.1s" id="darkSvcGrid">
+        <div class="dark-svc-grid" id="darkSvcGrid">
             @foreach ($darkSvcFirstPage as $key => $scategory)
-                <div class="dark-svc-card">
+                <div class="dark-svc-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <span class="dark-svc-card-num">{{ sprintf('%02d', $key + 1) }}</span>
                     @if (!empty($scategory->image))
                         <span class="dark-svc-card-icon">

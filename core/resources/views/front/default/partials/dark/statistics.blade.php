@@ -7,9 +7,9 @@
     <span class="dark-statistics-bg-texture"></span>
     <div class="statistics-container" style="position: relative; z-index: 2;">
         <div class="container">
-            <div class="dark-stat-grid reveal-stagger" style="--d:.1s">
+            <div class="dark-stat-grid">
                 @foreach ($statistics as $key => $statistic)
-                    <div class="dark-stat-card" data-stat data-target="{{ (int) preg_replace('/\D/', '', $statistic->quantity) }}">
+                    <div class="dark-stat-card reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s" data-stat data-target="{{ (int) preg_replace('/\D/', '', $statistic->quantity) }}">
                         <span class="dark-stat-glow"></span>
                         <div class="dark-stat-content">
                             <span class="dark-stat-icon"><i class="{{ $statistic->icon }}"></i></span>

@@ -30,7 +30,7 @@
   <div class="dark-svcp-section">
     <div class="dark-team-grid">
       @foreach ($members as $key => $member)
-        <div class="dark-team-member team-clickable" data-member-id="{{ $member->id }}" role="button" tabindex="0">
+        <div class="dark-team-member team-clickable reveal-card" style="--d:{{ ($key % 4) * 0.08 }}s" data-member-id="{{ $member->id }}" role="button" tabindex="0">
           <img class="team-img" src="{{ asset('assets/front/img/members/' . $member->image) }}" alt="">
           <span class="team-scrim"></span>
           <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>
@@ -65,7 +65,7 @@
       <div class="row">
         @foreach ($members as $key => $member)
           <div class="col-lg-3 col-sm-6">
-            <div class="single-team-member team-clickable" data-member-id="{{ $member->id }}" role="button" tabindex="0">
+            <div class="single-team-member team-clickable reveal-card" style="--d:{{ ($key % 4) * 0.08 }}s" data-member-id="{{ $member->id }}" role="button" tabindex="0">
                <div class="team-img-wrapper">
                   <img class="lazy" data-src="{{asset('assets/front/img/members/'.$member->image)}}" alt="">
                   <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>

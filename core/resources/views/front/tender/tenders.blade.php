@@ -181,7 +181,7 @@
 
     @if ($featured_tenders->count() > 0)
         <div class="dark-tp-spotlight">
-            <div class="dark-tp-spotlight-head">
+            <div class="dark-tp-spotlight-head reveal-text">
                 <span class="dark-tp-spotlight-label">{{ __('Featured') }}</span>
                 @if ($featured_tenders->count() > 1)
                     <div class="dark-tp-spotlight-nav">
@@ -192,7 +192,7 @@
             </div>
             <div class="dark-tp-spotlight-track-wrap">
                 <div class="dark-tp-spotlight-track" id="darkTpSpotTrack">
-                    @foreach ($featured_tenders as $ft)
+                    @foreach ($featured_tenders as $key => $ft)
                         @php
                             // A non-empty tender_image doesn't guarantee the file is actually
                             // on disk (real data has rows pointing at deleted/missing files) —
@@ -200,7 +200,7 @@
                             // instead of falling back to the "no image" dossier-icon state.
                             $ftHasImage = !empty($ft->tender_image) && file_exists(base_path('../assets/front/img/tenders/' . $ft->tender_image));
                         @endphp
-                        <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}" class="dark-tender-card">
+                        <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}" class="dark-tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                             <div class="dark-tender-thumb @if (!$ftHasImage) no-image @endif"
                                 @if ($ftHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $ft->tender_image) }}');" @endif>
                                 @if (!$ftHasImage)
@@ -333,7 +333,7 @@
 @else
     {{-- Featured Tenders --}}
     @if (count($featured_tenders) > 0)
-        <section class="course-area-v1 pt-80 pb-120 bg_cover"
+        <section class="course-area-v1 pt-80 pb-120 bg_cover reveal-stagger"
             style="background-image: url({{ asset('assets/front/img/counter-bg-1.png') }});">
             <div class="container">
                 <div class="row">
@@ -505,9 +505,9 @@
                                 </div>
                             </div>
                         @else
-                            @foreach ($tenders as $tender)
+                            @foreach ($tenders as $key => $tender)
                                 <div class="col-md-6 col-sm-12">
-                                    <div class="tender-card">
+                                    <div class="tender-card reveal-card" style="--d:{{ ($key % 2) * 0.1 }}s">
                                         <div class="card-img">
                                             @if (!empty($tender->tender_image))
                                                 <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}"
@@ -659,6 +659,9 @@
                 $.get(url)
                     .done(function(res) {
                         $darkTpResults.html(res.html);
+                        if (window.observeRevealStagger) {
+                            window.observeRevealStagger($darkTpResults[0]);
+                        }
                         history.pushState({
                             darkTpAjax: true
                         }, '', url);

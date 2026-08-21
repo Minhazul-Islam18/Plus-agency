@@ -10,7 +10,7 @@
             <div class="col-md-12">
                 <div class="dark-partner-carousel dark-glass-carousel owl-carousel owl-theme">
                     @foreach ($partners as $key => $partner)
-                        <a class="glass-panel dark-partner-item d-block" href="{{ $partner->url }}" target="_blank">
+                        <a class="glass-panel dark-partner-item d-block reveal-card" style="--d:{{ ($key % 5) * 0.06 }}s" href="{{ $partner->url }}" target="_blank">
                             <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
                         </a>
                     @endforeach

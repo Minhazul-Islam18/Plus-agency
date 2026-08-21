@@ -30,7 +30,7 @@
     <div class="dark-svcp-section">
         <div class="dark-svcp-inner @if ($service->sidebar != 1) dark-svcp-inner--full @endif">
             <div>
-                <div class="dark-svcd-panel">
+                <div class="dark-svcd-panel reveal-left">
                     <div class="dark-service-details">
                         {!! replaceBaseUrl(convertUtf8($service->content)) !!}
                     </div>
@@ -81,7 +81,7 @@
     <div class="pt-115 pb-110 service-details-section">
         <div class="container">
             <div class="row">
-                <div class="{{ $service->sidebar == 1 ? 'col-lg-7' : 'col-12' }}">
+                <div class="{{ $service->sidebar == 1 ? 'col-lg-7' : 'col-12' }} reveal-left">
                     <div class="service-details">
                         {!! replaceBaseUrl(convertUtf8($service->content)) !!}
                     </div>

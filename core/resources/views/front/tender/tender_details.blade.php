@@ -1298,7 +1298,7 @@
                                             ? 'soon'
                                             : 'ok')));
                     @endphp
-                    <div class="tender-thumb-card">
+                    <div class="tender-thumb-card reveal-stagger">
                         {{-- Thumbnail --}}
                         <div class="tender-thumb-box">
                             @if (!empty($tender->tender_image))
@@ -1372,7 +1372,7 @@
 
                 {{-- RIGHT: Tender Info & Purchase --}}
                 <div class="col-lg-6">
-                    <div class="tender-info-wrap">
+                    <div class="tender-info-wrap reveal-stagger" style="--d:.1s">
                         {{-- Price — the amount payable *now*. It starts at 0 and only
                              rises as modules are selected; the tender's own total is
                              shown on the card above and is not touched by this. --}}
@@ -1995,7 +1995,7 @@ $preFlag = $preCountry['flag'] ?? '';
     ═══════════════════════════════════════════ --}}
             <div class="row mt-5">
                 <div class="col-lg-12">
-                    <div class="discription-area">
+                    <div class="discription-area reveal-stagger">
                         <div class="discription-tabs">
                             <div class="tab-scroll-wrap">
                                 <button class="tab-arrow arrow-prev" id="tabArrowPrev"

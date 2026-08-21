@@ -48,7 +48,7 @@
                                               @endphp
 
                                               @foreach ($qas as $qa)
-                                                  <div class="card mb-30">
+                                                  <div class="card mb-30 reveal-text" style="--d:{{ ($loop->index % 6) * 0.07 }}s">
                                                       <a class="collapsed card-header" id="heading1" href="#" data-toggle="collapse" data-target="{{ '#collapse' . $qa->id }}" aria-expanded="{{ $loop->iteration == 1 ? 'true' : 'false' }}" aria-controls="{{ 'collapse' . $qa->id }}">
                                                           {{ $qa->question }}<span class="toggle_btn"></span>
                                                       </a>
@@ -67,7 +67,7 @@
                       </div>
 
                       <div id="pfCatSource">
-                          <div class="dark-svcp-widget">
+                          <div class="dark-svcp-widget reveal-text">
                               <h4>{{ __('Categories') }}</h4>
                               <ul class="dark-svcp-cat-list faq-cat-list" id="faqCatList">
                                   @foreach ($categories as $category)
@@ -112,7 +112,7 @@
                                                   @endphp
 
                                                   @foreach ($qas as $qa)
-                                                      <div class="card mb-30">
+                                                      <div class="card mb-30 reveal-text" style="--d:{{ ($loop->index % 6) * 0.07 }}s">
                                                           <a class="collapsed card-header" id="heading1" href="#" data-toggle="collapse" data-target="{{ '#collapse' . $qa->id }}" aria-expanded="{{ $loop->iteration == 1 ? 'true' : 'false' }}" aria-controls="{{ 'collapse' . $qa->id }}">
                                                               {{ $qa->question }}<span class="toggle_btn"></span>
                                                           </a>
@@ -130,7 +130,7 @@
                               </div>
                           </div>
 
-                          <div class="col-lg-4" id="pfCatSource">
+                          <div class="col-lg-4 reveal-text" id="pfCatSource">
                               <div class="sidebar">
                                   <div class="blog-sidebar-widgets category-widget">
                                       <div class="category-lists job">
@@ -182,7 +182,7 @@
                         <div class="col-lg-6">
                            <div class="accordion" id="accordionExample1">
                               @for ($i=0; $i < ceil(count($faqs)/2); $i++)
-                              <div class="card">
+                              <div class="card reveal-text" style="--d:{{ ($i % 6) * 0.07 }}s">
                                  <div class="card-header" id="heading{{$faqs[$i]->id}}">
                                     <h2 class="mb-0">
                                        <button class="btn btn-link collapsed btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{$faqs[$i]->id}}" aria-expanded="false" aria-controls="collapse{{$faqs[$i]->id}}">
@@ -202,7 +202,7 @@
                         <div class="col-lg-6">
                            <div class="accordion" id="accordionExample2">
                               @for ($i=ceil(count($faqs)/2); $i < count($faqs); $i++)
-                              <div class="card">
+                              <div class="card reveal-text" style="--d:{{ ($i % 6) * 0.07 }}s">
                                  <div class="card-header" id="heading{{$faqs[$i]->id}}">
                                     <h2 class="mb-0">
                                        <button class="btn btn-link collapsed btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{$faqs[$i]->id}}" aria-expanded="false" aria-controls="collapse{{$faqs[$i]->id}}">

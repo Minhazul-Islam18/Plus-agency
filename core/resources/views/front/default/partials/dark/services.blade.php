@@ -11,7 +11,7 @@
     @endif
     <div class="container" style="position: relative; z-index: 2;">
         <div class="row text-center">
-            <div class="col-lg-6 offset-lg-3">
+            <div class="col-lg-6 offset-lg-3 reveal-text">
                 <span class="section-eyebrow">{{ convertUtf8($bs->service_section_title) }}</span>
                 <h2 class="gradient-shine-heading">{{ convertUtf8($bs->service_section_subtitle) }}</h2>
             </div>
@@ -21,7 +21,7 @@
         <div class="row justify-content-center">
             @foreach ($services as $key => $service)
                 <div class="col-lg-4 col-md-6 col-sm-8">
-                    <div class="glass-panel dark-services-item services-item mt-30 reveal-stagger" style="--d:{{ ($key % 3) * 0.1 }}s">
+                    <div class="glass-panel dark-services-item services-item mt-30 reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                         <div class="services-thumb">
                             <img class="lazy" data-src="{{ asset('assets/front/img/services/' . $service->main_image) }}" alt="service" />
                         </div>

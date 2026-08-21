@@ -63,7 +63,7 @@
                 @else
                     <div class="dark-pf-grid">
                         @foreach ($portfolios as $key => $portfolio)
-                            <a class="dark-pf-card" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
+                            <a class="dark-pf-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
                                 <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
                                 <span class="dark-pf-scrim"></span>
                                 @if (!empty($portfolio->service->scategory))
@@ -149,7 +149,7 @@
                         @else
                             @foreach ($portfolios as $key => $portfolio)
                                 <div class="col-md-6">
-                                    <div class="single-case lazy"
+                                    <div class="single-case lazy reveal-card" style="--d:{{ ($key % 2) * 0.1 }}s"
                                         data-bg="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}">
                                         <div class="outer-container">
                                             <div class="inner-container">

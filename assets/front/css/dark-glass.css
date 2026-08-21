@@ -811,24 +811,6 @@ a.proceed-checkout-btn:hover {
   outline: none;
 }
 
-.reveal-stagger {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  transition-delay: var(--d, 0s);
-}
-.reveal-stagger.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reveal-stagger {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
 /* Carousel nav (owl-carousel) — consistent glass circle arrows/dots */
 .dark-glass-carousel .owl-nav button {
   background: var(--glass-bg) !important;

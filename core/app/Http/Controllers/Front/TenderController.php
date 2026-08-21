@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\BasicExtra;
 use App\Http\Controllers\Controller;
-use App\Http\Helpers\KreativMailer;
+use App\Jobs\SendAdminMail;
 use App\Language;
 use App\OfflineGateway;
 use App\PaymentGateway;
@@ -445,8 +445,7 @@ class TenderController extends Controller
         $tender      = Tender::find($purchase->tender_id);
 
         try {
-            $mailer = new KreativMailer;
-            $mailer->mailFromAdmin([
+            SendAdminMail::dispatch([
                 'toMail'        => $purchase->email,
                 'toName'        => $purchase->first_name,
                 'customer_name' => $purchase->first_name,

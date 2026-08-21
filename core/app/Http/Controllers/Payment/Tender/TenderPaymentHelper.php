@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Payment\Tender;
 
 use App\BasicExtra;
-use App\Http\Helpers\KreativMailer;
+use App\Jobs\SendAdminMail;
 use App\Language;
 use App\SecureToken;
 use App\Tender;
@@ -176,8 +176,7 @@ trait TenderPaymentHelper
             $bs     = $lang->basic_setting;
             $tender = Tender::find($purchase->tender_id);
 
-            $mailer = new KreativMailer;
-            $mailer->mailFromAdmin([
+            SendAdminMail::dispatch([
                 'toMail'        => $purchase->email,
                 'toName'        => $purchase->first_name,
                 'customer_name' => $purchase->first_name,
@@ -289,7 +288,7 @@ trait TenderPaymentHelper
             $mail['attachmentName'] = 'Receipt-' . $purchase->order_number . '.pdf';
         }
 
-        (new KreativMailer)->mailFromAdmin($mail);
+        SendAdminMail::dispatch($mail);
 
         // Hand both URLs to the purchase-complete page: the stream URL drives the
         // automatic download (no download-count consumed), the landing URL is the manual link.

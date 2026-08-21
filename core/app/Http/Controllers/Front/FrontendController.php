@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use App\BasicSetting as BS;
 use App\BasicExtended as BE;
 use App\ContactMessage;
-use App\Http\Helpers\KreativMailer;
+use App\Jobs\SendAdminMail;
+use App\Jobs\SendContactAdminNotifyMail;
 use Illuminate\Support\Facades\Log;
 use App\Slider;
 use App\Scategory;
@@ -429,11 +430,9 @@ class FrontendController extends Controller
         $safeSubject = e($subject);
         $safeMessage = nl2br(e($message));
 
-        $mailer = new KreativMailer;
-
         // 1) Notify the site owner.
         try {
-            $adminSent = $mailer->mailFromAdmin([
+            SendContactAdminNotifyMail::dispatch([
                 'toMail'          => $to,
                 'toName'          => $be->from_name ?: $bs->website_title,
                 'customer_name'   => $safeName,
@@ -443,12 +442,7 @@ class FrontendController extends Controller
                 'website_title'   => $bs->website_title,
                 'templateType'    => 'contact_admin_notify',
                 'type'            => 'contactAdminNotify',
-            ]);
-
-            if ($adminSent) {
-                $contactMessage->mail_sent = 1;
-                $contactMessage->save();
-            }
+            ], $contactMessage->id);
         } catch (\Exception $e) {
             Log::error('[Contact] Admin notification email failed', [
                 'contact_message_id' => $contactMessage->id,
@@ -458,7 +452,7 @@ class FrontendController extends Controller
 
         // 2) Auto-reply to the visitor confirming receipt.
         try {
-            $mailer->mailFromAdmin([
+            SendAdminMail::dispatch([
                 'toMail'          => $from,
                 'toName'          => $request->name,
                 'customer_name'   => $safeName,

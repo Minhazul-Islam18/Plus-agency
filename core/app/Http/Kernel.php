@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkpermission' => \App\Http\Middleware\CheckPermission::class,
         'setlang' => \App\Http\Middleware\SetLangMiddleware::class,
+        'force-default-locale' => \App\Http\Middleware\ForceDefaultLocale::class,
         'checkstatus' => \App\Http\Middleware\CheckStatus::class,
         'forcepasswordchange' => \App\Http\Middleware\ForcePasswordChange::class,
         'setLfmPath' => \App\Http\Middleware\SetLfmPath::class,

@@ -312,9 +312,14 @@
                         </div>
                         <div class="col-lg-3 col-md-4">
                             <h4>{{ __('Newsletter') }}</h4>
+                            {{-- No @csrf: /subscribe is CSRF-exempt (see
+                                 VerifyCsrfToken::$except) — this form appears
+                                 on every page via the shared layout, and
+                                 rendering @csrf here would need an active
+                                 session, which cacheable pages deliberately
+                                 skip. Rate-limited instead (throttle:5,10). --}}
                             <form class="footer-newsletter" id="footerSubscribeForm"
                                 action="{{ route('front.subscribe') }}" method="post">
-                                @csrf
                                 <p>{{ convertUtf8($bs->newsletter_text) }}</p>
                                 <input type="email" name="email" value=""
                                     placeholder="{{ __('Enter Email Address') }}" />
@@ -471,11 +476,11 @@
     <script src="{{ asset_v('assets/front/js/main.js') }}"></script>
     <!-- team member profile popup (self-guards on .team-clickable) -->
     <script src="{{ asset_v('assets/front/js/team-modal.js') }}"></script>
+    <!-- scroll-triggered stagger reveal, both themes (self-guards on .reveal-stagger) -->
+    <script src="{{ asset_v('assets/front/js/dark-reveal.js') }}"></script>
     @if ($be->theme_version == 'dark')
         <!-- dark glass theme: mouse-reactive particle network (self-guards on [data-particle-network]) -->
         <script src="{{ asset_v('assets/front/js/particle-network.js') }}"></script>
-        <!-- dark glass theme: scroll-triggered stagger reveal (self-guards on .reveal-stagger) -->
-        <script src="{{ asset_v('assets/front/js/dark-reveal.js') }}"></script>
         <!-- dark glass theme: hero mouse-tracking glow blob + flip-cycling titles -->
         <script src="{{ asset_v('assets/front/js/dark-hero-fx.js') }}"></script>
         <!-- dark glass theme: hero slider variant — keyboard/drag nav, autoplay progress (self-guards on #darkHeroSlider) -->
@@ -580,13 +585,17 @@
     @yield('scripts')
     @stack('event-js')
 
-    @if (session()->has('success'))
+    {{-- request()->hasSession() guard: cacheable anonymous pages (homepage,
+         listings) skip the session middleware entirely so Cloudflare never
+         sees a per-visitor Set-Cookie header — session()->has() would throw
+         on those pages without this check. --}}
+    @if (request()->hasSession() && session()->has('success'))
         <script>
             toastr["success"]("{{ __(session('success')) }}");
         </script>
     @endif
 
-    @if (session()->has('error'))
+    @if (request()->hasSession() && session()->has('error'))
         <script>
             toastr["error"]("{{ __(session('error')) }}");
         </script>

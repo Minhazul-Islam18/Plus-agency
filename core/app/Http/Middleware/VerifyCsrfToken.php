@@ -19,6 +19,16 @@ class VerifyCsrfToken extends Middleware
    * @var array
    */
   protected $except = [
-    //
+    // The newsletter form lives in the shared footer, so it's on every
+    // page. Once pages are Cloudflare-cached, the CSRF token baked into
+    // that cached HTML belongs to whoever's request generated the cache
+    // entry — every other visitor's submission would 419. Exempted here,
+    // compensated by throttle:5,10 on the route instead (see routes/web.php).
+    'subscribe',
+    // Web push subscription registration (common-main.js, fires from any
+    // page including the now session-less cacheable ones — same reasoning
+    // as 'subscribe' above). Low-stakes (just registers a push endpoint),
+    // compensated by throttle:10,1 on the route.
+    'push',
   ];
 }

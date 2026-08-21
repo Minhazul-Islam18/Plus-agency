@@ -3,6 +3,28 @@
 use Illuminate\Support\Facades\Route;
 use App\Permalink;
 
+/*
+|--------------------------------------------------------------------------
+| Cloudflare-cacheable route middleware
+|--------------------------------------------------------------------------
+|
+| Applied to anonymous, read-only, form-free pages (homepage, listings,
+| detail pages with no purchase/contact form) so their responses carry no
+| session/CSRF Set-Cookie header — required for them to be safely cached
+| at Cloudflare's edge (a cached Set-Cookie would otherwise be replayed
+| identically to every visitor who hits that cache entry). Language is
+| forced to the site default (see ForceDefaultLocale) instead of the
+| normal session/Accept-Language detection, since a cached response can't
+| vary per visitor's browser language. Never apply this to any route with
+| its own form (contact, tender purchase, find-my-files) or to /admin/*.
+*/
+$cfCacheableExcept = [
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\VerifyCsrfToken::class,
+    \App\Http\Middleware\SetLangMiddleware::class,
+];
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,17 +53,18 @@ Route::get('/backup', 'Front\FrontendController@backup');
 ******************** Front Routes **********************
 =======================================================*/
 
-Route::post('/push', 'Front\PushController@store');
+Route::post('/push', 'Front\PushController@store')->middleware('throttle:10,1');
 Route::get('/push/track/{log}', 'Front\PushController@track')->name('push.track');
 
-Route::group(['middleware' => 'setlang'], function () {
-    Route::get('/', 'Front\FrontendController@index')->name('front.index');
+Route::group(['middleware' => 'setlang'], function () use ($cfCacheableExcept) {
+    Route::get('/', 'Front\FrontendController@index')->name('front.index')
+        ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
 
     Route::post('/payment/instructions', 'Front\FrontendController@paymentInstruction')->name('front.payment.instructions');
 
 
     Route::post('/sendmail', 'Front\FrontendController@sendmail')->name('front.sendmail')->middleware('throttle:3,10');
-    Route::post('/subscribe', 'Front\FrontendController@subscribe')->name('front.subscribe');
+    Route::post('/subscribe', 'Front\FrontendController@subscribe')->name('front.subscribe')->middleware('throttle:5,10');
     Route::get('/newsletter/unsubscribe/{token}', 'Front\FrontendController@unsubscribeByToken')->name('front.unsubscribe.token');
     Route::post('/newsletter/unsubscribe', 'Front\FrontendController@unsubscribeByEmail')->name('front.unsubscribe.email')->middleware('throttle:5,10');
 
@@ -762,7 +785,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
 
 
 // Dynamic Routes
-Route::group(['middleware' => ['setlang']], function () {
+Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept) {
 
     try { $wdPermalinks = Permalink::where('details', 1)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
@@ -770,19 +793,24 @@ Route::group(['middleware' => ['setlang']], function () {
         $permalink = $pl->permalink;
 
         if ($type == 'service_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@servicedetails')->name('front.servicedetails');
+            Route::get("$permalink/{slug}", 'Front\FrontendController@servicedetails')->name('front.servicedetails')
+                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
         } elseif ($type == 'portfolio_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@portfoliodetails')->name('front.portfoliodetails');
+            Route::get("$permalink/{slug}", 'Front\FrontendController@portfoliodetails')->name('front.portfoliodetails')
+                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
         } elseif ($type == 'tender_details') {
+            // NOT cacheable — this page has the tender purchase form (real
+            // payment, real CSRF token needed), see tender_details.blade.php.
             Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'blog_details') {
-            Route::get("$permalink/{slug}", 'Front\FrontendController@blogdetails')->name('front.blogdetails');
+            Route::get("$permalink/{slug}", 'Front\FrontendController@blogdetails')->name('front.blogdetails')
+                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
         }
     }
 });
 
 // Dynamic Routes
-Route::group(['middleware' => ['setlang']], function () {
+Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept) {
 
     try { $wdPermalinks = Permalink::where('details', 0)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
@@ -835,7 +863,16 @@ Route::group(['middleware' => ['setlang']], function () {
             continue;
         }
 
-        Route::get("$permalink", "$action")->name("$routeName");
+        // Read-only listing pages with no per-visitor form on them — safe to
+        // strip session/CSRF for Cloudflare caching. Everything else here
+        // (find_my_files: OTP forms; contact: real contact form; gallery:
+        // unverified) stays on the normal session-backed stack.
+        $cfCacheableTypes = ['services', 'portfolios', 'team', 'tenders', 'faq', 'blogs'];
+
+        $route = Route::get("$permalink", "$action")->name("$routeName");
+        if (in_array($type, $cfCacheableTypes)) {
+            $route->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+        }
     }
 });
 

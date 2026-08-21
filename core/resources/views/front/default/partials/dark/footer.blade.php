@@ -57,8 +57,11 @@
         <div class="dark-footer-newsletter">
             <span class="footer-label">{{ __('Newsletter') }}</span>
             <p>{{ convertUtf8($bs->newsletter_text) }}</p>
+            {{-- No @csrf: /subscribe is CSRF-exempt (VerifyCsrfToken::$except)
+                 — this form is on every page via the shared footer, and
+                 cacheable pages deliberately skip the session middleware
+                 that @csrf would need. Rate-limited instead (throttle:5,10). --}}
             <form class="dark-footer-pill-form" id="footerSubscribeForm" action="{{ route('front.subscribe') }}" method="post">
-                @csrf
                 <input type="email" name="email" value="" placeholder="{{ __('Enter Email Address') }}">
                 <button type="submit" aria-label="{{ __('Subscribe') }}"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
             </form>

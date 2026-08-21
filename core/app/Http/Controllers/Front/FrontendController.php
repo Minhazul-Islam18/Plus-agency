@@ -87,7 +87,7 @@ class FrontendController extends Controller
             // manual invalidation hook on every one of these models.
             $data += \Illuminate\Support\Facades\Cache::remember("home_listing_blocks:lang:{$lang_id}", now()->addMinutes(15), function () use ($lang_id) {
                 $blocks = [
-                    'portfolios' => Portfolio::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->limit(10)->get(),
+                    'portfolios' => Portfolio::where('language_id', $lang_id)->where('feature', 1)->with('service:id,title')->orderBy('serial_number', 'ASC')->limit(10)->get(),
                     'points' => Point::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'statistics' => Statistic::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'testimonials' => Testimonial::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
@@ -96,7 +96,7 @@ class FrontendController extends Controller
                     'blogs' => Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get(),
                     'partners' => Partner::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
                     'scategories' => Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
-                    'tenders' => Tender::where('language_id', $lang_id)->where('is_featured', 1)->where('status', 1)->orderBy('id', 'DESC')->limit(10)->get(),
+                    'tenders' => Tender::where('language_id', $lang_id)->where('is_featured', 1)->where('status', 1)->with('tenderCategory:id,name')->orderBy('id', 'DESC')->limit(10)->get(),
                 ];
 
                 if (!serviceCategory()) {

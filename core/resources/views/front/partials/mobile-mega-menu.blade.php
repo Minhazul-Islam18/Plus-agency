@@ -6,11 +6,9 @@
                     <a href="{{$allUrl}}" data-tabid="all">{{__('All')}}</a>
                     @foreach ($megaMenus as $mCatId => $mItemIds)
                         @php
-                            $mcat = $catModel::where('id', $mCatId);
-                            if ($mcat->count() == 0) {
+                            $mcat = $megaCatsById->get($mCatId);
+                            if (!$mcat) {
                                 continue;
-                            } else {
-                                $mcat = $mcat->first();
                             }
 
                             if ($link["type"] == 'services-megamenu') {
@@ -45,11 +43,9 @@
                         @foreach ($megaMenus as $mItemId)
 
                             @php
-                                $mItem = $itemModel::where('id', $mItemId);
-                                if ($mItem->count() == 0) {
+                                $mItem = $megaItemsById->get($mItemId);
+                                if (!$mItem) {
                                     continue;
-                                } else {
-                                    $mItem = $mItem->first();
                                 }
                                 if ($link['type'] == 'services-megamenu') {
                                     $detailsUrl = route('front.servicedetails', [$mItem->slug]);

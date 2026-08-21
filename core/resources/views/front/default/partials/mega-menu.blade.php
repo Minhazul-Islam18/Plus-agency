@@ -63,7 +63,26 @@
     } else {
         $megaMenus = [];
     }
-    // dd($megaMenus);
+
+    // Batch-fetch every category/item this menu references ONCE, instead of
+    // a where('id', $x)->count() + ->first() pair per row inside each of the
+    // two render loops below (was up to 4 queries per row, doubled again
+    // whenever more than one *-megamenu link renders on the same page).
+    $megaCatsById = collect();
+    $megaItemsById = collect();
+    if (!empty($megaMenus)) {
+        if ($catAvailable) {
+            $megaCatsById = $catModel::whereIn('id', array_keys($megaMenus))->get()->keyBy('id');
+
+            $megaItemIds = [];
+            foreach ($megaMenus as $mIds) {
+                $megaItemIds = array_merge($megaItemIds, (array) $mIds);
+            }
+            $megaItemsById = $itemModel::whereIn('id', array_unique($megaItemIds))->get()->keyBy('id');
+        } else {
+            $megaItemsById = $itemModel::whereIn('id', $megaMenus)->get()->keyBy('id');
+        }
+    }
 @endphp
 
 @includeIf('front.partials.mobile-mega-menu')
@@ -81,11 +100,9 @@
                             <li class="active"><a href="{{$allUrl}}" data-tabid="all">{{__('All')}}</a></li>
                             @foreach ($megaMenus as $mCatId => $mItemIds)
                                 @php
-                                    $mcat = $catModel::where('id', $mCatId);
-                                    if ($mcat->count() == 0) {
+                                    $mcat = $megaCatsById->get($mCatId);
+                                    if (!$mcat) {
                                         continue;
-                                    } else {
-                                        $mcat = $mcat->first();
                                     }
 
                                     if ($link["type"] == 'services-megamenu') {
@@ -123,11 +140,9 @@
                 @if ($catAvailable)
                     @foreach ($megaMenus as $mCatId => $mItemIds)
                         @php
-                            $mcat = $catModel::where('id', $mCatId);
-                            if ($mcat->count() == 0) {
+                            $mcat = $megaCatsById->get($mCatId);
+                            if (!$mcat) {
                                 continue;
-                            } else {
-                                $mcat = $mcat->first();
                             }
 
                             if ($link["type"] == 'services-megamenu') {
@@ -151,11 +166,9 @@
                             <div class="row">
                                 @foreach ($mItemIds as $mItemId)
                                     @php
-                                        $mItem = $itemModel::where('id', $mItemId);
-                                        if ($mItem->count() == 0) {
+                                        $mItem = $megaItemsById->get($mItemId);
+                                        if (!$mItem) {
                                             continue;
-                                        } else {
-                                            $mItem = $mItem->first();
                                         }
                                         if ($link['type'] == 'tenders-megamenu' && (int) $mItem->status !== 1) {
                                             continue;
@@ -206,11 +219,9 @@
                         <div class="row">
                         @endif
                             @php
-                                $mItem = $itemModel::where('id', $mItemId);
-                                if ($mItem->count() == 0) {
+                                $mItem = $megaItemsById->get($mItemId);
+                                if (!$mItem) {
                                     continue;
-                                } else {
-                                    $mItem = $mItem->first();
                                 }
                                 if ($link['type'] == 'services-megamenu') {
                                     $detailsUrl = route('front.servicedetails', [$mItem->slug]);

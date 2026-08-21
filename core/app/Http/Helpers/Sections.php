@@ -56,11 +56,6 @@ if (!function_exists('convertHtml') ) {
 
 if (!function_exists('replaceBaseUrl') ) {
     function replaceBaseUrl($content) {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
         $content = str_replace("{base_url}", url('/'), $content);
         return $content;
     }

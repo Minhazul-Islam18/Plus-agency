@@ -86,8 +86,13 @@ if (! function_exists('make_input_name')) {
 if (! function_exists('serviceCategory')) {
     function serviceCategory()
     {
-        $hbex = BasicExtra::first();
-        if ($hbex?->service_category == 1) {
+        // Memoized per request — called repeatedly across the layout/homepage
+        // on every render (menu conditions, section toggles, etc.).
+        static $hbex = null;
+        if ($hbex === null) {
+            $hbex = BasicExtra::first() ?? false;
+        }
+        if ($hbex && $hbex->service_category == 1) {
             return true;
         } else {
             return false;
@@ -153,8 +158,15 @@ if (!function_exists('getHref')) {
                 $href = $link["href"];
             }
         } else {
+            // Memoized per request — the same menu tree is walked once for
+            // the desktop nav and again for the mobile nav, so without this
+            // every custom-page link's slug gets looked up twice.
+            static $pageCache = [];
             $pageid = (int)$link["type"];
-            $page = Page::find($pageid);
+            if (!array_key_exists($pageid, $pageCache)) {
+                $pageCache[$pageid] = Page::find($pageid);
+            }
+            $page = $pageCache[$pageid];
             if (!empty($page)) {
                 $href = route('front.dynamicPage', [$page->slug]);
             } else {

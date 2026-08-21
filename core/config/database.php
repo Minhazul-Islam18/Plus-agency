@@ -58,8 +58,18 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // Persistent connections (opt-in via DB_PERSISTENT): a PHP-FPM
+            // worker reuses one open connection across every request it
+            // handles instead of opening a fresh one each time. Cuts the
+            // *rate* of new-connection attempts under burst traffic, which
+            // is what actually tripped an account-level restriction on
+            // Hostinger (confirmed via SHOW STATUS — Threads_connected
+            // stayed ~50 of a 2000 ceiling when PDOException "Operation not
+            // permitted" fired at 40 concurrent requests; not a raw
+            // connection-count problem).
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
             ]) : [],
         ],
 

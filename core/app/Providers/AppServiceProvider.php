@@ -69,10 +69,17 @@ class AppServiceProvider extends ServiceProvider
     }
 
     try {
-      $socials = Cache::remember('global_socials', now()->addMinutes(30), function () {
+      // flexible() instead of remember(): every single request reads these,
+      // so a plain TTL expiry is a stampede waiting to happen — many
+      // concurrent requests would all miss at once and all hit the DB
+      // simultaneously. flexible() serves the still-good stale value to
+      // everyone except the one request that refreshes it (under an atomic
+      // lock), so an expiry never causes more than one DB hit no matter how
+      // many concurrent requests land on it.
+      $socials = Cache::flexible('global_socials', [1500, 1800], function () {
         return Social::where('status', 1)->orderBy('serial_number', 'ASC')->get();
       });
-      $langs = Cache::remember('global_languages_active', now()->addMinutes(30), function () {
+      $langs = Cache::flexible('global_languages_active', [1500, 1800], function () {
         return Language::where('status', 1)->get();
       });
     } catch (\Exception $e) {
@@ -122,7 +129,14 @@ class AppServiceProvider extends ServiceProvider
     // LanguageController). TTL keeps writes from other controllers (menus,
     // popups, ulinks, categories) eventually consistent within 30 min even
     // though they don't explicitly bust this key.
-    $data = Cache::remember(self::globalViewCacheKey($currentLang->id), now()->addMinutes(30), function () use ($currentLang) {
+    //
+    // flexible(), not remember(): this is the single most-read cache key in
+    // the app (every request, every route) — a plain TTL expiry here is a
+    // textbook stampede (confirmed live: 40 concurrent requests all missing
+    // at once caused real PDOException failures under production load
+    // testing). flexible() guarantees only one request ever rebuilds it,
+    // everyone else gets the still-valid stale value with zero DB hit.
+    $data = Cache::flexible(self::globalViewCacheKey($currentLang->id), [1500, 1800], function () use ($currentLang) {
       $menuRow = Menu::where('language_id', $currentLang->id)->first();
 
       $data = [

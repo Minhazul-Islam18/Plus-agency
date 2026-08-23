@@ -125,15 +125,22 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Language</label>
-                                            <input type="text" class="form-control"
-                                                value="{{ $tender->language->name ?? 'N/A' }}" readonly>
+                                            <label>Language **</label>
+                                            <select id="language" name="language_id" class="form-control">
+                                                @foreach ($langs as $lang)
+                                                    <option value="{{ $lang->id }}"
+                                                        {{ $tender->language_id == $lang->id ? 'selected' : '' }}>
+                                                        {{ $lang->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <p id="errlanguage_id" class="mb-0 text-danger em"></p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Category</label>
-                                            <select name="tender_category_id" class="form-control">
+                                            <label>Category **</label>
+                                            <select id="tender_category_id" name="tender_category_id" class="form-control">
                                                 <option value="" disabled>Select Category</option>
                                                 @foreach ($tender_categories as $cat)
                                                     <option value="{{ $cat->id }}"
@@ -367,6 +374,7 @@
     <script>
         window.ajaxSuccessRedirect =
             "{{ route('admin.tender.index') }}?language={{ $tender->language->code ?? request()->input('language') }}";
+        var langCodeMap = @json($langs->pluck('code', 'id'));
 
         // WhatsApp combiner — handles: "01630968359" / "+8801630968359" / "8801630968359"
         var waCodes = $('#waCode option').map(function() { return $(this).val().replace(/\D/g,''); }).get()
@@ -475,6 +483,58 @@
                     $('#thumbPreview2').html('<img src="' + img + '" alt="Expert Image">');
                     $('#fileInput2').val(img);
                 }
+            });
+
+            // Load categories + team members when language changes — moves
+            // this tender to the selected language's tender list on save.
+            $("#language").on('change', function () {
+                var langId = $(this).val();
+                window.ajaxSuccessRedirect = "{{ route('admin.tender.index') }}?language=" + langCodeMap[langId];
+
+                $.get("{{ url('/') }}/admin/tender/" + langId + "/get_categories", function (data) {
+                    var options = '<option value="" disabled selected>Select Category</option>';
+                    if (data.length === 0) {
+                        options += '<option value="" disabled>No Category Exists</option>';
+                    } else {
+                        $.each(data, function (i, cat) {
+                            options += '<option value="' + cat.id + '">' + cat.name + '</option>';
+                        });
+                    }
+                    $("#tender_category_id").html(options);
+                });
+
+                $.get("{{ url('/') }}/admin/tender/" + langId + "/get_members", function (data) {
+                    var $select = $("#expertMemberSelect").empty();
+                    $select.append($('<option>', { value: '', selected: true, disabled: true, text: 'Select Team Member' }));
+                    if (data.length === 0) {
+                        $select.append($('<option>', { value: '', disabled: true, text: 'No Team Member Exists' }));
+                    } else {
+                        $.each(data, function (i, m) {
+                            var img = m.image ? "{{ asset('assets/front/img/members') }}/" + m.image : '';
+                            $select.append($('<option>', {
+                                value: m.id,
+                                text: m.name || '',
+                                'data-position': m.rank || '',
+                                'data-details': m.details || '',
+                                'data-whatsapp': (m.whatsapp || '').replace(/\D/g, ''),
+                                'data-email': m.email || '',
+                                'data-image': img
+                            }));
+                        });
+                    }
+                });
+
+                $(".request-loader").addClass("show");
+                $.get("{{ url('/') }}/admin/rtlcheck/" + langId, function (data) {
+                    $(".request-loader").removeClass("show");
+                    if (data == 1) {
+                        $("form input:not(.ltr), form select:not(.ltr), form textarea:not(.ltr)").addClass('rtl');
+                        $("form .summernote").siblings('.note-editor').find('.note-editable').addClass('rtl text-right');
+                    } else {
+                        $("form input, form select, form textarea").removeClass('rtl');
+                        $("form .summernote").siblings('.note-editor').find('.note-editable').removeClass('rtl text-right');
+                    }
+                });
             });
 
             // Update image preview when LFM selects an image

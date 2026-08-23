@@ -351,6 +351,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 @section('scripts')
 <script>
   window.ajaxSuccessRedirect = "{{ route('admin.tender.index') }}?language={{ request()->input('language') }}";
+  var langCodeMap = @json($langs->pluck('code', 'id'));
 
   // WhatsApp combiner — handles: "01630968359" / "+8801630968359" / "8801630968359"
   function syncWa() {
@@ -435,6 +436,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
     $("#language").on('change', function () {
       var langId = $(this).val();
       $("#tender_category_id").removeAttr('disabled');
+      window.ajaxSuccessRedirect = "{{ route('admin.tender.index') }}?language=" + langCodeMap[langId];
 
       $.get("{{ url('/') }}/admin/tender/" + langId + "/get_categories", function (data) {
         var options = '<option value="" disabled selected>Select Category</option>';

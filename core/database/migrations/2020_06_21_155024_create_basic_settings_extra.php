@@ -33,6 +33,11 @@ class CreateBasicSettingsExtra extends Migration
         // admin/basicinfo instead of requiring a code deploy.
         $table->unsignedInteger('lfm_max_image_size_mb')->default(20);
         $table->unsignedInteger('lfm_max_file_size_mb')->default(50);
+
+        // Cloudflare "Purge Cache" button (admin header). Editable at
+        // admin/basicinfo instead of requiring a .env edit + deploy.
+        $table->string('cloudflare_zone_id')->nullable();
+        $table->string('cloudflare_api_token')->nullable();
       });
     }
 
@@ -40,6 +45,13 @@ class CreateBasicSettingsExtra extends Migration
       Schema::table('basic_settings_extra', function (Blueprint $table) {
         $table->unsignedInteger('lfm_max_image_size_mb')->default(20);
         $table->unsignedInteger('lfm_max_file_size_mb')->default(50);
+      });
+    }
+
+    if (Schema::hasTable('basic_settings_extra') && !Schema::hasColumn('basic_settings_extra', 'cloudflare_zone_id')) {
+      Schema::table('basic_settings_extra', function (Blueprint $table) {
+        $table->string('cloudflare_zone_id')->nullable();
+        $table->string('cloudflare_api_token')->nullable();
       });
     }
   }

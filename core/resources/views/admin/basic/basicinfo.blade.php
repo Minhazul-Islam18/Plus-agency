@@ -291,6 +291,55 @@
   <div class="row">
     <div class="col-md-12">
       <div class="card">
+        <form action="{{ route('admin.basicinfo.cloudflare') }}" method="POST">
+          @csrf
+          <div class="card-header">
+            <div class="card-title">Cloudflare — Purge Cache</div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="form-group">
+                  <label>Zone ID</label>
+                  <input type="text" class="form-control" name="cloudflare_zone_id"
+                    value="{{ $abx->cloudflare_zone_id ?? '' }}" placeholder="e.g. 023e105f4ecef8ad9ca31a8372d0c353">
+                  @if ($errors->has('cloudflare_zone_id'))
+                    <p class="mb-0 text-danger">{{ $errors->first('cloudflare_zone_id') }}</p>
+                  @endif
+                  <small class="text-muted">Cloudflare dashboard → your domain → Overview → right sidebar, under "API".</small>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="form-group">
+                  <label>API Token</label>
+                  <input type="password" class="form-control" name="cloudflare_api_token"
+                    value="{{ $abx->cloudflare_api_token ?? '' }}" autocomplete="new-password">
+                  @if ($errors->has('cloudflare_api_token'))
+                    <p class="mb-0 text-danger">{{ $errors->first('cloudflare_api_token') }}</p>
+                  @endif
+                  <small class="text-muted">My Profile → API Tokens → Create Token, scoped to Zone → Cache Purge → Purge for this zone only (not the global API key).</small>
+                </div>
+              </div>
+            </div>
+            <p class="text-muted mb-0"><small><i class="fas fa-info-circle"></i> Enables the "Purge Cache" button in the admin header, for clearing the site's Cloudflare edge cache on demand.</small></p>
+          </div>
+          <div class="card-footer">
+            <div class="form">
+              <div class="form-group from-show-notify row">
+                <div class="col-12 text-center">
+                  <button type="submit" class="btn btn-success">Update</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
         <form action="{{ route('admin.file-manager.upload-limits') }}" method="POST">
           @csrf
           <div class="card-header">

@@ -29,6 +29,12 @@
 
             <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
 
+                <li class="nav-item">
+                    <button type="button" id="purgeCfCacheBtn" class="btn btn-sm btn-outline-secondary" title="{{ __('Force-clear the cached site pages immediately instead of waiting for them to expire on their own') }}">
+                        <i class="fa fa-broom"></i> {{ __('Purge Cache') }}
+                    </button>
+                </li>
+
                 <li class="nav-item dropdown hidden-caret">
                     <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
                         <div class="avatar-sm">
@@ -78,3 +84,44 @@
     </nav>
     <!-- End Navbar -->
 </div>
+
+<script>
+    // DOMContentLoaded, not a bare top-level call: this partial is included
+    // near the top of the admin layout, before jQuery's <script> tag (which
+    // lives in the page's @section('scripts') block at the bottom) has
+    // necessarily run yet — DOMContentLoaded guarantees every script in the
+    // document has already executed by the time it fires, regardless of
+    // where they sit in the source.
+    document.addEventListener('DOMContentLoaded', function () {
+    $(document).on('click', '#purgeCfCacheBtn', function () {
+        var $btn = $(this);
+        var originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ __('Purging…') }}');
+
+        $.ajax({
+            url: '{{ route('admin.cloudflare.purge') }}',
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function (response) {
+                swal({
+                    title: response.success ? '{{ __('Purged!') }}' : '{{ __('Failed') }}',
+                    text: response.message,
+                    icon: response.success ? 'success' : 'error',
+                    button: 'OK'
+                });
+            },
+            error: function () {
+                swal({
+                    title: '{{ __('Failed') }}',
+                    text: '{{ __('Something went wrong — check the server logs.') }}',
+                    icon: 'error',
+                    button: 'OK'
+                });
+            },
+            complete: function () {
+                $btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
+    });
+</script>

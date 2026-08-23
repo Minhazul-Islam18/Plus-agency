@@ -61,6 +61,24 @@ class BasicController extends Controller
         return back();
     }
 
+    public function updateCloudflareSettings(Request $request)
+    {
+        $request->validate([
+            'cloudflare_zone_id' => 'nullable|string|max:64',
+            'cloudflare_api_token' => 'nullable|string|max:255',
+        ]);
+
+        $bexs = BasicExtra::all();
+        foreach ($bexs as $bex) {
+            $bex->cloudflare_zone_id = $request->cloudflare_zone_id;
+            $bex->cloudflare_api_token = $request->cloudflare_api_token;
+            $bex->save();
+        }
+
+        Session::flash('success', 'Cloudflare settings updated successfully!');
+        return back();
+    }
+
     public function logo()
     {
         $data['abs'] = BasicSetting::first();

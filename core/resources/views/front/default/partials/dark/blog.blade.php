@@ -28,7 +28,7 @@
 
         <div class="dark-blog-carousel dark-glass-carousel owl-carousel owl-theme">
             @foreach ($blogs as $key => $blog)
-                <a href="{{ route('front.blogdetails', [$blog->slug, $blog->id]) }}" class="dark-blog-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
+                <a href="{{ route('front.blogdetails', $blog->slug) }}" class="dark-blog-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
                     <div class="blog-img-wrapper">
                         <img src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
                         @php

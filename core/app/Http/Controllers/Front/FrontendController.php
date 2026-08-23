@@ -39,8 +39,8 @@ use App\Mail\ContactMail;
 use App\OfflineGateway;
 use App\Pcategory;
 use App\Product;
-use Session;
-use Validator;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Config;
 use Mail;
 use PDF;
@@ -59,11 +59,7 @@ class FrontendController extends Controller
 
     public function index()
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
         $data['currentLang'] = $currentLang;
 
         $be = $currentLang?->basic_extended;
@@ -123,11 +119,7 @@ class FrontendController extends Controller
 
     public function services(Request $request)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
         $data['currentLang'] = $currentLang;
         $be = $currentLang->basic_extended;
 
@@ -191,11 +183,7 @@ class FrontendController extends Controller
     }
     public function portfolios(Request $request)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $data['currentLang'] = $currentLang;
         $be = $currentLang->basic_extended;
@@ -228,13 +216,9 @@ class FrontendController extends Controller
 
     public function portfoliodetails($slug)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
-        $data['portfolio'] = Portfolio::where('slug', $slug)->firstOrFail();
+        $data['portfolio'] = Portfolio::where('slug', $slug)->where('language_id', $currentLang->id)->firstOrFail();
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
@@ -251,13 +235,9 @@ class FrontendController extends Controller
     public function servicedetails($slug)
     {
 
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
-        $data['service'] = Service::where('slug', $slug)->firstOrFail();
+        $data['service'] = Service::where('slug', $slug)->where('language_id', $currentLang->id)->firstOrFail();
 
         if ($data['service']->details_page_status == 0) {
             return back();
@@ -277,11 +257,7 @@ class FrontendController extends Controller
 
     public function blogs(Request $request)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
         $data['currentLang'] = $currentLang;
 
         $lang_id = $currentLang->id;
@@ -335,16 +311,11 @@ class FrontendController extends Controller
 
     public function blogdetails($slug)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $lang_id = $currentLang->id;
 
-
-        $data['blog'] = Blog::where('slug', $slug)->firstOrFail();
+        $data['blog'] = Blog::where('slug', $slug)->where('language_id', $lang_id)->firstOrFail();
 
         $data['archives'] = Archive::orderBy('id', 'DESC')->get();
         $data['bcats'] = Bcategory::where('status', 1)->where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
@@ -363,11 +334,7 @@ class FrontendController extends Controller
 
     public function contact()
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
 
@@ -377,18 +344,14 @@ class FrontendController extends Controller
 
         $data['version'] = $version;
 
-        $data['langg'] = Language::where('code', session('lang'))->first();
+        $data['langg'] = currentLang();
 
         return view('front.contact', $data);
     }
 
     public function sendmail(Request $request)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
         $bs = $currentLang->basic_setting;
 
         $messages = [
@@ -501,11 +464,7 @@ class FrontendController extends Controller
     {
         Subscriber::where('unsubscribe_token', $token)->delete();
 
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $version = $currentLang->basic_extended->theme_version;
         if ($version == 'dark') {
@@ -532,11 +491,7 @@ class FrontendController extends Controller
 
     public function team()
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $data['members'] = Member::when($currentLang, function ($query, $currentLang) {
             return $query->where('language_id', $currentLang->id);
@@ -553,11 +508,7 @@ class FrontendController extends Controller
 
     public function gallery()
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $lang_id = $currentLang->id;
 
@@ -581,11 +532,7 @@ class FrontendController extends Controller
 
     public function faq()
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
         $lang_id = $currentLang->id;
 
@@ -608,13 +555,17 @@ class FrontendController extends Controller
 
     public function dynamicPage($slug)
     {
-        if (session()->has('lang')) {
-            $currentLang = Language::where('code', session()->get('lang'))->first();
-        } else {
-            $currentLang = Language::where('is_default', 1)->first();
-        }
+        $currentLang = currentLang();
 
-        $data['page'] = Page::where('slug', $slug)->firstOrFail();
+        // Page rows have per-language slugs with no cross-language link
+        // (e.g. "Notre-histoire" only exists as a French row) — without
+        // this filter, /en/Notre-histoire silently returned the French
+        // row regardless of URL locale (chrome showed English, content
+        // stayed French). Filtering here means visiting a page's slug
+        // under the wrong locale correctly 404s instead of showing
+        // mismatched content — there's no data to resolve it to the
+        // "equivalent" English page.
+        $data['page'] = Page::where('slug', $slug)->where('language_id', $currentLang->id)->firstOrFail();
 
         $be = $currentLang->basic_extended;
         $bex = $currentLang->basic_extra;
@@ -635,13 +586,35 @@ class FrontendController extends Controller
 
     public function changeLanguage($lang)
     {
-        session()->put('lang', $lang);
-        app()->setLocale($lang);
+        // URL-based routing (see SetLocaleFromUrl) now carries the locale
+        // in every URL segment, so this no longer needs to set a cookie —
+        // it just redirects to the equivalent page under the new locale.
+        $target = \App\Language::where('code', $lang)->where('status', 1)->first();
+        if (!$target) {
+            return redirect()->back();
+        }
 
-        $be = be::first();
-        $version = $be->theme_version;
+        // Route name + params come from the switcher link's query string
+        // (set in layout.blade.php from the page that rendered it), not
+        // from re-parsing a Referer header — the layout already knows
+        // exactly which route/params generated the current page. Only
+        // permalink-driven routes (shared slug across languages) are
+        // swapped in place; front.dynamicPage (per-language Page slugs,
+        // no cross-language link) falls through to the target homepage.
+        $routeName = request()->query('_route');
+        $params = request()->query();
+        unset($params['_route']);
 
-        return redirect()->route('front.index');
+        if ($routeName && $routeName !== 'front.dynamicPage' && \Illuminate\Support\Facades\Route::has($routeName)) {
+            $params['locale'] = $target->code;
+            try {
+                return redirect()->route($routeName, $params);
+            } catch (\Exception) {
+                // param mismatch for this route — fall through to homepage
+            }
+        }
+
+        return redirect()->route('front.index', ['locale' => $target->code]);
     }
 
 }

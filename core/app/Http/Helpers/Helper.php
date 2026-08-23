@@ -115,6 +115,26 @@ if (!function_exists('asset_v')) {
     }
 }
 
+if (!function_exists('currentLang')) {
+    // Single source of truth for "what language is this request in", now
+    // that locale comes from the URL (/{locale}/..., set by
+    // SetLocaleFromUrl) rather than a site_lang cookie. Replaces ~20
+    // call-site copies of "if cookie/session has lang, else default" that
+    // were never updated when the cookie (and before that, session)
+    // mechanism was retired — they silently kept reading a value nothing
+    // sets anymore, so every page always fell back to the default
+    // language regardless of the /en/ or /fr/ URL. app()->getLocale() is
+    // correct for both: SetLocaleFromUrl sets it from the URL segment on
+    // locale-prefixed routes, and SetLangMiddleware (still active on the
+    // few deliberately-unprefixed routes, e.g. tender payment callbacks)
+    // sets it the old way there — one call works everywhere.
+    function currentLang()
+    {
+        return \App\Language::where('code', app()->getLocale())->where('status', 1)->first()
+            ?? \App\Language::where('is_default', 1)->first();
+    }
+}
+
 if (!function_exists('tenderCountdown')) {
     // Real days/hours remaining, computed server-side — the countdown
     // markup's static HTML previously always hardcoded "00j 00h" regardless

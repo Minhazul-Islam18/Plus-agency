@@ -14,11 +14,7 @@ class FeedbackController extends Controller
 {
   public function feedback()
   {
-    if (session()->has('lang')) {
-      $currentLang = Language::where('code', session()->get('lang'))->first();
-    } else {
-      $currentLang = Language::where('is_default', 1)->first();
-    }
+    $currentLang = currentLang();
 
     $data['bse'] = $currentLang->basic_extra;
     $data['currentLang'] = $currentLang;

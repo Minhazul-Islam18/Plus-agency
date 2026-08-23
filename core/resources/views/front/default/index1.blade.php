@@ -194,7 +194,7 @@
                                         </div>
                                         <div class="services-content">
                                             <a class="title"
-                                                @if ($service->details_page_status == 1) href="{{ route('front.servicedetails', [$service->slug, $service->id]) }}" @endif>
+                                                @if ($service->details_page_status == 1) href="{{ route('front.servicedetails', $service->slug) }}" @endif>
                                                 <h4>{{ $service->title }}</h4>
                                             </a>
 
@@ -209,7 +209,7 @@
                                             </p>
 
                                             @if ($service->details_page_status == 1)
-                                                <a href="{{ route('front.servicedetails', [$service->slug, $service->id]) }}">{{ __('Read More') }}
+                                                <a href="{{ route('front.servicedetails', $service->slug) }}">{{ __('Read More') }}
                                                     <i class="fas fa-plus"></i></a>
                                             @endif
                                         </div>
@@ -486,7 +486,7 @@
                                                     <p>{{ $portfolio->service->title }}</p>
                                                 @endif
 
-                                                <a href="{{ route('front.portfoliodetails', [$portfolio->slug, $portfolio->id]) }}"
+                                                <a href="{{ route('front.portfoliodetails', $portfolio->slug) }}"
                                                     class="readmore-btn"><span>{{ __('Read More') }}</span></a>
 
                                             </div>
@@ -683,7 +683,7 @@
                                     </p>
 
                                     <h4 class="blog-title"><a
-                                            href="{{ route('front.blogdetails', [$blog->slug, $blog->id]) }}">{{ strlen($blog->title) > 40 ? mb_substr($blog->title, 0, 40, 'utf-8') . '...' : $blog->title }}</a>
+                                            href="{{ route('front.blogdetails', $blog->slug) }}">{{ strlen($blog->title) > 40 ? mb_substr($blog->title, 0, 40, 'utf-8') . '...' : $blog->title }}</a>
                                     </h4>
 
 
@@ -692,7 +692,7 @@
                                         : strip_tags($blog->content) !!}</p>
 
 
-                                    <a href="{{ route('front.blogdetails', [$blog->slug, $blog->id]) }}"
+                                    <a href="{{ route('front.blogdetails', $blog->slug) }}"
                                         class="readmore-btn"><span>{{ __('Read More') }}</span></a>
 
                                 </div>

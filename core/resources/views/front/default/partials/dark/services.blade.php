@@ -27,7 +27,7 @@
                         </div>
                         <div class="services-content">
                             <a class="title"
-                                @if ($service->details_page_status == 1) href="{{ route('front.servicedetails', [$service->slug, $service->id]) }}" @endif>
+                                @if ($service->details_page_status == 1) href="{{ route('front.servicedetails', $service->slug) }}" @endif>
                                 <h4>{{ $service->title }}</h4>
                             </a>
 
@@ -42,7 +42,7 @@
                             </p>
 
                             @if ($service->details_page_status == 1)
-                                <a class="glass-panel-link" href="{{ route('front.servicedetails', [$service->slug, $service->id]) }}">{{ __('Read More') }}
+                                <a class="glass-panel-link" href="{{ route('front.servicedetails', $service->slug) }}">{{ __('Read More') }}
                                     <i class="fas fa-plus"></i></a>
                             @endif
                         </div>

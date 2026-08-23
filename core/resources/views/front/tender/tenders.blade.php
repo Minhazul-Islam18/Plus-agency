@@ -210,9 +210,10 @@
                                     <span class="dark-tender-cat">{{ convertUtf8($ft->tenderCategory->name) }}</span>
                                 @endif
                                 @if ($ft->submission_deadline)
+                                    @php $tenderCd = tenderCountdown($ft->submission_deadline); @endphp
                                     <div class="dark-tender-countdown" data-deadline="{{ \Carbon\Carbon::parse($ft->submission_deadline)->toIso8601String() }}">
-                                        <span class="unit"><b data-d>00</b><span>{{ __('d') }}</span></span>
-                                        <span class="unit"><b data-h>00</b><span>{{ __('h') }}</span></span>
+                                        <span class="unit"><b data-d>{{ $tenderCd['d'] }}</b><span>{{ __('d') }}</span></span>
+                                        <span class="unit"><b data-h>{{ $tenderCd['h'] }}</b><span>{{ __('h') }}</span></span>
                                     </div>
                                 @endif
                             </div>

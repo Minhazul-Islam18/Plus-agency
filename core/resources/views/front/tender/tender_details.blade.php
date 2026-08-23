@@ -2193,12 +2193,13 @@ $preFlag = $preCountry['flag'] ?? '';
                                                 class="dark-tender-cat">{{ convertUtf8($rt->tenderCategory->name) }}</span>
                                         @endif
                                         @if ($rt->submission_deadline)
+                                            @php $tenderCd = tenderCountdown($rt->submission_deadline); @endphp
                                             <div class="dark-tender-countdown"
                                                 data-deadline="{{ \Carbon\Carbon::parse($rt->submission_deadline)->toIso8601String() }}">
                                                 <span class="unit"><b
-                                                        data-d>00</b><span>{{ __('d') }}</span></span>
+                                                        data-d>{{ $tenderCd['d'] }}</b><span>{{ __('d') }}</span></span>
                                                 <span class="unit"><b
-                                                        data-h>00</b><span>{{ __('h') }}</span></span>
+                                                        data-h>{{ $tenderCd['h'] }}</b><span>{{ __('h') }}</span></span>
                                             </div>
                                         @endif
                                     </div>

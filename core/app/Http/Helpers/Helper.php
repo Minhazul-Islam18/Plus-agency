@@ -115,6 +115,24 @@ if (!function_exists('asset_v')) {
     }
 }
 
+if (!function_exists('tenderCountdown')) {
+    // Real days/hours remaining, computed server-side — the countdown
+    // markup's static HTML previously always hardcoded "00j 00h" regardless
+    // of the actual deadline, relying entirely on dark-tenders-fx.js's
+    // client-side tick() to overwrite it after the page loads. Search
+    // crawlers (and anyone for a brief moment before JS runs) only ever
+    // saw "00". The JS still takes over and re-ticks every 60s — this only
+    // fixes what the *first* render shows.
+    function tenderCountdown($deadline)
+    {
+        $diffSeconds = max(0, \Carbon\Carbon::parse($deadline)->getTimestamp() - now()->getTimestamp());
+        return [
+            'd' => str_pad((string) intdiv($diffSeconds, 86400), 2, '0', STR_PAD_LEFT),
+            'h' => str_pad((string) intdiv($diffSeconds % 86400, 3600), 2, '0', STR_PAD_LEFT),
+        ];
+    }
+}
+
 if (!function_exists('slug_create')) {
     function slug_create($val)
     {

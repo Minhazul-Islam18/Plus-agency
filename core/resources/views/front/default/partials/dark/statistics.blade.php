@@ -9,12 +9,19 @@
         <div class="container">
             <div class="dark-stat-grid">
                 @foreach ($statistics as $key => $statistic)
-                    <div class="dark-stat-card reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s" data-stat data-target="{{ (int) preg_replace('/\D/', '', $statistic->quantity) }}">
+                    @php $statTarget = (int) preg_replace('/\D/', '', $statistic->quantity); @endphp
+                    <div class="dark-stat-card reveal-card" style="--d:{{ ($key % 4) * 0.1 }}s" data-stat data-target="{{ $statTarget }}">
                         <span class="dark-stat-glow"></span>
                         <div class="dark-stat-content">
                             <span class="dark-stat-icon"><i class="{{ $statistic->icon }}"></i></span>
                             <div class="dark-stat-number-row">
-                                <span class="dark-stat-number" data-count>0</span>
+                                {{-- Real number in the static HTML, not "0" — search
+                                     engines only ever see this initial render, they
+                                     don't execute the count-up animation below. JS
+                                     still animates from 0 for real visitors (it
+                                     overwrites this text the instant it runs; doesn't
+                                     care what it started as). --}}
+                                <span class="dark-stat-number" data-count>{{ $statTarget }}</span>
                                 <span class="dark-stat-plus">+</span>
                             </div>
                             <div class="dark-stat-label">{{ convertUtf8($statistic->title) }}</div>

@@ -158,7 +158,7 @@ class TenderController extends Controller
         return view('front.tender.tenders', $data);
     }
 
-    public function tenderDetails($slug)
+    public function tenderDetails($slug, ?TenderPurchase $resumePurchase = null)
     {
         $currentLang = $this->getCurrentLang();
         $bex         = BasicExtra::first();
@@ -245,7 +245,48 @@ class TenderController extends Controller
         $data['currentLang'] = $currentLang;
         $data['version']     = $this->getVersionData($currentLang);
 
+        // Set only when landing via a "complete your payment" resume link
+        // (see resumePurchase()) — prefills the checkout form so the buyer
+        // doesn't retype everything for a payment that already failed once.
+        $data['resumePurchase'] = $resumePurchase;
+
         return view('front.tender.tender_details', $data);
+    }
+
+    /**
+     * Landing page for the "Complete Your Payment" email link sent when an
+     * online payment fails/is abandoned (see TenderPaymentHelper::handleFailedPayment).
+     * Re-renders the same tender page with the buyer's details and module
+     * selection prefilled, ready to resubmit against the same Pending order.
+     * A Completed order's link is dead — no re-payment, no resubmission.
+     */
+    public function resumePurchase($token)
+    {
+        $purchase = TenderPurchase::where('resume_token_hash', hash('sha256', $token))->first();
+
+        if (!$purchase) {
+            return redirect()->route('tenders')->with('error', __('This payment link is invalid or has expired.'));
+        }
+
+        if ($purchase->payment_status === 'Completed') {
+            return redirect()->route('tenders')->with('success', __('This order has already been paid. Check your email for the download link.'));
+        }
+
+        $tender = Tender::where('id', $purchase->tender_id)->where('status', 1)->first();
+        if (!$tender) {
+            return redirect()->route('tenders')->with('error', __('This tender is no longer available.'));
+        }
+
+        // This route lives outside every /{locale} group (payment routes are
+        // deliberately unprefixed), so nothing has set the locale from a URL
+        // segment here — without this, the page would render in whatever the
+        // visitor's cookie/browser locale happens to be instead of the
+        // language the buyer actually checked out in.
+        if ($tender->language) {
+            app()->setLocale($tender->language->code);
+        }
+
+        return $this->tenderDetails($tender->slug, $purchase);
     }
 
     public function purchase(\App\Http\Requests\Tender\PurchaseRequest $request)

@@ -109,10 +109,25 @@ trait TenderPaymentHelper
         // Persist paid + free; free modules carry cost 0 so the receipt total is unchanged.
         $modules = $paidModules->concat($freeModules);
 
-        $purchase                    = new TenderPurchase;
+        // Resuming a previously-failed attempt (see resumePurchase()) updates
+        // the SAME Pending row instead of creating a new one — otherwise every
+        // retry after a declined card would leave another orphaned Pending
+        // purchase behind. Guarded to the same tender and still-Pending, so a
+        // stale/tampered resume_purchase_id can't hijack an unrelated order.
+        $purchase = null;
+        if ($request->filled('resume_purchase_id')) {
+            $purchase = TenderPurchase::where('id', $request->input('resume_purchase_id'))
+                ->where('tender_id', $request->tender_id)
+                ->where('payment_status', 'Pending')
+                ->first();
+        }
+        if (!$purchase) {
+            $purchase = new TenderPurchase;
+            $purchase->order_number = strtoupper(Str::random(10));
+        }
+
         $purchase->tender_id         = $request->tender_id;
         $purchase->user_id           = Auth::check() ? Auth::id() : null;
-        $purchase->order_number      = strtoupper(Str::random(10));
         $purchase->first_name        = $request->first_name;
         $purchase->last_name         = $request->last_name;
         $purchase->email             = $request->email;
@@ -338,5 +353,53 @@ trait TenderPaymentHelper
     {
         return redirect()->route('tender.purchase.complete')
             ->with('fmf_purchase_id', $purchase->id);
+    }
+
+    /**
+     * Issue (or reissue) a signed resume token for a still-Pending purchase and
+     * email the buyer a link to pick the SAME order back up — same modules, same
+     * amount, no re-typing their details. Only the hash is persisted; the raw
+     * token lives solely in the emailed URL (mirrors SecureToken's download
+     * links). Safe to call repeatedly — each call overwrites the previous hash,
+     * silently invalidating any earlier resume email for this order.
+     */
+    protected function handleFailedPayment(?TenderPurchase $purchase): void
+    {
+        if (!$purchase || $purchase->payment_status === 'Completed') {
+            return;
+        }
+
+        try {
+            $rawToken = hash_hmac('sha256', implode('|', [
+                $purchase->id,
+                $purchase->order_number,
+                now()->timestamp,
+                Str::random(16),
+            ]), config('app.key'));
+
+            $purchase->resume_token_hash = hash('sha256', $rawToken);
+            $purchase->save();
+
+            $lang   = $this->getLang();
+            $bs     = $lang->basic_setting;
+            $tender = Tender::find($purchase->tender_id);
+
+            SendAdminMail::dispatch([
+                'toMail'        => $purchase->email,
+                'toName'        => $purchase->first_name,
+                'customer_name' => $purchase->first_name,
+                'tender_name'   => $tender ? $tender->title : 'Tender Document',
+                'order_number'  => $purchase->order_number,
+                'resume_url'    => route('tender.purchase.resume', ['token' => $rawToken]),
+                'website_title' => $bs->website_title,
+                'templateType'  => 'tender_payment_incomplete',
+                'type'          => 'tenderPaymentIncomplete',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Tender] Incomplete-payment email failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

@@ -64,12 +64,15 @@ class StripeController extends Controller
                 return $this->redirectToComplete($purchase);
             }
         } catch (\RuntimeException $e) {
-            // Duplicate-payment guard (already-paid modules)
+            // Duplicate-payment guard (already-paid modules) — no pending
+            // purchase was created here, so nothing to send a resume link for.
             return back()->with('error', $e->getMessage());
         } catch (Exception $e) {
+            $this->handleFailedPayment($purchase ?? null);
             return back()->with('error', $e->getMessage());
         }
 
+        $this->handleFailedPayment($purchase);
         return back()->with('error', 'Payment failed.');
     }
 }

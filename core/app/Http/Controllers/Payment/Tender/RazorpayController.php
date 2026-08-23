@@ -102,6 +102,9 @@ class RazorpayController extends Controller
             return $this->redirectToComplete($purchase);
         }
 
+        $this->handleFailedPayment($id ? \App\TenderPurchase::find($id) : null);
+        Session::forget(['tenderPurchaseId', 'tenderRazorpayOrder']);
+
         return redirect()->route('tender.razorpay.cancel');
     }
 

@@ -48,9 +48,11 @@ class MonerooController extends Controller
 
             return redirect()->away($payment->checkout_url);
         } catch (\RuntimeException $e) {
-            // Duplicate-payment guard (already-paid modules) — show the clean message
+            // Duplicate-payment guard (already-paid modules) — no pending
+            // purchase was created here, so nothing to send a resume link for.
             return back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
+            $this->handleFailedPayment($purchase ?? null);
             return back()->with('error', 'Payment initialization failed: ' . $e->getMessage());
         }
     }
@@ -77,6 +79,9 @@ class MonerooController extends Controller
         } catch (\Exception $e) {
             // fall through to cancel
         }
+
+        $this->handleFailedPayment($id ? \App\TenderPurchase::find($id) : null);
+        Session::forget(['tenderPurchaseId', 'tenderMonerooTransaction']);
 
         return redirect()->route('tender.moneroo.cancel');
     }

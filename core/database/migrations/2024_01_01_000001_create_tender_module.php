@@ -152,6 +152,15 @@ return new class extends Migration
                 // buyer's own offline-checkout receipt above.
                 $table->string('admin_proof')->nullable();
 
+                // Lets a buyer whose online payment failed/was abandoned resume
+                // the SAME pending order (same modules, same amount) from an
+                // emailed link instead of starting over. Hash only — the raw
+                // token lives solely in the emailed URL, same pattern as
+                // SecureToken's download links. Cleared implicitly by staying
+                // NULL once the order reaches Completed (see resumePurchase()),
+                // which is what "locks" the link after payment.
+                $table->string('resume_token_hash')->nullable()->index();
+
                 $table->timestamps();
             });
         }
@@ -159,6 +168,12 @@ return new class extends Migration
         if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'admin_proof')) {
             Schema::table('tender_purchases', function (Blueprint $table) {
                 $table->string('admin_proof')->nullable()->after('invoice');
+            });
+        }
+
+        if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'resume_token_hash')) {
+            Schema::table('tender_purchases', function (Blueprint $table) {
+                $table->string('resume_token_hash')->nullable()->index()->after('admin_proof');
             });
         }
 

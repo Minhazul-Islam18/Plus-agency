@@ -31,6 +31,8 @@ class TenderPurchase extends Model
         'paid_at',
         'receipt',
         'invoice',
+        'admin_proof',
+        'resume_token_hash',
         'payment_reference',
         'access_status',
         'suspend_reason',

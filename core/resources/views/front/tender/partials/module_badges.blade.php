@@ -1,6 +1,14 @@
 {{-- Module badges. Rendered inside the checkout form (step 1) when the tender is
      purchasable, otherwise in the standalone "Check the plans" section — never both,
      so the ids and the selection JS stay unique on the page. --}}
+@php
+    // Resuming a failed payment (see TenderController::resumePurchase) —
+    // purchased_modules only stores names (no ids), so match by name against
+    // the tender's live modules to know which badges to preselect.
+    $resumeModuleNames = !empty($resumePurchase)
+        ? collect(json_decode($resumePurchase->purchased_modules, true) ?: [])->pluck('name')->all()
+        : [];
+@endphp
 @foreach ($modules as $module)
     @if (is_null($module->cost))
         {{-- Free module → click to download --}}
@@ -16,6 +24,7 @@
     @else
         {{-- Paid module → toggle selection, adds cost to total --}}
         <div class="module-badge paid-badge" data-cost="{{ $module->cost }}" data-module-id="{{ $module->id }}"
+            @if (in_array($module->name, $resumeModuleNames, true)) data-preselect="1" @endif
             onclick="toggleModule(this)" title="{{ __('Click to select / deselect') }}">
             <i class="fas fa-lock"></i>
             <span>{{ convertUtf8($module->name) }}

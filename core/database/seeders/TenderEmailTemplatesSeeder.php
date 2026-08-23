@@ -32,6 +32,14 @@ class TenderEmailTemplatesSeeder extends Seeder
                 'email_subject' => 'Your Tender Download Links — File Recovery',
                 'email_body'    => $this->tenderRecoveryLinkBody(),
             ],
+            // 5) Sent when an online gateway payment fails/is cancelled/abandoned.
+            //    Red / "incomplete" identity with a resume CTA. Used by
+            //    TenderPaymentHelper::handleFailedPayment.
+            [
+                'email_type'    => 'tender_payment_incomplete',
+                'email_subject' => 'Complete Your Payment — Order {order_number}',
+                'email_body'    => $this->tenderPaymentIncompleteBody(),
+            ],
             // 4) Sent from "Find My Files" Method 4 (Expired Link / Regenerate) —
             //    the verification code gating that method's email-only recovery
             //    before any link is issued. Same indigo identity as #3.
@@ -310,6 +318,93 @@ HTML;
           <td style="background-color:#0f1b30; border-radius:0 0 14px 14px; padding:22px 40px;">
             <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>
             <p style="margin:0; font-size:12px; color:#64748b;">This link expires on {expires_at} or after {max_downloads} opens. Automated message — please do not reply.</p>
+          </td>
+        </tr>
+      </table>
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:14px auto 0;">
+        <tr><td align="center"><p style="margin:0; font-size:11px; color:#94a3b8; line-height:1.7;">&copy; {website_title}. All rights reserved. &middot; Order {order_number}</p></td></tr>
+      </table>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+HTML;
+    }
+
+    // ── 2b. PAYMENT INCOMPLETE — red, single "Complete Payment" CTA ─────────────
+    private function tenderPaymentIncompleteBody(): string
+    {
+        $head = $this->head('Complete Your Payment', 'Your payment did not go through — pick up right where you left off.');
+        return $head . <<<'HTML'
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef1f6;">
+  <tr>
+    <td align="center" style="padding:32px 14px 44px;">
+      <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+      <table role="presentation" class="container" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+        <!-- Red header -->
+        <tr>
+          <td class="px" style="background-color:#0f1b30; border-radius:14px 14px 0 0; padding:22px 40px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-size:19px; font-weight:700; color:#ffffff; letter-spacing:0.03em;">{website_title}</td>
+                <td align="right" class="hide-sm" style="font-size:11px; color:#fca5a5; letter-spacing:0.14em; text-transform:uppercase; font-weight:700;">Payment Incomplete</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Hero -->
+        <tr>
+          <td class="px" style="background-color:#fef2f2; padding:32px 40px 26px; border-bottom:1px solid #fecaca;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="52" valign="middle" style="padding-right:16px;">
+                  <div style="width:52px; height:52px; background-color:#dc2626; border-radius:13px; text-align:center; line-height:52px; font-size:26px; color:#ffffff;">&#33;</div>
+                </td>
+                <td valign="middle">
+                  <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#b91c1c; letter-spacing:0.1em; text-transform:uppercase;">Payment Not Completed</p>
+                  <p class="h1" style="margin:0; font-size:23px; font-weight:800; color:#0f172a; line-height:1.25;">Your order is still waiting on payment.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:30px 40px 0;">
+            <p style="margin:0 0 6px 0; font-size:15px; color:#334155; line-height:1.7;">Hello, <strong style="color:#0f172a;">{customer_name}</strong></p>
+            <p style="margin:0 0 24px 0; font-size:15px; color:#475569; line-height:1.7;">We noticed your payment for <strong style="color:#0f172a;">{tender_name}</strong> (order <strong style="color:#0f172a;">{order_number}</strong>) didn&#39;t go through. No charge was made. Use the button below to pick up right where you left off — your details and module selection are already saved.</p>
+          </td>
+        </tr>
+        <!-- Single CTA -->
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 30px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" style="background-color:#dc2626; border-radius:9px;">
+                  <a href="{resume_url}" target="_blank" style="display:block; padding:17px 30px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:9px; text-align:center; letter-spacing:0.01em;">Complete Your Payment</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:16px 0 0 0; font-size:12px; color:#94a3b8; line-height:1.6;">Button not working? Copy this link:<br><span style="color:#2563eb; word-break:break-all;">{resume_url}</span></p>
+          </td>
+        </tr>
+        <tr>
+          <td class="px" style="background-color:#ffffff; padding:0 40px 34px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background-color:#fef2f2; border-left:4px solid #dc2626; border-radius:0 6px 6px 0; padding:14px 18px;">
+                  <p style="margin:0; font-size:13px; color:#7f1d1d; line-height:1.6;">Already paid another way, or have questions? Contact us and quote your order number <strong>{order_number}</strong>.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#0f1b30; border-radius:0 0 14px 14px; padding:22px 40px;">
+            <p style="margin:0 0 2px 0; font-size:14px; font-weight:700; color:#f1f5f9;">{website_title}</p>
+            <p style="margin:0; font-size:12px; color:#64748b;">Automated message — please do not reply.</p>
           </td>
         </tr>
       </table>

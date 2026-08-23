@@ -70,6 +70,9 @@ class KreativMailer {
         if (array_key_exists('download_url', $data)) {
             $body = preg_replace("/{download_url}/", $data['download_url'], $body);
         }
+        if (array_key_exists('resume_url', $data)) {
+            $body = preg_replace("/{resume_url}/", $data['resume_url'], $body);
+        }
         // HTML block of one-or-more titled download buttons (tender multi-download).
         // str_replace so the HTML is never treated as a regex backreference.
         if (array_key_exists('download_list', $data)) {

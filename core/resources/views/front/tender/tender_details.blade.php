@@ -1396,6 +1396,11 @@
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="tender_id" value="{{ $tender->id }}">
+                                @if (!empty($resumePurchase))
+                                    {{-- Resuming a failed payment (see resumePurchase()) — reuses
+                                         the same Pending order instead of creating a new one. --}}
+                                    <input type="hidden" name="resume_purchase_id" value="{{ $resumePurchase->id }}">
+                                @endif
                                 {{-- Payable amount: 0 until modules are picked (see toggleModule) --}}
                                 <input type="hidden" name="selected_amount" id="selectedAmount" value="0">
                                 <div id="selectedModuleInputs"></div>
@@ -1429,22 +1434,23 @@
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="first_name" class="form-control"
                                                 placeholder="{{ __('First Name') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->fname : '' }}" required>
+                                                value="{{ $resumePurchase->first_name ?? (Auth::check() ? Auth::user()->fname : '') }}" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="last_name" class="form-control"
                                                 placeholder="{{ __('Last Name') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->lname : '' }}" required>
+                                                value="{{ $resumePurchase->last_name ?? (Auth::check() ? Auth::user()->lname : '') }}" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="email" name="email" class="form-control"
                                                 placeholder="{{ __('Email Address') }} *"
-                                                value="{{ Auth::check() ? Auth::user()->email : '' }}"
+                                                value="{{ $resumePurchase->email ?? (Auth::check() ? Auth::user()->email : '') }}"
                                                 {{ Auth::check() ? 'readonly' : '' }} required>
                                         </div>
                                         @php
-                                            // Pre-select the tender's country when it is on the canonical list.
-$preCountry = collect($countries)->firstWhere('name', $tender->country);
+                                            // Pre-select the resumed order's own country, falling back to
+                                            // the tender's country when it is on the canonical list.
+$preCountry = collect($countries)->firstWhere('name', !empty($resumePurchase) ? $resumePurchase->country : $tender->country);
 $preName = $preCountry['name'] ?? '';
 $preDial = $preCountry['dial'] ?? '';
 $preFlag = $preCountry['flag'] ?? '';
@@ -1477,10 +1483,21 @@ $preFlag = $preCountry['flag'] ?? '';
                                                         <div class="ss-empty">{{ __('No match') }}</div>
                                                     </div>
                                                 </div>
+                                                @php
+                                                    // Stored as one combined E.164 string (dial code + number,
+                                                    // no separator) — strip the dial code back off for the
+                                                    // national-number-only input.
+                                                    $preNationalNumber = '';
+                                                    if (!empty($resumePurchase)) {
+                                                        $preNationalNumber = $preDial && str_starts_with($resumePurchase->phone_number, $preDial)
+                                                            ? substr($resumePurchase->phone_number, strlen($preDial))
+                                                            : $resumePurchase->phone_number;
+                                                    }
+                                                @endphp
                                                 <input type="text" name="phone_number" id="phoneNumber"
                                                     class="phone-input" inputmode="numeric"
                                                     placeholder="{{ __('Phone Number') }} *" maxlength="15" required
-                                                    value="{{ Auth::check() ? Auth::user()->phone : '' }}">
+                                                    value="{{ $preNationalNumber ?: (Auth::check() ? Auth::user()->phone : '') }}">
                                             </div>
                                             <input type="hidden" name="phone_code" id="phoneCodeInput"
                                                 value="{{ $preDial }}">
@@ -1525,15 +1542,18 @@ $preFlag = $preCountry['flag'] ?? '';
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="city" class="form-control"
-                                                placeholder="{{ __('City') }}">
+                                                placeholder="{{ __('City') }}"
+                                                value="{{ $resumePurchase->city ?? '' }}">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="company_name" class="form-control"
-                                                placeholder="{{ __('Company Name') }}">
+                                                placeholder="{{ __('Company Name') }}"
+                                                value="{{ $resumePurchase->company_name ?? '' }}">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <input type="text" name="company_address" class="form-control"
-                                                placeholder="{{ __('Company Address') }}">
+                                                placeholder="{{ __('Company Address') }}"
+                                                value="{{ $resumePurchase->company_address ?? '' }}">
                                         </div>
                                         <style>
                                             /* ── Searchable select (country / dialling code) ── */
@@ -1781,6 +1801,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                                     class="form-control"
                                                     placeholder="{{ __('Company Registration No.') }} *" maxlength="100"
                                                     required pattern="[A-Z0-9]+"
+                                                    value="{{ $resumePurchase->company_registration_no ?? '' }}"
                                                     style="text-transform:uppercase;padding-right:38px;">
                                                 <span class="regno-help" tabindex="0" role="button"
                                                     aria-label="{{ __('What is this?') }}">?
@@ -2663,6 +2684,13 @@ $preFlag = $preCountry['flag'] ?? '';
                 $('.modules-warning').stop(true, true).hide();
             }
         }
+
+        // Resuming a failed payment (see resumePurchase()) — reselect the
+        // same modules the buyer picked before, reusing toggleModule() so the
+        // price total and hidden inputs stay in sync exactly as if clicked.
+        $('.module-badge.paid-badge[data-preselect="1"]').each(function() {
+            toggleModule(this);
+        });
 
         // ── Duplicate-payment guard ───────────────────────────────────────────
         (function() {

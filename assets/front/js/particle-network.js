@@ -24,11 +24,19 @@
 
         var isMobile = window.matchMedia('(max-width: 767px)').matches;
         // Per-instance opt-in: data-particle-density="dense" on the same
-        // element as data-particle-network. Every other instance (hero,
-        // find-my-files, tender purchase-complete) keeps the original count
-        // — only whichever container explicitly asks for "dense" gets more.
+        // element as data-particle-network — a per-pixel density multiplier,
+        // not a flat headcount (see COUNT below). A fixed particle count
+        // regardless of container size looked fine on the full-height hero
+        // it was tuned for, but crammed 500 particles into a short
+        // breadcrumb-height header bar on custom pages, way too dense.
         var dense = container.getAttribute('data-particle-density') === 'dense';
-        var COUNT = dense ? (isMobile ? 160 : 500) : (isMobile ? 42 : 95);
+        // Calibrated from the original hero-only tuning: COUNT=95 over a
+        // roughly 1900x700 hero (~1.33M px^2) => ~1 particle per 14000px^2.
+        // Reused as the baseline "normal" density; dense packs ~2.2x tighter.
+        var AREA_PER_PARTICLE = dense ? 14000 / 2.2 : 14000;
+        var COUNT_MIN = isMobile ? 14 : 20;
+        var COUNT_MAX = isMobile ? 90 : 220;
+        var COUNT = COUNT_MIN;
         var LINK_DIST = dense ? (isMobile ? 130 : 180) : (isMobile ? 120 : 165);
         var REPEL_DIST = isMobile ? 80 : 110;
 
@@ -40,6 +48,11 @@
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             w = container.offsetWidth;
             h = container.offsetHeight;
+            // Recomputed on every resize, not just once at init — a short
+            // custom-page header and a full-height hero using the same
+            // "dense" flag now each get a count proportional to their own
+            // area instead of sharing one hardcoded number.
+            COUNT = Math.max(COUNT_MIN, Math.min(COUNT_MAX, Math.round((w * h) / AREA_PER_PARTICLE)));
         }
 
         function initParticles() {

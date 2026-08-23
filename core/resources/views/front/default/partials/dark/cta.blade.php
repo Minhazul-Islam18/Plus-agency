@@ -8,8 +8,20 @@
     @if (!empty($bs->cta_bg))
         <div style="position: absolute; inset: 0; z-index: 0; pointer-events: none; background-color: #{{ $be->cta_overlay_color ?? '000000' }}; opacity: {{ $be->cta_overlay_opacity ?? '0.6' }};"></div>
     @endif
+    @php
+        // .glass-panel's shared CSS rule hardcodes a fixed rgba(4,16,13,0.6)
+        // background with !important — it never reflected the admin's
+        // cta_overlay_color/opacity at all. Computed here and fed in as a
+        // custom property so the CTA-scoped override below (dark-glass.css)
+        // can actually use it, without touching the shared rule other
+        // glass-panel cards (approach, pricing, testimonials, etc) rely on.
+        $ctaOverlayHex = ltrim($be->cta_overlay_color ?? '000000', '#');
+        $ctaOverlayRgb = sscanf($ctaOverlayHex, '%02x%02x%02x');
+        $ctaOverlayOpacity = $be->cta_overlay_opacity ?? '0.6';
+    @endphp
     <div class="container" style="position: relative; z-index: 2;">
-        <div class="glass-panel dark-cta-content reveal-cta">
+        <div class="glass-panel dark-cta-content reveal-cta"
+            style="--cta-overlay-rgba: rgba({{ $ctaOverlayRgb[0] }}, {{ $ctaOverlayRgb[1] }}, {{ $ctaOverlayRgb[2] }}, {{ $ctaOverlayOpacity }});">
             <span class="dark-cta-grid-texture"></span>
             <span class="dark-cta-mesh"></span>
 

@@ -1830,6 +1830,18 @@ a.proceed-checkout-btn:hover {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
+/* Overrides .glass-panel's fixed rgba(4,16,13,0.6) — that hardcoded tint
+   ignored the admin's cta_overlay_color/opacity entirely. Two classes here
+   beats .glass-panel's single-class specificity, so this wins over its
+   !important without needing to touch the shared rule. */
+.dark-cta-content.glass-panel {
+  background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.02)
+    ),
+    var(--cta-overlay-rgba, rgba(4, 16, 13, 0.6)) !important;
+}
 .dark-cta-grid-texture {
   position: absolute;
   inset: 0;

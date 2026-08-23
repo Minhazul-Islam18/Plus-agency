@@ -19,11 +19,7 @@ trait TenderPaymentHelper
 {
     protected function getLang(): Language
     {
-        if (session()->has('lang')) {
-            return Language::where('code', session()->get('lang'))->first()
-                ?? Language::where('is_default', 1)->first();
-        }
-        return Language::where('is_default', 1)->first();
+        return currentLang();
     }
 
     protected function getVersion(): string

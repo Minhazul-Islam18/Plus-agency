@@ -29,9 +29,9 @@
                  <div class="oops">
                     <img src="{{asset('assets/front/img/oops.png')}}" alt="">
                  </div>
-                 <h2>You're lost...</h2>
-                 <p>The page you are looking for might have been moved, renamed, or might never existed.</p>
-                 <a href="{{route('front.index')}}" class="go-home-btn">Back Home</a>
+                 <h2>{{ __("You're lost...") }}</h2>
+                 <p>{{ __('The page you are looking for might have been moved, renamed, or might never existed.') }}</p>
+                 <a href="{{route('front.index')}}" class="go-home-btn">{{ __('Back Home') }}</a>
               </div>
            </div>
         </div>

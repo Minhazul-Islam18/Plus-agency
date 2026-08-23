@@ -12,18 +12,50 @@ use App\Permalink;
 | detail pages with no purchase/contact form) so their responses carry no
 | session/CSRF Set-Cookie header — required for them to be safely cached
 | at Cloudflare's edge (a cached Set-Cookie would otherwise be replayed
-| identically to every visitor who hits that cache entry). Language is
-| forced to the site default (see ForceDefaultLocale) instead of the
-| normal session/Accept-Language detection, since a cached response can't
-| vary per visitor's browser language. Never apply this to any route with
-| its own form (contact, tender purchase, find-my-files) or to /admin/*.
+| identically to every visitor who hits that cache entry). Never apply
+| this to any route with its own form (contact, tender purchase,
+| find-my-files) or to /admin/*.
+|
+| SetLangMiddleware/ForceDefaultLocale used to need excluding here too
+| (session/cookie-based locale detection), but every front route now gets
+| its locale from the URL itself (see $activeLocales below) — nothing
+| session-based to exclude for that anymore.
 */
 $cfCacheableExcept = [
     \Illuminate\Session\Middleware\StartSession::class,
     \Illuminate\View\Middleware\ShareErrorsFromSession::class,
     \App\Http\Middleware\VerifyCsrfToken::class,
-    \App\Http\Middleware\SetLangMiddleware::class,
 ];
+
+/*
+|--------------------------------------------------------------------------
+| URL-based language routing
+|--------------------------------------------------------------------------
+|
+| Every front-end route lives under /{locale}/... (e.g. /en/tenders,
+| /fr/tenders) instead of a cookie/Accept-Language-detected language on a
+| flat URL — makes each language genuinely crawlable and independently
+| cacheable. $activeLocales feeds the route-level ->where() constraint so
+| an unrecognized locale segment (e.g. /xx/tenders) never matches these
+| groups at all, falling through to the legacy-redirect catch-all (bottom
+| of this file) and then a real 404 — never a crash.
+*/
+$activeLocales = \App\Language::where('status', 1)->pluck('code')->implode('|');
+// Only SetLangMiddleware gets excluded at the OUTER {locale} group level —
+// it must never run on these routes (it would clobber the URL-derived
+// locale with a stale site_lang cookie/Accept-Language guess after
+// SetLocaleFromUrl already set it correctly). $cfCacheableExcept
+// (session/errors/CSRF) is NOT included here: applying it at this outer
+// level would strip session+CSRF from every route in the group, not just
+// the intentionally-cacheable read-only listing pages — it must stay opt-in
+// per-route/per-type (see the explicit ->withoutMiddleware($cfCacheableExcept)
+// calls below on front.index and the cacheable permalink types only).
+// Previously this merged in $cfCacheableExcept too, which silently killed
+// CSRF verification and sessions on every real-form page in these groups
+// (tender_details, sendmail, feedback, find_my_files) — caught via a 500
+// on tender_details ("Undefined variable $errors", ShareErrorsFromSession
+// never ran) during manual verification of this migration.
+$localeExcept = [\App\Http\Middleware\SetLangMiddleware::class];
 
 
 /*
@@ -37,8 +69,23 @@ $cfCacheableExcept = [
 |
 */
 
-Route::fallback(function () {
-    return view('errors.404');
+Route::fallback(function (\Illuminate\Http\Request $request) {
+    // Was returning the 404 VIEW with the default 200 status — a soft 404.
+    // Search engines treat that as a real, valid page instead of "not
+    // found", which is bad for SEO and can even get nonsense URLs indexed.
+
+    // Route::fallback() sits outside every /{locale} group, so
+    // SetLocaleFromUrl never runs here and app()->getLocale() would stay
+    // on the site default regardless of the URL — e.g. /fr/some-bad-path
+    // rendered an English 404 page. Read the first path segment directly
+    // so a bad URL still 404s in its own locale's language.
+    $maybeLocale = $request->segment(1);
+    $lang = \App\Language::where('code', $maybeLocale)->where('status', 1)->first();
+    if ($lang) {
+        app()->setLocale($lang->code);
+    }
+
+    return response()->view('errors.404', [], 404);
 });
 
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth:admin', 'setLfmPath']], function () {
@@ -56,9 +103,17 @@ Route::get('/backup', 'Front\FrontendController@backup');
 Route::post('/push', 'Front\PushController@store')->middleware('throttle:10,1');
 Route::get('/push/track/{log}', 'Front\PushController@track')->name('push.track');
 
-Route::group(['middleware' => 'setlang'], function () use ($cfCacheableExcept) {
+Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware($localeExcept)
+    ->middleware('set-locale-from-url')->group(function () use ($cfCacheableExcept) {
+// No 'setlang' middleware here: SetLocaleFromUrl (applied on the outer
+// {locale} group above) is now authoritative. Adding 'setlang' inside this
+// nested group would run SetLangMiddleware AFTER SetLocaleFromUrl and
+// silently overwrite the URL-derived locale with a stale site_lang cookie
+// or Accept-Language guess — a real regression for any visitor with a
+// leftover cookie from the old cookie-based scheme.
+Route::group([], function () use ($cfCacheableExcept) {
     Route::get('/', 'Front\FrontendController@index')->name('front.index')
-        ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+        ->withoutMiddleware($cfCacheableExcept);
 
     Route::post('/payment/instructions', 'Front\FrontendController@paymentInstruction')->name('front.payment.instructions');
 
@@ -83,6 +138,7 @@ Route::group(['middleware' => 'setlang'], function () use ($cfCacheableExcept) {
     // dark-theme homepage service-categories: server-side "Load more" pagination
     Route::get('/service-categories/load-more', 'Front\FrontendController@loadMoreServiceCategories')->name('front.serviceCategories.loadMore')->middleware('throttle:30,1');
 });
+});
 
 /** Health probe for uptime monitors / load balancers **/
 Route::get('/health', 'HealthController')->name('health')->middleware('throttle:60,1');
@@ -90,6 +146,7 @@ Route::get('/health', 'HealthController')->name('health')->middleware('throttle:
 /** Tender Frontend Routes **/
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit')->middleware('throttle:10,1');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');
+Route::get('/tender/purchase/resume/{token}', 'Front\TenderController@resumePurchase')->name('tender.purchase.resume')->middleware('throttle:20,1');
 Route::post('/tender/paid-modules', 'Front\TenderController@paidModules')->name('tender.paid_modules')->middleware('throttle:30,1');
 Route::get('/tender/module/{module}/download', 'Front\TenderController@downloadFreeModule')->name('tender.module.download.free')->middleware('throttle:30,1');
 
@@ -101,6 +158,12 @@ Route::get('/tender/payment/razorpay/cancel',   'Payment\Tender\RazorpayControll
 Route::post('/tender/payment/moneroo',          'Payment\Tender\MonerooController@redirect')->name('tender.payment.moneroo');
 Route::get('/tender/payment/moneroo/notify',    'Payment\Tender\MonerooController@notify')->name('tender.moneroo.notify');
 Route::get('/tender/payment/moneroo/cancel',    'Payment\Tender\MonerooController@cancel')->name('tender.moneroo.cancel');
+
+// Locale-prefixed: real navigable pages (contact form, find-my-files self
+// service flow). Not Cloudflare-cacheable (real forms/OTP), so no
+// $cfCacheableExcept session exclusion here — just the locale swap.
+Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware([\App\Http\Middleware\SetLangMiddleware::class])
+    ->middleware('set-locale-from-url')->group(function () {
 
 /** Static fallback for dynamic permalink routes needed by FMF views **/
 Route::get('/contact', 'Front\FrontendController@contact')->name('front.contact');
@@ -125,6 +188,8 @@ Route::post('/find-my-files/payment-ref', 'Front\FindMyFilesController@requestBy
 Route::post('/find-my-files/regenerate', 'Front\FindMyFilesController@requestRegenerate')->name('find_my_files.regenerate')->middleware('throttle:5,1');
 Route::post('/find-my-files/regenerate/otp/verify', 'Front\FindMyFilesController@verifyRegenerateOtp')->name('find_my_files.regenerate_otp_verify')->middleware('throttle:6,1');
 Route::post('/find-my-files/regenerate/otp/resend', 'Front\FindMyFilesController@resendRegenerateOtp')->name('find_my_files.regenerate_otp_resend')->middleware('throttle:3,1');
+
+});
 
 
 
@@ -157,6 +222,11 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
 
     // RTL check
     Route::get('/rtlcheck/{langid}', 'Admin\LanguageController@rtlcheck')->name('admin.rtlcheck');
+
+    // Cloudflare cache purge (header button) — lets an admin force-clear the
+    // edge cache for the Cloudflare-cached anonymous pages (see
+    // ForceDefaultLocale / routes above) instead of waiting out the TTL.
+    Route::post('/cloudflare/purge-cache', 'Admin\CloudflareController@purgeCache')->name('admin.cloudflare.purge')->middleware('throttle:5,1');
 
     // Summernote image upload
     Route::post('/summernote/upload', 'Admin\SummernoteController@upload')->name('admin.summernote.upload');
@@ -191,6 +261,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/file-manager', 'Admin\BasicController@fileManager')->name('admin.file-manager');
         Route::post('/file-manager/image-settings', 'Admin\BasicController@updateImageSettings')->name('admin.file-manager.image-settings');
         Route::post('/file-manager/upload-limits', 'Admin\BasicController@updateUploadLimits')->name('admin.file-manager.upload-limits');
+        Route::post('/basicinfo/cloudflare', 'Admin\BasicController@updateCloudflareSettings')->name('admin.basicinfo.cloudflare');
 
         // Admin Logo Routes
         Route::get('/logo', 'Admin\BasicController@logo')->name('admin.logo');
@@ -785,7 +856,10 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
 
 
 // Dynamic Routes
-Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept) {
+Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware($localeExcept)
+    ->middleware('set-locale-from-url')->group(function () use ($cfCacheableExcept) {
+// No 'setlang' here — see the identical note on the first locale group above.
+Route::group([], function () use ($cfCacheableExcept) {
 
     try { $wdPermalinks = Permalink::where('details', 1)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
@@ -794,23 +868,36 @@ Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept)
 
         if ($type == 'service_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@servicedetails')->name('front.servicedetails')
-                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+                ->withoutMiddleware($cfCacheableExcept);
         } elseif ($type == 'portfolio_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@portfoliodetails')->name('front.portfoliodetails')
-                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+                ->withoutMiddleware($cfCacheableExcept);
         } elseif ($type == 'tender_details') {
             // NOT cacheable — this page has the tender purchase form (real
             // payment, real CSRF token needed), see tender_details.blade.php.
             Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'blog_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@blogdetails')->name('front.blogdetails')
-                ->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+                ->withoutMiddleware($cfCacheableExcept);
         }
     }
 });
+});
+
+// Admin login — deliberately registered OUTSIDE the locale-prefixed group
+// below (must stay reachable at bare /admin, not /{locale}/admin). Was
+// previously handled inline inside that loop; extracted here so wrapping
+// the rest of the loop in a locale prefix doesn't drag this along with it.
+try { $adminLoginPermalink = Permalink::where('details', 0)->where('type', 'admin_login')->first(); } catch (\Exception $e) { $adminLoginPermalink = null; }
+if ($adminLoginPermalink) {
+    Route::get(config('app.admin_prefix', 'admin'), 'Admin\LoginController@login')->name('admin.login')->middleware('guest:admin');
+}
 
 // Dynamic Routes
-Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept) {
+Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware($localeExcept)
+    ->middleware('set-locale-from-url')->group(function () use ($cfCacheableExcept) {
+// No 'setlang' here — see the identical note on the first locale group above.
+Route::group([], function () use ($cfCacheableExcept) {
 
     try { $wdPermalinks = Permalink::where('details', 0)->get(); } catch (\Exception $e) { $wdPermalinks = collect(); }
     foreach ($wdPermalinks as $pl) {
@@ -851,15 +938,8 @@ Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept)
             // $action/$routeName the previous loop iteration left behind.
             continue;
         } elseif ($type == 'admin_login') {
-            // Deliberately NOT using the DB-stored $permalink here: the whole
-            // admin panel's URL is governed by config('app.admin_prefix')
-            // (ADMIN_PANEL_PREFIX) as of the configurable-admin-URL feature —
-            // keeping this on the old permalink value would let the login
-            // page stay reachable at the previous, presumably-leaked URL
-            // even after the prefix is rotated.
-            $action = 'Admin\LoginController@login';
-            $routeName = 'admin.login';
-            Route::get(config('app.admin_prefix', 'admin'), "$action")->name("$routeName")->middleware('guest:admin');
+            // Handled above, outside the locale-prefixed group — must stay
+            // reachable at bare /admin, not /{locale}/admin.
             continue;
         }
 
@@ -871,13 +951,38 @@ Route::group(['middleware' => ['setlang']], function () use ($cfCacheableExcept)
 
         $route = Route::get("$permalink", "$action")->name("$routeName");
         if (in_array($type, $cfCacheableTypes)) {
-            $route->withoutMiddleware($cfCacheableExcept)->middleware('force-default-locale');
+            $route->withoutMiddleware($cfCacheableExcept);
         }
     }
 });
+});
 
 
-// Dynamic Page Routes
-Route::group(['middleware' => 'setlang'], function () {
+// Dynamic Page Routes — must stay LAST among locale-prefixed groups (a
+// bare {slug} wildcard would otherwise swallow every more-specific route
+// registered after it).
+Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware([\App\Http\Middleware\SetLangMiddleware::class])
+    ->middleware('set-locale-from-url')->group(function () {
+// No 'setlang' here — see the identical note on the first locale group above.
+Route::group([], function () {
     Route::get('/{slug}', 'Front\FrontendController@dynamicPage')->name('front.dynamicPage');
 });
+});
+
+// Legacy-URL redirect: any request that doesn't match a /{locale}/... route
+// above (old bare URLs like /tenders, /Notre-histoire, or the bare root /)
+// gets a real 301 to the default-locale equivalent — preserves most SEO
+// link equity instead of just breaking every currently-indexed URL.
+// Excludes /admin and /laravel-filemanager so a genuinely bogus admin path
+// still 404s normally instead of getting redirected somewhere confusing.
+Route::any('/{any?}', function ($any = '') {
+    $default = \App\Language::where('is_default', 1)->first();
+    $code = $default->code ?? 'en';
+    return redirect('/' . $code . '/' . ltrim($any, '/'), 301);
+})->where('any', '(?!' . preg_quote(config('app.admin_prefix', 'admin'), '/') . '(/|$)|laravel-filemanager(/|$)|(' . $activeLocales . ')(/|$)).*');
+// The (?:(locale-codes)(/|$)) branch above matters: without it, a bogus URL
+// that already starts with a valid locale but has an invalid sub-path
+// (e.g. /fr/xx/tenders) would match this catch-all too and get redirected
+// to /fr/fr/xx/tenders — an infinite redirect loop. Excluding anything
+// already locale-prefixed lets it fall through to the real Route::fallback
+// 404 instead, which is the correct outcome for a genuinely bad sub-path.

@@ -18,9 +18,11 @@ class SetLangMiddleware
      public function handle($request, Closure $next)
      {
 
-         if (session()->has('lang')) {
-           // User has manually selected a language - respect their choice
-           app()->setLocale(session()->get('lang'));
+         if ($request->hasCookie('site_lang')) {
+           // Cookie, not session — readable on every route regardless of
+           // whether the session middleware ran (see ForceDefaultLocale for
+           // the cacheable routes that skip it entirely).
+           app()->setLocale($request->cookie('site_lang'));
          } else {
            // Auto-detect browser language
            $detectedLang = $this->detectBrowserLanguage($request);

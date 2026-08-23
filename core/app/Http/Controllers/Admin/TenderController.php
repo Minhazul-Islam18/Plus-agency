@@ -426,6 +426,8 @@ class TenderController extends Controller
         $extExpImage = pathinfo($expImage, PATHINFO_EXTENSION);
 
         $rules = [
+            'language_id'         => 'required',
+            'tender_category_id'  => 'required',
             'country'             => 'required',
             'tender_code'         => 'required',
             'title'               => 'required|max:255',
@@ -472,6 +474,8 @@ class TenderController extends Controller
         }
 
         $messages = [
+            'language_id.required'              => 'The language field is required.',
+            'tender_category_id.required'       => 'The category field is required.',
             'submission_deadline.after_or_equal' => 'The submission deadline cannot be a past date.',
         ];
 
@@ -482,6 +486,8 @@ class TenderController extends Controller
             return response()->json($validator->errors());
         }
 
+        $tender->language_id        = $request->language_id;
+        $tender->tender_category_id = $request->tender_category_id;
         $tender->country            = $request->country;
         $tender->tender_code        = $request->tender_code;
         $tender->title              = $request->title;

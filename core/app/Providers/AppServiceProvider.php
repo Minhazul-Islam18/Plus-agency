@@ -68,6 +68,22 @@ class AppServiceProvider extends ServiceProvider
       // table not ready yet (fresh install) — fall back to config/lfm.php defaults
     }
 
+    // Baseline {locale} default for route() calls made outside the
+    // /{locale} route group (admin login/forget/forced-changepass views
+    // reference front.contact; Route::fallback()'s 404 view references
+    // front.index) — those requests never hit SetLocaleFromUrl, which is
+    // the only other place this gets set. SetLocaleFromUrl overrides this
+    // per-request for actual locale-prefixed matches; this is just the
+    // fallback so route() doesn't throw UrlGenerationException elsewhere.
+    try {
+      $defaultLang = Language::where('is_default', 1)->first();
+      if ($defaultLang) {
+        \Illuminate\Support\Facades\URL::defaults(['locale' => $defaultLang->code]);
+      }
+    } catch (\Exception $e) {
+      // table not ready yet (fresh install)
+    }
+
     try {
       // flexible() instead of remember(): every single request reads these,
       // so a plain TTL expiry is a stampede waiting to happen — many

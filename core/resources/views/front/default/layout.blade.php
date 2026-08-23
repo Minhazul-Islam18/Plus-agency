@@ -17,6 +17,29 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $bs->website_title }} @yield('pagename')</title>
+
+    @php
+        // Dynamic Page-model catch-all (front.dynamicPage) has independent,
+        // per-language slugs with no cross-language link in the data — a
+        // /{locale} swap on that route's slug would 404 or land on the
+        // wrong page, so it's excluded from both hreflang and the language
+        // switcher's in-place swap below (falls back to the target
+        // homepage instead). Every other named route is permalink-driven
+        // and shares one slug across languages, safe to swap directly.
+        $__routeName = \Illuminate\Support\Facades\Route::currentRouteName();
+        $__routeParams = request()->route() ? request()->route()->parameters() : [];
+        unset($__routeParams['locale']);
+        $__canSwapLocale = $__routeName && $__routeName !== 'front.dynamicPage' && \Illuminate\Support\Facades\Route::has($__routeName);
+        $langSwitchQuery = '?' . http_build_query(array_merge($__routeParams, ['_route' => $__routeName]));
+    @endphp
+    @if ($__canSwapLocale && !empty($langs) && count($langs) > 1)
+        @foreach ($langs as $hrefLang)
+            <link rel="alternate" hreflang="{{ $hrefLang->code }}" href="{{ route($__routeName, array_merge($__routeParams, ['locale' => $hrefLang->code])) }}">
+        @endforeach
+        <link rel="alternate" hreflang="x-default" href="{{ route($__routeName, array_merge($__routeParams, ['locale' => optional($langs->firstWhere('is_default', 1))->code ?? ($currentLang->code ?? 'en')])) }}">
+    @else
+        <link rel="alternate" hreflang="{{ $currentLang->code ?? 'en' }}" href="{{ url()->current() }}">
+    @endif
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/front/img/' . $bs->favicon) }}" type="image/x-icon">
     {{-- Icon webfonts are only discovered once plugin.min.css finishes parsing,
@@ -147,7 +170,7 @@
                                 <ul class="language-dropdown">
                                     @foreach ($langs as $key => $lang)
                                         <li><a
-                                                href='{{ route('changeLanguage', $lang->code) }}'>{{ convertUtf8($lang->name) }}</a>
+                                                href='{{ route('changeLanguage', $lang->code) . $langSwitchQuery }}'>{{ convertUtf8($lang->name) }}</a>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -189,7 +212,7 @@
                                 <ul class="language-dropdown">
                                     @foreach ($langs as $key => $lang)
                                         <li><a
-                                                href='{{ route('changeLanguage', $lang->code) }}'>{{ convertUtf8($lang->name) }}</a>
+                                                href='{{ route('changeLanguage', $lang->code) . $langSwitchQuery }}'>{{ convertUtf8($lang->name) }}</a>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -382,8 +405,14 @@
             @if (!($bex?->home_page_pagebuilder == 0 && $bs->copyright_section == 0))
                 @if ($be->theme_version == 'dark')
                     @php
+                        // page_type (language-agnostic marker), not slug — a
+                        // page's slug is per-language translated text, so
+                        // matching hardcoded French slugs only ever found the
+                        // French rows and silently produced zero results
+                        // (no links, no error) for every other language.
                         $legalPages = \App\Page::where('language_id', $currentLang->id ?? null)
-                            ->whereIn('slug', ['Politique-de-confidentialité', 'Termes-&-Conditions'])
+                            ->whereIn('page_type', ['privacy', 'terms'])
+                            ->where('status', 1)
                             ->get(['id', 'title', 'slug']);
                     @endphp
                     <div class="copyright-section dark-copyright-section">

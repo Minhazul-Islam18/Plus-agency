@@ -276,6 +276,7 @@
     "Could not send the verification code. Please try again shortly or contact support.": "Impossible d’envoyer le code de vérification. Réessayez sous peu ou contactez le support.",
     "Show more": "Afficher plus",
     "Show less": "Afficher moins",
+    "Loading…": "Chargement…",
     "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "Votre compte a été verrouillé car vous avez dépassé le nombre maximal de tentatives de connexion. Vous pourrez réessayer après :time.",
     "24 hours": "24 heures",
     "404": "404",

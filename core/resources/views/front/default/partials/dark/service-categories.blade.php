@@ -45,7 +45,11 @@
                     data-lang="{{ $currentLang->id ?? '' }}"
                     data-offset="{{ $darkSvcPerPage }}"
                     data-total="{{ $darkSvcTotal }}"
-                    data-url="{{ route('front.serviceCategories.loadMore') }}">
+                    data-url="{{ route('front.serviceCategories.loadMore') }}"
+                    data-text-loading="{{ __('Loading…') }}"
+                    data-text-load-more="{{ __('Load more') }}"
+                    data-text-show-less="{{ __('Show less') }}"
+                    data-text-more-suffix="{{ __('more') }}">
                     <span class="dark-svc-load-more-label">{{ __('Load more') }}</span>
                     <span class="dark-svc-load-more-count">({{ $darkSvcTotal - $darkSvcPerPage }} {{ __('more') }})</span>
                     <span class="dark-svc-load-more-icon">

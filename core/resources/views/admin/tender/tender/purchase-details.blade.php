@@ -131,13 +131,31 @@
                         <hr>
                     @endif
 
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-lg-5"><strong>Payment Status:</strong></div>
                         <div class="col-lg-7">
                             @if (strtolower($purchase->payment_status) == 'completed')
-                                <span class="badge badge-success">Completed</span>
+                                <span class="badge badge-success mr-2">Completed</span>
+                                @if (!empty($purchase->admin_proof))
+                                    <a href="#" data-toggle="modal"
+                                        data-target="#proofModal{{ $purchase->id }}"
+                                        style="font-size: 12px;">View Proof</a>
+                                @endif
+                                <form action="{{ route('admin.tender.purchasePaymentStatus') }}"
+                                    method="POST" class="d-inline-block ml-2">
+                                    @csrf
+                                    <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
+                                    <input type="hidden" name="payment_status" value="Pending">
+                                    <button type="submit" class="btn btn-link btn-sm p-0" style="font-size: 12px;">
+                                        Revert to Pending
+                                    </button>
+                                </form>
                             @else
-                                <span class="badge badge-warning">Pending</span>
+                                <span class="badge badge-warning mr-2">Pending</span>
+                                <button type="button" class="btn btn-success btn-sm"
+                                    data-open-target="#markPaidModal{{ $purchase->id }}">
+                                    <i class="fas fa-check mr-1"></i> Mark as Paid
+                                </button>
                             @endif
                         </div>
                     </div>

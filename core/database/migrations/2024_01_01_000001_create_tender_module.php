@@ -146,7 +146,19 @@ return new class extends Migration
                 $table->string('payment_reference', 100)->nullable();
                 $table->string('invoice')->nullable();
 
+                // Set when an admin manually marks a Pending order Completed
+                // (e.g. a failed/abandoned online payment paid outside the
+                // automated flow) — mandatory proof upload, distinct from the
+                // buyer's own offline-checkout receipt above.
+                $table->string('admin_proof')->nullable();
+
                 $table->timestamps();
+            });
+        }
+
+        if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'admin_proof')) {
+            Schema::table('tender_purchases', function (Blueprint $table) {
+                $table->string('admin_proof')->nullable()->after('invoice');
             });
         }
 

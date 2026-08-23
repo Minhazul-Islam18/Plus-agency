@@ -108,30 +108,10 @@
                                                     </td>
                                                     <td style="width: 140px; word-break: break-word;">{{ $purchase->first_name }} {{ $purchase->last_name }}</td>
                                                     <td style="width: 130px;">
-                                                        @if ($purchase->gateway_type == 'offline')
-                                                            <form
-                                                                action="{{ route('admin.tender.purchasePaymentStatus') }}"
-                                                                id="paymentStatusForm{{ $purchase->id }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="purchase_id"
-                                                                    value="{{ $purchase->id }}">
-                                                                <select
-                                                                    class="{{ strtolower($purchase->payment_status) == 'completed' ? 'bg-success' : 'bg-danger' }} form-control-sm text-white border-0"
-                                                                    name="payment_status"
-                                                                    onchange="document.getElementById('paymentStatusForm{{ $purchase->id }}').submit();">
-                                                                    <option value="Completed"
-                                                                        {{ strtolower($purchase->payment_status) == 'completed' ? 'selected' : '' }}>
-                                                                        Completed</option>
-                                                                    <option value="Pending"
-                                                                        {{ strtolower($purchase->payment_status) == 'pending' ? 'selected' : '' }}>
-                                                                        Pending</option>
-                                                                </select>
-                                                            </form>
+                                                        @if (strtolower($purchase->payment_status) == 'completed')
+                                                            <span class="badge badge-success">Completed</span>
                                                         @else
-                                                            <span
-                                                                class="{{ strtolower($purchase->payment_status) == 'completed' ? 'badge badge-success' : 'badge badge-danger' }}">
-                                                                {{ strtolower($purchase->payment_status) == 'completed' ? 'Completed' : 'Pending' }}
-                                                            </span>
+                                                            <span class="badge badge-danger">Pending</span>
                                                         @endif
                                                     </td>
                                                     <td style="width: 90px;">
@@ -231,6 +211,8 @@
 
                                                 @includeIf('admin.tender.tender.receipt')
                                                 @includeIf('admin.tender.tender.purchase-details')
+                                                @includeIf('admin.tender.tender.markpaid-modal')
+                                                @includeIf('admin.tender.tender.proof-modal')
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -262,6 +244,36 @@
         }
     </style>
     <script>
+        // "Mark as Paid" / "Revert to Pending" now live inside the Details
+        // modal (data-open-target on the trigger button). Bootstrap 4 can't
+        // stack two modals cleanly (backdrop conflicts), so hide the current
+        // one first and only show the target after it's fully hidden.
+        //
+        // jQuery isn't guaranteed to be defined yet at this point on every
+        // admin page (load-order varies) — bind immediately if it's already
+        // there, otherwise wait for window 'load' (fires only after every
+        // <script src> including jQuery has finished) instead of throwing.
+        (function() {
+            function bindMarkPaid($) {
+                $(document).on('click', '[data-open-target]', function(e) {
+                    e.preventDefault();
+                    var $current = $(this).closest('.modal');
+                    var target = $(this).data('open-target');
+                    $current.one('hidden.bs.modal', function() {
+                        $(target).modal('show');
+                    });
+                    $current.modal('hide');
+                });
+            }
+            if (window.jQuery) {
+                bindMarkPaid(window.jQuery);
+            } else {
+                window.addEventListener('load', function() {
+                    if (window.jQuery) bindMarkPaid(window.jQuery);
+                });
+            }
+        })();
+
         document.addEventListener('click', function(e) {
             var toggle = e.target.closest('.tender-title-toggle');
             if (!toggle) return;

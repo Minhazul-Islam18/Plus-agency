@@ -635,6 +635,24 @@ class TenderController extends Controller
     {
         $purchase        = TenderPurchase::findOrFail($request->purchase_id);
         $previousStatus  = $purchase->payment_status;
+
+        // Manually completing a Pending order (offline receipt or an
+        // abandoned/failed online payment) requires proof — the buyer's own
+        // uploaded receipt only covers the offline-checkout path, not a
+        // gateway payment an admin is confirming happened outside the app.
+        if ($request->payment_status === 'Completed' && $previousStatus !== 'Completed') {
+            $request->validate([
+                'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            ], [
+                'proof.required' => 'A payment proof (image or file) is required to mark this order as paid.',
+            ]);
+
+            $file     = $request->file('proof');
+            $filename = uniqid('proof_') . '.' . ($file->extension() ?: 'dat');
+            $file->move('assets/front/tender_proofs', $filename);
+            $purchase->admin_proof = $filename;
+        }
+
         $purchase->payment_status = $request->payment_status;
         // Match the gateway path (TenderPaymentHelper::completePurchase) — stamp
         // paid_at the first time this order is marked Completed, so it's not

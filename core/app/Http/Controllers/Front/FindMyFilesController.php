@@ -777,6 +777,16 @@ class FindMyFilesController extends Controller
             return $this->suspendedDownloadError($currentLang, $purchase);
         }
 
+        // ── Payment-status check — the token's own validity only proves it was
+        // issued correctly, not that the order is STILL paid right now. An
+        // admin can reverse a manual validation after a link was already
+        // emailed; that revokes active tokens immediately, but this check
+        // is what actually stops a not-yet-revoked or re-validated-elsewhere
+        // token from still working. ──────────────────────────────────────────
+        if ($purchase && $purchase->payment_status !== 'Completed') {
+            return $this->notCompletedDownloadError($currentLang, $purchase);
+        }
+
         // ── Binding check — link is locked to the browser+device+IP that verified ─
         if ($this->bindingFails($token, $request)) {
             AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
@@ -852,6 +862,26 @@ class FindMyFilesController extends Controller
         ]);
     }
 
+    /**
+     * Order is no longer Completed (e.g. an admin reversed a manual
+     * validation) — revoke any lingering tokens and refuse the download,
+     * even though the token itself is still technically "valid".
+     */
+    private function notCompletedDownloadError($currentLang, ?TenderPurchase $purchase)
+    {
+        if ($purchase) {
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+        }
+
+        return $this->downloadError($currentLang, [
+            'suspended' => true,
+            'title'     => __('This order is no longer marked as paid.'),
+            'message'   => __('This order is no longer marked as paid, so this download link is no longer valid. Please contact ICA support if you believe this is a mistake.'),
+        ]);
+    }
+
     // ── Step 8 — Stream ZIP of all modules ────────────────────────────────────
 
     public function downloadStream(Request $request)
@@ -895,6 +925,17 @@ class FindMyFilesController extends Controller
 
         // Suspended transaction → kill its tokens and refuse the file outright.
         if ($purchase->isSuspended()) {
+            SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
+            abort(403);
+        }
+
+        // Order no longer Completed (e.g. a manual validation was reversed
+        // after this token was issued) — same live check as download(), but
+        // this is the endpoint that actually serves the file, so it's the
+        // one that matters if that first check were ever bypassed.
+        if ($purchase->payment_status !== 'Completed') {
             SecureToken::where('order_id', $purchase->order_number)
                 ->where('status', 'active')
                 ->update(['status' => 'revoked']);

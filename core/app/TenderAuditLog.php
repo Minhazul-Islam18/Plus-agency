@@ -35,7 +35,10 @@ class TenderAuditLog extends Model
 
             static::create([
                 'admin_id'           => $admin->id ?? null,
-                'admin_name'         => $admin->name ?? null,
+                // admins table has first_name/last_name, no `name` column/accessor —
+                // $admin->name silently returned null (Eloquent doesn't error on
+                // unknown attributes), so every audit entry recorded a blank name.
+                'admin_name'         => $admin ? trim($admin->first_name . ' ' . $admin->last_name) : null,
                 'action'             => $action,
                 'tender_purchase_id' => $purchase?->id,
                 'order_number'       => $purchase?->order_number,

@@ -16,6 +16,7 @@ use App\OfflineGateway;
 use App\PaymentGateway;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -657,44 +658,126 @@ class TenderController extends Controller
     {
         $purchase        = TenderPurchase::findOrFail($request->purchase_id);
         $previousStatus  = $purchase->payment_status;
+        $completing      = $request->payment_status === 'Completed' && $previousStatus !== 'Completed';
+        $reversing       = $request->payment_status !== 'Completed' && $previousStatus === 'Completed';
 
         // Manually completing a Pending order (offline receipt or an
         // abandoned/failed online payment) requires proof — the buyer's own
         // uploaded receipt only covers the offline-checkout path, not a
         // gateway payment an admin is confirming happened outside the app.
-        if ($request->payment_status === 'Completed' && $previousStatus !== 'Completed') {
+        // Every completion reaching this endpoint (as opposed to
+        // TenderPaymentHelper::completePurchase(), the real gateway-callback
+        // path) is by definition an admin manual validation — recorded below
+        // so the receipt can say so instead of showing a stale gateway name.
+        if ($completing) {
+            // Proof now comes from LFM (a URL to an already-uploaded file),
+            // not a raw multipart upload — same "copy from LFM's URL into our
+            // own storage" pattern as the invoice branding images on
+            // admin/tender/settings.
             $request->validate([
-                'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'proof' => 'required|string',
             ], [
                 'proof.required' => 'A payment proof (image or file) is required to mark this order as paid.',
             ]);
 
-            $file     = $request->file('proof');
-            $filename = uniqid('proof_') . '.' . ($file->extension() ?: 'dat');
-            $file->move('assets/front/tender_proofs', $filename);
+            $url      = $request->input('proof');
+            $ext      = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+            $filename = uniqid('proof_') . '.' . ($ext ?: 'dat');
+            $dir      = 'assets/front/tender_proofs/';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            @copy($url, $dir . $filename);
             $purchase->admin_proof = $filename;
+
+            $admin = Auth::guard('admin')->user();
+            $purchase->validated_by_admin_id   = $admin->id ?? null;
+            // admins table has first_name/last_name, no `name` column/accessor.
+            $purchase->validated_by_admin_name = $admin ? trim($admin->first_name . ' ' . $admin->last_name) : null;
+        }
+
+        // Reversing a manual validation (Completed → anything else) revokes
+        // download access immediately rather than waiting for the next
+        // download attempt to notice — an already-open tab or a cached
+        // direct link should stop working the moment this happens, not just
+        // future ones. The download routes also re-check payment_status
+        // live (defense in depth), but this makes existing tokens dead on
+        // arrival instead of merely dormant.
+        $revokedTokens = 0;
+        if ($reversing) {
+            $purchase->validated_by_admin_id   = null;
+            $purchase->validated_by_admin_name = null;
+
+            $revokedTokens = SecureToken::where('order_id', $purchase->order_number)
+                ->where('status', 'active')
+                ->update(['status' => 'revoked']);
         }
 
         $purchase->payment_status = $request->payment_status;
         // Match the gateway path (TenderPaymentHelper::completePurchase) — stamp
         // paid_at the first time this order is marked Completed, so it's not
         // left null for manually-approved (e.g. offline) payments.
-        if ($request->payment_status === 'Completed' && empty($purchase->paid_at)) {
+        if ($completing && empty($purchase->paid_at)) {
             $purchase->paid_at = now();
         }
         $purchase->save();
 
         \App\TenderAuditLog::record('payment_status_changed', $purchase,
             "Payment status {$previousStatus} → {$purchase->payment_status}",
-            ['from' => $previousStatus, 'to' => $purchase->payment_status]);
+            ['from' => $previousStatus, 'to' => $purchase->payment_status, 'tokens_revoked' => $revokedTokens]);
 
-        // Send secure download link email when payment is first approved
-        if ($request->payment_status === 'Completed' && $previousStatus !== 'Completed') {
+        if ($completing) {
             $this->sendPurchaseApprovedEmail($purchase);
+        }
+
+        if ($reversing) {
+            $this->sendPaymentReversedEmail($purchase);
         }
 
         Session::flash('success', 'Payment status changed successfully!');
         return back();
+    }
+
+    /**
+     * Emailed when an admin reverses a manual "Mark as Paid" validation.
+     * Issues a fresh resume token (same mechanism as
+     * TenderPaymentHelper::handleFailedPayment) so the buyer can pay again
+     * through any available gateway without re-entering their details.
+     */
+    private function sendPaymentReversedEmail(TenderPurchase $purchase): void
+    {
+        try {
+            $rawToken = hash_hmac('sha256', implode('|', [
+                $purchase->id,
+                $purchase->order_number,
+                now()->timestamp,
+                Str::random(16),
+            ]), config('app.key'));
+
+            $purchase->resume_token_hash = hash('sha256', $rawToken);
+            $purchase->resume_token_issued_at = now();
+            $purchase->save();
+
+            $language = $purchase->tender->language ?? Language::where('is_default', 1)->first();
+            $bs       = $language->basic_setting;
+
+            (new KreativMailer)->mailFromAdmin([
+                'toMail'        => $purchase->email,
+                'toName'        => $purchase->first_name,
+                'customer_name' => $purchase->first_name,
+                'tender_name'   => $purchase->tender->title ?? 'Tender Document',
+                'order_number'  => $purchase->order_number,
+                'resume_url'    => route('tender.purchase.resume', ['token' => $rawToken]),
+                'website_title' => $bs->website_title,
+                'templateType'  => 'tender_payment_reversed',
+                'type'          => 'tenderPaymentReversed',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[Tender] Payment-reversed email failed', [
+                'order' => $purchase->order_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function purchaseUpdateReference(Request $request)

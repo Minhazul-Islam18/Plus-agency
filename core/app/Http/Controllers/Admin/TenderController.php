@@ -976,6 +976,8 @@ class TenderController extends Controller
             'tender_regen_cap_otp'              => 'nullable|in:0,1',
             'tender_regen_cap_payref'           => 'nullable|in:0,1',
             'tender_regen_cap_regenerate'       => 'nullable|in:0,1',
+            'tender_payment_session_timeout_minutes' => 'nullable|integer|min:1|max:1440',
+            'tender_payment_link_expiry_hours'       => 'nullable|integer|min:1|max:720',
         ], [
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
         ]);
@@ -1038,6 +1040,15 @@ class TenderController extends Controller
             $bex->tender_regen_cap_otp          = $request->input('tender_regen_cap_otp', 1);
             $bex->tender_regen_cap_payref       = $request->input('tender_regen_cap_payref', 1);
             $bex->tender_regen_cap_regenerate   = $request->input('tender_regen_cap_regenerate', 1);
+
+            // Abandoned-payment sweep (global) — see NotifyIncompleteTenderPayments.
+            $bex->tender_payment_session_timeout_minutes = $request->filled('tender_payment_session_timeout_minutes')
+                ? (int) $request->tender_payment_session_timeout_minutes
+                : 5;
+            // Resume-link lifetime (global) — see TenderController::resumePurchase().
+            $bex->tender_payment_link_expiry_hours = $request->filled('tender_payment_link_expiry_hours')
+                ? (int) $request->tender_payment_link_expiry_hours
+                : 24;
 
             $bex->save();
         }

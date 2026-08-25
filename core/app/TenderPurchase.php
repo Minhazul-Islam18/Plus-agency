@@ -33,6 +33,9 @@ class TenderPurchase extends Model
         'invoice',
         'admin_proof',
         'resume_token_hash',
+        'resume_token_issued_at',
+        'validated_by_admin_id',
+        'validated_by_admin_name',
         'payment_reference',
         'access_status',
         'suspend_reason',
@@ -40,8 +43,9 @@ class TenderPurchase extends Model
     ];
 
     protected $casts = [
-        'paid_at'      => 'datetime',
-        'suspended_at' => 'datetime',
+        'paid_at'                 => 'datetime',
+        'suspended_at'            => 'datetime',
+        'resume_token_issued_at'  => 'datetime',
     ];
 
     public function tender()

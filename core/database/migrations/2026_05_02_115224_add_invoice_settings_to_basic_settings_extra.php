@@ -50,6 +50,22 @@ return new class extends Migration
             if (!Schema::hasColumn('basic_settings_extra', 'tender_regen_cap_regenerate')) {
                 $table->tinyInteger('tender_regen_cap_regenerate')->default(1)->after('tender_regen_cap_payref');
             }
+
+            // How long a Pending online order sits untouched before
+            // NotifyIncompleteTenderPayments treats it as abandoned and
+            // sends the resume-payment email. Editable at admin/tender/settings.
+            if (!Schema::hasColumn('basic_settings_extra', 'tender_payment_session_timeout_minutes')) {
+                $table->unsignedInteger('tender_payment_session_timeout_minutes')->default(5)->after('tender_regen_cap_regenerate');
+            }
+
+            // How long a resume-payment link (the "Complete Your Payment" /
+            // "Resume Payment" email button) stays valid after being issued,
+            // checked in TenderController::resumePurchase() against
+            // tender_purchases.resume_token_issued_at. Editable at
+            // admin/tender/settings.
+            if (!Schema::hasColumn('basic_settings_extra', 'tender_payment_link_expiry_hours')) {
+                $table->unsignedInteger('tender_payment_link_expiry_hours')->default(24)->after('tender_payment_session_timeout_minutes');
+            }
         });
     }
 
@@ -60,7 +76,8 @@ return new class extends Migration
                 'invoice_sign', 'invoice_watermark', 'invoice_footer_wavy', 'invoice_footer_address',
                 'tender_max_downloads', 'tender_max_regen_per_day', 'tender_regen_cap_enabled',
                 'tender_regen_cap_order_number', 'tender_regen_cap_otp', 'tender_regen_cap_payref',
-                'tender_regen_cap_regenerate',
+                'tender_regen_cap_regenerate', 'tender_payment_session_timeout_minutes',
+                'tender_payment_link_expiry_hours',
             ]);
         });
     }

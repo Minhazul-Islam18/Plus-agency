@@ -161,6 +161,23 @@ return new class extends Migration
                 // which is what "locks" the link after payment.
                 $table->string('resume_token_hash')->nullable()->index();
 
+                // When the current resume_token_hash was (re)issued — checked
+                // in resumePurchase() against the admin-configurable
+                // tender_payment_link_expiry_hours setting so an old emailed
+                // link stops working after that window, independent of
+                // whether the order itself is still Pending.
+                $table->timestamp('resume_token_issued_at')->nullable();
+
+                // Who manually validated this order from the admin panel (Mark
+                // as Paid), and their name at the time — denormalized rather
+                // than joined from tender_audit_logs so the receipt PDF can
+                // render it directly, and stays accurate even if the admin
+                // account is later renamed or removed. NULL for orders paid
+                // through a real gateway. Cleared when the validation is
+                // reversed (see purchasePaymentStatus()'s Pending-revert path).
+                $table->unsignedBigInteger('validated_by_admin_id')->nullable();
+                $table->string('validated_by_admin_name')->nullable();
+
                 $table->timestamps();
             });
         }
@@ -168,6 +185,19 @@ return new class extends Migration
         if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'admin_proof')) {
             Schema::table('tender_purchases', function (Blueprint $table) {
                 $table->string('admin_proof')->nullable()->after('invoice');
+            });
+        }
+
+        if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'resume_token_issued_at')) {
+            Schema::table('tender_purchases', function (Blueprint $table) {
+                $table->timestamp('resume_token_issued_at')->nullable()->after('resume_token_hash');
+            });
+        }
+
+        if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'validated_by_admin_id')) {
+            Schema::table('tender_purchases', function (Blueprint $table) {
+                $table->unsignedBigInteger('validated_by_admin_id')->nullable()->after('resume_token_hash');
+                $table->string('validated_by_admin_name')->nullable()->after('validated_by_admin_id');
             });
         }
 

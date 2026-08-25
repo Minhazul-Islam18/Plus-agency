@@ -590,6 +590,37 @@
               </div>
 
               <hr>
+              <h6 class="font-weight-bold mb-3 mt-2">Abandoned Payment Recovery</h6>
+              <p class="text-muted mb-3" style="font-size:12px;">
+                Controls the "Complete Your Payment" email sent to a buyer whose online payment
+                never finished and was never explicitly reported as failed by the gateway
+                (closed the tab, gave up on an OTP prompt, network drop, browser crash). Global
+                (all languages).
+              </p>
+
+              {{-- Payment session timeout --}}
+              <div class="form-group">
+                <label>Payment Session Timeout (minutes)</label>
+                <input type="number" class="form-control ltr" name="tender_payment_session_timeout_minutes"
+                  value="{{ $abex->tender_payment_session_timeout_minutes ?? 5 }}" step="1" min="1" max="1440">
+                <small class="text-muted d-block mt-1">
+                  Default 5. How long an online order sits Pending with no gateway response
+                  before it's treated as abandoned and the recovery email is sent.
+                </small>
+              </div>
+
+              {{-- Payment link expiry --}}
+              <div class="form-group">
+                <label>Payment Link Expiration (hours)</label>
+                <input type="number" class="form-control ltr" name="tender_payment_link_expiry_hours"
+                  value="{{ $abex->tender_payment_link_expiry_hours ?? 24 }}" step="1" min="1" max="720">
+                <small class="text-muted d-block mt-1">
+                  Default 24. How long the "Complete Your Payment" / "Resume Payment" link stays
+                  valid after being emailed, before it stops working.
+                </small>
+              </div>
+
+              <hr>
               <h6 class="font-weight-bold mb-3 mt-2">Recovery Request Cap</h6>
               <p class="text-muted mb-3" style="font-size:12px;">
                 How many times a single order's link may be (re)issued per 24 hours across the
@@ -872,6 +903,8 @@ $(document).ready(function() {
         tender_pdf_encrypt_enabled: '#tab-encryption',
         tender_pdf_password: '#tab-encryption',
         tender_max_downloads: '#tab-links',
+        tender_payment_session_timeout_minutes: '#tab-links',
+        tender_payment_link_expiry_hours: '#tab-links',
         tender_breadcrumb_overlay_color: '#tab-breadcrumb',
         tender_breadcrumb_overlay_opacity: '#tab-breadcrumb',
     };

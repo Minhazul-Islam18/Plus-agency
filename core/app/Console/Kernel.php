@@ -58,6 +58,19 @@ class Kernel extends ConsoleKernel
             ->name('queue-worker')
             ->everyMinute()
             ->withoutOverlapping();
+
+        // Catches abandoned online payments the gateway never reports back
+        // to us at all (closed tab, gave up on OTP, network drop) — see
+        // NotifyIncompleteTenderPayments for why this exists alongside the
+        // real-time gateway-triggered failure emails. Same proc_open
+        // restriction as the queue worker above — Artisan::call(), not
+        // ->command().
+        $schedule->call(function () {
+            Artisan::call('tender:notify-incomplete-payments');
+        })
+            ->name('notify-incomplete-tender-payments')
+            ->everyTenMinutes()
+            ->withoutOverlapping();
     }
 
     /**

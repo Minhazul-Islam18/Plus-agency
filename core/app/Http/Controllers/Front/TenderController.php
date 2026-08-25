@@ -272,6 +272,15 @@ class TenderController extends Controller
             return redirect()->route('tenders')->with('success', __('This order has already been paid. Check your email for the download link.'));
         }
 
+        // Admin-configurable link lifetime (Settings → tender_payment_link_expiry_hours).
+        // Every resume link this order has ever had shares one resume_token_hash
+        // column, so an expired link and an unknown one look identical from
+        // here — same message either way, nothing to distinguish for the buyer.
+        $expiryHours = (int) (optional(BasicExtra::first())->tender_payment_link_expiry_hours ?: 24);
+        if ($purchase->resume_token_issued_at && $purchase->resume_token_issued_at->addHours($expiryHours)->isPast()) {
+            return redirect()->route('tenders')->with('error', __('This payment link is invalid or has expired.'));
+        }
+
         $tender = Tender::where('id', $purchase->tender_id)->where('status', 1)->first();
         if (!$tender) {
             return redirect()->route('tenders')->with('error', __('This tender is no longer available.'));

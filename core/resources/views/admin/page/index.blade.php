@@ -109,7 +109,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                 </span>
                                 Edit
                             </a>
-                            <a class="btn btn-info btn-sm" href="{{route('front.dynamicPage', $apage->slug)}}" target="_blank">
+                            <a class="btn btn-info btn-sm" href="{{route('front.dynamicPage', ['slug' => $apage->slug, 'locale' => $apage->language->code ?? config('app.locale')])}}" target="_blank">
                                 <span class="btn-label">
                                 <i class="fas fa-external-link-alt"></i>
                                 </span>

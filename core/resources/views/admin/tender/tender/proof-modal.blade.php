@@ -10,11 +10,18 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    @php $proofExt = strtolower(pathinfo($purchase->admin_proof, PATHINFO_EXTENSION)); @endphp
-                    @if ($proofExt === 'pdf')
-                        <a href="{{ asset('assets/front/tender_proofs/' . $purchase->admin_proof) }}" target="_blank" class="btn btn-outline-primary">Open PDF</a>
-                    @else
+                    @php
+                        $proofExt = strtolower(pathinfo($purchase->admin_proof, PATHINFO_EXTENSION));
+                        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'];
+                    @endphp
+                    @if (in_array($proofExt, $imageExts, true))
                         <img style="width: 100%;" src="{{ asset('assets/front/tender_proofs/' . $purchase->admin_proof) }}" alt="Payment Proof">
+                    @else
+                        {{-- PDF, Word, Excel, or any other document type — no
+                             inline preview, just a direct link to open/download it. --}}
+                        <a href="{{ asset('assets/front/tender_proofs/' . $purchase->admin_proof) }}" target="_blank" class="btn btn-outline-primary">
+                            Open {{ strtoupper($proofExt) ?: 'File' }}
+                        </a>
                     @endif
                 </div>
                 <div class="modal-footer">

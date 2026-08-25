@@ -172,7 +172,7 @@
                             @else
                                 <span class="badge badge-warning mr-2">Pending</span>
                                 <button type="button" class="btn btn-success btn-sm"
-                                    data-open-target="#markPaidModal{{ $purchase->id }}">
+                                    data-toggle="modal" data-target="#markPaidModal{{ $purchase->id }}">
                                     <i class="fas fa-check mr-1"></i> Mark as Paid
                                 </button>
                             @endif

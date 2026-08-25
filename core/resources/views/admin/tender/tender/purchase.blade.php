@@ -244,32 +244,55 @@
         }
     </style>
     <script>
-        // "Mark as Paid" / "Revert to Pending" now live inside the Details
-        // modal (data-open-target on the trigger button). Bootstrap 4 can't
-        // stack two modals cleanly (backdrop conflicts), so hide the current
-        // one first and only show the target after it's fully hidden.
+        // Details → Mark as Paid → LFM is 3 levels of nested modal on this
+        // page (the tender edit form's own LFM modal never has this problem —
+        // it opens directly from a full page, only 1 level deep). Bootstrap 4
+        // has no built-in support for more than one open modal at a time: by
+        // default a second .modal('show') call steals the single shared
+        // backdrop, so the first modal visually vanishes even though it's
+        // still "open" in the DOM. This raises each nested modal's own
+        // z-index (and its own backdrop's, right below it) so they stack
+        // properly instead — closing the top one reveals the one underneath,
+        // same as the browser's own window stacking, no custom hide/show
+        // relay needed between them.
         //
         // jQuery isn't guaranteed to be defined yet at this point on every
         // admin page (load-order varies) — bind immediately if it's already
         // there, otherwise wait for window 'load' (fires only after every
         // <script src> including jQuery has finished) instead of throwing.
         (function() {
-            function bindMarkPaid($) {
-                $(document).on('click', '[data-open-target]', function(e) {
-                    e.preventDefault();
-                    var $current = $(this).closest('.modal');
-                    var target = $(this).data('open-target');
-                    $current.one('hidden.bs.modal', function() {
-                        $(target).modal('show');
+            function bindModalStacking($) {
+                $(document).on('show.bs.modal', '.modal', function() {
+                    var zIndex = 1050 + (10 * $('.modal.show').length);
+                    $(this).css('z-index', zIndex);
+                    setTimeout(function() {
+                        $('.modal-backdrop').not('.modal-stacked').css('z-index', zIndex - 1).addClass('modal-stacked');
                     });
-                    $current.modal('hide');
+                });
+            }
+            function bindProofFilenameLabel($) {
+                // LFM writes the picked file straight into #fileInput{serial}
+                // itself (see markpaid-modal.blade.php) — no callback fires,
+                // so the only reliable moment to react is when its own modal
+                // finishes closing (file picked, or cancelled via the X).
+                $(document).on('hidden.bs.modal', '[id^="lfmModal"]', function() {
+                    var serial = this.id.replace('lfmModal', '');
+                    var url = $('#fileInput' + serial).val();
+                    var $label = $('#proofFileName' + serial);
+                    if (!url || !$label.length) return;
+                    var name = decodeURIComponent(url.split('/').pop().split('?')[0]);
+                    $label.html('<span class="text-success"><i class="fas fa-check-circle mr-1"></i>' + name + '</span>');
                 });
             }
             if (window.jQuery) {
-                bindMarkPaid(window.jQuery);
+                bindModalStacking(window.jQuery);
+                bindProofFilenameLabel(window.jQuery);
             } else {
                 window.addEventListener('load', function() {
-                    if (window.jQuery) bindMarkPaid(window.jQuery);
+                    if (window.jQuery) {
+                        bindModalStacking(window.jQuery);
+                        bindProofFilenameLabel(window.jQuery);
+                    }
                 });
             }
         })();

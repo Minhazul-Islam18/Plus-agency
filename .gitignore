@@ -47,10 +47,20 @@
 *.swp
 *.swo
 *~
+# Merge/checkout backup artifacts (e.g. file.jpg~<sha>, file.jpg~HEAD) —
+# *~ above only matches a trailing tilde, not these suffixed ones.
+*~*
 
 # Ignore OS files
 .DS_Store
 Thumbs.db
+
+# Debugbar (dev-only, published config + runtime cache — not custom config)
+/core/config/debugbar.php
+/core/storage/debugbar/
+
+# HTMLPurifier generated cache (version-hash filenames, never hand-authored)
+/core/storage/app/purifier/
 
 # SetaPDF Stamper (licensed, not redistributable)
 core/setapdf/

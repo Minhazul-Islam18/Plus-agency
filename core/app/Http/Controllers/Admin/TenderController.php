@@ -394,6 +394,11 @@ class TenderController extends Controller
         $tender->expert_email      = $request->expert_email;
         $tender->save();
 
+        // A new tender doesn't change any cached front-end page's content by
+        // itself (nothing links to it yet), but the listing pages' cached
+        // HTML doesn't know it exists either — purge so it appears immediately.
+        CloudflareController::purge();
+
         Session::flash('success', 'Tender Added Successfully');
 
         return 'success';
@@ -538,6 +543,12 @@ class TenderController extends Controller
         $tender->expert_email      = $request->expert_email;
         $tender->save();
 
+        // Front-end listing + detail pages are cached at Cloudflare's edge —
+        // without this, an edit (including a language change moving the
+        // tender to a different locale's list) wouldn't show up until the
+        // Cache Rule's TTL naturally expired.
+        CloudflareController::purge();
+
         Session::flash('success', 'Tender Updated Successfully');
 
         return 'success';
@@ -555,6 +566,11 @@ class TenderController extends Controller
         }
 
         $tender->delete();
+
+        // The front-end listing page is cached at Cloudflare's edge — without
+        // this, a deleted tender keeps appearing there (with its detail page
+        // now 404ing) until the Cache Rule's TTL naturally expires.
+        CloudflareController::purge();
 
         Session::flash('success', 'Tender Deleted Successfully');
 
@@ -575,6 +591,8 @@ class TenderController extends Controller
 
             $tender->delete();
         }
+
+        CloudflareController::purge();
 
         Session::flash('success', 'Tenders Deleted Successfully');
 
@@ -601,6 +619,10 @@ class TenderController extends Controller
         $tender = Tender::findOrFail($request->id);
         $tender->status = $request->status;
         $tender->save();
+
+        // Toggling status changes whether it should appear in the cached
+        // front-end listing at all.
+        CloudflareController::purge();
 
         return response()->json(['success' => true]);
     }

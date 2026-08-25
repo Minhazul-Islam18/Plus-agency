@@ -21,15 +21,30 @@ class CloudflareController extends Controller
      */
     public function purgeCache(Request $request)
     {
+        $result = static::purge();
+
+        return response()->json($result);
+    }
+
+    /**
+     * Callable from anywhere (not just the admin button) — e.g. content
+     * controllers call this after create/update/delete so a change shows on
+     * the cached front-end immediately instead of waiting out the Cache
+     * Rule's edge TTL. Silent by design: a purge failure here must never
+     * block the actual save/delete that triggered it, only get logged.
+     * Returns the same success/message shape purgeCache() turns into JSON.
+     */
+    public static function purge(): array
+    {
         $bex = BasicExtra::first();
         $zoneId = !empty($bex->cloudflare_zone_id) ? $bex->cloudflare_zone_id : config('services.cloudflare.zone_id');
         $apiToken = !empty($bex->cloudflare_api_token) ? $bex->cloudflare_api_token : config('services.cloudflare.api_token');
 
         if (empty($zoneId) || empty($apiToken)) {
-            return response()->json([
+            return [
                 'success' => false,
                 'message' => 'Cloudflare isn\'t configured yet — set the Zone ID and API Token under Settings → Basic Info first.',
-            ]);
+            ];
         }
 
         try {
@@ -42,26 +57,26 @@ class CloudflareController extends Controller
             $result = $response->json();
 
             if ($response->successful() && ($result['success'] ?? false)) {
-                return response()->json([
+                return [
                     'success' => true,
                     'message' => 'Cloudflare cache purged successfully.',
-                ]);
+                ];
             }
 
             $errorMessage = $result['errors'][0]['message'] ?? 'Cloudflare rejected the request (check the zone ID and API token).';
             Log::error('[Cloudflare] Cache purge failed', ['response' => $result]);
 
-            return response()->json([
+            return [
                 'success' => false,
                 'message' => $errorMessage,
-            ]);
+            ];
         } catch (\Exception $e) {
             Log::error('[Cloudflare] Cache purge request failed', ['error' => $e->getMessage()]);
 
-            return response()->json([
+            return [
                 'success' => false,
                 'message' => 'Could not reach Cloudflare — ' . $e->getMessage(),
-            ]);
+            ];
         }
     }
 }

@@ -4,6 +4,13 @@
     $qty = $moduleList->count();
     $summaryFee = $moduleList->sum('cost');
     $currency = $purchase->currency_code ?? '';
+
+    // Total actual file opens across every download link this order has ever
+    // had (a new SecureToken is issued each time the order is (re)validated,
+    // and a revoked token's count still reflects real downloads that
+    // happened before it was revoked, so this sums all of them, not just
+    // the currently-active one).
+    $downloadCount = \App\SecureToken::where('order_id', $purchase->order_number)->sum('download_count');
 @endphp
 
 <!-- Receipt Details Modal -->
@@ -23,6 +30,12 @@
                         <div class="col-lg-5"><strong>Tender Title:</strong></div>
                         <div class="col-lg-7">
                             {{ !empty($purchase->tender) ? convertUtf8($purchase->tender->title) : '-' }}</div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Order Number Generation Date &amp; Time:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->created_at->format('d M Y, H:i:s') }}</div>
                     </div>
                     <hr>
 
@@ -119,6 +132,12 @@
                     </div>
                     <hr>
 
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Payment Date &amp; Time:</strong></div>
+                        <div class="col-lg-7">{{ $purchase->paid_at ? $purchase->paid_at->format('d M Y, H:i:s') : '-' }}</div>
+                    </div>
+                    <hr>
+
                     @if (!empty($purchase->receipt))
                         <div class="row">
                             <div class="col-lg-5"><strong>Uploaded Receipt:</strong></div>
@@ -173,6 +192,12 @@
                                 <span class="badge badge-success">Active</span>
                             @endif
                         </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5"><strong>Download Count:</strong></div>
+                        <div class="col-lg-7">{{ $downloadCount }}</div>
                     </div>
                     <hr>
 

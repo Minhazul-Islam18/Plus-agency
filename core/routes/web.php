@@ -40,7 +40,19 @@ $cfCacheableExcept = [
 | groups at all, falling through to the legacy-redirect catch-all (bottom
 | of this file) and then a real 404 — never a crash.
 */
-$activeLocales = \App\Language::where('status', 1)->pluck('code')->implode('|');
+// This file's top-level code runs on EVERY request (route closures like
+// Route::fallback() below make `route:cache` impossible, so there's no
+// compiled-route shortcut skipping this) — an uncached query here fires
+// once per request. Under bursty/bot traffic that's many near-simultaneous
+// fresh DB connections for the exact same 1-row-per-language result,
+// which is exactly the shape of thing that trips a host's connection-rate
+// limit (real production error: "SQLSTATE[HY000] [2002] Operation not
+// permitted" from many requests hitting this line at once). Cached with
+// the same key/TTL AppServiceProvider already uses for this identical
+// lookup elsewhere, so it's realistically always a cache hit.
+$activeLocales = \Illuminate\Support\Facades\Cache::flexible('global_languages_active', [1500, 1800], function () {
+    return \App\Language::where('status', 1)->get();
+})->pluck('code')->implode('|');
 // Only SetLangMiddleware gets excluded at the OUTER {locale} group level —
 // it must never run on these routes (it would clobber the URL-derived
 // locale with a stale site_lang cookie/Accept-Language guess after

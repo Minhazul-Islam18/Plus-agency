@@ -50,6 +50,20 @@
   border-top: 1px solid rgba(181, 181, 181, 0.1) !important;
 }
 
+/* Nested modals (e.g. Mark as Paid opened on top of the Details modal —
+   see purchase.blade.php's bindModalStacking) are correctly z-index-stacked
+   already, but the default Bootstrap backdrop (rgba(0,0,0,.5)) barely reads
+   against this theme's dark modal-content (#202940) — the two dialogs end
+   up looking visually mixed together instead of clearly layered. A darker
+   stacked backdrop plus a shadow on the front modal fixes the separation. */
+.modal-backdrop.modal-stacked {
+  background-color: #000;
+  opacity: 0.75 !important;
+}
+.modal.show .modal-content {
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.65);
+}
+
 /* bootstrap modal customize end */
 
 /* bootstrap form control customize start */

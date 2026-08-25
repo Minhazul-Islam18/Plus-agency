@@ -208,15 +208,28 @@
                                                         </div>
                                                     </td>
                                                 </tr>
-
-                                                @includeIf('admin.tender.tender.receipt')
-                                                @includeIf('admin.tender.tender.purchase-details')
-                                                @includeIf('admin.tender.tender.markpaid-modal')
-                                                @includeIf('admin.tender.tender.proof-modal')
                                             @endforeach
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {{-- Per-row modals rendered OUTSIDE the table on purpose: a
+                                     <form> whose start tag appears as a direct child of
+                                     <table> (not inside a <td>) hits a special HTML5
+                                     parsing rule that inserts the <form> then immediately
+                                     pops it off the open-elements stack — its own children
+                                     (hidden inputs, submit button) never end up nested
+                                     inside it in the parsed DOM, so `.closest('.revertform')`
+                                     silently finds nothing and the JS submit throws. Keeping
+                                     these includes here (after </table>) avoids that
+                                     entirely instead of relying on browsers to "recover"
+                                     from invalid table content. --}}
+                                @foreach ($purchases as $purchase)
+                                    @includeIf('admin.tender.tender.receipt')
+                                    @includeIf('admin.tender.tender.purchase-details')
+                                    @includeIf('admin.tender.tender.markpaid-modal')
+                                    @includeIf('admin.tender.tender.proof-modal')
+                                @endforeach
                             @endif
                         </div>
                     </div>
@@ -284,14 +297,58 @@
                     $label.html('<span class="text-success"><i class="fas fa-check-circle mr-1"></i>' + name + '</span>');
                 });
             }
+            function bindRevertReason($) {
+                // Same reason-prompt pattern as .blacklistbtn (custom.js),
+                // except the reason is mandatory here — cancelling a payment
+                // validation revokes the buyer's access immediately, so
+                // there must be a record of why.
+                $(document).on('click', '.revertbtn', function(e) {
+                    e.preventDefault();
+                    var form = $(this).closest('.revertform');
+                    // This button lives inside the open "Details" Bootstrap
+                    // modal — Bootstrap's own focus-trap (_enforceFocus)
+                    // keeps yanking focus back into that modal on every
+                    // focusin, which fires for SweetAlert's input too (it's
+                    // appended to <body>, outside the modal), making it
+                    // impossible to type. Bootstrap re-attaches this handler
+                    // the next time any modal is shown, so it's safe to drop
+                    // it here rather than track re-enabling it after close.
+                    $(document).off('focusin.bs.modal');
+                    swal({
+                        title: 'Cancel this payment validation?',
+                        text: 'Download access will be revoked immediately and the buyer notified. A reason is required.',
+                        content: {
+                            element: 'input',
+                            attributes: { placeholder: 'Reason for cancelling (required)', type: 'text' }
+                        },
+                        buttons: {
+                            confirm: { text: 'Yes, cancel it', className: 'btn btn-danger' },
+                            cancel: { visible: true, className: 'btn btn-secondary' }
+                        }
+                    }).then(function(reason) {
+                        if (reason === null) { swal.close(); return; }
+                        if (!reason.trim()) {
+                            $.notify({ message: 'A reason is required to cancel this payment validation.' }, {
+                                type: 'danger', placement: { from: 'top', align: 'right' }
+                            });
+                            return;
+                        }
+                        form.find('input[name="reason"]').val(reason.trim());
+                        $(".request-loader").addClass("show");
+                        form.get(0).submit();
+                    });
+                });
+            }
             if (window.jQuery) {
                 bindModalStacking(window.jQuery);
                 bindProofFilenameLabel(window.jQuery);
+                bindRevertReason(window.jQuery);
             } else {
                 window.addEventListener('load', function() {
                     if (window.jQuery) {
                         bindModalStacking(window.jQuery);
                         bindProofFilenameLabel(window.jQuery);
+                        bindRevertReason(window.jQuery);
                     }
                 });
             }

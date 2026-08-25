@@ -178,6 +178,13 @@ return new class extends Migration
                 $table->unsignedBigInteger('validated_by_admin_id')->nullable();
                 $table->string('validated_by_admin_name')->nullable();
 
+                // Why a manual validation was reversed (Completed → Pending) —
+                // mandatory, captured at the same moment access is revoked and
+                // the buyer is notified. Kept even after a later re-validation
+                // overwrites validated_by_admin_* so the history isn't lost;
+                // only cleared if this order is reversed again.
+                $table->string('reversal_reason', 500)->nullable();
+
                 $table->timestamps();
             });
         }
@@ -204,6 +211,12 @@ return new class extends Migration
         if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'resume_token_hash')) {
             Schema::table('tender_purchases', function (Blueprint $table) {
                 $table->string('resume_token_hash')->nullable()->index()->after('admin_proof');
+            });
+        }
+
+        if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'reversal_reason')) {
+            Schema::table('tender_purchases', function (Blueprint $table) {
+                $table->string('reversal_reason', 500)->nullable()->after('validated_by_admin_name');
             });
         }
 

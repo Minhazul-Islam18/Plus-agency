@@ -99,6 +99,10 @@
                 			<span class="selectgroup-button">Tender Management</span>
                 		</label>
                 		<label class="selectgroup-item">
+                			<input type="checkbox" name="permissions[]" value="Manual Payment Completion" class="selectgroup-input" @if(is_array($permissions) && in_array('Manual Payment Completion', $permissions)) checked @endif>
+                			<span class="selectgroup-button">Manual Payment Completion</span>
+                		</label>
+                		<label class="selectgroup-item">
                 			<input type="checkbox" name="permissions[]" value="Client Feedbacks" class="selectgroup-input" @if(is_array($permissions) && in_array('Client Feedbacks', $permissions)) checked @endif>
                 			<span class="selectgroup-button">Client Feedbacks</span>
                 		</label>

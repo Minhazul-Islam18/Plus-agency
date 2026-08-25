@@ -32,4 +32,19 @@ class Admin extends Authenticatable
   {
     return $this->id == 1 && is_null($this->role_id);
   }
+
+  /**
+   * Same "unrestricted" rule CheckPermission middleware already applies for
+   * a roleless admin (the super admin) — no role means every permission
+   * check passes, not just the module-level ones the middleware gates.
+   */
+  public function hasPermission(string $permission): bool
+  {
+    if (empty($this->role)) {
+      return true;
+    }
+
+    $permissions = json_decode($this->role->permissions, true) ?: [];
+    return in_array($permission, $permissions, true);
+  }
 }

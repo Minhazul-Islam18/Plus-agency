@@ -34,11 +34,12 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Confirm order <strong>{{ $purchase->order_number }}</strong> was paid outside the automated flow. A proof of payment is required.</p>
+                    <p>Confirm order <strong>{{ $purchase->order_number }}</strong> was paid outside the automated flow.
+                        A proof of payment is required.</p>
                     <div class="form-group">
                         <label>Payment Proof (image, PDF, Word, Excel, or other document) **</label>
                         <br>
-                        <div class="thumb-preview" id="thumbPreview{{ $purchase->id }}"></div>
+                        {{-- <div class="thumb-preview" id="thumbPreview{{ $purchase->id }}"></div> --}}
                         <p class="mb-2" id="proofFileName{{ $purchase->id }}">
                             <span class="text-muted">No file chosen yet.</span>
                         </p>

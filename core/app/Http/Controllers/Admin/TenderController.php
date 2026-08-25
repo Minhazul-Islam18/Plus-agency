@@ -661,6 +661,29 @@ class TenderController extends Controller
         $completing      = $request->payment_status === 'Completed' && $previousStatus !== 'Completed';
         $reversing       = $request->payment_status !== 'Completed' && $previousStatus === 'Completed';
 
+        // Reversal only makes sense for a validation an admin actually made —
+        // it flips a DB flag and revokes access, it doesn't refund anything.
+        // A real gateway payment (validated_by_admin_id empty — it reached
+        // Completed via TenderPaymentHelper::completePurchase(), the
+        // callback path this endpoint has nothing to do with) genuinely
+        // charged the buyer through Moneroo/Stripe/Razorpay; "reversing" it
+        // here would revoke access from someone who legitimately paid, with
+        // no corresponding refund ever happening on the gateway's side.
+        if ($reversing && empty($purchase->validated_by_admin_id)) {
+            Session::flash('error', 'This order was paid through a real payment gateway, not a manual admin validation — it can\'t be reversed here.');
+            return back();
+        }
+
+        // Manually marking an order Completed is a sensitive action (it
+        // grants download access without any real payment having been
+        // verified by a gateway) — gated behind its own permission, separate
+        // from and in addition to the general Tender Management access this
+        // whole route group already requires.
+        if ($completing && !Auth::guard('admin')->user()->hasPermission('Manual Payment Completion')) {
+            Session::flash('error', 'You don\'t have permission to manually complete a payment. Contact an administrator.');
+            return back();
+        }
+
         // Manually completing a Pending order (offline receipt or an
         // abandoned/failed online payment) requires proof — the buyer's own
         // uploaded receipt only covers the offline-checkout path, not a
@@ -690,6 +713,12 @@ class TenderController extends Controller
             @copy($url, $dir . $filename);
             $purchase->admin_proof = $filename;
 
+            // The buyer's original payment_method still held whatever
+            // gateway their earlier failed/abandoned attempt used (or
+            // whichever offline gateway they picked at checkout) — neither
+            // is how this order actually got marked paid.
+            $purchase->payment_method = 'Manual';
+
             $admin = Auth::guard('admin')->user();
             $purchase->validated_by_admin_id   = $admin->id ?? null;
             // admins table has first_name/last_name, no `name` column/accessor.
@@ -705,8 +734,15 @@ class TenderController extends Controller
         // arrival instead of merely dormant.
         $revokedTokens = 0;
         if ($reversing) {
-            $purchase->validated_by_admin_id   = null;
-            $purchase->validated_by_admin_name = null;
+            $request->validate([
+                'reason' => 'required|string|max:500',
+            ], [
+                'reason.required' => 'A reason is required to cancel this payment validation.',
+            ]);
+
+            $purchase->reversal_reason          = trim($request->input('reason'));
+            $purchase->validated_by_admin_id    = null;
+            $purchase->validated_by_admin_name  = null;
 
             $revokedTokens = SecureToken::where('order_id', $purchase->order_number)
                 ->where('status', 'active')
@@ -724,7 +760,33 @@ class TenderController extends Controller
 
         \App\TenderAuditLog::record('payment_status_changed', $purchase,
             "Payment status {$previousStatus} → {$purchase->payment_status}",
-            ['from' => $previousStatus, 'to' => $purchase->payment_status, 'tokens_revoked' => $revokedTokens]);
+            [
+                'from' => $previousStatus,
+                'to' => $purchase->payment_status,
+                'tokens_revoked' => $revokedTokens,
+                'reversal_reason' => $reversing ? $purchase->reversal_reason : null,
+            ]);
+
+        // Immutable evidence log — one row per validate/cancel event, own
+        // proof copy, so a Completed → Reversed → Completed cycle keeps
+        // full history even though tender_purchases.admin_proof only ever
+        // holds the CURRENT proof.
+        if ($completing || $reversing) {
+            $moduleTotal = collect(json_decode($purchase->purchased_modules, true) ?: [])->sum('cost');
+            \App\TenderPaymentEvidence::create([
+                'tender_purchase_id'   => $purchase->id,
+                'order_number'         => $purchase->order_number,
+                'action'               => $completing ? 'validated' : 'canceled',
+                'amount'               => $moduleTotal,
+                'currency_code'        => $purchase->currency_code,
+                'proof_path'           => $purchase->admin_proof,
+                'proof_original_name'  => $completing ? basename(parse_url($url, PHP_URL_PATH)) : null,
+                'proof_size'           => $completing && isset($dir, $filename) && file_exists($dir . $filename) ? filesize($dir . $filename) : null,
+                'admin_id'             => Auth::guard('admin')->id(),
+                'admin_name'           => trim((Auth::guard('admin')->user()->first_name ?? '') . ' ' . (Auth::guard('admin')->user()->last_name ?? '')),
+                'reason'               => $reversing ? $purchase->reversal_reason : null,
+            ]);
+        }
 
         if ($completing) {
             $this->sendPurchaseApprovedEmail($purchase);

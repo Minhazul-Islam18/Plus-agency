@@ -36,6 +36,7 @@ class TenderPurchase extends Model
         'resume_token_issued_at',
         'validated_by_admin_id',
         'validated_by_admin_name',
+        'reversal_reason',
         'payment_reference',
         'access_status',
         'suspend_reason',

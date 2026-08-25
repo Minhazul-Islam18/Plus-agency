@@ -160,25 +160,46 @@
                                         data-target="#proofModal{{ $purchase->id }}"
                                         style="font-size: 12px;">View Proof</a>
                                 @endif
-                                <form action="{{ route('admin.tender.purchasePaymentStatus') }}"
-                                    method="POST" class="d-inline-block ml-2">
-                                    @csrf
-                                    <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
-                                    <input type="hidden" name="payment_status" value="Pending">
-                                    <button type="submit" class="btn btn-link btn-sm p-0" style="font-size: 12px;">
-                                        Revert to Pending
-                                    </button>
-                                </form>
+                                {{-- Only a manual admin validation can be reversed — a real
+                                     gateway payment (Moneroo etc.) genuinely charged the
+                                     buyer, there's no corresponding refund happening here. --}}
+                                @if (!empty($purchase->validated_by_admin_id))
+                                    <form action="{{ route('admin.tender.purchasePaymentStatus') }}"
+                                        method="POST" class="d-inline-block ml-2 revertform">
+                                        @csrf
+                                        <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
+                                        <input type="hidden" name="payment_status" value="Pending">
+                                        <input type="hidden" name="reason">
+                                        <button type="button" class="revertbtn btn btn-link btn-sm p-0" style="font-size: 12px;">
+                                            Cancel Payment Validation
+                                        </button>
+                                    </form>
+                                @endif
                             @else
                                 <span class="badge badge-warning mr-2">Pending</span>
-                                <button type="button" class="btn btn-success btn-sm"
-                                    data-toggle="modal" data-target="#markPaidModal{{ $purchase->id }}">
-                                    <i class="fas fa-check mr-1"></i> Mark as Paid
-                                </button>
+                                @if (\Illuminate\Support\Facades\Auth::guard('admin')->user()->hasPermission('Manual Payment Completion'))
+                                    <button type="button" class="btn btn-success btn-sm"
+                                        data-toggle="modal" data-target="#markPaidModal{{ $purchase->id }}">
+                                        <i class="fas fa-check mr-1"></i> Mark as Paid
+                                    </button>
+                                @else
+                                    <span class="text-muted" style="font-size: 12px;" data-toggle="tooltip"
+                                        title="You don't have permission to manually complete a payment.">
+                                        <i class="fas fa-lock mr-1"></i> Mark as Paid
+                                    </span>
+                                @endif
                             @endif
                         </div>
                     </div>
                     <hr>
+
+                    @if (!empty($purchase->reversal_reason))
+                        <div class="row">
+                            <div class="col-lg-5"><strong>Last Cancellation Reason:</strong></div>
+                            <div class="col-lg-7">{{ $purchase->reversal_reason }}</div>
+                        </div>
+                        <hr>
+                    @endif
 
                     <div class="row">
                         <div class="col-lg-5"><strong>Access:</strong></div>

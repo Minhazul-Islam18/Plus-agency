@@ -316,11 +316,13 @@ trait TenderPaymentHelper
 
         $logoSrc = null;
         if (!empty($bs->logo)) {
-            foreach ([
-                storage_path('app/public/front/img/' . $bs->logo),
-                base_path(FRONT_IMG_PUBLIC_DIR . $bs->logo),
-                base_path(FRONT_IMG_DIR . $bs->logo),
-            ] as $path) {
+            foreach (
+                [
+                    storage_path('app/public/front/img/' . $bs->logo),
+                    base_path(FRONT_IMG_PUBLIC_DIR . $bs->logo),
+                    base_path(FRONT_IMG_DIR . $bs->logo),
+                ] as $path
+            ) {
                 if (file_exists($path)) {
                     $ext     = strtolower(pathinfo($path, PATHINFO_EXTENSION));
                     $mime    = in_array($ext, ['jpg', 'jpeg']) ? 'image/jpeg' : 'image/' . $ext;
@@ -365,9 +367,29 @@ trait TenderPaymentHelper
      */
     protected function handleFailedPayment(?TenderPurchase $purchase): void
     {
-        if (!$purchase || $purchase->payment_status === 'Completed') {
+        if (!$purchase) {
+            // The gateway controllers resolve $purchase from
+            // Session::get('tenderPurchaseId') before calling this — a null
+            // here means that session value was missing by the time the
+            // gateway redirected back (classic cross-domain-redirect
+            // SameSite-cookie loss, or the session simply expired). No
+            // purchase to resume means no email can be sent at all, so this
+            // is the most likely silent failure mode — log it loudly.
+            Log::error('[Tender] handleFailedPayment called with no purchase — session lookup likely failed on gateway redirect back, no incomplete-payment email sent');
             return;
         }
+
+        if ($purchase->payment_status === 'Completed') {
+            Log::error('[Tender] handleFailedPayment skipped — order already Completed', [
+                'order' => $purchase->order_number,
+            ]);
+            return;
+        }
+
+        Log::error('[Tender] handleFailedPayment firing — sending incomplete-payment email', [
+            'order' => $purchase->order_number,
+            'email' => $purchase->email,
+        ]);
 
         try {
             $rawToken = hash_hmac('sha256', implode('|', [
@@ -378,6 +400,7 @@ trait TenderPaymentHelper
             ]), config('app.key'));
 
             $purchase->resume_token_hash = hash('sha256', $rawToken);
+            $purchase->resume_token_issued_at = now();
             $purchase->save();
 
             $lang   = $this->getLang();
@@ -394,6 +417,10 @@ trait TenderPaymentHelper
                 'website_title' => $bs->website_title,
                 'templateType'  => 'tender_payment_incomplete',
                 'type'          => 'tenderPaymentIncomplete',
+            ]);
+
+            Log::error('[Tender] Incomplete-payment email queued', [
+                'order' => $purchase->order_number,
             ]);
         } catch (\Exception $e) {
             Log::error('[Tender] Incomplete-payment email failed', [

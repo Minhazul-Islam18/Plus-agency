@@ -24,14 +24,17 @@ class SendAdminMail implements ShouldQueue
     public int $tries = 3;
     public int $backoff = 30;
 
-    public function __construct(protected array $data)
-    {
-    }
+    public function __construct(protected array $data) {}
 
     public function handle(): void
     {
         try {
             (new KreativMailer)->mailFromAdmin($this->data);
+
+            Log::error('[SendAdminMail] Sent', [
+                'templateType' => $this->data['templateType'] ?? null,
+                'toMail'       => $this->data['toMail'] ?? null,
+            ]);
         } catch (\Exception $e) {
             Log::error('[SendAdminMail] Send failed', [
                 'templateType' => $this->data['templateType'] ?? null,

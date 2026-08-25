@@ -744,6 +744,12 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/tender/purchase/{id}/invoice', 'Admin\TenderController@invoiceDownload')->name('admin.tender.invoiceDownload');
         Route::post('/tender/purchase/{id}/generate-invoice', 'Admin\TenderController@purchaseGenerateInvoice')->name('admin.tender.purchaseGenerateInvoice');
 
+        // Admin Tender Payment Evidence Routes (immutable manual-validation log)
+        Route::get('/tender/payment-evidence', 'Admin\TenderPaymentEvidenceController@index')->name('admin.tender.paymentEvidence');
+        Route::get('/tender/payment-evidence/export/csv', 'Admin\TenderPaymentEvidenceController@exportCsv')->name('admin.tender.paymentEvidence.exportCsv');
+        Route::get('/tender/payment-evidence/export/word', 'Admin\TenderPaymentEvidenceController@exportWord')->name('admin.tender.paymentEvidence.exportWord');
+        Route::get('/tender/payment-evidence/{id}', 'Admin\TenderPaymentEvidenceController@show')->name('admin.tender.paymentEvidence.show');
+
         // Admin Tender Blacklist Routes
         Route::get('/tender/blacklist', 'Admin\TenderBlacklistController@index')->name('admin.tender.blacklist');
         Route::post('/tender/blacklist/store', 'Admin\TenderBlacklistController@store')->name('admin.tender.blacklist.store');

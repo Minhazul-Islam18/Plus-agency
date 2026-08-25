@@ -189,6 +189,41 @@ return new class extends Migration
             });
         }
 
+        // Append-only log of every manual payment-validation event (Mark as
+        // Paid / Cancel Payment Validation) — one row per event, never
+        // updated or deleted. tender_purchases.admin_proof only ever holds
+        // the CURRENT proof, overwritten on every re-validation; a Completed
+        // → Reversed → Completed cycle would silently lose the earlier
+        // proof(s) without this. Each row keeps its own copy of the proof
+        // file reference so history survives regardless of what the parent
+        // purchase row does later.
+        if (!Schema::hasTable('tender_payment_evidences')) {
+            Schema::create('tender_payment_evidences', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('tender_purchase_id');
+                $table->string('order_number', 100);
+                // 'validated' (Mark as Paid) | 'canceled' (reversal)
+                $table->string('action', 20);
+                // Snapshot at event time — purchased_modules can't retroactively
+                // change, but currency_code theoretically could if site config
+                // changes later, so both are captured per event, not looked up live.
+                $table->decimal('amount', 15, 2)->default(0);
+                $table->string('currency_code', 10)->nullable();
+                $table->string('proof_path')->nullable();
+                $table->string('proof_original_name')->nullable();
+                $table->unsignedInteger('proof_size')->nullable();
+                $table->unsignedBigInteger('admin_id')->nullable();
+                $table->string('admin_name')->nullable();
+                // Only set on a 'canceled' row.
+                $table->string('reason', 500)->nullable();
+                $table->timestamps();
+
+                $table->index('tender_purchase_id');
+                $table->index('order_number');
+                $table->index('action');
+            });
+        }
+
         if (Schema::hasTable('tender_purchases') && !Schema::hasColumn('tender_purchases', 'admin_proof')) {
             Schema::table('tender_purchases', function (Blueprint $table) {
                 $table->string('admin_proof')->nullable()->after('invoice');

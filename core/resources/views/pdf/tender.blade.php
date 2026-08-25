@@ -518,10 +518,33 @@
                                     {{ \Illuminate\Support\Str::limit($order->payment_reference, 30, '...') }}</td>
                             </tr>
                         @endif
-                        <tr>
-                            <td class="od-label">Payment</td>
-                            <td class="od-value">{{ $order->payment_method }}</td>
-                        </tr>
+                        @if (!empty($order->validated_by_admin_id))
+                            {{-- Manually validated from the admin panel — the buyer's
+                                 payment_method column still holds whatever gateway
+                                 their earlier failed/abandoned attempt used, which
+                                 would be misleading to show as how this was paid. --}}
+                            <tr>
+                                <td class="od-label">Payment Method</td>
+                                <td class="od-value">Manual Payment Validation</td>
+                            </tr>
+                            <tr>
+                                <td class="od-label">Validated via</td>
+                                <td class="od-value">Admin Panel</td>
+                            </tr>
+                            <tr>
+                                <td class="od-label">Validated by</td>
+                                <td class="od-value">{{ $order->validated_by_admin_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="od-label">Validation Date</td>
+                                <td class="od-value">{{ optional($order->paid_at ?? $order->updated_at)->format('d M Y, H:i') }}</td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td class="od-label">Payment</td>
+                                <td class="od-value">{{ $order->payment_method }}</td>
+                            </tr>
+                        @endif
                         <tr>
                             <td class="od-label">Currency</td>
                             <td class="od-value">{{ $currency ?: '—' }}</td>
@@ -530,10 +553,12 @@
                             <td class="od-label">Order Date</td>
                             <td class="od-value">{{ $order->created_at->format('d M Y') }}</td>
                         </tr>
-                        <tr>
-                            <td class="od-label">Payment Date</td>
-                            <td class="od-value">{{ $isCompleted ? optional($order->paid_at ?? $order->updated_at)->format('d M Y') : '' }}</td>
-                        </tr>
+                        @if (empty($order->validated_by_admin_id))
+                            <tr>
+                                <td class="od-label">Payment Date</td>
+                                <td class="od-value">{{ $isCompleted ? optional($order->paid_at ?? $order->updated_at)->format('d M Y') : '' }}</td>
+                            </tr>
+                        @endif
                     </table>
                 </td>
             </tr>

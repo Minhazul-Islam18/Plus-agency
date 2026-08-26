@@ -157,9 +157,19 @@
                                                     <td>{{ optional($row->created_at)->format('d M Y, H:i') }}</td>
                                                     <td>
                                                         @if ($row->proof_path)
+                                                            @php
+                                                                $fname = $row->proof_original_name ?: $row->proof_path;
+                                                                $fnameDisplay = $fname;
+                                                                if (mb_strlen($fname, 'utf-8') > 28) {
+                                                                    // Shorten from the middle, not the end — the
+                                                                    // extension (and any distinguishing suffix) at
+                                                                    // the tail stays visible, unlike a plain "...".
+                                                                    $fnameDisplay = mb_substr($fname, 0, 14, 'utf-8') . '…' . mb_substr($fname, -10, null, 'utf-8');
+                                                                }
+                                                            @endphp
                                                             <i class="fas {{ $ext == 'pdf' ? 'fa-file-pdf text-danger' : 'fa-file-image text-success' }} mr-1"></i>
                                                             <a href="{{ asset('assets/front/tender_proofs/' . $row->proof_path) }}"
-                                                                target="_blank">{{ $row->proof_original_name ?: $row->proof_path }}</a>
+                                                                target="_blank" title="{{ $fname }}">{{ $fnameDisplay }}</a>
                                                             @if ($row->proof_size)
                                                                 <small class="text-muted">({{ round($row->proof_size / 1024, 1) }} KB)</small>
                                                             @endif

@@ -163,6 +163,11 @@
     transition: background .2s;
     cursor: pointer;
 }
+.btn-fmf-dl.disabled {
+    background: #9db2f4;
+    pointer-events: none;
+    cursor: default;
+}
 .btn-fmf-dl:hover {
     background: #2a58e0;
     color: #fff;
@@ -376,11 +381,37 @@
                             // Auto-start the download once, only on a genuine page load
                             // (not on bfcache back/forward restores), so a single redirect
                             // from the email = one download.
+                            //
+                            // The visible button below points at the same stream URL, so
+                            // without this, an impatient click during/right after the
+                            // silent auto-download fires a SECOND real download-stream
+                            // request — each one genuinely consumes a count server-side,
+                            // which is how a single "first open" was burning 2-3 downloads
+                            // at once. Disable the button with clear feedback for a few
+                            // seconds so a reflex click can't double-fire it.
                             function autoStart() {
                                 if (window.__fmfAutoStarted) return;
                                 window.__fmfAutoStarted = true;
                                 if (frame) frame.src = url;
                                 spendOne();
+
+                                if (btn) {
+                                    var originalText = btn.textContent;
+                                    btn.classList.add('disabled');
+                                    btn.setAttribute('aria-disabled', 'true');
+                                    btn.textContent = @json(__('Downloading…'));
+                                    var reenable = function (e) {
+                                        if (e) e.preventDefault();
+                                    };
+                                    btn.addEventListener('click', reenable);
+                                    setTimeout(function () {
+                                        btn.classList.remove('disabled');
+                                        btn.removeAttribute('aria-disabled');
+                                        btn.textContent = originalText;
+                                        btn.removeEventListener('click', reenable);
+                                    }, 6000);
+                                }
+
                                 if (hint) {
                                     setTimeout(function () {
                                         hint.textContent = @json(__('If your download did not start, use the button above.'));

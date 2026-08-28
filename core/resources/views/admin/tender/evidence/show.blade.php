@@ -214,6 +214,14 @@
                                     <div class="text-muted" style="font-size: 12px;">
                                         {{ optional($event->created_at)->format('d M Y \a\t H:i') }} by {{ $event->admin_name }}
                                     </div>
+                                    @if ($event->proof_path)
+                                        <div style="font-size: 12px;">
+                                            <i class="fas fa-paperclip mr-1"></i>
+                                            <a href="{{ asset('assets/front/tender_proofs/' . $event->proof_path) }}" target="_blank">
+                                                {{ $event->proof_original_name ?: $event->proof_path }}
+                                            </a>
+                                        </div>
+                                    @endif
                                 </li>
                                 <li style="--dot-color: #28a745;">
                                     <strong>Payment Validated</strong>

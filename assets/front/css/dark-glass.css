@@ -3879,11 +3879,28 @@ a.proceed-checkout-btn:hover {
 }
 
 /* ---- WYSIWYG content panel (service/blog details) ---- */
+/* This panel holds large amounts of readable prose (legal pages, service/blog
+   details) — legibility can't depend entirely on backdrop-filter actually
+   compositing correctly. Confirmed on real Chrome/Linux (and reproduced
+   headless): backdrop-filter reports as applied (getComputedStyle shows
+   blur(18px)) but visually fails to blur what's behind it, leaving var(--glass-bg)'s
+   near-transparent 6% white tint with almost no contrast against the busy
+   canvas/gradient background — text becomes barely legible. Firefox renders
+   the same blur correctly. Giving the panel its own solidly dark background
+   makes it readable regardless of whether the blur effect renders.
+
+   backdrop-filter itself is dropped entirely, not just backstopped: a long
+   WYSIWYG page (the CGVLU legal doc has 2343 real <p> tags) makes this
+   panel over 100,000px tall, and applying a blur filter across a
+   compositing layer that large is exactly the kind of case that breaks a
+   GPU compositor — confirmed live: Chrome painted large stretches of the
+   panel plain white once the background above was fixed. The background
+   is solid now and doesn't need the blur for contrast, so removing the
+   filter removes the failure case instead of hoping every browser copes
+   with an arbitrarily tall filtered layer. */
 .dark-svcd-panel {
   border-radius: 20px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  background: rgba(9, 13, 22, 0.82);
   border: 1px solid var(--glass-border);
   padding: 44px 46px;
 }

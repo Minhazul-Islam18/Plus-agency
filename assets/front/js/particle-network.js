@@ -40,14 +40,28 @@
         var LINK_DIST = dense ? (isMobile ? 130 : 180) : (isMobile ? 120 : 165);
         var REPEL_DIST = isMobile ? 80 : 110;
 
+        // Canvas dimensions have a hard browser/GPU ceiling (well under
+        // 100,000px) — a data-particle-network container wrapping a long
+        // WYSIWYG page (a legal doc with thousands of paragraphs can push
+        // its section past 100,000px tall) blows past that, the canvas
+        // fails to allocate, and Chrome paints the failed tile as plain
+        // white instead of transparent — confirmed live on the CGVLU page.
+        // The particle effect is only ever meant to be seen behind the
+        // hero/breadcrumb near the top anyway, so capping the canvas (and
+        // its own CSS height, so it isn't stretched past its real pixels)
+        // avoids the failure mode entirely instead of hoping no page ever
+        // gets this long again.
+        var MAX_CANVAS_HEIGHT = 2600;
+
         function resize() {
+            var containerHeight = Math.min(container.offsetHeight, MAX_CANVAS_HEIGHT);
             w = canvas.width = container.offsetWidth * dpr;
-            h = canvas.height = container.offsetHeight * dpr;
+            h = canvas.height = containerHeight * dpr;
             canvas.style.width = container.offsetWidth + 'px';
-            canvas.style.height = container.offsetHeight + 'px';
+            canvas.style.height = containerHeight + 'px';
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             w = container.offsetWidth;
-            h = container.offsetHeight;
+            h = containerHeight;
             // Recomputed on every resize, not just once at init — a short
             // custom-page header and a full-height hero using the same
             // "dense" flag now each get a count proportional to their own

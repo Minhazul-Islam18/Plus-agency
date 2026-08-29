@@ -723,6 +723,20 @@ class TenderController extends Controller
             $purchase->validated_by_admin_id   = $admin->id ?? null;
             // admins table has first_name/last_name, no `name` column/accessor.
             $purchase->validated_by_admin_name = $admin ? trim($admin->first_name . ' ' . $admin->last_name) : null;
+
+            // Find My Files' "Payment Reference" recovery method looks the
+            // order up by whereNotNull('payment_reference') — a manually
+            // completed order has no real gateway reference to put here
+            // (that's the whole point of this flow), so without this,
+            // payment_reference stays null forever and that recovery method
+            // can never find this order at all. The order number is already
+            // unique and known to the buyer (it's on every email/receipt),
+            // so it doubles as a usable reference here. Never overwrite an
+            // admin-entered reference (purchaseUpdateReference) if one's
+            // already set.
+            if (empty($purchase->payment_reference)) {
+                $purchase->payment_reference = $purchase->order_number;
+            }
         }
 
         // Reversing a manual validation (Completed → anything else) revokes

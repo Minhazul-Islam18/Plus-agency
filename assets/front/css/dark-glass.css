@@ -3330,6 +3330,12 @@ a.proceed-checkout-btn:hover {
   position: relative;
   flex: 1;
   min-width: 0;
+  /* style.css has a bare, unscoped `.client-desc { margin-left: 100px; }`
+     rule from the old light-theme float-based testimonial layout — this
+     class name got reused here for the dark redesign's flex layout, and
+     that legacy margin was never explicitly overridden, so it silently
+     added a ~100px gap between the photo and the text on every card. */
+  margin-left: 0;
   padding: 26px 26px 24px;
   display: flex;
   flex-direction: column;

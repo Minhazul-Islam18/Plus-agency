@@ -800,6 +800,29 @@
                                         </div>
                                     </div>
 
+                                    {{-- Device Recognition --}}
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div class="tss-subhead mt-0" style="--tss-accent:#31CE36;">Device
+                                                Recognition</div>
+                                            <p class="text-muted mb-3" style="font-size:12px;">
+                                                Maximum number of distinct devices/browsers that may be authorized
+                                                per order. The first device on a link is trusted automatically; each
+                                                new one after that requires an email OTP. Once this cap is reached,
+                                                a new device is refused outright — see <strong>Authorized
+                                                    Devices</strong> to reset or revoke devices for an order.
+                                            </p>
+                                            <div class="form-group mb-0">
+                                                <label>Max Devices Per Order</label>
+                                                <input type="number" class="form-control ltr"
+                                                    name="tender_max_devices_per_order"
+                                                    value="{{ $abex->tender_max_devices_per_order ?? 5 }}" step="1"
+                                                    min="1" max="20">
+                                                <small class="text-muted d-block mt-1">Default 5.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                                 {{-- ============ /Secure Links ============ --}}
 

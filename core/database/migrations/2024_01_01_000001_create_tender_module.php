@@ -255,6 +255,86 @@ return new class extends Migration
             });
         }
 
+        // Devices/browsers recognized for a given order's secure download
+        // link — replaces the old single permanent device+browser+IP lock.
+        // The first device to use a link is auto-trusted (no OTP); any
+        // later, not-yet-seen device needs a tender_device_otps round before
+        // it gets a row here. IP is stored for admin visibility only — it is
+        // never itself a match/blocking criterion (network changes, mobile
+        // data, VPNs etc. must never lock a legitimate buyer out).
+        if (!Schema::hasTable('tender_device_registrations')) {
+            Schema::create('tender_device_registrations', function (Blueprint $table) {
+                $table->id();
+                $table->string('order_id', 50);
+                $table->string('device_hash', 64);
+                // Human-readable for the admin device list (e.g. "Chrome on
+                // Windows") — cosmetic only, never matched against.
+                $table->string('device_label')->nullable();
+                // All cosmetic (admin display / audit only, never matched):
+                $table->string('device_type', 20)->nullable();    // desktop|mobile|tablet
+                $table->string('browser_name', 30)->nullable();
+                $table->string('browser_version', 20)->nullable();
+                $table->string('os_name', 30)->nullable();
+                $table->string('ip', 45)->nullable();
+                $table->string('network_label')->nullable();       // e.g. "Mobile data (Orange)"
+                // pending: OTP sent, not yet verified — shown in the admin list
+                // so a not-yet-completed challenge is visible, not just implied
+                // by its absence. active: recognized, can download without OTP.
+                // revoked: blocked outright (kept for audit — see 'deleted' for
+                // the hard-remove action instead).
+                $table->enum('status', ['pending', 'active', 'revoked'])->default('pending');
+                // First device ever registered for the order — cosmetic
+                // "Primary device" badge only, carries no extra privilege.
+                $table->boolean('is_primary')->default(false);
+                $table->string('validation_method', 20)->nullable(); // auto_first|otp_email
+                $table->unsignedInteger('otp_uses')->default(0);
+                $table->timestamp('registered_at');
+                $table->timestamp('last_used_at')->nullable();
+                $table->timestamps();
+
+                $table->unique(['order_id', 'device_hash']);
+                $table->index('order_id');
+            });
+        }
+
+        // Every real access by a recognized device — the "Historique des
+        // accès récents" trail on the admin device-details page. Separate
+        // from tender_device_registrations.last_used_at (a single rolling
+        // value) so the full history survives regardless of how many times
+        // a device is used.
+        if (!Schema::hasTable('tender_device_access_logs')) {
+            Schema::create('tender_device_access_logs', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('device_registration_id')->index();
+                $table->string('ip', 45)->nullable();
+                $table->string('network_label')->nullable();
+                $table->string('result', 20)->default('success'); // success|failed
+                $table->timestamp('accessed_at');
+                $table->timestamps();
+            });
+        }
+
+        // One-time email codes gating a NOT-YET-recognized device onto an
+        // order's secure link (see tender_device_registrations above).
+        // Deliberately separate from otp_verifications (that table's OTPs
+        // recover/reissue a lost link via email+phone; this one authorizes a
+        // new device for a link the buyer already legitimately has).
+        if (!Schema::hasTable('tender_device_otps')) {
+            Schema::create('tender_device_otps', function (Blueprint $table) {
+                $table->id();
+                $table->string('order_id', 50)->index();
+                $table->string('device_hash', 64);
+                $table->string('email_hash', 64)->index();
+                $table->string('otp_hash', 64);
+                $table->tinyInteger('attempts')->default(0);
+                $table->timestamp('expires_at');
+                $table->timestamp('last_resend_at')->nullable();
+                $table->enum('status', ['pending', 'verified', 'expired', 'exhausted'])->default('pending')->index();
+                $table->string('ip', 45)->nullable();
+                $table->timestamps();
+            });
+        }
+
         if (!Schema::hasTable('tender_blacklists')) {
             Schema::create('tender_blacklists', function (Blueprint $table) {
                 $table->id();

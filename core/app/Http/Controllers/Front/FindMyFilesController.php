@@ -12,6 +12,8 @@ use App\RateLimitAttempt;
 use App\SecureToken;
 use App\Services\SmsGateway\SmsGatewayInterface;
 use App\Tender;
+use App\TenderDeviceOtp;
+use App\TenderDeviceRegistration;
 use App\TenderModule;
 use App\TenderPurchase;
 use Carbon\Carbon;
@@ -91,6 +93,338 @@ class FindMyFilesController extends Controller
     }
 
     /**
+     * Recognized-device gate for the plain post-payment link (no
+     * session_secret — issued by TenderPaymentHelper::completePurchase /
+     * Admin\TenderController::sendPurchaseApprovedEmail). Replaces the old
+     * single permanent device+browser+IP lock, per explicit product
+     * decision: a strict first-use-only lock was too aggressive (a WiFi
+     * change or a second device the buyer legitimately owns shouldn't be a
+     * dead end), so this instead maintains a small, admin-capped LIST of
+     * recognized devices per order:
+     *
+     *   - The first device to ever use the link is auto-trusted, no OTP.
+     *   - A later, not-yet-seen device must pass an emailed OTP
+     *     (TenderDeviceOtp) before it's added to the list.
+     *   - Network/IP is never itself a blocking signal — it's stored on
+     *     the registration row for admin visibility only. A WiFi switch,
+     *     mobile data, a new ISP, a VPN etc. never locks a legitimate buyer
+     *     out on its own.
+     *   - This is separate from bindingFails() above, the stricter
+     *     session_secret+cookie binding applied to links issued via the
+     *     Find My Files recovery methods (OTP, Order Number, Payment
+     *     Reference, Regenerate) — a session_secret token skips this
+     *     entirely and keeps using its own mechanism.
+     *
+     * Enforced at the DB row level (tender_device_registrations, keyed on
+     * order_id), not a cookie/session/config value, so it survives a server
+     * migration or redeploy.
+     *
+     * Returns 'allowed' (active/recognized, or just auto-trusted as the
+     * first), 'otp_required' (new or still-pending device, under the cap —
+     * front end should show the OTP prompt), 'device_limit' (new device,
+     * order already at its admin-configured cap), or 'revoked' (admin
+     * explicitly blocked this exact device — only an admin clearing it can
+     * unblock, unlike otp_required which the buyer can resolve themself).
+     */
+    private function deviceAccessState(SecureToken $token, Request $request): string
+    {
+        if (!empty($token->session_secret)) {
+            return 'allowed'; // covered by bindingFails() instead
+        }
+
+        $deviceHash = $this->uaHash($request);
+        $orderId    = $token->order_id;
+
+        $existing = TenderDeviceRegistration::where('order_id', $orderId)
+            ->where('device_hash', $deviceHash)
+            ->first();
+
+        if ($existing) {
+            if ($existing->status === 'revoked') {
+                return 'revoked';
+            }
+            if ($existing->status === 'pending') {
+                return 'otp_required'; // row exists (OTP was sent) but never verified
+            }
+
+            $existing->update(['last_used_at' => now(), 'ip' => (string) $request->ip()]);
+            $this->logDeviceAccess($existing, $request, 'success');
+            return 'allowed';
+        }
+
+        // Pending + active rows both occupy a slot; a revoked one has
+        // freed its slot back up.
+        $count = TenderDeviceRegistration::where('order_id', $orderId)
+            ->whereIn('status', ['pending', 'active'])
+            ->count();
+
+        if ($count === 0) {
+            // First-ever device for this order — auto-trusted, no OTP.
+            $info = $this->parseUserAgent($request);
+            $registration = TenderDeviceRegistration::create(array_merge($info, [
+                'order_id'          => $orderId,
+                'device_hash'       => $deviceHash,
+                'ip'                => (string) $request->ip(),
+                'status'            => 'active',
+                'is_primary'        => true,
+                'validation_method' => 'auto_first',
+                'registered_at'     => now(),
+                'last_used_at'      => now(),
+            ]));
+            $this->logDeviceAccess($registration, $request, 'success');
+            return 'allowed';
+        }
+
+        if ($count >= $this->maxDevicesPerOrder()) {
+            return 'device_limit';
+        }
+
+        return 'otp_required';
+    }
+
+    private function logDeviceAccess(TenderDeviceRegistration $device, Request $request, string $result): void
+    {
+        \App\TenderDeviceAccessLog::create([
+            'device_registration_id' => $device->id,
+            'ip'                     => (string) $request->ip(),
+            'network_label'          => $device->network_label,
+            'result'                 => $result,
+            'accessed_at'            => now(),
+        ]);
+    }
+
+    /**
+     * Max devices/browsers that can be recognized per order. Editable at
+     * admin/tender/settings (basic_settings_extra.tender_max_devices_per_order).
+     */
+    private function maxDevicesPerOrder(): int
+    {
+        $n = (int) optional(\App\BasicExtra::first())->tender_max_devices_per_order;
+        return $n > 0 ? $n : 5;
+    }
+
+    /**
+     * Structured, cosmetic-only breakdown of the requesting browser/OS/
+     * device type for the admin device list — never matched against, a
+     * plain-text User-Agent parse (no external service). Network carrier
+     * (e.g. "Orange 4G" vs "Home WiFi") genuinely can't be determined
+     * server-side from an HTTP request alone without a paid IP-intelligence
+     * lookup, which isn't wired up here — network_label is left null rather
+     * than showing a fabricated guess.
+     */
+    private function parseUserAgent(Request $request): array
+    {
+        $ua = (string) $request->userAgent();
+
+        $browser = 'Unknown';
+        $version = null;
+        foreach (['Edg' => 'Edge', 'OPR' => 'Opera', 'Chrome' => 'Chrome', 'Firefox' => 'Firefox', 'Safari' => 'Safari'] as $needle => $name) {
+            if (str_contains($ua, $needle)) {
+                $browser = $name;
+                if (preg_match('/' . preg_quote($needle, '/') . '\/?([\d.]+)/', $ua, $m)) {
+                    $version = $m[1];
+                }
+                break;
+            }
+        }
+
+        $os = 'Unknown';
+        foreach (['Windows' => 'Windows', 'Mac OS X' => 'macOS', 'Android' => 'Android', 'iPhone' => 'iOS', 'iPad' => 'iOS', 'Linux' => 'Linux'] as $needle => $name) {
+            if (str_contains($ua, $needle)) {
+                $os = $name;
+                break;
+            }
+        }
+
+        $type = 'desktop';
+        if (str_contains($ua, 'iPad') || str_contains($ua, 'Tablet')) {
+            $type = 'tablet';
+        } elseif (str_contains($ua, 'Mobi') || str_contains($ua, 'Android') || str_contains($ua, 'iPhone')) {
+            $type = 'mobile';
+        }
+
+        return [
+            'device_label'    => "{$browser} on {$os}",
+            'device_type'     => $type,
+            'browser_name'    => $browser,
+            'browser_version' => $version,
+            'os_name'         => $os,
+        ];
+    }
+
+    /**
+     * Sends the OTP that authorizes a new device onto an order (see
+     * deviceAccessState). Takes the same raw token ('t') the download page
+     * itself uses — the buyer already legitimately has the link; this
+     * isn't a "find my order" lookup like the recovery methods, just a
+     * confirmation that whoever's sitting at this new device also has
+     * access to the order's inbox.
+     */
+    public function requestDeviceOtp(Request $request)
+    {
+        $raw   = (string) $request->input('t', '');
+        $token = $this->resolveToken($raw);
+
+        if (!$token || !$token->isValid()) {
+            return response()->json(['status' => 'error', 'type' => 'invalid_token']);
+        }
+
+        $purchase = TenderPurchase::where('order_number', $token->order_id)->first();
+        if (!$purchase) {
+            return response()->json(['status' => 'error', 'type' => 'invalid_token']);
+        }
+
+        $emailHash = $this->emailHash($purchase->email);
+
+        $blocked = $this->checkRateLimit($request, $emailHash);
+        if ($blocked) {
+            return response()->json(['status' => 'error', 'type' => 'rate_limited', 'minutes' => $blocked['minutes']]);
+        }
+
+        $deviceHash = $this->uaHash($request);
+
+        // A revoked device can't self-service its way back in via OTP —
+        // only an admin clearing the row does that (endpoint could still be
+        // hit directly even though the UI never leads here for one).
+        $revoked = TenderDeviceRegistration::where('order_id', $token->order_id)
+            ->where('device_hash', $deviceHash)
+            ->where('status', 'revoked')
+            ->exists();
+        if ($revoked) {
+            return response()->json(['status' => 'error', 'type' => 'revoked']);
+        }
+
+        // Someone could still be waiting on an earlier link for this exact
+        // device — re-send that if it's usable and outside its own cooldown
+        // instead of silently piling up rows.
+        $pending = TenderDeviceOtp::where('order_id', $token->order_id)
+            ->where('device_hash', $deviceHash)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if ($pending && $pending->isUsable() && !$pending->canResend()) {
+            return response()->json([
+                'status'  => 'error',
+                'type'    => 'resend_cooldown',
+                'seconds' => $pending->resendCooldownSeconds(),
+            ]);
+        }
+
+        $count = TenderDeviceRegistration::where('order_id', $token->order_id)
+            ->whereIn('status', ['pending', 'active'])
+            ->count();
+        if ($count >= $this->maxDevicesPerOrder()) {
+            return response()->json(['status' => 'error', 'type' => 'device_limit']);
+        }
+
+        TenderDeviceOtp::where('order_id', $token->order_id)
+            ->where('device_hash', $deviceHash)
+            ->where('status', 'pending')
+            ->update(['status' => 'expired']);
+
+        $rawOtp = \App\OtpVerification::generateOtp();
+
+        TenderDeviceOtp::create([
+            'order_id'       => $token->order_id,
+            'device_hash'    => $deviceHash,
+            'email_hash'     => $emailHash,
+            'otp_hash'       => hash('sha256', $rawOtp),
+            'attempts'       => 0,
+            'expires_at'     => now()->addMinutes(TenderDeviceOtp::OTP_TTL_MIN),
+            'last_resend_at' => now(),
+            'status'         => 'pending',
+            'ip'             => $request->ip(),
+        ]);
+
+        $lang = $this->getCurrentLang();
+        $bs   = $lang->basic_setting;
+        $sent = $this->sendRecoveryOtpEmail($purchase->email, $purchase->first_name, $rawOtp, $bs);
+
+        if (!$sent) {
+            return response()->json(['status' => 'error', 'type' => 'send_failed']);
+        }
+
+        // Visible in the admin device list as "Pending OTP" from the moment
+        // the code is sent, not only once it's verified.
+        TenderDeviceRegistration::updateOrCreate(
+            ['order_id' => $token->order_id, 'device_hash' => $deviceHash],
+            array_merge($this->parseUserAgent($request), [
+                'ip'                => (string) $request->ip(),
+                'status'            => 'pending',
+                'validation_method' => 'otp_email',
+                'registered_at'     => now(),
+            ])
+        );
+
+        $this->incrementAttempts($request, $emailHash);
+
+        return response()->json([
+            'status'       => 'success',
+            'masked_email' => \App\OtpVerification::maskEmail($purchase->email),
+        ]);
+    }
+
+    /**
+     * Verifies the code from requestDeviceOtp and, on success, registers
+     * this device for the order — see deviceAccessState.
+     */
+    public function verifyDeviceOtp(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'otp_code' => 'required|string|size:6|regex:/^\d{6}$/',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'type' => 'validation']);
+        }
+
+        $raw   = (string) $request->input('t', '');
+        $token = $this->resolveToken($raw);
+
+        if (!$token || !$token->isValid()) {
+            return response()->json(['status' => 'error', 'type' => 'invalid_token']);
+        }
+
+        $deviceHash = $this->uaHash($request);
+
+        $otp = TenderDeviceOtp::where('order_id', $token->order_id)
+            ->where('device_hash', $deviceHash)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if (!$otp || !$otp->isUsable()) {
+            return response()->json(['status' => 'error', 'type' => 'expired']);
+        }
+
+        if (!$otp->verifyOtp($request->input('otp_code'))) {
+            $otp->increment('attempts');
+            if ($otp->attempts >= TenderDeviceOtp::MAX_ATTEMPTS) {
+                $otp->update(['status' => 'exhausted']);
+                return response()->json(['status' => 'error', 'type' => 'exhausted']);
+            }
+            return response()->json(['status' => 'error', 'type' => 'invalid_code']);
+        }
+
+        $otp->update(['status' => 'verified']);
+
+        $registration = TenderDeviceRegistration::updateOrCreate(
+            ['order_id' => $token->order_id, 'device_hash' => $deviceHash],
+            array_merge($this->parseUserAgent($request), [
+                'ip'                => (string) $request->ip(),
+                'status'            => 'active',
+                'validation_method' => 'otp_email',
+                'registered_at'     => now(),
+                'last_used_at'      => now(),
+            ])
+        );
+        $registration->increment('otp_uses');
+        $this->logDeviceAccess($registration, $request, 'success');
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
      * How many times each secure download link may be opened. Editable at
      * admin/tender/settings (basic_settings_extra.tender_max_downloads); falls
      * back to the MAX_DOWNLOADS constant when unset or invalid.
@@ -114,8 +448,8 @@ class FindMyFilesController extends Controller
     }
 
     /**
-     * Whether the per-order recovery cap applies to a given method — false if
-     * the master switch is off, or that specific method's switch is off.
+     * Whether the per-customer recovery cap applies to a given method — false
+     * if the master switch is off, or that specific method's switch is off.
      * $method is one of: 'order_number' | 'otp' | 'payref' | 'regenerate'.
      */
     private function regenCapApplies(string $method): bool
@@ -125,6 +459,19 @@ class FindMyFilesController extends Controller
             return false;
         }
         return (bool) ($bex->{"tender_regen_cap_$method"} ?? true);
+    }
+
+    /**
+     * Links (re)issued for this order (by email + order number) in the last
+     * 24h, shared across all 4 Find-My-Files methods — switching methods
+     * doesn't get the buyer a fresh budget for the same order.
+     */
+    private function regenCountForOrder(string $emailHash, string $orderNumber): int
+    {
+        return SecureToken::where('email_hash', $emailHash)
+            ->where('order_id', $orderNumber)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->count();
     }
 
     /**
@@ -635,10 +982,7 @@ class FindMyFilesController extends Controller
         // ── 6c. Recovery cap: max N link issuances per order per 24h, shared
         // across all 4 Find-My-Files methods (admin configurable) ────────────
         if ($this->regenCapApplies('order_number')) {
-            $regenCount = SecureToken::where('email_hash', $emailHash)
-                ->where('order_id', $purchase->order_number)
-                ->where('created_at', '>=', now()->subHours(24))
-                ->count();
+            $regenCount = $this->regenCountForOrder($emailHash, $purchase->order_number);
 
             if ($regenCount >= $this->maxRegenPerDay()) {
                 AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
@@ -801,6 +1145,58 @@ class FindMyFilesController extends Controller
             ]);
         }
 
+        // Recognized-device gate for the plain post-payment link (no
+        // session_secret). A recognized/first device sails through as
+        // 'allowed'. A new device shows this same page in an OTP-prompt
+        // state instead of a hard block — see deviceAccessState().
+        $deviceState = $this->deviceAccessState($token, $request);
+
+        if ($deviceState === 'device_limit') {
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'DEVICE_LIMIT',
+                'risk_score' => 0,
+            ]);
+            return $this->downloadError($currentLang, [
+                'message' => __('This order has reached its limit of recognized devices. Please contact support to have an old device removed.'),
+            ]);
+        }
+
+        if ($deviceState === 'revoked') {
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'DEVICE_REVOKED',
+                'risk_score' => 0,
+            ]);
+            return $this->downloadError($currentLang, [
+                'message' => __('Access from this device has been blocked. Please contact support if you believe this is a mistake.'),
+            ]);
+        }
+
+        if ($deviceState === 'otp_required') {
+            AccessLog::record(AccessLog::LINK_REQUESTED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => 'DEVICE_OTP_REQUIRED',
+                'risk_score' => 0,
+            ]);
+
+            return view('front.find-my-files.device-otp', [
+                'rawToken'    => $raw,
+                'bse'         => $currentLang->basic_extra,
+                'currentLang' => $currentLang,
+                'version'     => $this->getVersion($currentLang),
+                'bs'          => $currentLang->basic_setting,
+                'appUrl'      => config('app.url'),
+                'otpTtlMinutes' => TenderDeviceOtp::OTP_TTL_MIN,
+            ]);
+        }
+
         // Risk score for logging
         $risk = $this->riskScore($request, $token->email_hash);
 
@@ -911,6 +1307,23 @@ class FindMyFilesController extends Controller
                 'user_agent' => substr($request->userAgent(), 0, 255),
                 'order_id'   => $token->order_id,
                 'result'     => 'BINDING_MISMATCH_AT_STREAM',
+                'risk_score' => 0,
+            ]);
+            abort(403);
+        }
+
+        // Same recognized-device gate as download() — defense in depth in
+        // case this stream URL is ever hit directly without going through
+        // the confirmation page first (the normal flow already resolved
+        // 'otp_required' there, so this should only ever fire for a
+        // bookmarked/shared raw stream link).
+        $deviceState = $this->deviceAccessState($token, $request);
+        if ($deviceState !== 'allowed') {
+            AccessLog::record(AccessLog::DOWNLOAD_FAILED, [
+                'ip'         => $request->ip(),
+                'user_agent' => substr($request->userAgent(), 0, 255),
+                'order_id'   => $token->order_id,
+                'result'     => $deviceState === 'device_limit' ? 'DEVICE_LIMIT_AT_STREAM' : 'DEVICE_OTP_REQUIRED_AT_STREAM',
                 'risk_score' => 0,
             ]);
             abort(403);
@@ -1476,10 +1889,7 @@ class FindMyFilesController extends Controller
             // configurable, shared across all 4 methods) — scoped to THIS
             // order, so one order hitting its cap doesn't block the rest.
             if ($this->regenCapApplies('regenerate')) {
-                $regenCount = SecureToken::where('email_hash', $emailHash)
-                    ->where('order_id', $purchase->order_number)
-                    ->where('created_at', '>=', now()->subHours(24))
-                    ->count();
+                $regenCount = $this->regenCountForOrder($emailHash, $purchase->order_number);
 
                 if ($regenCount >= $this->maxRegenPerDay()) {
                     $anyCapExceeded = true;
@@ -1803,10 +2213,7 @@ class FindMyFilesController extends Controller
         // ── 4c. Recovery cap: max N link issuances per order per 24h, shared
         // across all 4 Find-My-Files methods (admin configurable) ────────────
         if ($this->regenCapApplies('payref')) {
-            $regenCount = SecureToken::where('email_hash', $emailHash)
-                ->where('order_id', $purchase->order_number)
-                ->where('created_at', '>=', now()->subHours(24))
-                ->count();
+            $regenCount = $this->regenCountForOrder($emailHash, $purchase->order_number);
 
             if ($regenCount >= $this->maxRegenPerDay()) {
                 AccessLog::record(AccessLog::LINK_REQUESTED, array_merge($logMeta, [
@@ -2182,10 +2589,7 @@ class FindMyFilesController extends Controller
             // across all 4 Find-My-Files methods (admin configurable) — scoped
             // to THIS order, so one capped order doesn't block the rest.
             if ($this->regenCapApplies('otp')) {
-                $regenCount = SecureToken::where('email_hash', $emailHash)
-                    ->where('order_id', $purchase->order_number)
-                    ->where('created_at', '>=', now()->subHours(24))
-                    ->count();
+                $regenCount = $this->regenCountForOrder($emailHash, $purchase->order_number);
 
                 if ($regenCount >= $this->maxRegenPerDay()) {
                     $anyCapExceeded = true;

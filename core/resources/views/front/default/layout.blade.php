@@ -232,7 +232,7 @@
     <!--   header area end   -->
 
 
-    @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation') && !request()->routeIs('front.unsubscribe.token'))
+    @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation') && !request()->routeIs('front.unsubscribe.token') && !($hideBreadcrumb ?? false))
         <!--   breadcrumb area start   -->
         @if ($be->theme_version == 'dark')
             <div class="dark-breadcrumb-hero">

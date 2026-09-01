@@ -217,6 +217,7 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/purchase-log') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/blacklist') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/payment-evidence') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/tender/devices') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tenders') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/create') active
 @elseif(request()->is(config('app.admin_prefix','admin').'/tender/*/edit')) active
@@ -232,6 +233,7 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/purchase-log') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/blacklist') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/payment-evidence') show
+@elseif(request()->path() == config('app.admin_prefix','admin').'/tender/devices') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tenders') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/tender/create') show
 @elseif(request()->is(config('app.admin_prefix','admin').'/tender/*/edit')) show
@@ -274,6 +276,11 @@
                                 <li class="@if (request()->path() == config('app.admin_prefix','admin').'/tender/payment-evidence') active @endif">
                                     <a href="{{ route('admin.tender.paymentEvidence') }}">
                                         <span class="sub-item">Payment Evidence</span>
+                                    </a>
+                                </li>
+                                <li class="@if (request()->path() == config('app.admin_prefix','admin').'/tender/devices') active @endif">
+                                    <a href="{{ route('admin.tender.devices') }}">
+                                        <span class="sub-item">Authorized Devices</span>
                                     </a>
                                 </li>
                                 <li class="@if (request()->path() == config('app.admin_prefix','admin').'/tender/enrolls/report') active @endif">

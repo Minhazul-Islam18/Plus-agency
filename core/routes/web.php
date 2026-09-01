@@ -188,6 +188,10 @@ Route::get('/find-my-files/security-verification', 'Front\FindMyFilesController@
 Route::get('/find-my-files/download', 'Front\FindMyFilesController@download')->name('find_my_files.download')->middleware('throttle:30,1');
 Route::get('/find-my-files/download/stream', 'Front\FindMyFilesController@downloadStream')->name('find_my_files.stream')->middleware('throttle:20,1');
 
+/** Find My Files — new-device recognition gate on the post-payment link **/
+Route::post('/find-my-files/device/otp/request', 'Front\FindMyFilesController@requestDeviceOtp')->name('find_my_files.device_otp_request')->middleware('throttle:5,1');
+Route::post('/find-my-files/device/otp/verify', 'Front\FindMyFilesController@verifyDeviceOtp')->name('find_my_files.device_otp_verify')->middleware('throttle:8,1');
+
 /** Find My Files — OTP Method (brute-force + SMS/email cost sensitive) **/
 Route::post('/find-my-files/otp/request', 'Front\FindMyFilesController@requestOtp')->name('find_my_files.otp_request')->middleware('throttle:3,1');
 Route::post('/find-my-files/otp/verify',  'Front\FindMyFilesController@verifyOtp')->name('find_my_files.otp_verify')->middleware('throttle:6,1');
@@ -738,6 +742,14 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
         Route::post('/tender/purchase/update-reference', 'Admin\TenderController@purchaseUpdateReference')->name('admin.tender.purchaseUpdateReference');
+        // Authorized Devices page
+        Route::get('/tender/devices', 'Admin\TenderDeviceController@index')->name('admin.tender.devices');
+        Route::post('/tender/devices/store', 'Admin\TenderDeviceController@store')->name('admin.tender.devices.store');
+        Route::post('/tender/devices/reset', 'Admin\TenderDeviceController@reset')->name('admin.tender.devices.reset');
+        Route::post('/tender/devices/revoke', 'Admin\TenderDeviceController@revoke')->name('admin.tender.devices.revoke');
+        Route::post('/tender/devices/destroy', 'Admin\TenderDeviceController@destroy')->name('admin.tender.devices.destroy');
+        Route::post('/tender/devices/resend-otp', 'Admin\TenderDeviceController@resendOtp')->name('admin.tender.devices.resendOtp');
+        Route::post('/tender/devices/verify-otp', 'Admin\TenderDeviceController@verifyOtp')->name('admin.tender.devices.verifyOtp');
         Route::post('/tender/purchase/suspend', 'Admin\TenderController@purchaseSuspend')->name('admin.tender.purchaseSuspend');
         Route::post('/tender/purchase/delete', 'Admin\TenderController@purchaseDelete')->name('admin.tender.purchaseDelete');
         Route::post('/tender/purchase/bulk_delete', 'Admin\TenderController@purchaseBulkOrderDelete')->name('admin.tender.purchaseBulkOrderDelete');

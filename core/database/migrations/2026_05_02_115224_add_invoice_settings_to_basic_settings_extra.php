@@ -66,6 +66,25 @@ return new class extends Migration
             if (!Schema::hasColumn('basic_settings_extra', 'tender_payment_link_expiry_hours')) {
                 $table->unsignedInteger('tender_payment_link_expiry_hours')->default(24)->after('tender_payment_session_timeout_minutes');
             }
+
+            // When the plain post-payment download link (no session_secret —
+            // see FindMyFilesController::firstUseBindingFails) gets locked to
+            // the device/browser+network that used it: 'download' (default —
+            // only a real file transfer binds it) or 'open' (binds the
+            // moment the confirmation page itself is viewed, before any
+            // download). Editable at admin/tender/settings.
+            if (!Schema::hasColumn('basic_settings_extra', 'tender_bind_link_on')) {
+                $table->string('tender_bind_link_on', 20)->default('download')->after('tender_payment_link_expiry_hours');
+            }
+
+            // Max devices/browsers that can be recognized per order (the
+            // first is auto-trusted, every one after needs an email OTP —
+            // see tender_device_registrations / tender_device_otps).
+            // Without a cap, anyone with ongoing email access could keep
+            // registering devices indefinitely.
+            if (!Schema::hasColumn('basic_settings_extra', 'tender_max_devices_per_order')) {
+                $table->unsignedInteger('tender_max_devices_per_order')->default(5)->after('tender_bind_link_on');
+            }
         });
     }
 
@@ -77,7 +96,7 @@ return new class extends Migration
                 'tender_max_downloads', 'tender_max_regen_per_day', 'tender_regen_cap_enabled',
                 'tender_regen_cap_order_number', 'tender_regen_cap_otp', 'tender_regen_cap_payref',
                 'tender_regen_cap_regenerate', 'tender_payment_session_timeout_minutes',
-                'tender_payment_link_expiry_hours',
+                'tender_payment_link_expiry_hours', 'tender_bind_link_on', 'tender_max_devices_per_order',
             ]);
         });
     }

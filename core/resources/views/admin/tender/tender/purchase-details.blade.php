@@ -11,6 +11,12 @@
     // happened before it was revoked, so this sums all of them, not just
     // the currently-active one).
     $downloadCount = \App\SecureToken::where('order_id', $purchase->order_number)->sum('download_count');
+
+    // Devices/browsers recognized for this order's secure download link —
+    // see FindMyFilesController::deviceAccessState().
+    $recognizedDevices = \App\TenderDeviceRegistration::where('order_id', $purchase->order_number)
+        ->orderByDesc('registered_at')
+        ->get();
 @endphp
 
 <!-- Receipt Details Modal -->
@@ -238,6 +244,47 @@
                         <div class="col-lg-5"><strong>Payment Reference:</strong></div>
                         <div class="col-lg-7">{{ $purchase->payment_reference }}</div>
 
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <strong>Recognized Devices:</strong>
+                            <br>
+                            <a href="{{ route('admin.tender.devices', ['q' => $purchase->order_number]) }}"
+                                style="font-size: 11px;">View in Authorized Devices &rarr;</a>
+                        </div>
+                        <div class="col-lg-7">
+                            @if ($recognizedDevices->isEmpty())
+                                <span class="text-muted">None yet</span>
+                            @else
+                                @foreach ($recognizedDevices as $device)
+                                    <div class="d-flex justify-content-between align-items-center mb-1"
+                                        style="font-size: 12px;">
+                                        <span>
+                                            {{ $device->device_label ?: 'Unknown device' }}
+                                            @if ($device->status == 'pending')
+                                                <span class="badge badge-warning">Pending OTP</span>
+                                            @elseif ($device->status == 'revoked')
+                                                <span class="badge badge-danger">Revoked</span>
+                                            @endif
+                                            <span class="text-muted">
+                                                &middot; last used {{ optional($device->last_used_at)->format('d M Y, H:i') }}
+                                            </span>
+                                        </span>
+                                        <form action="{{ route('admin.tender.devices.reset') }}" method="POST"
+                                            class="d-inline-block ml-2 revokedeviceform">
+                                            @csrf
+                                            <input type="hidden" name="device_id" value="{{ $device->id }}">
+                                            <button type="submit" class="btn btn-link btn-sm p-0 text-danger"
+                                                onclick="return confirm('Reset this device? It will need a new email code to access this order\'s link again.')">
+                                                Reset
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
                     </div>
                     <hr>
 

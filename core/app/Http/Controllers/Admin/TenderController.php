@@ -1150,6 +1150,7 @@ class TenderController extends Controller
             'tender_regen_cap_regenerate'       => 'nullable|in:0,1',
             'tender_payment_session_timeout_minutes' => 'nullable|integer|min:1|max:1440',
             'tender_payment_link_expiry_hours'       => 'nullable|integer|min:1|max:720',
+            'tender_max_devices_per_order'       => 'nullable|integer|min:1|max:20',
         ], [
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
             'tender_max_downloads.min'          => 'Opens Allowed Per Link can\'t be set below the system default (3).',
@@ -1223,6 +1224,11 @@ class TenderController extends Controller
             $bex->tender_payment_link_expiry_hours = $request->filled('tender_payment_link_expiry_hours')
                 ? (int) $request->tender_payment_link_expiry_hours
                 : 24;
+            // Max recognized devices/browsers per order before a new one is
+            // refused outright — see FindMyFilesController::deviceAccessState().
+            $bex->tender_max_devices_per_order = $request->filled('tender_max_devices_per_order')
+                ? (int) $request->tender_max_devices_per_order
+                : 5;
 
             $bex->save();
         }

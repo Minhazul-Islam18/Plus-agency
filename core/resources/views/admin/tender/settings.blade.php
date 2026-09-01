@@ -658,13 +658,21 @@
                                     </div>
 
                                     {{-- Max downloads per link --}}
-                                    <div class="form-group">
-                                        <label>Opens Allowed Per Link</label>
-                                        <input type="number" class="form-control ltr" name="tender_max_downloads"
-                                            value="{{ $abex->tender_max_downloads ?? 3 }}" step="1" min="1"
-                                            max="20">
-                                        <small class="text-muted d-block mt-1">Default 3. Each selected tender gets its own
-                                            link with its own counter.</small>
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div class="tss-subhead mt-0" style="--tss-accent:#31CE36;">Opens Allowed
+                                                Per Link</div>
+                                            <div class="form-group mb-0">
+                                                <label>Opens Allowed Per Link</label>
+                                                <input type="number" class="form-control ltr"
+                                                    name="tender_max_downloads"
+                                                    value="{{ $abex->tender_max_downloads ?? 3 }}" step="1" min="3"
+                                                    max="20">
+                                                <small class="text-muted d-block mt-1">Default 3 — the system
+                                                    minimum, can be raised but never lowered. Each selected tender
+                                                    gets its own link with its own counter.</small>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="card mb-4">
@@ -707,9 +715,10 @@
                                         <label>Recovery Requests Per Order (24h)</label>
                                         <input type="number" class="form-control ltr" name="tender_max_regen_per_day"
                                             value="{{ $abex->tender_max_regen_per_day ?? 3 }}" step="1"
-                                            min="1" max="20">
-                                        <small class="text-muted d-block mt-1">Default 3. Only used while Recovery Cap
-                                            above is Active.</small>
+                                            min="3" max="20">
+                                        <small class="text-muted d-block mt-1">Default 3 — the system minimum, can be
+                                            raised but never lowered. Only used while Recovery Cap above is
+                                            Active.</small>
                                     </div>
 
                                     {{-- Per-method toggles --}}

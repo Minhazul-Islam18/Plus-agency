@@ -1025,13 +1025,22 @@ class TenderController extends Controller
         $rawToken  = hash_hmac('sha256', $payload, config('app.key'));
         $tokenHash = hash('sha256', $rawToken);
 
+        // Admin-configurable open-limit (admin/tender/settings), matching the
+        // gateway-payment path (TenderPaymentHelper::dispatchTenderDownloadLink)
+        // — this was hardcoded to 3 here, silently ignoring the Opens Allowed
+        // Per Link setting for every manually-completed order.
+        $maxDownloads = (int) optional(BasicExtra::first())->tender_max_downloads;
+        if ($maxDownloads < 1) {
+            $maxDownloads = 3;
+        }
+
         SecureToken::create([
             'order_id'       => $purchase->order_number,
             'email_hash'     => hash('sha256', strtolower(trim($purchase->email))),
             'token_hash'     => $tokenHash,
             'issued_at'      => now(),
             'expires_at'     => now()->addHours(24),
-            'max_downloads'  => 3,
+            'max_downloads'  => $maxDownloads,
             'download_count' => 0,
             'status'         => 'active',
             'device_hash'    => '',
@@ -1051,7 +1060,7 @@ class TenderController extends Controller
                 'order_number'   => $purchase->order_number,
                 'download_url'   => $downloadUrl,
                 'expires_at'     => now()->addHours(24)->format('d M Y, H:i'),
-                'max_downloads'  => 3,
+                'max_downloads'  => $maxDownloads,
                 'website_title'  => $bs->website_title,
                 'templateType'   => 'tender_download_link',
                 'type'           => 'tenderDownloadLink',
@@ -1128,8 +1137,12 @@ class TenderController extends Controller
             'tender_watermark_template'         => 'nullable|string|max:2000',
             'tender_pdf_encrypt_enabled'        => 'nullable|in:0,1',
             'tender_pdf_password'               => 'nullable|string|max:255|required_if:tender_pdf_encrypt_enabled,1',
-            'tender_max_downloads'              => 'nullable|integer|min:1|max:20',
-            'tender_max_regen_per_day'          => 'nullable|integer|min:1|max:20',
+            // min:3 is the system default, not an arbitrary floor — these
+            // are security caps (download opens / recovery-link reissuance),
+            // and an admin should be able to raise them but never weaken
+            // them below what the system ships with.
+            'tender_max_downloads'              => 'nullable|integer|min:3|max:20',
+            'tender_max_regen_per_day'          => 'nullable|integer|min:3|max:20',
             'tender_regen_cap_enabled'          => 'nullable|in:0,1',
             'tender_regen_cap_order_number'     => 'nullable|in:0,1',
             'tender_regen_cap_otp'              => 'nullable|in:0,1',
@@ -1139,6 +1152,8 @@ class TenderController extends Controller
             'tender_payment_link_expiry_hours'       => 'nullable|integer|min:1|max:720',
         ], [
             'tender_pdf_password.required_if'   => 'A password is required when PDF encryption is active.',
+            'tender_max_downloads.min'          => 'Opens Allowed Per Link can\'t be set below the system default (3).',
+            'tender_max_regen_per_day.min'       => 'Recovery Requests Per Order can\'t be set below the system default (3).',
         ]);
 
         $invoiceDir = base_path(FRONT_ADMIN_IMG_DIR . 'invoice/');

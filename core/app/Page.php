@@ -11,9 +11,10 @@ class Page extends Model
      * Normal pages (null / '') are unlimited.
      */
     const SPECIAL_TYPES = [
-        'terms'        => 'Terms & Conditions',
-        'privacy'      => 'Privacy Policy',
-        'legal_notice' => 'Legal Notice',
+        'terms'         => 'Terms & Conditions',
+        'privacy'       => 'Privacy Policy',
+        'legal_notice'  => 'Legal Notice',
+        'cookie_policy' => 'Cookie Policy',
     ];
 
     public function language() {

@@ -410,10 +410,16 @@
                         // matching hardcoded French slugs only ever found the
                         // French rows and silently produced zero results
                         // (no links, no error) for every other language.
+                        // Fixed display order (privacy, terms, legal notice, cookie
+                        // policy) regardless of DB/insertion order — sortBy keyed on
+                        // this array's own position, missing pages just drop out.
+                        $legalPageOrder = ['privacy', 'terms', 'legal_notice', 'cookie_policy'];
                         $legalPages = \App\Page::where('language_id', $currentLang->id ?? null)
-                            ->whereIn('page_type', ['privacy', 'terms'])
+                            ->whereIn('page_type', $legalPageOrder)
                             ->where('status', 1)
-                            ->get(['id', 'title', 'slug']);
+                            ->get(['id', 'title', 'slug', 'page_type'])
+                            ->sortBy(fn($page) => array_search($page->page_type, $legalPageOrder))
+                            ->values();
                     @endphp
                     <div class="copyright-section dark-copyright-section">
                         <span class="dark-copyright-text">{!! replaceBaseUrl(convertUtf8($bs->copyright_text)) !!}</span>

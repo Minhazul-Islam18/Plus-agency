@@ -37,6 +37,9 @@ class TestimonialController extends Controller
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
+        $companyLogo = $request->company_logo;
+        $extCompanyLogo = pathinfo($companyLogo, PATHINFO_EXTENSION);
+
         $messages = [
             'language_id.required' => 'The language field is required'
         ];
@@ -48,12 +51,23 @@ class TestimonialController extends Controller
             'name' => 'required|max:50',
             'rank' => 'required|max:50',
             'serial_number' => 'required|integer',
+            'company_url' => 'nullable|url|max:255',
         ];
 
         if ($request->filled('image')) {
             $rules['image'] = [
                 function ($attribute, $value, $fail) use ($extImage, $allowedExts) {
                     if (!in_array($extImage, $allowedExts)) {
+                        return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        if ($request->filled('company_logo')) {
+            $rules['company_logo'] = [
+                function ($attribute, $value, $fail) use ($extCompanyLogo, $allowedExts) {
+                    if (!in_array($extCompanyLogo, $allowedExts)) {
                         return $fail("Only png, jpg, jpeg, svg image is allowed");
                     }
                 }
@@ -73,11 +87,18 @@ class TestimonialController extends Controller
         $testimonial->rank = $request->rank;
         $testimonial->image = $request->testimonial_image;
         $testimonial->serial_number = $request->serial_number;
+        $testimonial->company_url = $request->filled('company_url') ? trim($request->company_url) : null;
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
             @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $testimonial->image = $filename;
+        }
+
+        if ($request->filled('company_logo')) {
+            $filename = uniqid() . '.' . $extCompanyLogo;
+            @copy($companyLogo, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
+            $testimonial->company_logo = $filename;
         }
 
         $testimonial->save();
@@ -92,17 +113,31 @@ class TestimonialController extends Controller
         $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
+        $companyLogo = $request->company_logo;
+        $extCompanyLogo = pathinfo($companyLogo, PATHINFO_EXTENSION);
+
         $rules = [
             'comment' => 'required',
             'name' => 'required|max:50',
             'rank' => 'required|max:50',
             'serial_number' => 'required|integer',
+            'company_url' => 'nullable|url|max:255',
         ];
 
         if ($request->filled('image')) {
             $rules['image'] = [
                 function ($attribute, $value, $fail) use ($extImage, $allowedExts) {
                     if (!in_array($extImage, $allowedExts)) {
+                        return $fail("Only png, jpg, jpeg, svg image is allowed");
+                    }
+                }
+            ];
+        }
+
+        if ($request->filled('company_logo')) {
+            $rules['company_logo'] = [
+                function ($attribute, $value, $fail) use ($extCompanyLogo, $allowedExts) {
+                    if (!in_array($extCompanyLogo, $allowedExts)) {
                         return $fail("Only png, jpg, jpeg, svg image is allowed");
                     }
                 }
@@ -120,6 +155,7 @@ class TestimonialController extends Controller
         $testimonial->name = $request->name;
         $testimonial->rank = $request->rank;
         $testimonial->serial_number = $request->serial_number;
+        $testimonial->company_url = $request->filled('company_url') ? trim($request->company_url) : null;
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->image);
@@ -127,6 +163,16 @@ class TestimonialController extends Controller
             @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $testimonial->image = $filename;
         }
+
+        if ($request->filled('company_logo')) {
+            if ($testimonial->company_logo) {
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->company_logo);
+            }
+            $filename = uniqid() . '.' . $extCompanyLogo;
+            @copy($companyLogo, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
+            $testimonial->company_logo = $filename;
+        }
+
         $testimonial->save();
 
         Session::flash('success', 'Testimonial updated successfully!');
@@ -210,6 +256,9 @@ class TestimonialController extends Controller
     {
         $testimonial = Testimonial::findOrFail($request->testimonial_id);
         @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->image);
+        if ($testimonial->company_logo) {
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $testimonial->company_logo);
+        }
         $testimonial->delete();
 
         Session::flash('success', 'Testimonial deleted successfully!');

@@ -30,6 +30,21 @@
                         <img src="{{ asset('assets/front/img/testimonials/' . $testimonial->image) }}" alt="">
                     </div>
                     <div class="client-desc">
+                        @if (!empty($testimonial->company_logo))
+                            @php
+                                $logoImg = '<img src="' . asset('assets/front/img/testimonials/' . $testimonial->company_logo) . '" alt="' . e(convertUtf8($testimonial->name)) . '">';
+                            @endphp
+                            @if (!empty($testimonial->company_url))
+                                <a href="{{ $testimonial->company_url }}" target="_blank" rel="noopener noreferrer nofollow"
+                                    class="testi-company-logo" aria-label="{{ __('Visit company website') }}">
+                                    {!! $logoImg !!}
+                                </a>
+                            @else
+                                <div class="testi-company-logo testi-company-logo-static">
+                                    {!! $logoImg !!}
+                                </div>
+                            @endif
+                        @endif
                         <div class="dark-testimonial-quote-icon">{{ __('Testimonial') }} <b>{{ sprintf('N°%02d', $key + 1) }}</b></div>
                         <h6 class="name">{{ convertUtf8($testimonial->name) }}</h6>
                         <p class="rank">{{ convertUtf8($testimonial->rank) }}</p>

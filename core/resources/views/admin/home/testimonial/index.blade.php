@@ -185,6 +185,7 @@
                                     <tr>
                                         <th scope="col">#</th>
                                         <th scope="col">Image</th>
+                                        <th scope="col">Company Logo</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Rank</th>
                                         <th scope="col">Serial Number</th>
@@ -196,6 +197,13 @@
                                     <tr>
                                         <td>{{$loop->iteration}}</td>
                                         <td><img src="{{asset('assets/front/img/testimonials/'.$testimonial->image)}}" alt="" width="40"></td>
+                                        <td>
+                                            @if (!empty($testimonial->company_logo))
+                                                <img src="{{asset('assets/front/img/testimonials/'.$testimonial->company_logo)}}" alt="" width="32">
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                         <td>{{convertUtf8($testimonial->name)}}</td>
                                         <td>{{convertUtf8($testimonial->rank)}}</td>
                                         <td>{{$testimonial->serial_number}}</td>
@@ -265,6 +273,30 @@
 
                     </div>
 
+                    {{-- Company Logo Part (optional) --}}
+                    <div class="form-group">
+                        <label for="">Company Logo (Optional)</label>
+                        <br>
+                        <div class="thumb-preview" id="thumbPreview2">
+                            <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="Company Logo">
+                        </div>
+                        <br>
+                        <br>
+
+                        <input id="fileInput2" type="hidden" name="company_logo">
+                        <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Logo</button>
+
+                        <p class="text-warning mb-0">Shown as a small badge on the testimonial card. Leave empty to show no logo.</p>
+                        <p class="em text-danger mb-0" id="errcompany_logo"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Company Website URL (Optional)</label>
+                        <input type="text" class="form-control ltr" name="company_url" value="" placeholder="https://example.com">
+                        <p class="text-warning mb-0">If set, the company logo becomes clickable and opens this URL in a new tab. Only used if a logo is also uploaded.</p>
+                        <p id="errcompany_url" class="mb-0 text-danger em"></p>
+                    </div>
+
                     <div class="form-group">
                         <label for="">Language **</label>
                         <select name="language_id" class="form-control">
@@ -313,6 +345,18 @@
         <div class="modal-content">
             <div class="modal-body p-0">
                 <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Company Logo LFM Modal -->
+<div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+    <i class="fas fa-times-circle"></i>
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <iframe src="{{url('laravel-filemanager')}}?serial=2" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
             </div>
         </div>
     </div>

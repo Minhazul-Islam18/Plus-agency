@@ -90,6 +90,46 @@
                     </div>
                 </div>
 
+                {{-- Company Logo Part (optional) --}}
+                <div class="form-group">
+                    <label for="">Company Logo (Optional)</label>
+                    <br>
+                    <div class="thumb-preview" id="thumbPreview2">
+                        @if (!empty($testimonial->company_logo))
+                            <img src="{{asset('assets/front/img/testimonials/'.$testimonial->company_logo)}}" alt="Company Logo">
+                        @else
+                            <img src="{{asset('assets/admin/img/noimage.jpg')}}" alt="Company Logo">
+                        @endif
+                    </div>
+                    <br>
+                    <br>
+
+                    <input id="fileInput2" type="hidden" name="company_logo">
+                    <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Logo</button>
+
+                    <p class="text-warning mb-0">Shown as a small badge on the testimonial card. Leave empty to show no logo.</p>
+                    <p class="em text-danger mb-0" id="errcompany_logo"></p>
+
+                    <!-- Company Logo LFM Modal -->
+                    <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
+                        <i class="fas fa-times-circle"></i>
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body p-0">
+                                    <iframe src="{{url('laravel-filemanager')}}?serial=2" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Company Website URL (Optional)</label>
+                    <input type="text" class="form-control ltr" name="company_url" value="{{$testimonial->company_url}}" placeholder="https://example.com">
+                    <p class="text-warning mb-0">If set, the company logo becomes clickable and opens this URL in a new tab. Only used if a logo is also uploaded.</p>
+                    <p id="errcompany_url" class="mb-0 text-danger em"></p>
+                </div>
+
                 <div class="form-group">
                   <label for="">Comment **</label>
                   <textarea class="form-control" name="comment" rows="3" cols="80" placeholder="Enter comment">{{$testimonial->comment}}</textarea>

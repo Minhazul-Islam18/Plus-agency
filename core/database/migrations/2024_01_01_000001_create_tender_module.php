@@ -296,6 +296,19 @@ return new class extends Migration
                 $table->index('order_id');
             });
         }
+        // Last-known city/country for the device, from a free IP-geolocation
+        // lookup at the moment of OTP verification/access (see
+        // App\Services\GeoIpLookup) — city-level accuracy only, not exact
+        // position. Never a match/blocking criterion, display only.
+        $this->addColumn('tender_device_registrations', 'city', function (Blueprint $t) {
+            $t->string('city', 100)->nullable()->after('network_label');
+        });
+        $this->addColumn('tender_device_registrations', 'country', function (Blueprint $t) {
+            $t->string('country', 100)->nullable()->after('city');
+        });
+        $this->addColumn('tender_device_registrations', 'isp', function (Blueprint $t) {
+            $t->string('isp', 150)->nullable()->after('country');
+        });
 
         // Every real access by a recognized device — the "Historique des
         // accès récents" trail on the admin device-details page. Separate
@@ -313,6 +326,15 @@ return new class extends Migration
                 $table->timestamps();
             });
         }
+        $this->addColumn('tender_device_access_logs', 'city', function (Blueprint $t) {
+            $t->string('city', 100)->nullable()->after('network_label');
+        });
+        $this->addColumn('tender_device_access_logs', 'country', function (Blueprint $t) {
+            $t->string('country', 100)->nullable()->after('city');
+        });
+        $this->addColumn('tender_device_access_logs', 'isp', function (Blueprint $t) {
+            $t->string('isp', 150)->nullable()->after('country');
+        });
 
         // One-time email codes gating a NOT-YET-recognized device onto an
         // order's secure link (see tender_device_registrations above).

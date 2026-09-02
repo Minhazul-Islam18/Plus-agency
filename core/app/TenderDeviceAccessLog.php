@@ -16,6 +16,9 @@ class TenderDeviceAccessLog extends Model
         'device_registration_id',
         'ip',
         'network_label',
+        'city',
+        'country',
+        'isp',
         'result',
         'accessed_at',
     ];

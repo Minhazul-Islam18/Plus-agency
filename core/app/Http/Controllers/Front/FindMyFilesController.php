@@ -184,13 +184,23 @@ class FindMyFilesController extends Controller
 
     private function logDeviceAccess(TenderDeviceRegistration $device, Request $request, string $result): void
     {
+        $ip  = (string) $request->ip();
+        $geo = \App\Services\GeoIpLookup::lookup($ip);
+
         \App\TenderDeviceAccessLog::create([
             'device_registration_id' => $device->id,
-            'ip'                     => (string) $request->ip(),
+            'ip'                     => $ip,
             'network_label'          => $device->network_label,
+            'city'                   => $geo['city'] ?? null,
+            'country'                => $geo['country'] ?? null,
+            'isp'                    => $geo['isp'] ?? null,
             'result'                 => $result,
             'accessed_at'            => now(),
         ]);
+
+        if ($geo) {
+            $device->update(['city' => $geo['city'], 'country' => $geo['country'], 'isp' => $geo['isp']]);
+        }
     }
 
     /**

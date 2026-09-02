@@ -80,6 +80,20 @@
                                 <div class="ddm-info-value">{{ $device->ip ?: '-' }}</div>
                             </div>
                             <div class="ddm-info-row">
+                                <div class="ddm-info-label"><i class="fas fa-map-pin"></i> Location (last access)</div>
+                                <div class="ddm-info-value">
+                                    @if ($device->city || $device->country)
+                                        {{ trim(collect([$device->city, $device->country])->filter()->implode(', ')) }}
+                                    @else
+                                        Not available
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="ddm-info-row">
+                                <div class="ddm-info-label"><i class="fas fa-wifi"></i> ISP (last access)</div>
+                                <div class="ddm-info-value">{{ $device->isp ?: 'Not available' }}</div>
+                            </div>
+                            <div class="ddm-info-row">
                                 <div class="ddm-info-label"><i class="fas fa-broadcast-tower"></i> Network (last access)</div>
                                 <div class="ddm-info-value">{{ $device->network_label ?: 'Not available' }}</div>
                             </div>
@@ -135,6 +149,8 @@
                                         <tr>
                                             <th>Date &amp; Time</th>
                                             <th>IP</th>
+                                            <th>Location</th>
+                                            <th>ISP</th>
                                             <th>Network</th>
                                             <th>Result</th>
                                         </tr>
@@ -144,6 +160,8 @@
                                             <tr>
                                                 <td>{{ optional($log->accessed_at)->format('d M Y, H:i') }}</td>
                                                 <td>{{ $log->ip ?: '-' }}</td>
+                                                <td>{{ trim(collect([$log->city, $log->country])->filter()->implode(', ')) ?: '-' }}</td>
+                                                <td>{{ $log->isp ?: '-' }}</td>
                                                 <td>{{ $log->network_label ?: '-' }}</td>
                                                 <td>
                                                     @if ($log->result == 'success')

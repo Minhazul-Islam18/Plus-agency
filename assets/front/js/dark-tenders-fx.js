@@ -29,7 +29,10 @@
 
         $carousel.owlCarousel({
             loop: true,
-            autoplay: false,
+            autoplay: true,
+            autoplayTimeout: 4500,
+            autoplaySpeed: 1800,
+            autoplayHoverPause: true,
             nav: false,
             dots: false,
             margin: 26,

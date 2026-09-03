@@ -11,7 +11,10 @@
         // screens; this stays capped at 3, matching the approved design.
         $carousel.owlCarousel({
             loop: true,
-            autoplay: false,
+            autoplay: true,
+            autoplayTimeout: 4500,
+            autoplaySpeed: 1800,
+            autoplayHoverPause: true,
             nav: false,
             dots: false,
             margin: 24,

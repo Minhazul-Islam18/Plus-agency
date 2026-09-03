@@ -25,7 +25,7 @@ class ServicesectionController extends Controller
     public function update(Request $request, $langid)
     {
         $serviceSectionBg = $request->service_section_bg;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extServiceSectionBg = pathinfo($serviceSectionBg, PATHINFO_EXTENSION);
 
         $rules = [

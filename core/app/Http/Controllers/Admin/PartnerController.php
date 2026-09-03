@@ -37,7 +37,7 @@ class PartnerController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -89,7 +89,7 @@ class PartnerController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
@@ -169,7 +169,7 @@ class PartnerController extends Controller
     public function sectionUpdate(Request $request, $langid)
     {
         $image = $request->background;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [

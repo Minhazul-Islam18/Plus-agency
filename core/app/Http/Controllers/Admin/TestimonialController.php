@@ -34,7 +34,7 @@ class TestimonialController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $companyLogo = $request->company_logo;
@@ -110,7 +110,7 @@ class TestimonialController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $companyLogo = $request->company_logo;
@@ -182,7 +182,7 @@ class TestimonialController extends Controller
     public function textupdate(Request $request, $langid)
     {
         $testimonialSectionBg = $request->testimonial_section_bg;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extTestimonialSectionBg = pathinfo($testimonialSectionBg, PATHINFO_EXTENSION);
 
         $rules = [

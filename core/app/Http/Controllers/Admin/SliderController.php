@@ -45,7 +45,7 @@ class SliderController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $messages = [
@@ -110,7 +110,7 @@ class SliderController extends Controller
     public function update(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $slider = Slider::findOrFail($request->slider_id);

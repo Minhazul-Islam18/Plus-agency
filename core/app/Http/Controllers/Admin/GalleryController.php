@@ -58,7 +58,7 @@ class GalleryController extends Controller
     $categoryInfo = BasicExtra::first();
 
     $image = $request->image;
-    $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+    $allowedExts = allowed_image_extensions();
     $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
     $messages = [
@@ -128,7 +128,7 @@ class GalleryController extends Controller
 
     $gallery = Gallery::findOrFail($request->gallery_id);
     $image = $request->image;
-    $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+    $allowedExts = allowed_image_extensions();
     $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
     $rules = [

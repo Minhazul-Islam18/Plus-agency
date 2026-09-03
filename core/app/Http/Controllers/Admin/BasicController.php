@@ -93,7 +93,7 @@ class BasicController extends Controller
         $favicon = $request->favicon;
         $breadcrumb = $request->breadcrumb;
 
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         // Email clients (Outlook especially) largely don't render inline SVG
         // regardless of markup — the email logo must be a raster format.
         $allowedEmailExts = array('jpg', 'png', 'jpeg');
@@ -265,7 +265,7 @@ class BasicController extends Controller
     public function updatepreloader(Request $request)
     {
         $preloader = $request->preloader;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extPreloader = pathinfo($preloader, PATHINFO_EXTENSION);
 
         $rules = [
@@ -627,7 +627,7 @@ class BasicController extends Controller
     public function updatemaintainance(Request $request, $langid)
     {
         $maintenance = $request->maintenance;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extLogo = pathinfo($maintenance, PATHINFO_EXTENSION);
 
         $rules = [];

@@ -34,7 +34,7 @@ class AdminSettingsController extends Controller
     {
         $logo = $request->login_logo;
         $bgImage = $request->login_bg_image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extLogo = pathinfo($logo, PATHINFO_EXTENSION);
         $extBg = pathinfo($bgImage, PATHINFO_EXTENSION);
 

@@ -41,7 +41,7 @@ class ServiceController extends Controller
         $bs->service_breadcrumb_overlay_opacity = $request->service_breadcrumb_overlay_opacity;
 
         if ($request->filled('service_breadcrumb_bg')) {
-            $allowedExts = ['jpg', 'jpeg', 'png', 'avif'];
+            $allowedExts = allowed_image_extensions();
             $extBg = pathinfo($request->service_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
                 @unlink(FRONT_IMG_PATH . $bs->service_breadcrumb_bg);
@@ -103,7 +103,7 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $language = Language::find($request->language_id);
@@ -192,7 +192,7 @@ class ServiceController extends Controller
         $serviceId = $request->service_id;
 
         $image = $request->image;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $language = Language::find($service->language_id);

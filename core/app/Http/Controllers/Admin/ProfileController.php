@@ -78,7 +78,7 @@ class ProfileController extends Controller
 
     public function updatePropic(Request $request) {
       $img = $request->file('file');
-      $allowedExts = array('jpg', 'png', 'jpeg', 'webp', 'avif');
+      $allowedExts = allowed_image_extensions();
 
       $rules = [
         'file' => [

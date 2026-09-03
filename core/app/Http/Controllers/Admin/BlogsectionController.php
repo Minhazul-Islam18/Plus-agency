@@ -31,7 +31,7 @@ class BlogsectionController extends Controller
     public function update(Request $request, $langid)
     {
         $background = $request->background;
-        $allowedExts = array('jpg', 'png', 'jpeg', 'svg', 'webp', 'avif');
+        $allowedExts = allowed_image_extensions();
         $extBackground = pathinfo($background, PATHINFO_EXTENSION);
 
         $rules = [

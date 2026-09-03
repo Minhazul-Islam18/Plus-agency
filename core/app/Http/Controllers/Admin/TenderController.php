@@ -261,7 +261,7 @@ class TenderController extends Controller
         $slug = slug_create($request->title);
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
-        $allowedExts = ['jpg', 'png', 'jpeg', 'svg', 'avif'];
+        $allowedExts = allowed_image_extensions();
         $extImage    = pathinfo($image, PATHINFO_EXTENSION);
         $extExpImage = pathinfo($expImage, PATHINFO_EXTENSION);
 
@@ -427,7 +427,7 @@ class TenderController extends Controller
 
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
-        $allowedExts = ['jpg', 'png', 'jpeg', 'svg', 'avif'];
+        $allowedExts = allowed_image_extensions();
         $extImage    = pathinfo($image, PATHINFO_EXTENSION);
         $extExpImage = pathinfo($expImage, PATHINFO_EXTENSION);
 

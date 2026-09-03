@@ -64,6 +64,49 @@ if (! function_exists('convertUtf8')) {
 }
 
 
+if (! function_exists('allowed_image_extensions')) {
+    /**
+     * Image extensions accepted for direct (non-LFM) admin uploads —
+     * derived from LFM's own image-category MIME whitelist
+     * (config/lfm.php, 'folder_categories.image.valid_mime') so both
+     * stay in sync from one place. Add a new format there and it
+     * automatically shows up here too, in both validation and hint text.
+     */
+    function allowed_image_extensions()
+    {
+        $mimeToExt = [
+            'image/jpeg'    => ['jpg', 'jpeg'],
+            'image/pjpeg'   => ['jpg', 'jpeg'],
+            'image/jpg'     => ['jpg'],
+            'image/png'     => ['png'],
+            'image/gif'     => ['gif'],
+            'image/webp'    => ['webp'],
+            'image/avif'    => ['avif'],
+            'image/svg+xml' => ['svg'],
+        ];
+
+        $mimes = config('lfm.folder_categories.image.valid_mime', []);
+        $extensions = [];
+        foreach ($mimes as $mime) {
+            foreach ($mimeToExt[$mime] ?? [] as $ext) {
+                $extensions[$ext] = true;
+            }
+        }
+
+        return array_keys($extensions);
+    }
+}
+
+
+if (! function_exists('allowed_image_extensions_label')) {
+    /** e.g. "JPG, JPEG, PNG, GIF, WEBP, AVIF, SVG" — for upload-field hint text. */
+    function allowed_image_extensions_label()
+    {
+        return implode(', ', array_map('strtoupper', allowed_image_extensions()));
+    }
+}
+
+
 if (! function_exists('make_slug')) {
     function make_slug($string)
     {

@@ -31,7 +31,7 @@ class BlogSettingsController extends Controller
         $bs->blog_breadcrumb_overlay_opacity = $request->blog_breadcrumb_overlay_opacity;
 
         if ($request->filled('blog_breadcrumb_bg')) {
-            $allowedExts = ['jpg', 'jpeg', 'png', 'avif'];
+            $allowedExts = allowed_image_extensions();
             $extBg = pathinfo($request->blog_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
                 @unlink(FRONT_IMG_PATH . $bs->blog_breadcrumb_bg);

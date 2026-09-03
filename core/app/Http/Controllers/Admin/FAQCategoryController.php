@@ -44,7 +44,7 @@ class FAQCategoryController extends Controller
         $bs->faq_breadcrumb_overlay_opacity = $request->faq_breadcrumb_overlay_opacity;
 
         if ($request->filled('faq_breadcrumb_bg')) {
-            $allowedExts = ['jpg', 'jpeg', 'png', 'avif'];
+            $allowedExts = allowed_image_extensions();
             $extBg = pathinfo($request->faq_breadcrumb_bg, PATHINFO_EXTENSION);
             if (in_array($extBg, $allowedExts)) {
                 @unlink(FRONT_IMG_PATH . $bs->faq_breadcrumb_bg);

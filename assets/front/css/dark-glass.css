@@ -5727,6 +5727,16 @@ button.dark-sheet-submit[type="submit"]:active {
    treatment, applied directly rather than duplicated), spec-sheet
    sidebar on the right (reuses .dark-svcp-widget/-newsletter).
    ===================================================================== */
+.dark-pd-main-col {
+  /* This is a CSS Grid item (child of .dark-svcp-inner) — grid items
+     default to min-width:auto, meaning they won't shrink below their
+     content's intrinsic min-content size. Owl Carousel's .owl-stage is
+     intrinsically as wide as every slide combined, so without this
+     override that huge width was winning and ballooning the whole
+     column (and the grid) outward — overflow:hidden on descendants
+     can't fix it, since intrinsic sizing is computed before clipping. */
+  min-width: 0;
+}
 .dark-pd-gallery {
   margin-bottom: 40px;
 }
@@ -5741,16 +5751,83 @@ button.dark-sheet-submit[type="submit"]:active {
   height: 460px;
   object-fit: cover;
   display: block;
+  transition: opacity 0.4s ease;
 }
-.dark-pd-gallery-thumbs {
+.dark-pd-gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(9, 13, 22, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+.dark-pd-gallery-nav svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dark-pd-gallery-nav:hover {
+  background: rgba(var(--accent-2-rgb), 0.35);
+  border-color: rgba(var(--accent-2-rgb), 0.6);
+}
+.dark-pd-gallery-nav-prev {
+  left: 16px;
+}
+.dark-pd-gallery-nav-prev svg {
+  margin-right: 2px;
+}
+.dark-pd-gallery-nav-next {
+  right: 16px;
+}
+.dark-pd-gallery-nav-next svg {
+  margin-left: 2px;
+}
+@media (max-width: 460px) {
+  .dark-pd-gallery-nav {
+    width: 36px;
+    height: 36px;
+  }
+}
+/* Real Owl Carousel instance (see the script section) — its native loop
+   mode clones slides on both edges, so both autoplay AND a visitor
+   manually dragging/swiping the strip loop infinitely in either
+   direction. A hand-rolled scroll-position trick can only ever fix the
+   autoplay case; manual dragging on a plain overflow:auto div is always
+   bounded start-to-end, which is exactly what this replaces. */
+.dark-pd-gallery-thumbs {
+  /* Owl's .owl-stage is intrinsically as wide as every slide combined
+     (that's how its sliding mechanism works) — without this, a grid/flex
+     ancestor's default min-width:auto lets that full intrinsic width
+     balloon the whole column outward instead of the .owl-stage-outer
+     child clipping it as intended. */
+  overflow: hidden;
+  min-width: 0;
+}
+.dark-pd-gallery-thumbs.owl-carousel .owl-stage-outer {
+  overflow: hidden;
+  border-radius: 4px;
+}
+.dark-pd-gallery-thumbs .owl-stage {
+  display: flex;
 }
 .dark-pd-gallery-thumbs button {
   position: relative;
-  flex: 1;
-  min-width: 100px;
+  width: 100%;
   border: none;
   padding: 0;
   border-radius: 14px;

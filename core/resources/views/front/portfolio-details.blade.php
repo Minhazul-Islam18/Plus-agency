@@ -80,14 +80,18 @@
     <!--    dark portfolio details section start   -->
     <div class="dark-svcp-section">
         <div class="dark-svcp-inner">
-            <div>
+            <div class="dark-pd-main-col">
                 @if ($portfolio->portfolio_images->count() > 0)
                     <div class="dark-pd-gallery">
                         <div class="dark-pd-gallery-main">
                             <img id="pdMainImg" class="lazy" data-src="{{ asset('assets/front/img/portfolios/sliders/' . $portfolio->portfolio_images->first()->image) }}" alt="">
+                            @if ($portfolio->portfolio_images->count() > 1)
+                                <button type="button" class="dark-pd-gallery-nav dark-pd-gallery-nav-prev" id="pdGalleryPrev" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+                                <button type="button" class="dark-pd-gallery-nav dark-pd-gallery-nav-next" id="pdGalleryNext" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+                            @endif
                         </div>
                         @if ($portfolio->portfolio_images->count() > 1)
-                            <div class="dark-pd-gallery-thumbs">
+                            <div class="dark-pd-gallery-thumbs owl-carousel" id="pdThumbsTrack">
                                 @foreach ($portfolio->portfolio_images as $key => $pi)
                                     <button type="button" class="{{ $key == 0 ? 'is-active' : '' }}" data-full="{{ asset('assets/front/img/portfolios/sliders/' . $pi->image) }}">
                                         <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/sliders/' . $pi->image) }}" alt="">
@@ -337,17 +341,87 @@
 @section('scripts')
     @if ($be->theme_version == 'dark')
         <script>
-            document.querySelectorAll('.dark-pd-gallery-thumbs button').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    document.querySelectorAll('.dark-pd-gallery-thumbs button').forEach(function (b) { b.classList.remove('is-active'); });
-                    btn.classList.add('is-active');
-                    var full = btn.getAttribute('data-full');
-                    var mainImg = document.getElementById('pdMainImg');
-                    mainImg.classList.remove('lazy');
-                    mainImg.removeAttribute('data-src');
-                    mainImg.src = full;
+            (function () {
+                var $ = window.jQuery;
+                var mainImg = document.getElementById('pdMainImg');
+                var realThumbs = Array.prototype.slice.call(document.querySelectorAll('#pdThumbsTrack > button'));
+                if (!$ || !mainImg || !realThumbs.length) return;
+
+                var $track = $('#pdThumbsTrack');
+                var n = realThumbs.length;
+
+                function setActiveClass(index) {
+                    realThumbs.forEach(function (b) { b.classList.remove('is-active'); });
+                    realThumbs[index].classList.add('is-active');
+                }
+
+                function showImage(index) {
+                    setActiveClass(index);
+
+                    var full = realThumbs[index].getAttribute('data-full');
+                    // Crossfade instead of a hard swap — preload off-screen so
+                    // the fade-in only starts once the new image is actually
+                    // ready, avoiding a flash of the old frame at full opacity.
+                    mainImg.style.opacity = '0';
+                    var preload = new Image();
+                    preload.onload = function () {
+                        mainImg.classList.remove('lazy');
+                        mainImg.removeAttribute('data-src');
+                        mainImg.src = full;
+                        mainImg.style.opacity = '1';
+                    };
+                    preload.src = full;
+                }
+
+                // Real Owl Carousel instance for the thumb strip — its native
+                // loop:true mode clones slides on both edges, so this loops
+                // infinitely whether advanced by autoplay, the arrow buttons,
+                // or a visitor manually dragging/swiping the strip. Owl owns
+                // all the position/scroll mechanics; this script just listens
+                // for which slide is current and crossfades the main image to
+                // match — the two hand-rolled attempts before this only ever
+                // fixed the autoplay case, never manual dragging.
+                $track.owlCarousel({
+                    loop: true,
+                    margin: 12,
+                    nav: false,
+                    dots: false,
+                    autoplay: true,
+                    autoplayTimeout: 7000, // dwell time per image, long enough to read on-image text
+                    autoplayHoverPause: true,
+                    smartSpeed: 600,
+                    responsive: {
+                        0: { items: 1.3 },
+                        620: { items: 2 }
+                    }
                 });
-            });
+
+                $track.on('changed.owl.carousel', function (e) {
+                    if (!e.item || !e.relatedTarget) return;
+                    var realIndex = e.relatedTarget.relative(e.item.index);
+                    showImage(realIndex);
+                });
+
+                realThumbs.forEach(function (btn, index) {
+                    btn.addEventListener('click', function () {
+                        $track.trigger('to.owl.carousel', [index, 300]);
+                    });
+                });
+
+                var prevBtn = document.getElementById('pdGalleryPrev');
+                var nextBtn = document.getElementById('pdGalleryNext');
+                if (prevBtn) prevBtn.addEventListener('click', function () { $track.trigger('prev.owl.carousel'); });
+                if (nextBtn) nextBtn.addEventListener('click', function () { $track.trigger('next.owl.carousel'); });
+
+                // Owl's own autoplayHoverPause only covers hovering the thumb
+                // strip itself — extend the same pause to hovering the main
+                // image too, so the whole gallery pauses together.
+                var mainWrap = document.querySelector('.dark-pd-gallery-main');
+                if (mainWrap) {
+                    mainWrap.addEventListener('mouseenter', function () { $track.trigger('stop.owl.autoplay'); });
+                    mainWrap.addEventListener('mouseleave', function () { $track.trigger('play.owl.autoplay', [7000]); });
+                }
+            })();
         </script>
     @endif
 @endsection

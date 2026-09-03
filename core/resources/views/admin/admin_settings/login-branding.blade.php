@@ -66,7 +66,8 @@
                                 <br><br>
                                 <input id="fileInput1" type="hidden" name="login_logo">
                                 <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">{{__('Choose Image')}}</button>
-                                <p class="text-warning mb-0">{{__('JPG, PNG, JPEG, SVG images are allowed. Leave empty to use the site logo (:logo).', ['logo' => $bs->logo])}}</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed. Leave empty to use the site logo ({{ $bs->logo }}).</p>
+                                <p class="text-warning mb-0"><small>{{__('Recommended size: 260x80px (landscape wordmark). Displayed at max 130px wide, so a transparent PNG/SVG works best.')}}</small></p>
                                 @if ($errors->has('login_logo'))
                                 <p class="text-danger mb-0">{{$errors->first('login_logo')}}</p>
                                 @endif
@@ -101,7 +102,8 @@
                                 <br><br>
                                 <input id="fileInput2" type="hidden" name="login_bg_image">
                                 <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">{{__('Choose Image')}}</button>
-                                <p class="text-warning mb-0">{{__('JPG, PNG, JPEG, SVG images are allowed. Leave empty to use the default background.')}}</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed. Leave empty to use the default background.</p>
+                                <p class="text-warning mb-0"><small>{{__('Recommended size: 1200x1600px (3:4 portrait). Fills a full-height left panel (60% width), so use a tall image.')}}</small></p>
                                 @if ($errors->has('login_bg_image'))
                                 <p class="text-danger mb-0">{{$errors->first('login_bg_image')}}</p>
                                 @endif

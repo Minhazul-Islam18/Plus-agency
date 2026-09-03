@@ -89,7 +89,8 @@
                     <input id="deleteBackground" type="hidden" name="delete_background" value="0">
                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
-                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                    <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                     <p id="errbackground" class="em text-danger mb-0"></p>
 
                     <!-- Background LFM Modal -->

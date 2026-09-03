@@ -52,7 +52,8 @@
                                         <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                                        <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                        <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                        <p class="text-warning mb-0"><small>Recommended size: 192x192px (square) — the standard web push notification icon size.</small></p>
                                         @if ($errors->has('icon'))
                                         <p class="text-danger mb-0">{{$errors->first('icon')}}</p>
                                         @endif

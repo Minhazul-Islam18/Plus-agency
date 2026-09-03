@@ -103,7 +103,8 @@
                                                 Image</button>
 
 
-                                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                            <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                            <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                                             @if ($errors->has('background'))
                                                 <p class="text-danger mb-0">{{ $errors->first('background') }}</p>
                                             @endif

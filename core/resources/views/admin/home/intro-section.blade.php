@@ -100,8 +100,9 @@
                                                 data-multiple="false" data-toggle="modal" data-target="#lfmModal3">Choose
                                                 Background Image</button>
 
-                                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                            <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed. This will
                                                 be the background for the entire intro section.</p>
+                                            <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                                             <p class="text-danger mb-0 em" id="errintro_section_bg"></p>
 
                                             <!-- Intro Section Background LFM Modal -->
@@ -149,7 +150,8 @@
                                                 Image</button>
 
 
-                                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                            <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                            <p class="text-warning mb-0"><small>Recommended size: 1200x930px (4:3.1). The image is cropped to fit this ratio.</small></p>
                                             <p class="text-danger mb-0 em" id="errimage"></p>
 
                                             <!-- Image LFM Modal -->

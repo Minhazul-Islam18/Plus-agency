@@ -196,7 +196,8 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                    <p class="text-warning mb-0"><small>Recommended size: 800x500px (8:5 landscape). Displayed at its natural ratio (not cropped), so keep close to this ratio for a consistent card layout.</small></p>
                     <p class="em text-danger mb-0" id="errimage"></p>
 
                 </div>

@@ -356,9 +356,10 @@
                                             data-multiple="false" data-toggle="modal" data-target="#lfmModal1">
                                             Choose Image
                                         </button>
-                                        <p class="text-warning mb-0 mt-1">JPG, PNG, JPEG images are allowed</p>
+                                        <p class="text-warning mb-0 mt-1">{{ allowed_image_extensions_label() }} images are allowed</p>
                                         <p class="text-muted mb-0"><small>Faint watermark behind fee table. Leave empty to
                                                 use default.</small></p>
+                                        <p class="text-warning mb-0"><small>Recommended size: 500x500px (square). Rendered at 25% of the page width in the PDF, so a simple transparent logo mark works best.</small></p>
                                     </div>
 
                                     {{-- Stamp / Signature --}}
@@ -387,9 +388,10 @@
                                             data-multiple="false" data-toggle="modal" data-target="#lfmModal2">
                                             Choose Image
                                         </button>
-                                        <p class="text-warning mb-0 mt-1">JPG, PNG, JPEG images are allowed</p>
+                                        <p class="text-warning mb-0 mt-1">{{ allowed_image_extensions_label() }} images are allowed</p>
                                         <p class="text-muted mb-0"><small>Stamp/signature shown bottom-right of invoice.
                                                 Leave empty to use default.</small></p>
+                                        <p class="text-warning mb-0"><small>Recommended size: 400x400px (square, capped at 140x140px in the PDF). Use a transparent PNG.</small></p>
                                     </div>
 
                                     {{-- Footer Wavy Background --}}
@@ -419,9 +421,10 @@
                                             data-multiple="false" data-toggle="modal" data-target="#lfmModal3">
                                             Choose Image
                                         </button>
-                                        <p class="text-warning mb-0 mt-1">JPG, PNG, JPEG images are allowed</p>
+                                        <p class="text-warning mb-0 mt-1">{{ allowed_image_extensions_label() }} images are allowed</p>
                                         <p class="text-muted mb-0"><small>Background image behind footer address. Leave
                                                 empty to use default.</small></p>
+                                        <p class="text-warning mb-0"><small>Recommended size: 1200x200px (6:1). Stretched to fill the footer strip exactly (not cropped), so keep close to this ratio to avoid distortion.</small></p>
                                     </div>
 
                                     <div class="tss-subhead" style="--tss-accent:#6861CE;">Invoice Footer</div>
@@ -861,7 +864,7 @@
                                             data-multiple="false" data-toggle="modal" data-target="#lfmModal4">
                                             Choose Image
                                         </button>
-                                        <p class="text-warning mb-0 mt-1">JPG, PNG, JPEG images are allowed</p>
+                                        <p class="text-warning mb-0 mt-1">{{ allowed_image_extensions_label() }} images are allowed</p>
                                         <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px
                                                 (Width x Height)</small></p>
                                     </div>

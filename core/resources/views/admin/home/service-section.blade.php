@@ -96,8 +96,9 @@
                                 data-multiple="false" data-toggle="modal" data-target="#lfmModalService">Choose
                                 Background Image</button>
 
-                            <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                            <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed. This will
                                 be the background for the entire service section.</p>
+                            <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                             <p class="text-danger mb-0 em" id="errservice_section_bg"></p>
 
                             <!-- Service Section Background LFM Modal -->

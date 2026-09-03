@@ -76,7 +76,8 @@
                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                    <p class="text-warning mb-0"><small>Recommended size: 300x150px (landscape, transparent background). Displayed at natural size, not cropped.</small></p>
                     <p class="em text-danger mb-0" id="errimage"></p>
 
                     <!-- Image LFM Modal -->

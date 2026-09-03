@@ -82,7 +82,10 @@
                                         Image</button>
 
 
-                                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                    <p class="text-warning mb-0"><small>Recommended size: 1000x1250px (4:5 portrait). The
+                                            image is cropped to fit this ratio, so frame the subject with margin top/bottom
+                                            in case the edges get cut.</small></p>
                                     <p class="em text-danger mb-0" id="errimage"></p>
 
                                     <!-- Image LFM Modal -->
@@ -116,7 +119,11 @@
                                                 Images</button>
 
 
-                                            <p class="text-warning mb-0">JPG, PNG, JPEG images are allowed</p>
+                                            <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                            <p class="text-warning mb-0"><small>Recommended size: 1600x900px landscape.
+                                                    These show as a wide banner (~2.5:1) and as smaller thumbnails
+                                                    (16:10) on the details page, so keep the main subject centered —
+                                                    both crop differently from the same image.</small></p>
                                             <p id="errslider" class="mb-0 text-danger em"></p>
 
                                             <!-- slider LFM Modal -->

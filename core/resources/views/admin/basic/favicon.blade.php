@@ -77,7 +77,7 @@
                       </div>
                       <small class="status text-muted">Select a file or drag it over this area..</small>
                       <p class="text-warning mb-0 mt-2">Upload 40X40 image or squre size image for best quality.</p>
-                      <p class="text-warning mb-0">Only jpg, jpeg, png image is allowed.</p>
+                      <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed.</p>
                       <p class="text-danger mb-0 em" id="errfavicon"></p>
                     </div>
                   </div>

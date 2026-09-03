@@ -53,7 +53,8 @@
                                 <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                <p class="text-warning mb-0"><small>Recommended size: 300x80px (landscape wordmark, transparent background). Shown in the site header, scaled to a fixed height.</small></p>
                                 @if ($errors->has('logo'))
                                 <p class="text-danger mb-0">{{$errors->first('logo')}}</p>
                                 @endif
@@ -85,6 +86,7 @@
                                 <button id="chooseImage4" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal4">Choose Image</button>
 
                                 <p class="text-warning mb-0">JPG, PNG, JPEG only (SVG is not supported by most email clients — Outlook and others won't render it). Used in transactional emails instead of the main logo. Leave empty to keep the current one.</p>
+                                <p class="text-warning mb-0"><small>Recommended size: 300x80px (landscape wordmark).</small></p>
                                 @if ($errors->has('email_logo'))
                                 <p class="text-danger mb-0">{{$errors->first('email_logo')}}</p>
                                 @endif
@@ -117,7 +119,8 @@
                                 <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Image</button>
 
 
-                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG, SVG, SVG images are allowed</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                <p class="text-warning mb-0"><small>Recommended size: 40x40px (square).</small></p>
                                 @if ($errors->has('favicon'))
                                 <p class="text-danger mb-0">{{$errors->first('favicon')}}</p>
                                 @endif
@@ -150,7 +153,8 @@
                                 <button id="chooseImage3" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal3">Choose Image</button>
 
 
-                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG, SVG images are allowed</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                                 @if ($errors->has('breadcrumb'))
                                 <p class="text-danger mb-0">{{$errors->first('breadcrumb')}}</p>
                                 @endif

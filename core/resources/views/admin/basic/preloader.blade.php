@@ -63,7 +63,8 @@
                         <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                        <p class="text-warning mb-0">JPG, PNG, JPEG, GIF, SVG images are allowed</p>
+                        <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                        <p class="text-warning mb-0"><small>Recommended size: 200x200px (square). Displayed small (44px) with a glow effect, so a simple transparent logo mark works best.</small></p>
                         @if ($errors->has('preloader'))
                         <p class="text-danger mb-0">{{$errors->first('preloader')}}</p>
                         @endif

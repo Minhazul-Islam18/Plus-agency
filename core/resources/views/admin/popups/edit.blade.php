@@ -65,7 +65,8 @@
                                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                    <p class="text-warning mb-0"><small>Recommended size: 880x1000px. Modal caps at 880px wide, displayed at natural height (not cropped).</small></p>
                                     <p class="em text-danger mb-0" id="errimage"></p>
 
                                 </div>
@@ -87,7 +88,8 @@
                                 <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Image</button>
 
 
-                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                <p class="text-warning mb-0"><small>Recommended size: 1200x900px (4:3). Fills the popup panel as a cover background (cropped to fit).</small></p>
                                 <p class="em text-danger mb-0" id="errbackground_image"></p>
 
                             </div>

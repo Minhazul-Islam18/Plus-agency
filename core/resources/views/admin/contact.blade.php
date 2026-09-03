@@ -90,7 +90,7 @@
                                     <button id="chooseImage1" class="choose-image btn btn-primary" type="button"
                                         data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose
                                         Image</button>
-                                    <p class="text-warning mb-0">JPG, PNG, JPEG images are allowed</p>
+                                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
                                     <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px × 350px
                                             (Width × Height)</small></p>
                                     @if ($errors->has('contact_breadcrumb_bg'))

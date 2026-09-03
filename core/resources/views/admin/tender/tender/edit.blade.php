@@ -90,7 +90,8 @@
                                         data-multiple="false" data-toggle="modal" data-target="#lfmModal1">
                                         Choose Image
                                     </button>
-                                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                    <p class="text-warning mb-0"><small>Recommended size: 800x400px (2:1 landscape). The image is cropped to fit this ratio.</small></p>
                                     <p class="em text-danger mb-0" id="errtender_image"></p>
                                 </div>
 
@@ -321,7 +322,8 @@
                                         data-multiple="false" data-toggle="modal" data-target="#lfmModal2">
                                         Choose Image
                                     </button>
-                                    <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                                    <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                    <p class="text-warning mb-0"><small>Recommended size: 700x800px (7:8 portrait). The image is cropped to fit this ratio.</small></p>
                                     <p class="em text-danger mb-0" id="errexpert_image"></p>
                                 </div>
 

@@ -93,8 +93,9 @@
                                     data-multiple="false" data-toggle="modal" data-target="#lfmModalTestimonial">Choose
                                     Background Image</button>
 
-                                <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed. This will
+                                <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed. This will
                                     be the background for the entire testimonial section.</p>
+                                <p class="text-info mb-0"><small><strong>Recommended size:</strong> 1920px x 350px (Width x Height)</small></p>
                                 <p class="text-danger mb-0 em" id="errtestimonial_section_bg"></p>
 
                                 <!-- Testimonial Section Background LFM Modal -->
@@ -268,7 +269,8 @@
                         <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
 
 
-                        <p class="text-warning mb-0">JPG, PNG, JPEG, SVG images are allowed</p>
+                        <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                        <p class="text-warning mb-0"><small>Recommended size: 600x800px (3:4 portrait). The image is cropped to fit this ratio.</small></p>
                         <p class="em text-danger mb-0" id="errimage"></p>
 
                     </div>
@@ -287,6 +289,7 @@
                         <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose Logo</button>
 
                         <p class="text-warning mb-0">Shown as a small badge on the testimonial card. Leave empty to show no logo.</p>
+                        <p class="text-warning mb-0"><small>Recommended size: 200x200px (square). Displays as a 46px circular badge, so use a logo that reads well cropped to a circle.</small></p>
                         <p class="em text-danger mb-0" id="errcompany_logo"></p>
                     </div>
 

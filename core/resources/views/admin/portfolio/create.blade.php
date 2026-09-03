@@ -417,7 +417,6 @@
         var today = new Date();
         $("#submissionDate").datepicker({
             autoclose: true,
-            endDate: today,
             todayHighlight: true
         });
         $("#startDate").datepicker({

@@ -20,6 +20,18 @@ use App\Permalink;
 | (session/cookie-based locale detection), but every front route now gets
 | its locale from the URL itself (see $activeLocales below) — nothing
 | session-based to exclude for that anymore.
+|
+| Dropping the session middleware alone does NOT make a response actually
+| get cached anywhere — verified live: with no explicit Cache-Control, the
+| origin's LiteSpeed layer defaults a dynamic PHP response to
+| "Cache-Control: no-cache, private" regardless, and Cloudflare just
+| passes that through (cf-cache-status: DYNAMIC). Every
+| ->withoutMiddleware($cfCacheableExcept) call below is paired with
+| ->middleware('public-cacheable') (SetPublicCacheHeaders) — that's the
+| half that actually opts the response into both Cloudflare's edge cache
+| and LiteSpeed's own LSCache. Add one without the other and nothing
+| changes: exclusion alone leaves it un-cached; the header alone would
+| bake a session-bearing response into the cache for every visitor.
 */
 $cfCacheableExcept = [
     \Illuminate\Session\Middleware\StartSession::class,
@@ -125,7 +137,7 @@ Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddlewar
 // leftover cookie from the old cookie-based scheme.
 Route::group([], function () use ($cfCacheableExcept) {
     Route::get('/', 'Front\FrontendController@index')->name('front.index')
-        ->withoutMiddleware($cfCacheableExcept);
+        ->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
 
     Route::post('/payment/instructions', 'Front\FrontendController@paymentInstruction')->name('front.payment.instructions');
 
@@ -573,6 +585,32 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/portfolio/{langid}/update_settings', 'Admin\PortfolioController@updateSettings')->name('admin.portfolio.update_settings');
         Route::post('/portfolio/{langid}/delete_breadcrumb_bg', 'Admin\PortfolioController@deleteBreadcrumbBg')->name('admin.portfolio.delete_breadcrumb_bg');
 
+        // Portfolio module overhaul — evidence-of-competence redesign
+        Route::get('/portfolio/{id}/documents', 'Admin\PortfolioController@documents')->name('admin.portfolio.documents');
+        Route::post('/portfolio/preview', 'Admin\PortfolioController@preview')->name('admin.portfolio.preview');
+        Route::get('/portfolio/{id}/show', 'Admin\PortfolioController@show')->name('admin.portfolio.show');
+        Route::get('/portfolio/{id}/duplicate', 'Admin\PortfolioController@duplicate')->name('admin.portfolio.duplicate');
+        Route::post('/portfolio/toggle-visibility', 'Admin\PortfolioController@toggleVisibility')->name('admin.portfolio.toggle_visibility');
+        Route::post('/portfolio/update-status', 'Admin\PortfolioController@updateStatus')->name('admin.portfolio.update_status');
+        Route::post('/portfolio/toggle-archive', 'Admin\PortfolioController@toggleArchive')->name('admin.portfolio.toggle_archive');
+        Route::get('/portfolio/export', 'Admin\PortfolioController@export')->name('admin.portfolio.export');
+
+        // Portfolio Sectors (manageable taxonomy — see PortfolioSectorController)
+        Route::get('/portfolio/sectors', 'Admin\PortfolioSectorController@index')->name('admin.portfolio.sector.index');
+        Route::post('/portfolio/sector/store', 'Admin\PortfolioSectorController@store')->name('admin.portfolio.sector.store');
+        Route::post('/portfolio/sector/update', 'Admin\PortfolioSectorController@update')->name('admin.portfolio.sector.update');
+        Route::post('/portfolio/sector/delete', 'Admin\PortfolioSectorController@delete')->name('admin.portfolio.sector.delete');
+        Route::post('/portfolio/sector/bulk-delete', 'Admin\PortfolioSectorController@bulkDelete')->name('admin.portfolio.sector.bulk_delete');
+        Route::get('/portfolio/{langid}/get_sectors', 'Admin\PortfolioSectorController@getSectors')->name('admin.portfolio.sector.get');
+
+        // Portfolio Statuses (manageable list, mirrors Sectors above — see PortfolioStatusController)
+        Route::get('/portfolio/statuses', 'Admin\PortfolioStatusController@index')->name('admin.portfolio.status.index');
+        Route::post('/portfolio/status/store', 'Admin\PortfolioStatusController@store')->name('admin.portfolio.status.store');
+        Route::post('/portfolio/status/update', 'Admin\PortfolioStatusController@update')->name('admin.portfolio.status.update');
+        Route::post('/portfolio/status/delete', 'Admin\PortfolioStatusController@delete')->name('admin.portfolio.status.delete');
+        Route::post('/portfolio/status/bulk-delete', 'Admin\PortfolioStatusController@bulkDelete')->name('admin.portfolio.status.bulk_delete');
+        Route::get('/portfolio/{langid}/get_statuses', 'Admin\PortfolioStatusController@getStatuses')->name('admin.portfolio.status.get');
+
         // Admin Blog Category Routes
         Route::get('/bcategorys', 'Admin\BcategoryController@index')->name('admin.bcategory.index');
         Route::post('/bcategory/store', 'Admin\BcategoryController@store')->name('admin.bcategory.store');
@@ -898,17 +936,17 @@ Route::group([], function () use ($cfCacheableExcept) {
 
         if ($type == 'service_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@servicedetails')->name('front.servicedetails')
-                ->withoutMiddleware($cfCacheableExcept);
+                ->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
         } elseif ($type == 'portfolio_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@portfoliodetails')->name('front.portfoliodetails')
-                ->withoutMiddleware($cfCacheableExcept);
+                ->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
         } elseif ($type == 'tender_details') {
             // NOT cacheable — this page has the tender purchase form (real
             // payment, real CSRF token needed), see tender_details.blade.php.
             Route::get("$permalink/{slug}", 'Front\TenderController@tenderDetails')->name('tender_details');
         } elseif ($type == 'blog_details') {
             Route::get("$permalink/{slug}", 'Front\FrontendController@blogdetails')->name('front.blogdetails')
-                ->withoutMiddleware($cfCacheableExcept);
+                ->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
         }
     }
 });
@@ -981,7 +1019,7 @@ Route::group([], function () use ($cfCacheableExcept) {
 
         $route = Route::get("$permalink", "$action")->name("$routeName");
         if (in_array($type, $cfCacheableTypes)) {
-            $route->withoutMiddleware($cfCacheableExcept);
+            $route->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
         }
     }
 });

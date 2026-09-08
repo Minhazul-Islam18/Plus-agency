@@ -1,5 +1,95 @@
 @extends('admin.layout')
 
+@section('styles')
+    <style>
+        .sec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 991px) {
+            .sec-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sec-group-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #8d9498;
+            margin: 32px 0 14px;
+        }
+        .sec-group-title:first-child {
+            margin-top: 0;
+        }
+
+        .sec-card {
+            background: #1a2035;
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .sec-card-head {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .sec-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(21, 114, 232, .12);
+            color: #1572E8;
+        }
+
+        .sec-card-title {
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+        }
+
+        .sec-card-sub {
+            font-size: 11.5px;
+            color: #8d9498;
+            margin: 1px 0 0;
+        }
+
+        .sec-card-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .sec-speed {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #b9babf;
+        }
+
+        .sec-speed input {
+            width: 90px;
+        }
+    </style>
+@endsection
+
 @section('content')
 <div class="page-header">
     <h4 class="page-title">Section Customization</h4>
@@ -26,203 +116,44 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card">
-            <form class="" action="{{route('admin.sections.update')}}" method="post">
+            <form action="{{route('admin.sections.update')}}" method="post">
                 @csrf
                 <div class="card-header">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="card-title">Customize Sections</div>
-                        </div>
-                    </div>
+                    <div class="card-title">Customize Sections</div>
+                    <p class="text-muted mb-0" style="font-size:12.5px;">
+                        Turn homepage sections on or off, and set how fast each carousel-driven section auto-rotates.
+                    </p>
                 </div>
-                <div class="card-body pt-5 pb-5">
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-3">
-                            @csrf
-                            <div class="form-group">
-                                <label>Feature Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="feature_section" value="1" class="selectgroup-input" {{$abs->feature_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="feature_section" value="0" class="selectgroup-input" {{$abs->feature_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                                <div class="form-group">
-                                    <label>Introduction Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="intro_section" value="1" class="selectgroup-input" {{$abs->intro_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="intro_section" value="0" class="selectgroup-input" {{$abs->intro_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Service Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="service_section" value="1" class="selectgroup-input" {{$abs->service_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="service_section" value="0" class="selectgroup-input" {{$abs->service_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Approach Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="approach_section" value="1" class="selectgroup-input" {{$abs->approach_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="approach_section" value="0" class="selectgroup-input" {{$abs->approach_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Statistics Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="statistics_section" value="1" class="selectgroup-input" {{$abs->statistics_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="statistics_section" value="0" class="selectgroup-input" {{$abs->statistics_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Portfolio Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="portfolio_section" value="1" class="selectgroup-input" {{$abs->portfolio_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="portfolio_section" value="0" class="selectgroup-input" {{$abs->portfolio_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Tenders Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="tender_section" value="1" class="selectgroup-input" {{$abs->tender_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="tender_section" value="0" class="selectgroup-input" {{$abs->tender_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Testimonial Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="testimonial_section" value="1" class="selectgroup-input" {{$abs->testimonial_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="testimonial_section" value="0" class="selectgroup-input" {{$abs->testimonial_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Team Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="team_section" value="1" class="selectgroup-input" {{$abs->team_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="team_section" value="0" class="selectgroup-input" {{$abs->team_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Call to Action Section **</label>
-                                    <div class="selectgroup w-100">
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="call_to_action_section" value="1" class="selectgroup-input" {{$abs->call_to_action_section == 1 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Active</span>
-                                        </label>
-                                        <label class="selectgroup-item">
-                                            <input type="radio" name="call_to_action_section" value="0" class="selectgroup-input" {{$abs->call_to_action_section == 0 ? 'checked' : ''}}>
-                                            <span class="selectgroup-button">Deactive</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            <div class="form-group">
-                                <label>News Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="news_section" value="1" class="selectgroup-input" {{$abs->news_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="news_section" value="0" class="selectgroup-input" {{$abs->news_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Partners Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="partner_section" value="1" class="selectgroup-input" {{$abs->partner_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="partner_section" value="0" class="selectgroup-input" {{$abs->partner_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Top Footer Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="top_footer_section" value="1" class="selectgroup-input" {{$abs->top_footer_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="top_footer_section" value="0" class="selectgroup-input" {{$abs->top_footer_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Copyright Section **</label>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="copyright_section" value="1" class="selectgroup-input" {{$abs->copyright_section == 1 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Active</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="copyright_section" value="0" class="selectgroup-input" {{$abs->copyright_section == 0 ? 'checked' : ''}}>
-                                        <span class="selectgroup-button">Deactive</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                <div class="card-body pt-4 pb-4">
+
+                    @php
+                        $sec = function ($name, $icon, $label, $sub, $speedField = null) use ($abs, $abe) {
+                            return compact('name', 'icon', 'label', 'sub', 'speedField', 'abs', 'abe');
+                        };
+                    @endphp
+
+                    <div class="sec-group-title">Homepage Content</div>
+                    <div class="sec-grid">
+                        @include('admin.home.partials.section-toggle', $sec('feature_section', 'fa-star', 'Feature Section', 'Top highlight strip above the fold.'))
+                        @include('admin.home.partials.section-toggle', $sec('intro_section', 'fa-info-circle', 'Introduction Section', 'Who-we-are intro block.'))
+                        @include('admin.home.partials.section-toggle', $sec('service_section', 'fa-concierge-bell', 'Service Section', 'Services grid/list.'))
+                        @include('admin.home.partials.section-toggle', $sec('approach_section', 'fa-route', 'Approach Section', 'How-we-work steps.', 'approach_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('statistics_section', 'fa-chart-bar', 'Statistics Section', 'Animated counters.'))
+                        @include('admin.home.partials.section-toggle', $sec('portfolio_section', 'fa-briefcase', 'Portfolio Section', 'Case-studies carousel.', 'portfolio_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('tender_section', 'fa-file-contract', 'Tenders Section', 'Open tenders carousel.', 'tender_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('testimonial_section', 'fa-quote-right', 'Testimonial Section', 'Client testimonials carousel.', 'testimonial_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('team_section', 'fa-users', 'Team Section', 'Team members carousel.', 'team_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('call_to_action_section', 'fa-bullhorn', 'Call to Action Section', 'CTA banner.'))
                     </div>
+
+                    <div class="sec-group-title">Site-wide</div>
+                    <div class="sec-grid">
+                        @include('admin.home.partials.section-toggle', $sec('news_section', 'fa-newspaper', 'News Section', 'Latest blog posts carousel.', 'blog_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('partner_section', 'fa-handshake', 'Partners Section', 'Partner logos carousel.', 'partner_carousel_speed'))
+                        @include('admin.home.partials.section-toggle', $sec('top_footer_section', 'fa-layer-group', 'Top Footer Section', 'Footer widgets row.'))
+                        @include('admin.home.partials.section-toggle', $sec('copyright_section', 'fa-copyright', 'Copyright Section', 'Bottom copyright bar.'))
+                    </div>
+
                 </div>
                 <div class="card-footer">
                     <div class="form">

@@ -21,25 +21,36 @@
                 @endif
             </div>
             <div class="col-lg-7">
-                <ol class="dark-approach-lists reveal-timeline">
-                    @foreach ($points as $key => $point)
-                        <li class="dark-approach-item reveal-timeline-item @if ($key == 0) is-active @endif" style="--d:{{ $key * 0.15 }}s" data-approach-step>
-                            <div class="dark-approach-rail">
-                                <span class="dark-approach-icon">
-                                    <i class="{{ $point->icon }}"></i>
-                                    <span class="dark-approach-num">{{ sprintf('%02d', $key + 1) }}</span>
-                                </span>
-                                @if (!$loop->last)
-                                    <span class="dark-approach-line"></span>
-                                @endif
-                            </div>
-                            <div class="dark-approach-text">
-                                <h4>{{ convertUtf8($point->title) }}</h4>
-                                <p>{{ convertUtf8($point->short_text) }}</p>
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
+                @php $approachScroll = $points->count() > 3; @endphp
+                <div class="@if ($approachScroll) dark-approach-carousel-wrap @endif">
+                    <div class="{{ $approachScroll ? 'dark-approach-viewport' : '' }}" @if ($approachScroll) id="darkApproachViewport" @endif>
+                        <ol class="dark-approach-lists reveal-timeline" @if ($approachScroll) id="darkApproachList" @endif>
+                            @foreach ($points as $key => $point)
+                                <li class="dark-approach-item reveal-timeline-item @if ($key == 0) is-active @endif" style="--d:{{ $key * 0.15 }}s" data-approach-step>
+                                    <div class="dark-approach-rail">
+                                        <span class="dark-approach-icon">
+                                            <i class="{{ $point->icon }}"></i>
+                                            <span class="dark-approach-num">{{ sprintf('%02d', $key + 1) }}</span>
+                                        </span>
+                                        @if (!$loop->last)
+                                            <span class="dark-approach-line"></span>
+                                        @endif
+                                    </div>
+                                    <div class="dark-approach-text">
+                                        <h4>{{ convertUtf8($point->title) }}</h4>
+                                        <p>{{ convertUtf8($point->short_text) }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+                    @if ($approachScroll)
+                        <div class="dark-approach-nav-col">
+                            <button type="button" class="dark-approach-nav dark-approach-nav-up" id="darkApproachUp" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+                            <button type="button" class="dark-approach-nav dark-approach-nav-down" id="darkApproachDown" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

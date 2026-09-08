@@ -12,7 +12,7 @@
         $carousel.owlCarousel({
             loop: true,
             autoplay: true,
-            autoplayTimeout: 4500,
+            autoplayTimeout: (window.darkCarouselSpeeds && window.darkCarouselSpeeds.portfolio) || 4500,
             autoplaySpeed: 1800,
             autoplayHoverPause: true,
             nav: false,

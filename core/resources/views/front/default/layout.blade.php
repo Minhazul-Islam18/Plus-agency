@@ -514,6 +514,21 @@
     <!-- scroll-triggered stagger reveal, both themes (self-guards on .reveal-stagger) -->
     <script src="{{ asset_v('assets/front/js/dark-reveal.js') }}"></script>
     @if ($be->theme_version == 'dark')
+        <!-- Per-section Owl Carousel autoplay speed (ms), set in
+             admin/home/sections — read by each dark-*-fx.js init instead of
+             a hardcoded value. Falls back to 4500 in each file if a key is
+             ever missing here. -->
+        <script>
+            window.darkCarouselSpeeds = {
+                tender: {{ (int) ($be->tender_carousel_speed ?? 4500) }},
+                blog: {{ (int) ($be->blog_carousel_speed ?? 4500) }},
+                portfolio: {{ (int) ($be->portfolio_carousel_speed ?? 4500) }},
+                testimonial: {{ (int) ($be->testimonial_carousel_speed ?? 4500) }},
+                team: {{ (int) ($be->team_carousel_speed ?? 4500) }},
+                partner: {{ (int) ($be->partner_carousel_speed ?? 4500) }},
+                approach: {{ (int) ($be->approach_carousel_speed ?? 4500) }}
+            };
+        </script>
         <!-- dark glass theme: mouse-reactive particle network (self-guards on [data-particle-network]) -->
         <script src="{{ asset_v('assets/front/js/particle-network.js') }}"></script>
         <!-- dark glass theme: hero mouse-tracking glow blob + flip-cycling titles -->

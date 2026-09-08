@@ -39,7 +39,14 @@
 <script src="{{asset('assets/admin/js/plugin/jquery.dm-uploader/jquery.dm-uploader.min.js')}}"></script>
 
 <!-- Summernote JS -->
-<script src="{{asset('assets/admin/js/plugin/summernote/summernote-bs4.js')}}"></script>
+{{-- asset_v() (filemtime-based ?v= query param), not plain asset() — this
+     file is served with Cache-Control: immutable, max-age=31536000
+     (.htaccess), so a bugfix landing on the server is invisible to any
+     admin whose browser already cached the old file at this exact URL
+     until they hard-refresh. Confirmed happening live: an already-fixed
+     copy was on the server but still rendering broken for a returning
+     admin. --}}
+<script src="{{asset_v('assets/admin/js/plugin/summernote/summernote-bs4.js')}}"></script>
 
 <!-- JS color JS -->
 <script src="{{asset('assets/admin/js/plugin/jscolor/jscolor.js')}}"></script>

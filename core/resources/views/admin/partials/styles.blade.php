@@ -31,6 +31,6 @@
      touching any selector outside its own .note-* namespace, so nothing
      else in admin is affected) lets Summernote's own button/icon sizing win
      instead. --}}
-<link rel="stylesheet" href="{{asset('assets/admin/css/summernote-bs4.css')}}">
+<link rel="stylesheet" href="{{asset_v('assets/admin/css/summernote-bs4.css')}}">
 
 @yield('styles')

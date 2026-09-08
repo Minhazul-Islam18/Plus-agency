@@ -6270,7 +6270,7 @@ function () {
     this.options = context.options;
     this.lang = this.options.langInfo;
     this.documentEventHandlers = {};
-    this.$dropzone = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()(['<div class="note-dropzone">', '<div class="note-dropzone-message"/>', '</div>'].join('')).prependTo(this.$editor);
+    this.$dropzone = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()(['<div class="note-dropzone">', '<div class="note-dropzone-message"></div>', '</div>'].join('')).prependTo(this.$editor);
   }
   /**
    * attach Drag and Drop Events
@@ -7336,8 +7336,8 @@ function () {
             toggle: 'dropdown'
           }
         }), this.ui.dropdown({
-          items: (backColor ? ['<div class="note-palette">', '<div class="note-palette-title">' + this.lang.color.background + '</div>', '<div>', '<button type="button" class="note-color-reset btn btn-light" data-event="backColor" data-value="inherit">', this.lang.color.transparent, '</button>', '</div>', '<div class="note-holder" data-event="backColor"/>', '<div>', '<button type="button" class="note-color-select btn btn-light" data-event="openPalette" data-value="backColorPicker">', this.lang.color.cpSelect, '</button>', '<input type="color" id="backColorPicker" class="note-btn note-color-select-btn" value="' + this.options.colorButton.backColor + '" data-event="backColorPalette">', '</div>', '<div class="note-holder-custom" id="backColorPalette" data-event="backColor"/>', '</div>'].join('') : '') + (foreColor ? ['<div class="note-palette">', '<div class="note-palette-title">' + this.lang.color.foreground + '</div>', '<div>', '<button type="button" class="note-color-reset btn btn-light" data-event="removeFormat" data-value="foreColor">', this.lang.color.resetToDefault, '</button>', '</div>', '<div class="note-holder" data-event="foreColor"/>', '<div>', '<button type="button" class="note-color-select btn btn-light" data-event="openPalette" data-value="foreColorPicker">', this.lang.color.cpSelect, '</button>', '<input type="color" id="foreColorPicker" class="note-btn note-color-select-btn" value="' + this.options.colorButton.foreColor + '" data-event="foreColorPalette">', '</div>', // Fix missing Div, Commented to find easily if it's wrong
-          '<div class="note-holder-custom" id="foreColorPalette" data-event="foreColor"/>', '</div>'].join('') : ''),
+          items: (backColor ? ['<div class="note-palette">', '<div class="note-palette-title">' + this.lang.color.background + '</div>', '<div>', '<button type="button" class="note-color-reset btn btn-light" data-event="backColor" data-value="inherit">', this.lang.color.transparent, '</button>', '</div>', '<div class="note-holder" data-event="backColor"></div>', '<div>', '<button type="button" class="note-color-select btn btn-light" data-event="openPalette" data-value="backColorPicker">', this.lang.color.cpSelect, '</button>', '<input type="color" id="backColorPicker" class="note-btn note-color-select-btn" value="' + this.options.colorButton.backColor + '" data-event="backColorPalette">', '</div>', '<div class="note-holder-custom" id="backColorPalette" data-event="backColor"></div>', '</div>'].join('') : '') + (foreColor ? ['<div class="note-palette">', '<div class="note-palette-title">' + this.lang.color.foreground + '</div>', '<div>', '<button type="button" class="note-color-reset btn btn-light" data-event="removeFormat" data-value="foreColor">', this.lang.color.resetToDefault, '</button>', '</div>', '<div class="note-holder" data-event="foreColor"></div>', '<div>', '<button type="button" class="note-color-select btn btn-light" data-event="openPalette" data-value="foreColorPicker">', this.lang.color.cpSelect, '</button>', '<input type="color" id="foreColorPicker" class="note-btn note-color-select-btn" value="' + this.options.colorButton.foreColor + '" data-event="foreColorPalette">', '</div>', // Fix missing Div, Commented to find easily if it's wrong
+          '<div class="note-holder-custom" id="foreColorPalette" data-event="foreColor"></div>', '</div>'].join('') : ''),
           callback: function callback($dropdown) {
             $dropdown.find('.note-holder').each(function (idx, item) {
               var $holder = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()(item);
@@ -7529,7 +7529,7 @@ function () {
 
         return _this2.ui.buttonGroup([_this2.button({
           className: 'dropdown-toggle',
-          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontname"/>', _this2.options),
+          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontname"></span>', _this2.options),
           tooltip: _this2.lang.font.name,
           data: {
             toggle: 'dropdown'
@@ -7548,7 +7548,7 @@ function () {
       this.context.memo('button.fontsize', function () {
         return _this2.ui.buttonGroup([_this2.button({
           className: 'dropdown-toggle',
-          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontsize"/>', _this2.options),
+          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontsize"></span>', _this2.options),
           tooltip: _this2.lang.font.size,
           data: {
             toggle: 'dropdown'
@@ -7564,7 +7564,7 @@ function () {
       this.context.memo('button.fontsizeunit', function () {
         return _this2.ui.buttonGroup([_this2.button({
           className: 'dropdown-toggle',
-          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontsizeunit"/>', _this2.options),
+          contents: _this2.ui.dropdownButtonContents('<span class="note-current-fontsizeunit"></span>', _this2.options),
           tooltip: _this2.lang.font.sizeunit,
           data: {
             toggle: 'dropdown'
@@ -7679,7 +7679,7 @@ function () {
         }), _this2.ui.dropdown({
           title: _this2.lang.table.table,
           className: 'note-table',
-          items: ['<div class="note-dimension-picker">', '<div class="note-dimension-picker-mousecatcher" data-event="insertTable" data-value="1x1"/>', '<div class="note-dimension-picker-highlighted"/>', '<div class="note-dimension-picker-unhighlighted"/>', '</div>', '<div class="note-dimension-display">1 x 1</div>'].join('')
+          items: ['<div class="note-dimension-picker">', '<div class="note-dimension-picker-mousecatcher" data-event="insertTable" data-value="1x1"></div>', '<div class="note-dimension-picker-highlighted"></div>', '<div class="note-dimension-picker-unhighlighted"></div>', '</div>', '<div class="note-dimension-display">1 x 1</div>'].join('')
         })], {
           callback: function callback($node) {
             var $catcher = $node.find('.note-dimension-picker-mousecatcher');
@@ -9512,7 +9512,7 @@ function () {
       return items.map(function (item
       /*, idx */
       ) {
-        var $item = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()('<div class="note-hint-item"/>');
+        var $item = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()('<div class="note-hint-item"></div>');
         $item.append(hint.template ? hint.template(item) : item + '');
         $item.data({
           'index': hintIdx,
@@ -9557,7 +9557,7 @@ function () {
     value: function createGroup(idx, keyword) {
       var _this3 = this;
 
-      var $group = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()('<div class="note-hint-group note-hint-group-' + idx + '"/>');
+      var $group = external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default()('<div class="note-hint-group note-hint-group-' + idx + '"></div>');
       this.searchKeyword(idx, keyword, function (items) {
         items = items || [];
 
@@ -9953,14 +9953,14 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 
 
-var editor = renderer["a" /* default */].create('<div class="note-editor note-frame card"/>');
+var editor = renderer["a" /* default */].create('<div class="note-editor note-frame card"></div>');
 var toolbar = renderer["a" /* default */].create('<div class="note-toolbar card-header" role="toolbar"></div>');
-var editingArea = renderer["a" /* default */].create('<div class="note-editing-area"/>');
-var codable = renderer["a" /* default */].create('<textarea class="note-codable" aria-multiline="true"/>');
-var editable = renderer["a" /* default */].create('<div class="note-editable card-block" contentEditable="true" role="textbox" aria-multiline="true"/>');
-var statusbar = renderer["a" /* default */].create(['<output class="note-status-output" role="status" aria-live="polite"/>', '<div class="note-statusbar" role="status">', '<output class="note-status-output" aria-live="polite"></output>', '<div class="note-resizebar" aria-label="Resize">', '<div class="note-icon-bar"/>', '<div class="note-icon-bar"/>', '<div class="note-icon-bar"/>', '</div>', '</div>'].join(''));
-var airEditor = renderer["a" /* default */].create('<div class="note-editor note-airframe"/>');
-var airEditable = renderer["a" /* default */].create(['<div class="note-editable" contentEditable="true" role="textbox" aria-multiline="true"/>', '<output class="note-status-output" role="status" aria-live="polite"/>'].join(''));
+var editingArea = renderer["a" /* default */].create('<div class="note-editing-area"></div>');
+var codable = renderer["a" /* default */].create('<textarea class="note-codable" aria-multiline="true"></textarea>');
+var editable = renderer["a" /* default */].create('<div class="note-editable card-block" contentEditable="true" role="textbox" aria-multiline="true"></div>');
+var statusbar = renderer["a" /* default */].create(['<output class="note-status-output" role="status" aria-live="polite"></output>', '<div class="note-statusbar" role="status">', '<output class="note-status-output" aria-live="polite"></output>', '<div class="note-resizebar" aria-label="Resize">', '<div class="note-icon-bar"></div>', '<div class="note-icon-bar"></div>', '<div class="note-icon-bar"></div>', '</div>', '</div>'].join(''));
+var airEditor = renderer["a" /* default */].create('<div class="note-editor note-airframe"></div>');
+var airEditable = renderer["a" /* default */].create(['<div class="note-editable" contentEditable="true" role="textbox" aria-multiline="true"></div>', '<output class="note-status-output" role="status" aria-live="polite"></output>'].join(''));
 var buttonGroup = renderer["a" /* default */].create('<div class="note-btn-group btn-group">');
 var dropdown = renderer["a" /* default */].create('<div class="note-dropdown-menu dropdown-menu" role="list">', function ($node, options) {
   var markup = Array.isArray(options.items) ? options.items.map(function (item) {
@@ -9990,7 +9990,7 @@ var dropdownCheck = renderer["a" /* default */].create('<div class="note-dropdow
     'aria-label': options.title
   });
 });
-var dialog = renderer["a" /* default */].create('<div class="modal note-modal" aria-hidden="false" tabindex="-1" role="dialog"/>', function ($node, options) {
+var dialog = renderer["a" /* default */].create('<div class="modal note-modal" aria-hidden="false" tabindex="-1" role="dialog"></div>', function ($node, options) {
   if (options.fade) {
     $node.addClass('fade');
   }
@@ -10000,7 +10000,7 @@ var dialog = renderer["a" /* default */].create('<div class="modal note-modal" a
   });
   $node.html(['<div class="modal-dialog">', '<div class="modal-content">', options.title ? '<div class="modal-header">' + '<h4 class="modal-title">' + options.title + '</h4>' + '<button type="button" class="close" data-dismiss="modal" aria-label="Close" aria-hidden="true">&times;</button>' + '</div>' : '', '<div class="modal-body">' + options.body + '</div>', options.footer ? '<div class="modal-footer">' + options.footer + '</div>' : '', '</div>', '</div>'].join(''));
 });
-var popover = renderer["a" /* default */].create(['<div class="note-popover popover in">', '<div class="arrow"/>', '<div class="popover-content note-children-container"/>', '</div>'].join(''), function ($node, options) {
+var popover = renderer["a" /* default */].create(['<div class="note-popover popover in">', '<div class="arrow"></div>', '<div class="popover-content note-children-container"></div>', '</div>'].join(''), function ($node, options) {
   var direction = typeof options.direction !== 'undefined' ? options.direction : 'bottom';
   $node.addClass(direction);
 
@@ -10014,7 +10014,18 @@ var ui_checkbox = renderer["a" /* default */].create('<div class="form-check"></
 
 var icon = function icon(iconClassName, tagName) {
   tagName = tagName || 'i';
-  return '<' + tagName + ' class="' + iconClassName + '"/>';
+  // XML-style self-closing (`<i .../>`) is only respected by the HTML
+  // parser for actual void elements (img, br, input...) — for a normal
+  // element like <i> or <span> the trailing slash is silently ignored and
+  // the tag never closes, so it swallows every sibling that follows it in
+  // the same markup string as its own children. Harmless wherever icon()
+  // is the ONLY content being set (most toolbar buttons), but real
+  // corruption wherever it's followed by more markup in the same string —
+  // e.g. dropdownCheck's `icon(...) + ' ' + content`, which is what broke
+  // the Line Height / Font Name / Font Size / Font Size Unit dropdowns:
+  // each item's checkmark <i> ate the label text AND every dropdown item
+  // after it, nesting them all inside one one still-open <i>.
+  return '<' + tagName + ' class="' + iconClassName + '"></' + tagName + '>';
 };
 
 var ui_ui = function ui(editorOptions) {
@@ -10037,7 +10048,7 @@ var ui_ui = function ui(editorOptions) {
     checkbox: ui_checkbox,
     options: editorOptions,
     palette: function palette($node, options) {
-      return renderer["a" /* default */].create('<div class="note-color-palette"/>', function ($node, options) {
+      return renderer["a" /* default */].create('<div class="note-color-palette"></div>', function ($node, options) {
         var contents = [];
 
         for (var row = 0, rowSize = options.colors.length; row < rowSize; row++) {

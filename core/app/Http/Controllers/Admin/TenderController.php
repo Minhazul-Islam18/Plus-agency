@@ -764,10 +764,16 @@ class TenderController extends Controller
         }
 
         $purchase->payment_status = $request->payment_status;
-        // Match the gateway path (TenderPaymentHelper::completePurchase) — stamp
-        // paid_at the first time this order is marked Completed, so it's not
-        // left null for manually-approved (e.g. offline) payments.
-        if ($completing && empty($purchase->paid_at)) {
+        // Match the gateway path (TenderPaymentHelper::completePurchase) —
+        // stamp paid_at every time this order transitions into Completed.
+        // $completing already guarantees previousStatus !== 'Completed', so
+        // this is always a genuine new validation event, never a duplicate
+        // call on an already-completed order — no extra empty() guard
+        // needed, and one actively caused a bug: reversal (above) never
+        // clears paid_at, so a reversed-then-re-validated order kept
+        // showing its original (now stale) paid_at, including on the
+        // receipt's "Validation Date" field.
+        if ($completing) {
             $purchase->paid_at = now();
         }
         $purchase->save();

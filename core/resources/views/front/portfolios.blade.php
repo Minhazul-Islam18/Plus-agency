@@ -28,6 +28,10 @@
     @section('breadcrumb-overlay-opacity', $bs->portfolio_breadcrumb_overlay_opacity)
 @endif
 
+@section('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css" integrity="sha384-aQuvIWWIbpu/mSqULLDiUveyYiPoJzPKAWjUmGJ+Elm+N/LJhzfZqsutsfw870JS" crossorigin="anonymous">
+@endsection
+
 @if ($be->theme_version == 'dark')
     @section('breadcrumb-ledger')
         <div class="dark-bc-ledger-item">
@@ -66,8 +70,13 @@
                             <a class="dark-pf-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s" href="{{ route('front.portfoliodetails', [$portfolio->slug]) }}">
                                 <img class="lazy" data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}" alt="">
                                 <span class="dark-pf-scrim"></span>
-                                @if (!empty($portfolio->service->scategory))
+                                @if (!empty($portfolio->sector))
+                                    <span class="dark-pf-tag">{{ convertUtf8($portfolio->sector->name) }}</span>
+                                @elseif (!empty($portfolio->service->scategory))
                                     <span class="dark-pf-tag">{{ convertUtf8($portfolio->service->scategory->name) }}</span>
+                                @endif
+                                @if (!empty($portfolio->country))
+                                    <span class="dark-pf-flag"><span class="fi fi-{{ strtolower($portfolio->country) }}"></span></span>
                                 @endif
                                 <div class="dark-pf-body">
                                     @if (!empty($portfolio->service))

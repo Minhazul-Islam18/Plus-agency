@@ -84,7 +84,7 @@ class FrontendController extends Controller
             // manual invalidation hook on every one of these models.
             $data += \Illuminate\Support\Facades\Cache::remember("home_listing_blocks:lang:{$lang_id}", now()->addMinutes(15), function () use ($lang_id) {
                 $blocks = [
-                    'portfolios' => Portfolio::where('language_id', $lang_id)->where('feature', 1)->with('service:id,title')->orderBy('serial_number', 'ASC')->limit(10)->get(),
+                    'portfolios' => Portfolio::where('language_id', $lang_id)->where('feature', 1)->where('is_archived', 0)->where('is_published', 1)->with('service:id,title')->orderBy('serial_number', 'ASC')->limit(10)->get(),
                     'points' => Point::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'statistics' => Statistic::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'testimonials' => Testimonial::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
@@ -194,7 +194,7 @@ class FrontendController extends Controller
             $data['category'] = Scategory::findOrFail($category);
         }
 
-        $data['portfolios'] = Portfolio::with('service.scategory')->when($category, function ($query, $category) {
+        $data['portfolios'] = Portfolio::with('service.scategory', 'sector')->when($category, function ($query, $category) {
             $serviceIdArr = [];
             $serviceids = Service::select('id')->where('scategory_id', $category)->get();
             foreach ($serviceids as $key => $serviceid) {
@@ -203,7 +203,7 @@ class FrontendController extends Controller
             return $query->whereIn('service_id', $serviceIdArr);
         })->when($currentLang, function ($query, $currentLang) {
             return $query->where('language_id', $currentLang->id);
-        })->orderBy('serial_number', 'ASC');
+        })->where('is_archived', 0)->where('is_published', 1)->orderBy('serial_number', 'ASC');
 
         $version = $be->theme_version;
 
@@ -218,7 +218,48 @@ class FrontendController extends Controller
     {
         $currentLang = currentLang();
 
-        $data['portfolio'] = Portfolio::where('slug', $slug)->where('language_id', $currentLang->id)->firstOrFail();
+        $data['portfolio'] = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents'])
+            ->where('slug', $slug)->where('language_id', $currentLang->id)
+            ->where('is_archived', 0)->where('is_published', 1)
+            ->firstOrFail();
+
+        $portfolio = $data['portfolio'];
+
+        if ($portfolio->country) {
+            foreach (\App\Http\Helpers\Countries::all() as $c) {
+                if ($c['iso'] === $portfolio->country) {
+                    $data['pdCountryName'] = $c['name'];
+                    break;
+                }
+            }
+        }
+
+        $data['documentList'] = $portfolio->documents->map(fn ($pd) => [
+            'name' => $pd->original_name ?: $pd->file,
+            'url' => url(FRONT_IMG_PATH . 'portfolios/documents/' . $pd->file),
+            'size' => $pd->size,
+        ])->all();
+
+        // "Similar" = same sector if set, else same service — excludes
+        // itself and archived/unpublished rows, matching the identity-card
+        // fields actually shown (sector), falling back to the pre-existing
+        // taxonomy (service) for portfolios that don't have a sector yet.
+        $similarQuery = Portfolio::where('language_id', $currentLang->id)
+            ->where('id', '!=', $portfolio->id)
+            ->where('is_archived', 0)
+            ->where('is_published', 1);
+        if (!empty($portfolio->sector_id)) {
+            $similarQuery->where('sector_id', $portfolio->sector_id);
+        } elseif (!empty($portfolio->service_id)) {
+            $similarQuery->where('service_id', $portfolio->service_id);
+        } else {
+            $similarQuery->whereRaw('0 = 1');
+        }
+        $data['similarProjects'] = $similarQuery->with('sector')->orderBy('id', 'DESC')->limit(8)->get();
+
+        // ISO -> full name map for the similar-project cards' country line
+        // (they store the same 2-letter code as $portfolio->country above).
+        $data['countryNames'] = array_column(\App\Http\Helpers\Countries::all(), 'name', 'iso');
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;

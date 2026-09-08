@@ -1720,11 +1720,68 @@ a.proceed-checkout-btn:hover {
     margin-bottom: 40px;
   }
 }
+.dark-approach-carousel-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+}
+.dark-approach-carousel-wrap .dark-approach-viewport {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.dark-approach-nav-col {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+.dark-approach-nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(9, 13, 22, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.dark-approach-nav svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dark-approach-nav:hover {
+  background: rgba(var(--accent-2-rgb), 0.35);
+  border-color: rgba(var(--accent-2-rgb), 0.6);
+}
+.dark-approach-viewport {
+  position: relative;
+  overflow: hidden;
+  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .dark-approach-lists {
   position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-approach-lists,
+  .dark-approach-viewport {
+    transition: none;
+  }
 }
 .dark-approach-item {
   position: relative;
@@ -3935,7 +3992,7 @@ a.testi-company-logo:hover::after {
    ===================================================================== */
 .dark-svcp-section {
   position: relative;
-  padding: 90px 24px 140px;
+  padding: 24px 24px 140px;
   background: #090d16;
 }
 .dark-svcp-inner {
@@ -5585,6 +5642,26 @@ button.dark-sheet-submit[type="submit"]:active {
   transform: scale(1.08);
   filter: saturate(1) brightness(0.55);
 }
+.dark-pf-flag {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 30px;
+  height: 22px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark-pf-flag .fi {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
 .dark-pf-tag {
   position: absolute;
   top: 18px;
@@ -5737,14 +5814,29 @@ button.dark-sheet-submit[type="submit"]:active {
      can't fix it, since intrinsic sizing is computed before clipping. */
   min-width: 0;
 }
+/* Main image + thumbnail strip live inside ONE bordered/shadowed card —
+   not two separate boxes. overflow:hidden here (not on .dark-pd-gallery-
+   main) is what gives the image its rounded TOP corners only (it's flush
+   against the top edge) and the thumbs their rounded BOTTOM corners
+   (flush against the bottom edge); neither child needs its own radius. */
 .dark-pd-gallery {
   margin-bottom: 40px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+  background: #060910;
 }
 .dark-pd-gallery-main {
   position: relative;
-  border-radius: 22px;
+  /* Own clip (no radius/border/shadow — that's the outer .dark-pd-gallery
+     card's job now) so the Ken Burns zoom and hero overlay stay confined
+     to the photo instead of bleeding into the thumbnail row below. */
   overflow: hidden;
-  margin-bottom: 12px;
+  cursor: grab;
+}
+.dark-pd-gallery-main.is-dragging {
+  cursor: grabbing;
 }
 .dark-pd-gallery-main img {
   width: 100%;
@@ -5753,11 +5845,79 @@ button.dark-sheet-submit[type="submit"]:active {
   display: block;
   transition: opacity 0.4s ease;
 }
+/* Slow continuous zoom/pan on whichever image is showing — replaces the
+   old hover-only scale (redundant with this running all the time).
+   Restarted per slide by the script (remove/reflow/re-add), so each new
+   image gets its own fresh drift instead of picking up mid-cycle. */
+@keyframes pdKenBurns {
+  0% {
+    transform: scale(1.02) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.12) translate(-1.5%, -1.5%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dark-pd-gallery-main img.is-kenburns {
+    animation: pdKenBurns 11s ease-in-out infinite alternate;
+  }
+}
+.dark-pd-gallery-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 4;
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark-pd-gallery-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform-origin: left;
+  animation: pdFillBar linear forwards;
+  animation-duration: var(--dur, 5000ms);
+  /* Paused by default (frozen at 0%) — .is-running is the only thing that
+     starts/resumes it. Play-state pause/resume (not add/remove the
+     animation) so hovering freezes it in place instead of resetting it. */
+  animation-play-state: paused;
+}
+.dark-pd-gallery-progress-fill.is-running {
+  animation-play-state: running;
+}
+@keyframes pdFillBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.dark-pd-gallery-counter {
+  position: absolute;
+  z-index: 3;
+  bottom: 16px;
+  right: 16px;
+  font-family: "Plex Mono", monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: rgba(9, 13, 22, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--glass-border);
+  padding: 6px 13px;
+  border-radius: 100px;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
 .dark-pd-gallery-nav {
   position: absolute;
+  z-index: 3;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 2;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -5770,7 +5930,8 @@ button.dark-sheet-submit[type="submit"]:active {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+  transition: background 0.25s ease, border-color 0.25s ease,
+    transform 0.2s ease;
 }
 .dark-pd-gallery-nav svg {
   width: 18px;
@@ -5780,6 +5941,7 @@ button.dark-sheet-submit[type="submit"]:active {
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: transform 0.25s ease;
 }
 .dark-pd-gallery-nav:hover {
   background: rgba(var(--accent-2-rgb), 0.35);
@@ -5791,11 +5953,62 @@ button.dark-sheet-submit[type="submit"]:active {
 .dark-pd-gallery-nav-prev svg {
   margin-right: 2px;
 }
+.dark-pd-gallery-nav-prev:hover svg {
+  transform: translateX(-2px);
+}
+.dark-pd-gallery-nav-prev:active {
+  transform: translateY(-50%) scale(0.9);
+}
 .dark-pd-gallery-nav-next {
   right: 16px;
 }
 .dark-pd-gallery-nav-next svg {
   margin-left: 2px;
+}
+.dark-pd-gallery-nav-next:hover svg {
+  transform: translateX(2px);
+}
+.dark-pd-gallery-nav-next:active {
+  transform: translateY(-50%) scale(0.9);
+}
+.dark-pd-gallery-zoom {
+  top: 16px;
+  right: 16px;
+  left: auto;
+  transform: none;
+}
+.dark-pd-gallery-zoom:hover {
+  transform: scale(1.06);
+}
+.dark-pd-gallery-zoom:active {
+  transform: scale(0.92);
+}
+.dark-pd-gallery-play {
+  top: auto;
+  bottom: 16px;
+  left: 16px;
+  transform: none;
+  width: 36px;
+  height: 36px;
+}
+.dark-pd-gallery-play:hover {
+  transform: none;
+}
+.dark-pd-gallery-play:active {
+  transform: scale(0.9);
+}
+.dark-pd-gallery-play svg {
+  width: 13px;
+  height: 13px;
+}
+.dark-pd-gallery-play .icon-play {
+  display: none;
+}
+.dark-pd-gallery-play.is-paused .icon-pause {
+  display: none;
+}
+.dark-pd-gallery-play.is-paused .icon-play {
+  display: block;
 }
 @media (max-width: 460px) {
   .dark-pd-gallery-nav {
@@ -5803,49 +6016,217 @@ button.dark-sheet-submit[type="submit"]:active {
     height: 36px;
   }
 }
-/* Real Owl Carousel instance (see the script section) — its native loop
-   mode clones slides on both edges, so both autoplay AND a visitor
-   manually dragging/swiping the strip loop infinitely in either
-   direction. A hand-rolled scroll-position trick can only ever fix the
-   autoplay case; manual dragging on a plain overflow:auto div is always
-   bounded start-to-end, which is exactly what this replaces. */
-.dark-pd-gallery-thumbs {
-  /* Owl's .owl-stage is intrinsically as wide as every slide combined
-     (that's how its sliding mechanism works) — without this, a grid/flex
-     ancestor's default min-width:auto lets that full intrinsic width
-     balloon the whole column outward instead of the .owl-stage-outer
-     child clipping it as intended. */
-  overflow: hidden;
-  min-width: 0;
+.dark-pd-gallery-main img {
+  /* Without this, starting our drag-to-navigate gesture on the <img>
+     itself triggers the browser's native "drag the image out" behavior
+     instead — which swallows the mouseup our own handler waits for. */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.dark-pd-gallery-thumbs.owl-carousel .owl-stage-outer {
-  overflow: hidden;
-  border-radius: 4px;
-}
-.dark-pd-gallery-thumbs .owl-stage {
+
+/* Image lightbox — zoom (wheel/pinch/double-click/double-tap) + pan.
+   Triggered by .dark-pd-gallery-zoom; see the script section. */
+.dark-img-lightbox {
+  position: fixed;
+  inset: 0;
+  /* Sticky header is 1000 (.dark-header-shell.sticky-navbar). The
+     announcement popup (.popup-wrapper.dark-popup) and the mobile
+     off-canvas menu (.dark-oc-panel) both sit at 99999 and are
+     independently timer/toggle-triggered — either can fire while this
+     is already open, and without this the popup renders on top and
+     visually covers/"crops" the sides of the lightbox image. Must clear
+     both. */
+  z-index: 100000;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  background: rgba(4, 9, 16, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
 }
-.dark-pd-gallery-thumbs button {
-  position: relative;
-  width: 100%;
-  border: none;
-  padding: 0;
-  border-radius: 14px;
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: opacity 0.25s ease, box-shadow 0.25s ease;
-}
-.dark-pd-gallery-thumbs button.is-active {
+.dark-img-lightbox.is-open {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--accent-2);
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
 }
-.dark-pd-gallery-thumbs button img {
+.dark-img-lightbox-stage {
+  position: relative;
+  flex: 1 1 auto;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+.dark-img-lightbox-img {
+  /* 100% of the stage's own box, NOT a separate viewport-relative value —
+     the stage (this img's containing block, position:relative) is capped
+     at max-width:1200px independently of the viewport. A vw-based value
+     here has no knowledge of that 1200px ceiling: on a tall/wide viewport,
+     max-height below can drive the image's proportional width past 1200px
+     while still under a looser vw cap, rendering it wider than the stage
+     that clips it (overflow:hidden) — the image silently overflows its
+     own container and gets cut off on both sides. max-width:100% ties it
+     to whatever the stage's real rendered width actually is, always. */
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 6px;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  cursor: zoom-in;
+  transition: transform 0.15s ease;
+}
+.dark-img-lightbox-img.is-zoomed {
+  cursor: grab;
+}
+.dark-img-lightbox-img.is-dragging {
+  transition: none;
+  cursor: grabbing;
+}
+.dark-img-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  cursor: pointer;
+}
+.dark-img-lightbox-close svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.dark-img-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.dark-img-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.dark-img-lightbox-nav svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dark-img-lightbox-nav:hover {
+  background: rgba(var(--accent-2-rgb), 0.35);
+  border-color: rgba(var(--accent-2-rgb), 0.6);
+}
+.dark-img-lightbox-prev {
+  left: 20px;
+}
+.dark-img-lightbox-next {
+  right: 20px;
+}
+.dark-img-lightbox-zoombar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 6px;
+}
+.dark-img-lightbox-zbtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.dark-img-lightbox-zreset {
+  width: auto;
+  padding: 0 14px;
+  font-size: 11.5px;
+  font-family: "Plex Mono", monospace;
+  letter-spacing: 0.03em;
+}
+.dark-img-lightbox-zbtn:hover {
+  background: rgba(var(--accent-2-rgb), 0.35);
+}
+.dark-img-lightbox-hint {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+@media (max-width: 620px) {
+  .dark-img-lightbox {
+    padding: 14px;
+    gap: 12px;
+  }
+  .dark-img-lightbox-img {
+    max-height: 68vh;
+  }
+  .dark-img-lightbox-nav {
+    width: 40px;
+    height: 40px;
+  }
+  .dark-img-lightbox-prev {
+    left: 8px;
+  }
+  .dark-img-lightbox-next {
+    right: 8px;
+  }
+  .dark-img-lightbox-hint {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-img-lightbox,
+  .dark-img-lightbox-img {
+    transition: none !important;
+  }
 }
 @media (max-width: 620px) {
   .dark-pd-gallery-main img {
@@ -5853,64 +6234,107 @@ button.dark-sheet-submit[type="submit"]:active {
   }
 }
 
-.dark-pd-title {
-  font-family: "Fraunces", Georgia, serif;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: #fff !important;
-  margin: 0 0 26px;
-}
-.dark-pd-spec {
+/* ===== Sidebar identity card — pixel match to the approved mockup
+   (Portfolio Detail Redesign artifact): glass panel, client row with logo
+   chip top-right, 2-col label/value grid, status pill, full-width CTA. ===== */
+.dark-pd-side-card {
+  background: rgba(255, 255, 255, 0.045);
   border: 1px solid var(--glass-border);
   border-radius: 18px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  padding: 8px 24px;
-  margin-bottom: 24px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
-.dark-pd-spec-row {
+.dark-pd-side-widgets {
+  margin-top: 24px;
+}
+.dark-pd-side-client-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 18px;
   border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 18px;
 }
-.dark-pd-spec-row:last-child {
-  border-bottom: none;
+.dark-pd-side-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #fff;
+  object-fit: contain;
+  padding: 4px;
+  flex-shrink: 0;
 }
-.dark-pd-spec-label {
+.dark-pd-side-label {
+  display: block;
   font-family: "Plex Mono", monospace;
   font-size: 10.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.42);
+  margin-bottom: 5px;
 }
-.dark-pd-spec-value {
+/* Dates + Cost only — a small accent glyph ahead of the label, matching
+   the mono uppercase label's size instead of a full icon-chip (too
+   bulky for this dense 2-col grid). */
+.dark-pd-side-icon {
+  color: var(--accent-2, #16b999);
+  font-size: 10px;
+  margin-right: 6px;
+  width: 11px;
+  text-align: center;
+}
+.dark-pd-side-client-name {
   font-family: "Plex Sans", sans-serif;
-  font-size: 14.5px;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+.dark-pd-side-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 18px;
+}
+.dark-pd-side-full {
+  grid-column: 1 / -1;
+}
+.dark-pd-side-value {
+  display: block;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+.dark-pd-side-value--dim {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13.5px;
   line-height: 1.5;
 }
-.dark-pd-spec-value.dark-pd-status {
+.dark-pd-flag-chip {
   display: inline-flex;
-  align-self: flex-start;
   align-items: center;
-  gap: 7px;
-  padding: 4px 12px;
-  border-radius: 100px;
-  background: rgba(var(--accent-2-rgb), 0.14);
-  color: var(--accent-2);
-  font-family: "Plex Mono", monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  gap: 6px;
 }
-.dark-pd-spec-value.dark-pd-status::before {
-  content: "";
-  width: 6px;
-  height: 6px;
+.dark-pd-flag-chip .fi {
+  border-radius: 2px;
+}
+.dark-pd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+.dark-pd-status-pill .dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--accent-2);
 }
@@ -5946,7 +6370,6 @@ button.dark-sheet-submit[type="submit"]:active {
   height: 14px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .dark-pd-gallery-thumbs button,
   .dark-pd-demo-btn {
     transition: none !important;
   }
@@ -10673,4 +11096,685 @@ body.dark-oc-lock {
 }
 .dark-team-profile-modal .team-modal-details:empty::before {
   color: rgba(255, 255, 255, 0.4);
+}
+
+/* ===== Portfolio identity card + structured content blocks =====
+   Shared by the frontend detail page, the admin Aperçu preview, and the
+   admin read-only "eye" modal — see
+   resources/views/front/default/partials/dark/portfolio-identity-card.blade.php */
+.dark-pic-wrap {
+  color: #fff;
+}
+.dark-pic-identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  padding: 18px 20px;
+  background: rgba(9, 13, 22, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.dark-pic-identity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 140px;
+  /* Each item is its own grounded chip — without this, a record with
+     only 1-2 identity fields set (client + status, say) reads as sparse
+     text floating in a mostly-empty bar instead of a considered row. */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 16px 8px 8px;
+}
+.dark-pic-identity-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-2-rgb, 45, 212, 191), 0.18);
+  color: var(--accent-2, #2dd4bf);
+  font-size: 14px;
+}
+.dark-pic-identity-icon .fi {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+.dark-pic-identity-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+.dark-pic-identity-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.dark-pic-client-logo {
+  height: 22px;
+  width: auto;
+  max-width: 60px;
+  object-fit: contain;
+}
+.dark-pic-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.dark-pic-badge-success {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+.dark-pic-badge-info {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+.dark-pic-badge-warning {
+  background: rgba(234, 179, 8, 0.18);
+  color: #facc15;
+}
+
+/* Compact hero for the admin "Aperçu" preview and read-only eye modal
+   (admin/portfolio/preview_content.blade.php) — was raw inline styles
+   (ad-hoc radius/gradient values, no shared tokens), which is exactly
+   what read as unpolished next to the rest of this design system. */
+.dark-pic-preview-hero {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+}
+.dark-pic-preview-hero-img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+.dark-pic-preview-hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 26px;
+  background: linear-gradient(
+    0deg,
+    rgba(4, 7, 14, 0.88) 0%,
+    rgba(4, 7, 14, 0.2) 55%,
+    rgba(4, 7, 14, 0) 82%
+  );
+}
+.dark-pic-preview-hero-badge {
+  align-self: flex-start;
+  font-family: "Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: var(--accent-2, #16b999);
+  color: #06210f;
+  margin-bottom: 12px;
+}
+.dark-pic-preview-hero-title {
+  font-family: "Plex Sans", sans-serif;
+  font-size: 23px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+/* Same panel chrome as .dark-pic-documents so this reads as a sibling
+   card, not a bolted-on afterthought. */
+.dark-pic-preview-gallery {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 16px;
+  padding: 20px;
+}
+.dark-pic-preview-gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.dark-pic-preview-gallery-thumb {
+  width: 130px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  display: block;
+}
+
+.dark-pic-blocks {
+  display: grid;
+  /* auto-fit + minmax reflows off the actual CONTAINER width, not the
+     viewport — fixed breakpoints (repeat(5,1fr) above 1199px viewport,
+     etc.) assumed this always renders close to full page width. Inside
+     the admin's read-only modal the container is much narrower than the
+     viewport even on a wide desktop, so those breakpoints still forced 5
+     columns and the last ones clipped off the edge. This sizes correctly
+     wherever the partial is embedded — full-width page, Aperçu preview,
+     or the narrower modal — with no separate breakpoints needed. */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.dark-pic-impact {
+  margin-top: 14px;
+}
+.dark-pic-block {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 14px;
+  padding: 16px 16px 18px;
+}
+.dark-pic-block-accent {
+  border-color: rgba(var(--accent-2-rgb, 22, 185, 153), 0.4);
+  background: rgba(var(--accent-2-rgb, 22, 185, 153), 0.06);
+}
+.dark-pic-block-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+.dark-pic-block-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(var(--accent-2-rgb, 22, 185, 153), 0.16);
+  color: var(--accent-2, #16b999);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.dark-pic-block-icon--accent {
+  background: rgba(var(--accent-rgb, 59, 112, 255), 0.16);
+  color: var(--accent, #3b70ff);
+}
+.dark-pic-block h4 {
+  font-family: "Plex Sans", sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+.dark-pic-block p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0;
+}
+.dark-pic-block ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dark-pic-block ul li {
+  position: relative;
+  padding-left: 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.68);
+}
+.dark-pic-block ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.dark-pic-documents {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 16px;
+  padding: 20px;
+}
+.dark-pic-documents ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dark-pic-documents li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+}
+.dark-pic-documents li:last-child {
+  border-bottom: none;
+}
+.dark-pic-doc-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(224, 68, 68, 0.14);
+  color: #f0716f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.dark-pic-doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dark-pic-doc-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+}
+.dark-pic-doc-size {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 12px;
+}
+.dark-pic-doc-download {
+  margin-left: auto;
+  color: var(--accent, #3b70ff);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-rgb, 59, 112, 255), 0.14);
+  flex-shrink: 0;
+}
+
+/* ===== Portfolio details page: identity-card wrapper + similar projects =====
+   Same max-width/centering as .dark-svcp-inner (the hero+sidebar grid right
+   above) so these full-width sections line up with it instead of spanning
+   edge-to-edge of .dark-svcp-section. */
+.dark-pd-identity-section {
+  max-width: 1320px;
+  margin: 36px auto 0;
+}
+.dark-pd-desc-docs-row {
+  max-width: 1320px;
+  margin: 40px auto 0;
+  display: grid;
+  gap: 40px;
+  align-items: start;
+}
+.dark-pd-docs-col .dark-pic-documents {
+  margin-top: 0;
+}
+.dark-pd-gallery-col .dark-pd-gallery-panel {
+  margin-top: 0;
+}
+/* "Galerie d'images" thumbnail-grid panel — same card chrome as
+   .dark-pic-documents (its sibling in this row) so the three panels read
+   as one family. Clicking a thumb opens the main lightbox at that index
+   (see the script section) — this is the only way to jump straight to a
+   given photo now that the hero carousel itself has no thumbnail strip. */
+.dark-pd-gallery-panel {
+  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 16px;
+  padding: 20px;
+}
+.dark-pd-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.dark-pd-gallery-grid-item {
+  position: relative;
+  border: none;
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  cursor: zoom-in;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.dark-pd-gallery-grid-item:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+.dark-pd-gallery-grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (max-width: 480px) {
+  .dark-pd-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* Description / Gallery / Documents — whichever of the three actually
+   render (Gallery needs portfolio images, Documents needs an uploaded
+   document list; Description always renders) get a 5:4:3 split; with
+   only two of the three present it simplifies to a 2:1 split; with just
+   Description, the full row. */
+.dark-pd-desc-docs-row--cols-3 {
+  grid-template-columns: 5fr 4fr 3fr;
+}
+.dark-pd-desc-docs-row--cols-2 {
+  grid-template-columns: 2fr 1fr;
+}
+.dark-pd-desc-docs-row--cols-1 {
+  grid-template-columns: 1fr;
+}
+
+/* ===== Portfolio details page: full-bleed layout =====
+   This page only (.dark-pd-page, added on .dark-svcp-section in
+   portfolio-details.blade.php) — every other page using the shared
+   .dark-svcp-section/.dark-svcp-inner classes (services, blog, custom
+   pages) is untouched.
+     - .dark-svcp-inner: drops the 1320px cap and switches the fixed
+       340px sidebar for a proportional ~25% column (was disproportionate
+       once the page could run edge-to-edge — a fixed px sidebar either
+       looks starved or bloated depending on viewport, a fraction doesn't).
+     - .dark-pd-identity-section (the 5 "evidence of competence" blocks):
+       was spanning the full row width (hero + sidebar combined) — same
+       grid-column trick as .dark-svcp-inner so it lines up with the
+       hero/gallery column only, not the sidebar too.
+     - .dark-pd-desc-docs-row: just unboxed (max-width) here — its actual
+       column split is the width-independent --cols-N classes above, same
+       ratio whether this page is boxed or full-bleed.
+     - .dark-pd-similar-section: just unboxed (max-width) too — its
+       carousel already sizes itself off the container. */
+.dark-pd-page.dark-svcp-section {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+.dark-pd-page .dark-svcp-inner {
+  max-width: none;
+  grid-template-columns: 3fr 1fr;
+}
+.dark-pd-page .dark-pd-identity-section {
+  max-width: none;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 54px;
+}
+.dark-pd-page .dark-pd-identity-section > * {
+  grid-column: 1;
+}
+.dark-pd-page .dark-pd-desc-docs-row {
+  max-width: none;
+}
+.dark-pd-page .dark-pd-similar-section {
+  max-width: none;
+}
+@media (max-width: 1080px) {
+  .dark-pd-page .dark-pd-identity-section {
+    grid-template-columns: 1fr;
+  }
+}
+/* Restore the stacking .dark-svcp-inner already did before .dark-pd-page's
+   rule above raised its specificity past the plain-class responsive rule
+   (.dark-svcp-inner at 860px) that used to handle this. .dark-pd-desc-docs-row
+   needs no equivalent fix — its --cols-N modifier classes never touch this
+   breakpoint's rule below, which still matches the bare .dark-pd-desc-docs-row
+   class name and wins the specificity tie by source order. */
+@media (max-width: 860px) {
+  .dark-pd-page .dark-svcp-inner {
+    grid-template-columns: 1fr;
+  }
+}
+/* .dark-pd-identity-section now lives INSIDE .dark-pd-main-col (right
+   under the hero slider) instead of being a full-width row below the
+   whole hero+sidebar grid — portfolio-details.blade.php moved it there.
+   The 3fr/1fr "line up with the hero column only" trick above doesn't
+   apply anymore: .dark-pd-main-col already IS that column, so without
+   this override the blocks were only rendering across 3/4 of it,
+   wasting the right quarter. Also drop the old 36px top margin — it
+   directly follows .dark-pd-gallery now, which already carries its own
+   40px margin-bottom, so the extra margin was just doubling the gap. */
+.dark-pd-page .dark-pd-main-col .dark-pd-identity-section {
+  max-width: none;
+  margin: 0;
+  display: block;
+}
+/* Shared heading style for "Description du projet" / "Documents" — bigger
+   than the 5-pipeline-card .dark-pic-block-head, matches the mockup. */
+.dark-pd-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+.dark-pd-section-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb, 59, 112, 255), 0.16);
+  color: var(--accent, #3b70ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.dark-pd-prose {
+  max-height: 260px;
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.35s ease;
+}
+.dark-pd-prose.is-clamped::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 64px;
+  background: linear-gradient(
+    0deg,
+    var(--bg, #090d16) 0%,
+    rgba(9, 13, 22, 0) 100%
+  );
+  pointer-events: none;
+}
+.dark-pd-prose.is-expanded {
+  max-height: none;
+}
+.dark-pd-read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 9px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  background: transparent;
+  color: #fff;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.dark-pd-read-more:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+}
+.dark-pd-read-more svg {
+  transition: transform 0.25s ease;
+}
+.dark-pd-read-more.is-open svg {
+  transform: rotate(-90deg);
+}
+@media (max-width: 991px) {
+  .dark-pd-desc-docs-row {
+    grid-template-columns: 1fr;
+  }
+}
+.dark-pd-similar-section {
+  max-width: 1320px;
+  margin: 40px auto 0;
+}
+.dark-pd-similar-title {
+  color: #fff;
+  font-size: 21px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: baseline;
+}
+.dark-pd-similar-rule {
+  width: 40px;
+  height: 2px;
+  background: var(--accent-2, #16b999);
+  display: inline-block;
+  margin-left: 12px;
+}
+/* Was overflow:visible — let owl's loop-mode clones render past the
+   1320px-contained section, spilling the carousel edge-to-edge across
+   the full viewport during autoplay/drag. Contain it like every other
+   owl track on the site; the -4px hover lift below is small enough
+   that clipping it is not noticeable. */
+.dark-pd-similar-carousel .owl-stage-outer {
+  overflow: hidden;
+}
+.dark-pd-similar-card {
+  display: block;
+  background: rgba(9, 13, 22, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.dark-pd-similar-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--accent-2-rgb, 45, 212, 191), 0.5);
+}
+.dark-pd-similar-img {
+  position: relative;
+  height: 140px;
+}
+.dark-pd-similar-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dark-pd-similar-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: "Plex Mono", monospace;
+  background: rgba(6, 10, 18, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.dark-pd-similar-body {
+  padding: 14px 16px 16px;
+}
+.dark-pd-similar-body h5 {
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.dark-pd-similar-body p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12.5px;
+  margin: 0;
+}
+.dark-pd-similar-card > svg {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--accent-2, #2dd4bf);
+}
+
+/* ===== Portfolio details hero overlay: sector badge + "on behalf of
+   {client}" line on top of the hero image (badge top-left, client line
+   bottom-left over a gradient scrim). Title/subtitle used to render here
+   too — dropped per feedback (busy over the photo; the real title is
+   already the page's own <h1> in the breadcrumb header). ===== */
+.dark-pd-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 26px 30px;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    rgba(4, 7, 14, 0.86) 0%,
+    rgba(4, 7, 14, 0.25) 48%,
+    rgba(4, 7, 14, 0) 72%
+  );
+}
+.dark-pd-hero-text {
+  /* Pin to the bottom via margin, not the parent's justify-content:
+     space-between — the badge above is conditional (@if sector), and
+     space-between with a single flex child leaves it at flex-start
+     instead of the end, floating the client line up into the image's
+     busiest (unscrimmed) area when a record has no sector set. */
+  margin-top: auto;
+}
+.dark-pd-hero-badge {
+  align-self: flex-start;
+  display: inline-block;
+  font-family: "Plex Mono", monospace;
+  padding: 7px 16px;
+  border-radius: 100px;
+  background: var(--accent-2, #16b999);
+  color: #06210f;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.dark-pd-hero-client {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  max-width: 640px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

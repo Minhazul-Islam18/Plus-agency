@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Providers\AppServiceProvider;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -12,6 +13,12 @@ use Illuminate\Support\Facades\Cache;
  * ANY code path — controller, tinker, seeder, queue job — invalidates it,
  * instead of relying on every controller method remembering to call
  * Cache::forget itself.
+ *
+ * These same models (Portfolio/Service/Member/Tender/Blog/Faq/Point/
+ * Testimonial/Partner) also back the front-end pages SetPublicCacheHeaders
+ * opted into real HTTP caching (homepage + their own listing/detail pages) —
+ * a save/delete purges that layer too, for the same reason
+ * AppServiceProvider::flushGlobalViewCache() does.
  */
 trait InvalidatesHomeListingCache
 {
@@ -31,5 +38,7 @@ trait InvalidatesHomeListingCache
         if (!empty($model->language_id)) {
             Cache::forget("home_listing_blocks:lang:{$model->language_id}");
         }
+
+        AppServiceProvider::purgeLiteSpeedCache();
     }
 }

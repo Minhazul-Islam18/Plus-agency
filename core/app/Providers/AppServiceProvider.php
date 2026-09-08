@@ -182,9 +182,10 @@ class AppServiceProvider extends ServiceProvider
   }
 
   /**
-   * Called from admin controllers that write to the data bundled above
-   * (BasicController, LanguageController) so edits show up on the next
-   * request instead of waiting out the TTL.
+   * Invoked automatically via App\Traits\InvalidatesGlobalViewCache's model
+   * events (saved/deleted) on BasicExtra/BasicExtended/BasicSetting/Menu/
+   * Language/Popup — any save/delete on those busts this in-app cache so
+   * edits show up on the next request instead of waiting out the TTL.
    */
   public static function flushGlobalViewCache(): void
   {
@@ -192,6 +193,35 @@ class AppServiceProvider extends ServiceProvider
     Cache::forget('global_languages_active');
     foreach (Language::pluck('id') as $id) {
       Cache::forget(self::globalViewCacheKey($id));
+    }
+
+    self::purgeLiteSpeedCache();
+  }
+
+  /**
+   * Purges the origin's own LiteSpeed LSCache — a separate layer from
+   * Cloudflare's edge cache (which an admin purges manually via the
+   * Cloudflare dashboard/hPanel, by design — see the comment on
+   * $cfCacheableExcept in routes/web.php) and from anything Laravel itself
+   * caches. Since SetPublicCacheHeaders opted the homepage + portfolio/
+   * service/blog details + several listing pages into real HTTP caching
+   * (both Cloudflare and LiteSpeed), a content edit that used to be visible
+   * on the very next request now sits behind that cache too — this is what
+   * makes it visible again immediately instead of waiting out its own TTL.
+   *
+   * X-LiteSpeed-Purge: * asks LiteSpeed to drop everything it cached for
+   * this app, not just one URL — deliberately blunt rather than per-URL
+   * tagging: the affected models (Portfolio/Service/Member/Tender/Blog/
+   * Faq/Point/Testimonial/Partner, plus the 6 global-view-data models)
+   * mostly feed the homepage as well as their own listing/detail pages, so
+   * precise tagging would need to enumerate every page a given edit could
+   * touch anyway. This is a low-traffic admin-driven site (not high-QPS),
+   * so an occasional full purge on save is cheap next to that complexity.
+   */
+  public static function purgeLiteSpeedCache(): void
+  {
+    if (!headers_sent()) {
+      header('X-LiteSpeed-Purge: *');
     }
   }
 }

@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'setlang' => \App\Http\Middleware\SetLangMiddleware::class,
         'force-default-locale' => \App\Http\Middleware\ForceDefaultLocale::class,
         'set-locale-from-url' => \App\Http\Middleware\SetLocaleFromUrl::class,
+        'public-cacheable' => \App\Http\Middleware\SetPublicCacheHeaders::class,
         'checkstatus' => \App\Http\Middleware\CheckStatus::class,
         'forcepasswordchange' => \App\Http\Middleware\ForcePasswordChange::class,
         'setLfmPath' => \App\Http\Middleware\SetLfmPath::class,

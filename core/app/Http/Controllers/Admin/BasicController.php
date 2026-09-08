@@ -690,6 +690,16 @@ class BasicController extends Controller
 
     public function updatesections(Request $request)
     {
+        $request->validate([
+            'tender_carousel_speed'      => 'nullable|integer|min:2000|max:15000',
+            'blog_carousel_speed'        => 'nullable|integer|min:2000|max:15000',
+            'portfolio_carousel_speed'   => 'nullable|integer|min:2000|max:15000',
+            'testimonial_carousel_speed' => 'nullable|integer|min:2000|max:15000',
+            'team_carousel_speed'        => 'nullable|integer|min:2000|max:15000',
+            'partner_carousel_speed'     => 'nullable|integer|min:2000|max:15000',
+            'approach_carousel_speed'    => 'nullable|integer|min:2000|max:15000',
+        ]);
+
         $be = BasicExtended::select('theme_version')->first();
         $bss = BasicSetting::all();
 
@@ -715,6 +725,13 @@ class BasicController extends Controller
 
         $bes = BasicExtended::all();
         foreach ($bes as $key => $be) {
+            $be->tender_carousel_speed = $request->filled('tender_carousel_speed') ? (int) $request->tender_carousel_speed : 4500;
+            $be->blog_carousel_speed = $request->filled('blog_carousel_speed') ? (int) $request->blog_carousel_speed : 4500;
+            $be->portfolio_carousel_speed = $request->filled('portfolio_carousel_speed') ? (int) $request->portfolio_carousel_speed : 4500;
+            $be->testimonial_carousel_speed = $request->filled('testimonial_carousel_speed') ? (int) $request->testimonial_carousel_speed : 4500;
+            $be->team_carousel_speed = $request->filled('team_carousel_speed') ? (int) $request->team_carousel_speed : 4500;
+            $be->partner_carousel_speed = $request->filled('partner_carousel_speed') ? (int) $request->partner_carousel_speed : 4500;
+            $be->approach_carousel_speed = $request->filled('approach_carousel_speed') ? (int) $request->approach_carousel_speed : 4500;
             $be->save();
         }
 

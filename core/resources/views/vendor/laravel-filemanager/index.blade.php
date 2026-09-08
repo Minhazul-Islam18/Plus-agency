@@ -322,6 +322,18 @@
                     });
                 }
 
+                if (urlParams.get('documents')) {
+                    let id = urlParams.get('documents');
+                    $.get("{{url('/')}}" + "/admin/portfolio/" + id + "/documents", function(datas){
+
+                        datas.forEach(function(data) {
+                            sliders.push(data);
+                        });
+
+                        prevImages();
+                    });
+                }
+
 
                 // After clicking on 'Confirm' Button in LFM
                 $(document).on('click', 'a[data-action="use"]', function(e) {
@@ -401,14 +413,27 @@
                     prevImages();
                 }
 
+                // Non-image extensions (this multi-picker is reused for the
+                // Documents field — PDF/DOC/DOCX/XLSX — not just image
+                // galleries) get a generic file-icon + filename tile instead
+                // of a broken <img>.
+                const IMAGE_EXTS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg'];
+                function isImagePath(path) {
+                    let ext = path.split('.').pop().toLowerCase().split('?')[0];
+                    return IMAGE_EXTS.includes(ext);
+                }
+
                 function prevImages() {
                     let imagesDiv = ``;
                     let sliderValues = [];
                     if (sliders.length > 0) {
                         sliders.forEach(function(slider, index) {
+                            let preview = isImagePath(slider)
+                                ? `<img src="${slider}" alt="Slider Image">`
+                                : `<div class="lfm-file-tile"><i class="fas fa-file-alt"></i><span>${decodeURIComponent(slider.split('/').pop())}</span></div>`;
                             imagesDiv += `<div class="thumb-preview mr-2 mb-2">
                                 <i class="fas fa-times-circle" onclick="document.getElementById('lfmIframe${serial}').contentWindow.rmvImg(${index});"></i>
-                                <img src="${slider}" alt="Slider Image">
+                                ${preview}
                             </div>`;
 
                             sliderValues.push(slider.replace("{{url('/')}}" + '/', ""));

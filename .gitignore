@@ -21,6 +21,11 @@
 /assets/user/img/
 /installer/img/
 
+# Portfolio Documents uploads (PDF/DOC/DOCX/XLSX) — not image extensions,
+# so the rules above don't catch them; user-uploaded content, same as the
+# dirs above.
+/assets/front/img/portfolios/documents/
+
 # Ignore vendor directory
 /core/vendor/
 

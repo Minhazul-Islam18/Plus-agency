@@ -134,6 +134,20 @@
                                             {{ $errors->first('portfolio_breadcrumb_overlay_opacity') }}</p>
                                     @endif
                                 </div>
+
+                                <div class="form-group">
+                                    <label>Details Page Gallery Autoplay Speed (ms)</label>
+                                    <input type="number" class="form-control ltr" name="portfolio_details_gallery_speed"
+                                        value="{{ $abe->portfolio_details_gallery_speed ?? 7000 }}" step="500" min="2000"
+                                        max="15000" placeholder="Enter speed in milliseconds">
+                                    <p class="text-warning mb-0">Default 7000. How long each image shows before the
+                                        thumbnail gallery on a project's details page auto-advances. Applies to all
+                                        languages.</p>
+                                    @if ($errors->has('portfolio_details_gallery_speed'))
+                                        <p class="mb-0 text-danger">
+                                            {{ $errors->first('portfolio_details_gallery_speed') }}</p>
+                                    @endif
+                                </div>
                             </form>
                         </div>
                     </div>

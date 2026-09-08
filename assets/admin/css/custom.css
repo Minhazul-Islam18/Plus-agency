@@ -498,6 +498,29 @@ a.d-block {
   font-size: 18px;
   cursor: pointer;
 }
+/* Non-image files (Documents picker) in a slider-thumbs multi-picker —
+   same generic serial-based mechanism as the image gallery, just a file
+   icon + name instead of a broken <img> for PDF/DOC/DOCX/XLSX. */
+.lfm-file-tile {
+  width: 150px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  text-align: center;
+}
+.lfm-file-tile i {
+  font-size: 28px;
+  color: #6c757d;
+}
+.lfm-file-tile span {
+  font-size: 11px;
+  word-break: break-word;
+  max-width: 100%;
+}
 .seperate-file-manager iframe {
   height: 900px;
   width: 100%;

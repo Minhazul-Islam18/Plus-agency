@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Language;
 use App\Page;
@@ -45,6 +46,10 @@ class PageBuilderController extends Controller
     {
         if ($request->type == 'page') {
             $data = Page::findOrFail($request->id);
+            // "Last Modified By" on the Custom Pages list — this is the
+            // pagebuilder's own autosave, a genuine content edit same as
+            // the metadata form (PageController::store/update).
+            $data->updated_by_admin_id = Auth::guard('admin')->id();
         } elseif ($request->type == 'themeHome') {
             $data = Home::findOrFail($request->id);
         }

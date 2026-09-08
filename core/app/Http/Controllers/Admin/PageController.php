@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\BasicExtra;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Page;
 use App\Language;
@@ -40,7 +41,7 @@ class PageController extends Controller
     {
         $lang = Language::where('code', $request->language)->first();
         $lang_id = $lang->id;
-        $data['apages'] = Page::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
+        $data['apages'] = Page::where('language_id', $lang_id)->with('updatedByAdmin')->orderBy('id', 'DESC')->get();
 
         $data['lang_id'] = $lang_id;
         return view('admin.page.index', $data);
@@ -125,6 +126,7 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+        $page->updated_by_admin_id = Auth::guard('admin')->id();
 
         // Handle breadcrumb image from file manager
         if ($filename = $this->saveBreadcrumbImage($request)) {
@@ -202,6 +204,7 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+        $page->updated_by_admin_id = Auth::guard('admin')->id();
 
         // Handle breadcrumb image from file manager
         if ($filename = $this->saveBreadcrumbImage($request)) {

@@ -21,6 +21,10 @@ class Page extends Model
         return $this->belongsTo('App\Language');
     }
 
+    public function updatedByAdmin() {
+        return $this->belongsTo('App\Admin', 'updated_by_admin_id');
+    }
+
     /**
      * Resolve the page assigned to a special type for a given language.
      */

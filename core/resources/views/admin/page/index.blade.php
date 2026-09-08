@@ -74,8 +74,44 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
               @if (count($apages) == 0)
                 <h2 class="text-center">NO LINK ADDED</h2>
               @else
+                {{-- #basic-datatables is reused (same literal id) across ~13
+                     other admin list views — DataTables' own autoWidth gave
+                     "Name" way more room than it needed. A plain max-width
+                     override fought the browser's own auto table-layout
+                     algorithm and produced worse, unpredictable results
+                     (confirmed: it grew instead of shrinking) — table-layout:
+                     fixed is what actually works, since it makes column
+                     widths purely CSS-percentage-driven and ignores both
+                     DataTables' calculated inline widths and the content
+                     itself. Scoped to .pages-list-table (unique to this
+                     view) so none of this leaks into the other tables
+                     sharing the #basic-datatables id. --}}
+                <style>
+                    .pages-list-table {
+                        table-layout: fixed !important;
+                    }
+                    .pages-list-table th:nth-child(1),
+                    .pages-list-table td:nth-child(1) { width: 4%; }
+                    .pages-list-table th:nth-child(2),
+                    .pages-list-table td:nth-child(2) {
+                        width: 20%;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    .pages-list-table th:nth-child(3),
+                    .pages-list-table td:nth-child(3) { width: 8%; }
+                    .pages-list-table th:nth-child(4),
+                    .pages-list-table td:nth-child(4) { width: 8%; }
+                    .pages-list-table th:nth-child(5),
+                    .pages-list-table td:nth-child(5) { width: 13%; }
+                    .pages-list-table th:nth-child(6),
+                    .pages-list-table td:nth-child(6) { width: 13%; }
+                    .pages-list-table th:nth-child(7),
+                    .pages-list-table td:nth-child(7) { width: 34%; }
+                </style>
                 <div class="table-responsive">
-                  <table class="table table-striped mt-3" id="basic-datatables">
+                  <table class="table table-striped mt-3 pages-list-table" id="basic-datatables">
                     <thead>
                       <tr>
                         <th scope="col">
@@ -84,6 +120,8 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         <th scope="col">Name</th>
                         <th scope="col">Status</th>
                         <th scope="col">Serial Number</th>
+                        <th scope="col">Last Modified</th>
+                        <th scope="col">Last Modified By</th>
                         <th scope="col">Actions</th>
                       </tr>
                     </thead>
@@ -93,7 +131,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                           <td>
                             <input type="checkbox" class="bulk-check" data-val="{{$apage->id}}">
                           </td>
-                          <td>{!! convertUtf8($apage->name) !!}</td>
+                          <td title="{{ convertUtf8($apage->name) }}">{!! convertUtf8($apage->name) !!}</td>
                           <td>
                             @if ($apage->status == 1)
                               <span class="badge badge-success">Active</span>
@@ -102,6 +140,14 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                             @endif
                           </td>
                           <td>{{$apage->serial_number}}</td>
+                          <td>{{ optional($apage->updated_at)->format('d M Y, H:i') }}</td>
+                          <td>
+                            @if ($apage->updatedByAdmin)
+                              {{ trim($apage->updatedByAdmin->first_name . ' ' . $apage->updatedByAdmin->last_name) }}
+                            @else
+                              <span class="text-muted">—</span>
+                            @endif
+                          </td>
                           <td>
                             <a class="btn btn-secondary btn-sm" href="{{route('admin.page.edit', $apage->id) . '?language=' . request()->input('language')}}">
                                 <span class="btn-label">

@@ -38,6 +38,9 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolios') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/create') active
 @elseif(request()->is(config('app.admin_prefix','admin').'/portfolio/*/edit')) active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/settings') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/sectors') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/statuses') active
 
 @elseif(request()->path() == config('app.admin_prefix','admin').'/blog/settings') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/bcategorys') active
@@ -103,6 +106,9 @@
     @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolios') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/create') show
     @elseif(request()->is(config('app.admin_prefix','admin').'/portfolio/*/edit')) show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/settings') show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/sectors') show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/portfolio/statuses') show
 
     @elseif(request()->path() == config('app.admin_prefix','admin').'/blog/settings') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/bcategorys') show
@@ -445,6 +451,8 @@
                     'admin/portfolio/create',
                     'admin/portfolio/*/edit',
                     'admin/portfolio/settings',
+                    'admin/portfolio/sectors',
+                    'admin/portfolio/statuses',
                 );
             @endphp
 
@@ -466,6 +474,18 @@
                         <li class="{{ request()->is(config('app.admin_prefix','admin').'/portfolio/create') ? 'active' : '' }}">
                             <a href="{{ route('admin.portfolio.create') }}">
                                 <span class="sub-item">Add Portfolio</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->is(config('app.admin_prefix','admin').'/portfolio/sectors') ? 'active' : '' }}">
+                            <a href="{{ route('admin.portfolio.sector.index', ['language' => $default->code]) }}">
+                                <span class="sub-item">Sectors</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->is(config('app.admin_prefix','admin').'/portfolio/statuses') ? 'active' : '' }}">
+                            <a href="{{ route('admin.portfolio.status.index', ['language' => $default->code]) }}">
+                                <span class="sub-item">Statuses</span>
                             </a>
                         </li>
 

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="page-header">
-        <h4 class="page-title">{{ __('Add Portfolio') }}</h4>
+        <h4 class="page-title">Add Portfolio</h4>
         <ul class="breadcrumbs">
             <li class="nav-home">
                 <a href="{{ route('admin.dashboard') }}">
@@ -13,13 +13,13 @@
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.portfolio.index') }}">{{ __('Portfolios') }}</a>
+                <a href="{{ route('admin.portfolio.index') }}">Portfolios</a>
             </li>
             <li class="separator">
                 <i class="flaticon-right-arrow"></i>
             </li>
             <li class="nav-item">
-                <a href="#">{{ __('Add Portfolio') }}</a>
+                <a href="#">Add Portfolio</a>
             </li>
         </ul>
     </div>
@@ -28,14 +28,14 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title d-inline-block">{{ __('Add Portfolio') }}</div>
+                    <div class="card-title d-inline-block">Add Portfolio</div>
                     <button type="button" id="previewBtn" class="btn btn-secondary btn-sm float-right d-inline-block mr-2">
-                        <i class="fas fa-eye"></i> {{ __('Preview') }}
+                        <i class="fas fa-eye"></i> Preview
                     </button>
                     <a class="btn btn-info btn-sm float-right d-inline-block mr-2"
                         href="{{ route('admin.portfolio.index') . '?language=' . request()->input('language') }}">
                         <span class="btn-label"><i class="fas fa-backward" style="font-size: 12px;"></i></span>
-                        {{ __('Back') }}
+                        Back
                     </a>
                 </div>
                 <form id="ajaxForm" action="{{ route('admin.portfolio.store') }}" method="post">
@@ -64,9 +64,9 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            // sectors + services + statuses load according to language selection
+            // sectors + services + statuses + partners load according to language selection
             $("select[name='language_id']").on('change', function() {
-                $("#services, #sectors, #portfolioStatuses").removeAttr('disabled');
+                $("#services, #sectors, #portfolioStatuses, #partnerIds").removeAttr('disabled');
 
                 let langid = $(this).val();
 
@@ -85,7 +85,7 @@
                 });
 
                 $.get("{{ url('/') }}/admin/portfolio/" + langid + "/get_sectors", function(data) {
-                    let options = `<option value="" disabled selected>Ex: Énergie</option>`;
+                    let options = `<option value="" disabled selected>Ex: Energy</option>`;
                     for (let i = 0; i < data.length; i++) {
                         options += `<option value="${data[i].id}">${data[i].name}</option>`;
                     }
@@ -95,12 +95,21 @@
                 });
 
                 $.get("{{ url('/') }}/admin/portfolio/" + langid + "/get_statuses", function(data) {
-                    let options = `<option value="" disabled selected>{{ __('Select a status') }}</option>`;
+                    let options = `<option value="" disabled selected>Select a status</option>`;
                     for (let i = 0; i < data.length; i++) {
                         options += `<option value="${data[i].id}">${data[i].name}</option>`;
                     }
                     $("#portfolioStatuses").html(options);
                     $("#portfolioStatuses").trigger('change');
+                });
+
+                $.get("{{ url('/') }}/admin/portfolio/" + langid + "/get_partners", function(data) {
+                    let options = '';
+                    for (let i = 0; i < data.length; i++) {
+                        options += `<option value="${data[i].id}">${data[i].name}</option>`;
+                    }
+                    $("#partnerIds").html(options);
+                    $("#partnerIds").trigger('change');
                 });
             });
 
@@ -155,8 +164,26 @@
         }
 
         var today = new Date();
-        $("#submissionDate").datepicker({ autoclose: true, todayHighlight: true });
-        $("#startDate").datepicker({ autoclose: true, endDate: today, todayHighlight: true });
+        // Calendar year range — was letting the decade/century view scroll
+        // all the way back to the 1800s, which is never a real value for
+        // any of these fields. bootstrap-datepicker's own `startDate`
+        // option name is its MIN selectable date (confusingly, not related
+        // to our "Start Date" field) — floors all three pickers at 2000.
+        var minSelectableDate = new Date(2000, 0, 1);
+        $("#submissionDate").datepicker({ autoclose: true, todayHighlight: true, startDate: minSelectableDate });
+        $("#startDate").datepicker({ autoclose: true, startDate: minSelectableDate, endDate: today, todayHighlight: true });
+        $("#endDate").datepicker({ autoclose: true, todayHighlight: true, startDate: minSelectableDate });
+
+        // End Date can't be later than Submission Date (tender submission
+        // deadline) once one is actually set — no Submission Date = no cap.
+        // Mirrors PortfolioController::endDateRule(); this just stops the
+        // picker UI from offering an invalid date in the first place.
+        function applySubmissionDateCap() {
+            var d = $('#submissionDate').datepicker('getDate');
+            $('#endDate').datepicker('setEndDate', d || false);
+        }
+        $('#submissionDate').on('changeDate change', applySubmissionDateCap);
+        applySubmissionDateCap();
 
         // Aperçu — POSTs the current (unsaved) form fields, renders the same
         // shared identity-card partial used by the real frontend page.

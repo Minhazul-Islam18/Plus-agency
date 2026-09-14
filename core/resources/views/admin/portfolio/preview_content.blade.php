@@ -32,7 +32,7 @@
     <div class="dark-pic-preview-gallery">
         <div class="dark-pd-section-heading">
             <span class="dark-pd-section-icon"><i class="fas fa-images"></i></span>
-            {{ __('Image Gallery') }}
+            Image Gallery
         </div>
         <div class="dark-pic-preview-gallery-grid">
             @foreach ($galleryImages as $img)

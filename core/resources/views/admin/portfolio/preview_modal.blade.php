@@ -14,7 +14,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content" style="background: #0b0f16;">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title" style="color:#fff;"><i class="fas fa-eye"></i> {{ __('Project Preview') }}</h5>
+                <h5 class="modal-title" style="color:#fff;"><i class="fas fa-eye"></i> Project Preview</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff;">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -23,7 +23,7 @@
                 {{-- filled via AJAX --}}
             </div>
             <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

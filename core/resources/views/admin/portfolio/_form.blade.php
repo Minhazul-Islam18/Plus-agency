@@ -28,7 +28,6 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 10px;
         padding: 22px;
-        height: 100%;
         box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.5);
     }
 
@@ -87,10 +86,9 @@
         }
     }
 
-    /* Divides "Project Details" into Identity / Classification / Timeline
-       sub-groups — a heading-less rule reads as a lighter break than
-       another h5, appropriate one level down inside a column that already
-       has its own heading. */
+    /* Divides a card into sub-groups — a heading-less rule reads as a
+       lighter break than another h5, appropriate one level down inside a
+       column that already has its own heading. */
     .portfolio-subdivider {
         border: none;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -138,6 +136,62 @@
         height: 34px;
         padding: 0 12px;
         font-size: 15px;
+    }
+
+    /* Icon Highlights — drag-drop list builder. */
+    .highlights-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    /* Dark theme, matching this admin skin — not a light card. Also fixes
+       a genuine bug found live: dark-glass.css (loaded on this page for
+       the Aperçu preview) has a blanket, unscoped `.form-control{color:
+       #fff; background: rgba(255,255,255,.06); ...}` rule for the FRONT
+       END's own inputs. Every OTHER input on this page already sits on
+       this same dark navy admin background, so white text on a
+       near-transparent white overlay still reads fine there — a light
+       row background was the actual problem: same white text landed on
+       a near-white row, not a genuine "missing" style. */
+    .highlight-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        background: #1a2035;
+        border: 1px solid #2f374b;
+        border-radius: 6px;
+    }
+    .highlight-drag-handle {
+        cursor: grab;
+        color: rgba(255, 255, 255, 0.45);
+        padding: 0 2px;
+    }
+    .highlight-drag-handle:active {
+        cursor: grabbing;
+    }
+    .highlight-label {
+        flex: 1 1 auto;
+    }
+    /* The icon-picker's two buttons (42px + 34px) need ~78px — as a plain
+       flex item it shrinks below that to make room for .highlight-label's
+       own flex:1 1 auto, and the caret button wraps onto its own line
+       once it doesn't fit (confirmed live via getBoundingClientRect: the
+       picker was rendering at 65px instead of its natural ~78px). Fixed
+       width, not shrinkable — .highlight-label is the one meant to give
+       up space here. */
+    .highlight-row .portfolio-icon-picker {
+        flex: 0 0 auto;
+    }
+    .highlight-row.ui-sortable-helper {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    }
+    .highlight-row-placeholder {
+        border: 2px dashed #3a445c;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.03);
+        margin-bottom: 0;
     }
 
     /* The icon-picker popover ships with its own light-theme CSS (white/
@@ -266,194 +320,244 @@
         background: #1572e8 !important;
         color: #fff;
     }
-    .select2-container--default .select2-results__option[aria-selected="true"] {
-        background: rgba(255, 255, 255, 0.08);
+    /* select2.min.css's OWN default theme has a bare
+       `.select2-results__option--selected{background-color:#ddd}` rule —
+       light gray, meant for its light theme. [aria-selected="true"] is
+       NOT a reliable way to target "this is the picked value": select2
+       repurposes that attribute for keyboard/mouse FOCUS (the "active
+       descendant"), which moves to whatever option the pointer is over —
+       so the instant focus lands on a different option, the actually-
+       selected one drops back to aria-selected="false" and was left with
+       nothing overriding that light-gray default (visible live: reopening
+       a populated select and hovering a different row than the current
+       value showed it washed-out light-gray with barely-readable text —
+       exactly this scenario). Target the --selected CLASS directly
+       instead, unconditionally, so it stays dark regardless of focus. */
+    .select2-container--default .select2-results__option--selected {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #cfd4e4;
     }
     .select2-results__option .fi {
         margin-right: 8px;
         border-radius: 2px;
     }
+
+    /* Shopify/WordPress-style layout: content-heavy fields in the main
+       (left) column, everything else — language, publish state, taxonomy,
+       dates — in a sidebar (right) column. Sticky so it stays in view
+       while the main column (Evidence of Competence, Carousel Overlay...)
+       scrolls past it. Language is the FIRST sidebar card: it used to sit
+       far down the page while Sector/Service/Status/Partners (which all
+       load FROM it) were scattered elsewhere, forcing a scroll-down-then-
+       back-up round trip just to set up a new portfolio. */
+    @media (min-width: 992px) {
+        .portfolio-sidebar-col {
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+        }
+    }
+    /* Below lg, columns stack (Bootstrap's own behavior) but stay in DOM
+       order by default — that would put the sidebar (Language included)
+       BELOW every main-column card, further down than it was before this
+       reorg. .row is flex (Bootstrap 4), so `order` alone reorders the
+       stack without touching markup: sidebar first, main content after,
+       on phones/tablets. */
+    @media (max-width: 991px) {
+        .portfolio-main-col {
+            order: 2;
+        }
+        .portfolio-sidebar-col {
+            order: 1;
+            margin-bottom: 24px;
+        }
+    }
+    .portfolio-form-col.is-language {
+        border-color: rgba(21, 114, 232, 0.4);
+    }
+    .portfolio-form-col.is-language h5 {
+        background: rgba(21, 114, 232, 0.12);
+        border-bottom-color: rgba(21, 114, 232, 0.3);
+    }
+    .portfolio-form-col.is-language h5 i {
+        background: rgba(21, 114, 232, 0.2);
+        color: #6ea8f7;
+    }
+    .portfolio-sidebar-col .portfolio-form-col + .portfolio-form-col {
+        margin-top: 24px;
+    }
+
+    /* "Regenerate URL" button — Slug field's input-group companion (see
+       admin.slug.preview / SlugController). Same accent as the Language
+       card above for one consistent "smart/assisted field" visual language
+       across the form. */
+    .slug-input-group {
+        display: flex;
+        gap: 8px;
+    }
+    .slug-input-group input {
+        flex: 1;
+        min-width: 0;
+    }
+    .slug-regen-btn {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 14px;
+        border-radius: 6px;
+        border: 1px solid rgba(21, 114, 232, 0.35);
+        background: rgba(21, 114, 232, 0.12);
+        color: #6ea8f7;
+        font-size: 12.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .slug-regen-btn:hover:not(:disabled) {
+        background: rgba(21, 114, 232, 0.24);
+        border-color: rgba(21, 114, 232, 0.55);
+        color: #fff;
+    }
+    .slug-regen-btn:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+    .slug-regen-btn i {
+        font-size: 11.5px;
+    }
+    .slug-regen-btn.is-loading i {
+        animation: slugRegenSpin 0.6s linear infinite;
+    }
+    @keyframes slugRegenSpin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    /* Brief ring pulse on the field itself once a fresh slug lands — a
+       box-shadow (not background) so it never clobbers the form-control's
+       own themed background color. */
+    #slugInput.slug-just-regenerated {
+        animation: slugRegenFlash 1s ease;
+    }
+    @keyframes slugRegenFlash {
+        0% {
+            box-shadow: 0 0 0 3px rgba(21, 114, 232, 0.45);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(21, 114, 232, 0);
+        }
+    }
 </style>
 
+{{-- Shopify/WordPress-style layout: content-heavy fields in the main
+     (left) column, everything else — language, publish state, taxonomy,
+     dates — in a sticky sidebar (right) column. Language is the FIRST
+     sidebar card: Sector/Service/Status/Partners below it all cascade
+     from it, so picking it first — instead of scrolling down to it after
+     everything else — is what actually lets that cascade fire before you
+     need those fields. --}}
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-8 portfolio-main-col">
+
         <div class="portfolio-form-col">
-            <h5><i class="fas fa-file-alt"></i> {{ __('General Information') }}</h5>
+            <h5><i class="fas fa-file-alt"></i> General Information</h5>
 
             <div class="form-group">
-                <label>{{ __('Project Title') }} **</label>
+                <label>Project Title **</label>
                 <input type="text" class="form-control" name="title" value="{{ $old('title') }}" required
-                    placeholder="{{ __('Ex: Call for tenders for 15 kV and 33 kV mobile substations') }}">
+                    placeholder="Ex: Call for tenders for 15 kV and 33 kV mobile substations">
                 <p id="errtitle" class="mb-0 text-danger em"></p>
             </div>
 
             <div class="form-group">
-                <label>{{ __('Detailed Article') }} **</label>
+                <label>URL Slug</label>
+                <div class="slug-input-group">
+                    <input id="slugInput" type="text" class="form-control ltr" name="slug" value="{{ $old('slug') }}"
+                        placeholder="Leave blank to auto-generate from title">
+                    @if ($isEdit)
+                        <button type="button" id="regenerateSlugBtn" class="slug-regen-btn"
+                            title="Rebuild a short, meaningful slug from the current title">
+                            <i class="fas fa-sync-alt"></i> Regenerate
+                        </button>
+                    @endif
+                </div>
+                <p id="errslug" class="mb-0 text-danger em"></p>
+                <p id="eerrslug" class="mb-0 text-danger em"></p>
+                <p class="text-warning mb-0"><small>{{ $isEdit ? 'Changing the title above will NOT change this. Edit it here manually, or click Regenerate to rebuild it from the title above — the old URL redirects (301) automatically either way.' : 'Auto-generated from the title if left blank. Editable later without breaking existing links (old URL redirects automatically).' }}</small></p>
+            </div>
+            @if ($isEdit)
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var btn = document.getElementById('regenerateSlugBtn');
+                        var input = document.getElementById('slugInput');
+                        if (!btn || !input) return;
+                        btn.addEventListener('click', function () {
+                            var title = (document.querySelector('[name="title"]').value || '').trim();
+                            if (!title) {
+                                window.jQuery && jQuery.notify
+                                    ? jQuery.notify({ message: 'Enter a title first.' }, { type: 'warning' })
+                                    : alert('Enter a title first.');
+                                return;
+                            }
+                            btn.disabled = true;
+                            btn.classList.add('is-loading');
+                            fetch("{{ route('admin.slug.preview') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                                body: JSON.stringify({ title: title, module: 'portfolio', id: {{ $portfolio->id }} }),
+                            })
+                                .then(function (r) { return r.json(); })
+                                .then(function (data) {
+                                    if (!data.slug) return;
+                                    input.value = data.slug;
+                                    input.classList.remove('slug-just-regenerated');
+                                    void input.offsetWidth;
+                                    input.classList.add('slug-just-regenerated');
+                                })
+                                .catch(function () {
+                                    alert('Could not regenerate the URL — try again.');
+                                })
+                                .finally(function () {
+                                    btn.disabled = false;
+                                    btn.classList.remove('is-loading');
+                                });
+                        });
+                    });
+                </script>
+            @endif
+
+            <div class="form-group">
+                <label>Detailed Article **</label>
                 <textarea id="portfolioContent" class="form-control summernote" name="content" required
-                    placeholder="{{ __('Describe the project in detail…') }}" data-height="300">{{ $isEdit ? replaceBaseUrl($portfolio->content) : $old('content') }}</textarea>
+                    placeholder="Describe the project in detail…" data-height="300">{{ $isEdit ? replaceBaseUrl($portfolio->content) : $old('content') }}</textarea>
                 <p id="errcontent" class="mb-0 text-danger em"></p>
             </div>
 
             <div class="form-group">
-                <label>{{ __('Meta Keywords') }}</label>
+                <label>Meta Keywords</label>
                 <input class="form-control" name="meta_keywords" value="{{ $old('meta_keywords') }}"
                     placeholder="Enter meta keywords" data-role="tagsinput">
             </div>
             <div class="form-group mb-0">
-                <label>{{ __('Meta Description') }}</label>
+                <label>Meta Description</label>
                 <textarea class="form-control" name="meta_description" rows="4" placeholder="Enter meta description">{{ $old('meta_description') }}</textarea>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-lg-12">
-        <div class="portfolio-form-col">
-            <h5><i class="fas fa-folder-open"></i> {{ __('Project Details') }}</h5>
-
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Client') }} **</label>
-                        <input type="text" class="form-control" name="client_name" value="{{ $old('client_name') }}"
-                            data-role="tagsinput" required placeholder="Ex: SONABEL">
-                        <p id="errclient_name" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Sector') }}</label>
-                        <select id="sectors" class="form-control" name="sector_id" {{ $isEdit ? '' : 'disabled' }}>
-                            <option value="" {{ $old('sector_id') ? '' : 'selected' }} disabled>
-                                {{ __('Ex: Energy') }}</option>
-                            @foreach ($sectors as $sector)
-                                <option value="{{ $sector->id }}"
-                                    {{ $old('sector_id') == $sector->id ? 'selected' : '' }}>
-                                    {{ convertUtf8($sector->name) }}</option>
-                            @endforeach
-                        </select>
-                        <p id="errsector_id" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Country') }}</label>
-                        <select id="portfolioCountrySelect" class="form-control" name="country">
-                            <option value="" {{ $old('country') ? '' : 'selected' }} disabled>Ex: Burkina Faso
-                            </option>
-                            @foreach ($countries as $c)
-                                <option value="{{ $c['iso'] }}"
-                                    {{ $old('country') == $c['iso'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
-                            @endforeach
-                        </select>
-                        <p id="errcountry" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Year') }}</label>
-                        <input type="text" class="form-control ltr" name="year" value="{{ $old('year') }}"
-                            placeholder="Ex: 2026">
-                        <p id="erryear" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="portfolio-subdivider">
-
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Status') }} **</label>
-                        <select id="portfolioStatuses" class="form-control ltr" name="status_id" required {{ $isEdit ? '' : 'disabled' }}>
-                            <option value="" {{ $old('status_id') ? '' : 'selected' }} disabled>
-                                {{ __('Select a status') }}</option>
-                            @foreach ($statuses as $s)
-                                <option value="{{ $s->id }}"
-                                    {{ $old('status_id') == $s->id ? 'selected' : '' }}>
-                                    {{ convertUtf8($s->name) }}</option>
-                            @endforeach
-                        </select>
-                        <p id="errstatus_id" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Potential partners') }}</label>
-                        <input type="text" class="form-control" name="partners" value="{{ $old('partners') }}"
-                            placeholder="{{ __('Ex: Partner names') }}">
-                        <p id="errpartners" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Service') }} **</label>
-                        <select id="services" class="form-control" name="service_id" required
-                            {{ $isEdit ? '' : 'disabled' }}>
-                            <option value="" selected disabled>Select a service</option>
-                            @foreach ($services as $service)
-                                <option value="{{ $service->id }}"
-                                    {{ $old('service_id') == $service->id ? 'selected' : '' }}>{{ $service->title }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <p id="errservice_id" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Cost of Service') }} ({{ $bex->base_currency_symbol }})</label>
-                        <input type="number" class="form-control" name="cost_of_service" id="cost_of_service"
-                            value="{{ $old('cost_of_service') }}" placeholder="Enter cost of service" step="0.01"
-                            min="0">
-                        <p id="errcost_of_service" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="portfolio-subdivider">
-
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Start Date') }}</label>
-                        <input id="startDate" type="text" class="form-control datepicker" name="start_date"
-                            value="{{ $old('start_date') }}" placeholder="Enter start date" autocomplete="off">
-                        <p id="errstart_date" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="form-group">
-                        <label>{{ __('Submission Date') }}</label>
-                        <input id="submissionDate" type="text" class="form-control datepicker"
-                            name="submission_date" value="{{ $old('submission_date') }}"
-                            placeholder="Enter submission date" autocomplete="off">
-                        <p id="errsubmission_date" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group mb-0">
-                        <label>{{ __('Website Link') }}</label>
-                        <input type="url" class="form-control" name="website_link" value="{{ $old('website_link') }}"
-                            placeholder="Enter website link">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-lg-12">
-        <div class="portfolio-form-col">
-            <h5><i class="fas fa-images"></i> {{ __('Media') }}</h5>
+        <div class="portfolio-form-col mt-4">
+            <h5><i class="fas fa-images"></i> Media</h5>
 
             <div class="row">
             <div class="col-lg-3">
             {{-- Featured / main image (serial=1) --}}
             <div class="form-group">
-                <label>{{ __('Main Image') }} **</label>
+                <label>Main Image **</label>
                 <br>
                 <div class="thumb-preview" id="thumbPreview1">
                     <img src="{{ $isEdit && $portfolio->featured_image ? asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) : asset('assets/admin/img/noimage.jpg') }}"
@@ -462,8 +566,10 @@
                 <br><br>
                 <input id="fileInput1" type="hidden" name="image">
                 <button id="chooseImage1" class="choose-image btn btn-primary" type="button" data-multiple="false"
-                    data-toggle="modal" data-target="#lfmModal1">{{ __('Click to upload an image') }}</button>
+                    data-toggle="modal" data-target="#lfmModal1">Click to upload an image</button>
                 <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                <p class="text-warning mb-0"><small>Max file size: {{ max_upload_size_label('image') }}</small></p>
+                <p class="text-warning mb-0"><small>Recommended size: 1200x1500px (4:5 portrait). Shown as a cropped card thumbnail across the site, and as the details-page hero image when no gallery images are added.</small></p>
                 <p class="em text-danger mb-0" id="errimage"></p>
 
                 <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-hidden="true">
@@ -483,7 +589,7 @@
             <div class="col-lg-3">
             {{-- Client logo (serial=4) --}}
             <div class="form-group">
-                <label>{{ __('Client logo') }}</label>
+                <label>Client logo</label>
                 <br>
                 <div class="thumb-preview" id="thumbPreview4">
                     <img src="{{ $isEdit && $portfolio->client_logo ? asset('assets/front/img/portfolios/logos/' . $portfolio->client_logo) : asset('assets/admin/img/noimage.jpg') }}"
@@ -492,8 +598,10 @@
                 <br><br>
                 <input id="fileInput4" type="hidden" name="client_logo">
                 <button id="chooseImage4" class="choose-image btn btn-primary" type="button" data-multiple="false"
-                    data-toggle="modal" data-target="#lfmModal4">{{ __('Choose a logo') }}</button>
+                    data-toggle="modal" data-target="#lfmModal4">Choose a logo</button>
                 <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                <p class="text-warning mb-0"><small>Max file size: {{ max_upload_size_label('image') }}</small></p>
+                <p class="text-warning mb-0"><small>Recommended size: 300x100px (landscape, transparent background). Displayed small (22px tall) next to the client name.</small></p>
 
                 <div class="modal fade lfm-modal" id="lfmModal4" tabindex="-1" role="dialog" aria-hidden="true">
                     <i class="fas fa-times-circle"></i>
@@ -512,13 +620,15 @@
             <div class="col-lg-3">
             {{-- Gallery (serial=2, existing) --}}
             <div class="form-group">
-                <label>{{ __('Image Gallery') }} **</label>
+                <label>Image Gallery **</label>
                 <br>
                 <div class="slider-thumbs" id="sliderThumbs2"></div>
                 <input id="fileInput2" type="hidden" name="slider" value="" />
                 <button id="chooseImage2" class="choose-image btn btn-primary" type="button" data-multiple="true"
-                    data-toggle="modal" data-target="#lfmModal2">{{ __('Add images') }}</button>
+                    data-toggle="modal" data-target="#lfmModal2">Add images</button>
                 <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                <p class="text-warning mb-0"><small>Max file size: {{ max_upload_size_label('image') }} per image</small></p>
+                <p class="text-warning mb-0"><small>Recommended size: 1600x900px (16:9 landscape). Shown as the main details-page carousel image.</small></p>
                 <p id="errslider" class="mb-0 text-danger em"></p>
 
                 <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-hidden="true">
@@ -539,13 +649,14 @@
             <div class="col-lg-3">
             {{-- Documents (serial=3, LFM "file" category) --}}
             <div class="form-group">
-                <label>{{ __('Documents (optional)') }}</label>
+                <label>Documents (optional)</label>
                 <br>
                 <div class="slider-thumbs" id="sliderThumbs3"></div>
                 <input id="fileInput3" type="hidden" name="documents" value="" />
                 <button id="chooseImage3" class="choose-image btn btn-primary" type="button" data-multiple="true"
-                    data-toggle="modal" data-target="#lfmModal3">{{ __('Add documents') }}</button>
+                    data-toggle="modal" data-target="#lfmModal3">Add documents</button>
                 <p class="text-warning mb-0">Formats: PDF, DOC, DOCX, XLSX</p>
+                <p class="text-warning mb-0"><small>Max file size: {{ max_upload_size_label('file') }} per document</small></p>
                 <p id="errdocuments" class="mb-0 text-danger em"></p>
 
                 <div class="modal fade lfm-modal" id="lfmModal3" tabindex="-1" role="dialog" aria-hidden="true">
@@ -564,66 +675,15 @@
             </div>
             </div>
 
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="form-group">
-                        <label>{{ __('Language') }} **</label>
-                        <select id="language" name="language_id" class="form-control" {{ $isEdit ? '' : 'required' }}
-                            {{ $isEdit ? 'disabled' : '' }}>
-                            <option value="" {{ $old('language_id') ? '' : 'selected' }} disabled>Select a
-                                language</option>
-                            @foreach ($langs as $lang)
-                                <option value="{{ $lang->id }}"
-                                    {{ $old('language_id') == $lang->id ? 'selected' : '' }}>{{ $lang->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @if ($isEdit)
-                            <input type="hidden" name="language_id" value="{{ $portfolio->language_id }}">
-                        @endif
-                        <p id="errlanguage_id" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group">
-                        <label>{{ __('Serial Number') }} **</label>
-                        <input type="number" class="form-control ltr" name="serial_number" required
-                            value="{{ $old('serial_number') }}" placeholder="Enter Serial Number">
-                        <p id="errserial_number" class="mb-0 text-danger em"></p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group">
-                        <label>{{ __('Visibility') }}</label>
-                        @php $isPublishedVal = $old('is_published', 1); @endphp
-                        <select class="form-control ltr" name="is_published">
-                            <option value="1" {{ $isPublishedVal == 1 ? 'selected' : '' }}>{{ __('Published') }}
-                            </option>
-                            <option value="0" {{ $isPublishedVal == 0 ? 'selected' : '' }}>{{ __('Unpublished') }}
-                            </option>
-                        </select>
-                        <p class="text-warning mb-0"><small>{{ __('The project will be visible on the website.') }}</small>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             <input type="text" class="form-control d-none" name="tags" value="{{ $old('tags') }}">
         </div>
-    </div>
-</div>
 
-{{-- Evidence of Competence — the 6 structured reference blocks (see doc:
-     Problem -> ICA Mission -> Expertise -> Approach/Solution -> Result ->
-     Impact). Its own full-width row, not squeezed into the "Project
-     Details" column — these are a distinct set of long-form fields, not
-     project metadata, and six of them cramped into a 1/3-width column
-     made that column tower over the other two. Plain textareas, one
-     bullet per non-empty line on render — no rich text needed here. --}}
-<div class="row mt-4">
-    <div class="col-lg-12">
-        <div class="portfolio-form-col">
-            <h5><i class="fas fa-layer-group"></i> {{ __('Evidence of Competence') }}</h5>
+        {{-- Evidence of Competence — the 6 structured reference blocks (see
+             doc: Problem -> ICA Mission -> Expertise -> Approach/Solution
+             -> Result -> Impact). Plain textareas, one bullet per
+             non-empty line on render — no rich text needed here. --}}
+        <div class="portfolio-form-col mt-4">
+            <h5><i class="fas fa-layer-group"></i> Evidence of Competence</h5>
 
             @php
                 // Each block's icon is admin-chosen (picked from the same
@@ -653,11 +713,11 @@
                     @php $blkIcon = $old($blk['field'] . '_icon', $blockIcons[$blk['field']]); @endphp
                     <div class="portfolio-block">
                         <div class="portfolio-block-head">
-                            <label class="mb-0">{{ __($blk['label']) }}</label>
+                            <label class="mb-0">{{ $blk['label'] }}</label>
                             <div class="portfolio-icon-picker">
                                 <div class="btn-group d-block">
                                     <button type="button" class="btn btn-sm btn-secondary iconpicker-component" tabindex="-1"
-                                        title="{{ __('Choose an icon') }}"><i class="{{ $blkIcon }}"></i></button>
+                                        title="Choose an icon"><i class="{{ $blkIcon }}"></i></button>
                                     <button type="button" class="icp icp-dd btn btn-sm btn-secondary dropdown-toggle"
                                         data-toggle="dropdown"></button>
                                     <div class="dropdown-menu"></div>
@@ -667,11 +727,340 @@
                             </div>
                         </div>
                         <textarea class="form-control" name="{{ $blk['field'] }}" rows="{{ $blk['rows'] }}"
-                            placeholder="{{ __($blk['placeholder']) }}">{{ $old($blk['field']) }}</textarea>
+                            placeholder="{{ $blk['placeholder'] }}">{{ $old($blk['field']) }}</textarea>
                     </div>
                 @endforeach
             </div>
         </div>
+
+        {{-- Carousel/hero banner overlay — left copy (badge/title/subtitle/
+             desc over a controllable scrim) + right icon-highlights panel,
+             both shared across every image in this portfolio's own gallery
+             carousel (see front/portfolio-details.blade.php). Approved
+             design: https://claude.ai/code/artifact/62a27330-ae43-4222-a702-a93fd0811d02 --}}
+        <div class="portfolio-form-col mt-4">
+            <h5><i class="fas fa-panorama"></i> Carousel Overlay</h5>
+            <p class="text-warning"><small>Shown on top of this project's own gallery carousel. Title/subtitle/description fall back to Project Title / Summary when left blank.</small></p>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Overlay Title</label>
+                        <input type="text" class="form-control" name="overlay_title" value="{{ $old('overlay_title') }}"
+                            placeholder="Ex: International Tender Notice AOI N°035/2026">
+                        <p id="erroverlay_title" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Overlay Subtitle</label>
+                        <input type="text" class="form-control" name="overlay_subtitle" value="{{ $old('overlay_subtitle') }}"
+                            placeholder="Ex: Mobile substations 15 kV and 33 kV">
+                        <p id="erroverlay_subtitle" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Overlay Description</label>
+                        <input type="text" class="form-control" name="overlay_description" value="{{ $old('overlay_description') }}"
+                            placeholder="Ex: On behalf of SONABEL">
+                        <p id="erroverlay_description" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="form-group">
+                        <label>Overlay Color</label>
+                        <br>
+                        <input type="color" id="overlayColorInput" class="jscolor-none" name="overlay_color"
+                            value="#{{ $old('overlay_color', '060a09') }}"
+                            style="width:44px;height:38px;padding:2px;border-radius:6px;border:1px solid #dee2e6;cursor:pointer;">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Overlay Opacity <small class="text-muted">(right panel + badge)</small> — <span id="overlayOpacityLabel">{{ $old('overlay_opacity', 82) }}%</span></label>
+                        <input type="range" id="overlayOpacityInput" class="form-control-range" name="overlay_opacity"
+                            min="30" max="95" value="{{ $old('overlay_opacity', 82) }}">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group">
+                        <label>Left Bloom Opacity <small class="text-muted">(glow behind the copy)</small> — <span id="overlayBloomOpacityLabel">{{ $old('overlay_bloom_opacity') ?: $old('overlay_opacity', 82) }}%</span></label>
+                        <input type="range" id="overlayBloomOpacityInput" class="form-control-range" name="overlay_bloom_opacity"
+                            min="30" max="95" value="{{ $old('overlay_bloom_opacity') ?: $old('overlay_opacity', 82) }}">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="portfolio-subdivider">
+
+            <label>Icon Highlights <small class="text-muted">(right-side panel — drag to reorder)</small></label>
+            <div id="highlightsList" class="highlights-list">
+                @foreach (($isEdit ? $portfolio->highlights : collect()) as $h)
+                    <div class="highlight-row">
+                        <span class="highlight-drag-handle" title="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>
+                        <div class="portfolio-icon-picker">
+                            <div class="btn-group d-block">
+                                <button type="button" class="btn btn-sm btn-secondary iconpicker-component" tabindex="-1"
+                                    title="Choose an icon"><i class="{{ $h->icon ?: 'fas fa-star' }}"></i></button>
+                                <button type="button" class="icp icp-dd btn btn-sm btn-secondary dropdown-toggle"
+                                    data-toggle="dropdown"></button>
+                                <div class="dropdown-menu"></div>
+                            </div>
+                            <input type="hidden" class="portfolio-icon-input highlight-icon" value="{{ $h->icon ?: 'fas fa-star' }}">
+                        </div>
+                        <input type="text" class="form-control highlight-label" value="{{ convertUtf8($h->label) }}"
+                            placeholder="Ex: Fast and deployable solution">
+                        <button type="button" class="btn btn-sm btn-danger highlight-remove" title="Remove"><i class="fas fa-trash"></i></button>
+                    </div>
+                @endforeach
+            </div>
+            <button type="button" id="addHighlightBtn" class="btn btn-sm btn-secondary mt-2">
+                <i class="fas fa-plus"></i> Add highlight
+            </button>
+            <input type="hidden" name="highlights_json" id="highlightsJson">
+        </div>
+
+    </div>
+
+    <div class="col-lg-4 portfolio-sidebar-col">
+
+        {{-- Language — first sidebar card, always the first thing visible.
+             Sector/Service/Status/Partners below all cascade FROM this
+             (see create.blade.php's language-change AJAX handlers), so
+             picking it here first — instead of scrolling down to a
+             "Project Details" card further down the page — is the actual
+             fix for the old back-and-forth. --}}
+        <div class="portfolio-form-col is-language">
+            <h5><i class="fas fa-globe"></i> Language</h5>
+            <div class="form-group mb-0">
+                <label>Language **</label>
+                {{-- Editable on edit too now — changing it re-runs the same
+                     language cascade AJAX as create (see edit.blade.php),
+                     which clears+reloads Sector/Service/Status/Partners for
+                     the new language (those FK rows are language-scoped, so
+                     old selections wouldn't exist under the new language). --}}
+                <select id="language" name="language_id" class="form-control" required
+                    data-current="{{ $isEdit ? $portfolio->language_id : '' }}">
+                    <option value="" {{ $old('language_id') ? '' : 'selected' }} disabled>Select a
+                        language</option>
+                    @foreach ($langs as $lang)
+                        <option value="{{ $lang->id }}"
+                            {{ $old('language_id') == $lang->id ? 'selected' : '' }}>{{ $lang->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <p id="errlanguage_id" class="mb-0 text-danger em"></p>
+            </div>
+        </div>
+
+        <div class="portfolio-form-col">
+            <h5><i class="fas fa-bullhorn"></i> Publishing</h5>
+
+            <div class="form-group">
+                <label>Visibility</label>
+                @php $isPublishedVal = $old('is_published', 1); @endphp
+                <select id="visibilitySelect" class="form-control ltr" name="is_published">
+                    <option value="1" {{ $isPublishedVal == 1 ? 'selected' : '' }}>Published
+                    </option>
+                    <option value="0" {{ $isPublishedVal == 0 ? 'selected' : '' }}>Unpublished
+                    </option>
+                </select>
+                <p class="text-warning mb-0"><small>The project will be visible on the website.</small>
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Status **</label>
+                <select id="portfolioStatuses" class="form-control ltr" name="status_id" required {{ $isEdit ? '' : 'disabled' }}>
+                    <option value="" {{ $old('status_id') ? '' : 'selected' }} disabled>
+                        Select a status</option>
+                    @foreach ($statuses as $s)
+                        <option value="{{ $s->id }}"
+                            {{ $old('status_id') == $s->id ? 'selected' : '' }}>
+                            {{ convertUtf8($s->name) }}</option>
+                    @endforeach
+                </select>
+                <p id="errstatus_id" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="form-group mb-0">
+                <label>Serial Number **</label>
+                <input type="number" class="form-control ltr" name="serial_number" required
+                    value="{{ $old('serial_number') }}" placeholder="Enter Serial Number">
+                <p id="errserial_number" class="mb-0 text-danger em"></p>
+            </div>
+        </div>
+
+        <div class="portfolio-form-col">
+            <h5><i class="fas fa-folder-open"></i> Organization</h5>
+
+            <div class="form-group">
+                <label>Client **</label>
+                <input type="text" class="form-control" name="client_name" value="{{ $old('client_name') }}"
+                    data-role="tagsinput" required placeholder="Ex: SONABEL">
+                <p id="errclient_name" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="form-group">
+                <label>Sector</label>
+                <select id="sectors" class="form-control" name="sector_id" {{ $isEdit ? '' : 'disabled' }}>
+                    <option value="" {{ $old('sector_id') ? '' : 'selected' }} disabled>
+                        Ex: Energy</option>
+                    @foreach ($sectors as $sector)
+                        <option value="{{ $sector->id }}"
+                            {{ $old('sector_id') == $sector->id ? 'selected' : '' }}>
+                            {{ convertUtf8($sector->name) }}</option>
+                    @endforeach
+                </select>
+                <p id="errsector_id" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="form-group">
+                <label>Subsector</label>
+                <select id="subsectors" class="form-control" name="subsector_id"
+                    {{ $isEdit && $old('sector_id', $portfolio->sector_id ?? null) ? '' : 'disabled' }}>
+                    <option value="" {{ $old('subsector_id') ? '' : 'selected' }} disabled>
+                        Select a sector first</option>
+                    @foreach ($subsectors as $subsector)
+                        <option value="{{ $subsector->id }}"
+                            {{ $old('subsector_id') == $subsector->id ? 'selected' : '' }}>
+                            {{ convertUtf8($subsector->name) }}</option>
+                    @endforeach
+                </select>
+                <p id="errsubsector_id" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="form-group">
+                <label>Service **</label>
+                <select id="services" class="form-control" name="service_id" required
+                    {{ $isEdit ? '' : 'disabled' }}>
+                    <option value="" selected disabled>Select a service</option>
+                    @foreach ($services as $service)
+                        <option value="{{ $service->id }}"
+                            {{ $old('service_id') == $service->id ? 'selected' : '' }}>{{ $service->title }}
+                        </option>
+                    @endforeach
+                </select>
+                <p id="errservice_id" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label>Country</label>
+                        <select id="portfolioCountrySelect" class="form-control" name="country">
+                            <option value="" {{ $old('country') ? '' : 'selected' }} disabled>Ex: Burkina Faso
+                            </option>
+                            @foreach ($countries as $c)
+                                <option value="{{ $c['iso'] }}"
+                                    {{ $old('country') == $c['iso'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                            @endforeach
+                        </select>
+                        <p id="errcountry" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="text" class="form-control ltr" name="year" value="{{ $old('year') }}"
+                            placeholder="Ex: 2026">
+                        <p id="erryear" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Cost of Service ({{ $bex->base_currency_symbol }})</label>
+                <input type="number" class="form-control" name="cost_of_service" id="cost_of_service"
+                    value="{{ $old('cost_of_service') }}" placeholder="Enter cost of service" step="0.01"
+                    min="0">
+                <p id="errcost_of_service" class="mb-0 text-danger em"></p>
+            </div>
+
+            <div class="form-group mb-0">
+                <label>Partners</label>
+                {{-- Picked from the "Our Partners" module (App\Partner —
+                     admin/home/partner) instead of free text, so a
+                     partner's real logo can be shown against this
+                     project. Cascades on language change same as
+                     Sector/Service/Status. --}}
+                <select id="partnerIds" class="form-control" name="partner_ids[]" multiple
+                    {{ $isEdit ? '' : 'disabled' }}>
+                    @foreach ($partners as $partner)
+                        <option value="{{ $partner->id }}"
+                            {{ $isEdit && $portfolio->partnerRefs->contains('id', $partner->id) ? 'selected' : '' }}>
+                            {{ convertUtf8($partner->name) }}</option>
+                    @endforeach
+                </select>
+                <p id="errpartner_ids" class="mb-0 text-danger em"></p>
+            </div>
+        </div>
+
+        <div class="portfolio-form-col">
+            <h5><i class="fas fa-calendar-alt"></i> Timeline</h5>
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input id="startDate" type="text" class="form-control datepicker" name="start_date"
+                            value="{{ $old('start_date') }}" placeholder="Enter start date" autocomplete="off">
+                        <p id="errstart_date" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label>End Date</label>
+                        @php
+                            // end_date is a real `date` column (stored Y-m-d — MySQL
+                            // requires that format, see PortfolioController's
+                            // parseAdminDate()/endDateRule()); start_date/submission_date
+                            // are legacy varchar columns storing whatever the datepicker
+                            // typed verbatim (m/d/Y). Reformat back to m/d/Y here so the
+                            // field DISPLAYS the same format as its siblings and as what
+                            // was typed — only the display, not the DB storage, changes.
+                            $endDateDisplay = $old('end_date');
+                            if ($endDateDisplay && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDateDisplay)) {
+                                $endDateDisplay = \Carbon\Carbon::parse($endDateDisplay)->format('m/d/Y');
+                            }
+                        @endphp
+                        <input id="endDate" type="text" class="form-control datepicker" name="end_date"
+                            value="{{ $endDateDisplay }}" placeholder="Enter end date (leave blank if ongoing)"
+                            autocomplete="off">
+                        <p id="errend_date" class="mb-0 text-danger em"></p>
+                        {{-- custom.js's #updateBtn (edit) success/error handlers look up
+                             "eerr"+field, not "err"+field like #submitBtn (create) does —
+                             a pre-existing id-prefix mismatch between the two shared
+                             handlers. Harmless everywhere else since no other field had
+                             a rule that could actually fail server-side on edit, but the
+                             new End Date <= Submission Date rule below can — so it needs
+                             a home under both prefixes to actually show on either page. --}}
+                        <p id="eerrend_date" class="mb-0 text-danger em"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Submission Date</label>
+                <input id="submissionDate" type="text" class="form-control datepicker"
+                    name="submission_date" value="{{ $old('submission_date') }}"
+                    placeholder="Enter submission date" autocomplete="off">
+                <p id="errsubmission_date" class="mb-0 text-danger em"></p>
+                <p class="text-warning mb-0"><small>The tender's submission deadline. Once set, End Date
+                        above can't be later than this.</small></p>
+            </div>
+
+            <div class="form-group mb-0">
+                <label>Website Link</label>
+                <input type="url" class="form-control" name="website_link" value="{{ $old('website_link') }}"
+                    placeholder="Enter website link">
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -711,8 +1100,14 @@
     document.addEventListener('DOMContentLoaded', function () {
         if (!window.jQuery) return;
         var $ = window.jQuery;
-        $('.portfolio-icon-picker').each(function () {
-            var $wrap = $(this);
+
+        // Shared by the 6 fixed Evidence-of-Competence pickers (present at
+        // page load — custom.js's own blanket `$('.icp-dd').iconpicker()`
+        // ready-call already covers those) AND every highlight row's own
+        // picker, including ones added later by "Add highlight" — those
+        // never existed when custom.js's ready-call ran, so `freshInit`
+        // tells this function to call `.iconpicker()` on them itself first.
+        window.wirePortfolioIconPicker = function ($wrap, freshInit) {
             var savedIcon = $wrap.find('.portfolio-icon-input').val();
             function applySavedIcon() {
                 if (savedIcon) $wrap.find('.iconpicker-component i').attr('class', savedIcon);
@@ -732,6 +1127,12 @@
                 var iconClass = $wrap.find('.iconpicker-component i').attr('class');
                 $wrap.find('.portfolio-icon-input').val(iconClass);
             });
+
+            if (freshInit) $wrap.find('.icp-dd').iconpicker();
+        };
+
+        $('.portfolio-icon-picker').each(function () {
+            window.wirePortfolioIconPicker($(this), false);
         });
 
         // Country <select> — searchable, with a flag next to each name.
@@ -788,6 +1189,42 @@
             // language-picked lifecycle, same reskin, same width fix.
             $('#sectors').select2({ width: '100%' });
             $('#portfolioStatuses').select2({ width: '100%' });
+            $('#subsectors').select2({ width: '100%' });
+
+            // Sector -> Subsector cascade — same AJAX-swap-options pattern
+            // as Language -> Sector/Service/Status/Partners (create/edit
+            // .blade.php), just one level deeper. Picking a DIFFERENT
+            // sector always resets Subsector (a subsector from the old
+            // sector wouldn't be valid under the new one).
+            $('#sectors').on('change', function () {
+                var sectorId = $(this).val();
+                if (!sectorId) {
+                    $('#subsectors').html('<option value="" selected disabled>Select a sector first</option>').prop('disabled', true).trigger('change');
+                    return;
+                }
+                $('#subsectors').removeAttr('disabled');
+                $.get("{{ url('/') }}/admin/portfolio/sector/" + sectorId + "/get_subsectors", function (data) {
+                    var options = '<option value="" selected disabled>Select a subsector</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        options += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
+                    }
+                    $('#subsectors').html(options);
+                    $('#subsectors').trigger('change');
+                });
+            });
+
+            // Partners — multi-select, same disabled-until-language-picked
+            // lifecycle. `multiple` on the underlying <select> is all
+            // select2 needs to render it as a tag-chip picker.
+            $('#partnerIds').select2({ width: '100%', placeholder: 'Select partners' });
+
+            // Visibility — plain 2-option select, not language-gated, no
+            // disabled-lifecycle needed. Same reskin/width fix as the rest.
+            $('#visibilitySelect').select2({ width: '100%', minimumResultsForSearch: -1 });
+
+            // Language — now editable on edit too (was disabled/hidden-input
+            // locked before). Same reskin as its siblings.
+            $('#language').select2({ width: '100%' });
         });
     });
 </script>
@@ -812,6 +1249,15 @@
     document.addEventListener('click', function (e) {
         if (!e.target || e.target.id !== 'submitBtn' || !window.jQuery) return;
         var $ = window.jQuery;
+
+        // Highlights: serialize the list's CURRENT DOM order (drag-drop
+        // reordering only ever moves the actual .highlight-row elements —
+        // there's no separate "position" field to keep in sync) into JSON
+        // right before every submit attempt, valid or not, so it's always
+        // fresh for PortfolioController::storeHighlights().
+        if (typeof window.serializePortfolioHighlights === 'function') {
+            window.serializePortfolioHighlights();
+        }
 
         var isEdit = {{ $isEdit ? 'true' : 'false' }};
         var required = [
@@ -847,17 +1293,38 @@
             }
             if (!value) {
                 var $err = $('#err' + f.name);
-                if ($err.length) $err.html('{{ __('This field is required.') }}');
+                if ($err.length) $err.html('This field is required.');
                 if (!firstInvalid) firstInvalid = f.name;
             }
         });
+
+        // End Date must never be later than Submission Date (the tender's
+        // submission deadline) — but ONLY once a Submission Date is
+        // actually set. No Submission Date yet = no restriction at all.
+        // Mirrors PortfolioController::endDateRule() server-side; this is
+        // just the instant, no-round-trip version of the same rule.
+        var notifyMsg = 'Please fill in all required fields.';
+        var endVal = ($('#endDate').val() || '').trim();
+        var subVal = ($('#submissionDate').val() || '').trim();
+        if (endVal && subVal) {
+            var endD = new Date(endVal);
+            var subD = new Date(subVal);
+            if (!isNaN(endD) && !isNaN(subD) && endD > subD) {
+                var msg = 'End Date must be on or before the Submission Date.';
+                $('#errend_date, #eerrend_date').html(msg);
+                if (!firstInvalid) {
+                    firstInvalid = 'end_date';
+                    notifyMsg = msg;
+                }
+            }
+        }
 
         if (firstInvalid) {
             e.preventDefault();
             e.stopPropagation();
             $.notify({
-                message: '{{ __('Please fill in all required fields.') }}',
-                title: '{{ __('Validation Error!') }}',
+                message: notifyMsg,
+                title: 'Validation Error!',
                 icon: 'fa fa-bell',
             }, {
                 type: 'danger',
@@ -869,4 +1336,85 @@
             });
         }
     }, true);
+</script>
+
+<script>
+    // Icon Highlights — drag-to-reorder list (jQuery UI's sortable, already
+    // loaded site-wide in admin/partials/scripts.blade.php — no new
+    // dependency) + add/remove rows + serialize to JSON before submit.
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!window.jQuery || !window.jQuery.fn.sortable) return;
+        var $ = window.jQuery;
+        var $list = $('#highlightsList');
+
+        $list.sortable({
+            handle: '.highlight-drag-handle',
+            axis: 'y',
+            placeholder: 'highlight-row-placeholder',
+            forcePlaceholderSize: true,
+        });
+
+        function highlightRowTemplate() {
+            return $(
+                '<div class="highlight-row">' +
+                    '<span class="highlight-drag-handle" title="Drag to reorder"><i class="fas fa-grip-vertical"></i></span>' +
+                    '<div class="portfolio-icon-picker">' +
+                        '<div class="btn-group d-block">' +
+                            '<button type="button" class="btn btn-sm btn-secondary iconpicker-component" tabindex="-1" title="Choose an icon"><i class="fas fa-star"></i></button>' +
+                            '<button type="button" class="icp icp-dd btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown"></button>' +
+                            '<div class="dropdown-menu"></div>' +
+                        '</div>' +
+                        '<input type="hidden" class="portfolio-icon-input highlight-icon" value="fas fa-star">' +
+                    '</div>' +
+                    '<input type="text" class="form-control highlight-label" placeholder="Ex: Fast and deployable solution">' +
+                    '<button type="button" class="btn btn-sm btn-danger highlight-remove" title="Remove"><i class="fas fa-trash"></i></button>' +
+                '</div>'
+            );
+        }
+
+        $('#addHighlightBtn').on('click', function () {
+            var $row = highlightRowTemplate();
+            $list.append($row);
+            $list.sortable('refresh');
+            if (typeof window.wirePortfolioIconPicker === 'function') {
+                window.wirePortfolioIconPicker($row.find('.portfolio-icon-picker'), true);
+            }
+        });
+
+        // Delegated — covers rows already in the DOM at load AND every row
+        // added afterward via the button above.
+        $list.on('click', '.highlight-remove', function () {
+            $(this).closest('.highlight-row').remove();
+        });
+
+        window.serializePortfolioHighlights = function () {
+            var items = [];
+            $list.find('.highlight-row').each(function () {
+                var $row = $(this);
+                var label = $row.find('.highlight-label').val();
+                if (!label || !label.trim()) return;
+                items.push({
+                    icon: $row.find('.highlight-icon').val() || 'fas fa-star',
+                    label: label.trim(),
+                });
+            });
+            $('#highlightsJson').val(JSON.stringify(items));
+        };
+    });
+
+    // Overlay opacity slider — live label, matching the approved artifact's
+    // own control (percent shown next to the slider, not just the raw input).
+    document.addEventListener('DOMContentLoaded', function () {
+        [
+            ['overlayOpacityInput', 'overlayOpacityLabel'],
+            ['overlayBloomOpacityInput', 'overlayBloomOpacityLabel'],
+        ].forEach(function (pair) {
+            var range = document.getElementById(pair[0]);
+            var label = document.getElementById(pair[1]);
+            if (!range || !label) return;
+            range.addEventListener('input', function () {
+                label.textContent = range.value + '%';
+            });
+        });
+    });
 </script>

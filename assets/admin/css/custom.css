@@ -564,4 +564,16 @@ a.d-block {
   border-color: #31CE36 !important;
   color: #ffffff !important;
 }
+/* Native <select> dropdown popups sitewide (admin) — the closed box gets
+   the dark theme's own background (~rgba(255,255,255,.06) over the dark
+   page), but a plain <option> has no explicit background at all, so most
+   browsers render the OPENED list against their own native (light)
+   popup surface — white text on a near-white popup, unreadable. Explicit
+   opaque colors here (matching the sidebar/card dark tone used elsewhere
+   in the admin) fix every plain select's dropdown at once, not just one
+   page's. */
+select.form-control option {
+  background-color: #202940;
+  color: #ffffff;
+}
 /* Laravel File Manager CSS */

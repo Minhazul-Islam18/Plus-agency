@@ -218,10 +218,24 @@ class FrontendController extends Controller
     {
         $currentLang = currentLang();
 
-        $data['portfolio'] = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents'])
+        $portfolio = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])
             ->where('slug', $slug)->where('language_id', $currentLang->id)
             ->where('is_archived', 0)->where('is_published', 1)
-            ->firstOrFail();
+            ->first();
+
+        if (!$portfolio) {
+            // Editable-slug feature: this slug may just be an OLD one — an
+            // admin shortened it since this link was shared/indexed. 301
+            // (not 302) so search engines transfer the old URL's ranking
+            // to the new one instead of treating them as two pages.
+            $target = resolve_slug_redirect('portfolio', $slug);
+            if ($target && $target->is_published && !$target->is_archived) {
+                return redirect()->route('front.portfoliodetails', $target->slug, 301);
+            }
+            abort(404);
+        }
+
+        $data['portfolio'] = $portfolio;
 
         $portfolio = $data['portfolio'];
 
@@ -240,22 +254,20 @@ class FrontendController extends Controller
             'size' => $pd->size,
         ])->all();
 
-        // "Similar" = same sector if set, else same service — excludes
-        // itself and archived/unpublished rows, matching the identity-card
-        // fields actually shown (sector), falling back to the pre-existing
-        // taxonomy (service) for portfolios that don't have a sector yet.
-        $similarQuery = Portfolio::where('language_id', $currentLang->id)
+        // Latest published projects (excluding this one) — no popularity
+        // metric exists to track (no view/click count column on
+        // portfolios), so "latest" is the honest stand-in for that.
+        // Previously filtered to same sector/service only, which could
+        // come back empty for a project with neither set; newest-first
+        // always has something to show.
+        $data['similarProjects'] = Portfolio::where('language_id', $currentLang->id)
             ->where('id', '!=', $portfolio->id)
             ->where('is_archived', 0)
-            ->where('is_published', 1);
-        if (!empty($portfolio->sector_id)) {
-            $similarQuery->where('sector_id', $portfolio->sector_id);
-        } elseif (!empty($portfolio->service_id)) {
-            $similarQuery->where('service_id', $portfolio->service_id);
-        } else {
-            $similarQuery->whereRaw('0 = 1');
-        }
-        $data['similarProjects'] = $similarQuery->with('sector')->orderBy('id', 'DESC')->limit(8)->get();
+            ->where('is_published', 1)
+            ->with('sector', 'statusInfo')
+            ->orderBy('id', 'DESC')
+            ->limit(8)
+            ->get();
 
         // ISO -> full name map for the similar-project cards' country line
         // (they store the same 2-letter code as $portfolio->country above).
@@ -356,7 +368,19 @@ class FrontendController extends Controller
 
         $lang_id = $currentLang->id;
 
-        $data['blog'] = Blog::where('slug', $slug)->where('language_id', $lang_id)->firstOrFail();
+        $blog = Blog::where('slug', $slug)->where('language_id', $lang_id)->first();
+
+        if (!$blog) {
+            // Editable-slug feature — see portfoliodetails() above for the
+            // full explanation. 301 preserves the old URL's SEO ranking.
+            $target = resolve_slug_redirect('blog', $slug);
+            if ($target) {
+                return redirect()->route('front.blogdetails', $target->slug, 301);
+            }
+            abort(404);
+        }
+
+        $data['blog'] = $blog;
 
         $data['archives'] = Archive::orderBy('id', 'DESC')->get();
         $data['bcats'] = Bcategory::where('status', 1)->where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();

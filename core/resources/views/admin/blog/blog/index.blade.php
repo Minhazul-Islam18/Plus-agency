@@ -252,6 +252,12 @@ class="mb-0 text-danger em"
     ></p>
 </div>
 <div class="form-group">
+    <label for="">URL Slug</label>
+    <input type="text" class="form-control ltr" name="slug" placeholder="Leave blank to auto-generate from title">
+    <p id="errslug" class="mb-0 text-danger em"></p>
+    <p class="text-warning mb-0"><small>Auto-generated from the title if left blank. Editable later without breaking existing links (old URL redirects automatically).</small></p>
+</div>
+<div class="form-group">
     <label for="">Category **</label>
     <select
     id="bcategory"

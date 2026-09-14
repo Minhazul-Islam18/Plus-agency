@@ -44,17 +44,21 @@ class BlogController extends Controller
             'language_id.required' => 'The language field is required'
         ];
 
-        $slug = make_slug($request->title);
+        // Editable slug: admin-typed value wins if present, else auto-
+        // generate from the title (unchanged default behavior).
+        $slug = $request->filled('slug')
+            ? make_slug($request->slug)
+            : unique_intelligent_slug($request->title, fn ($s) => Blog::whereRaw('LOWER(slug) = ?', [strtolower($s)])->exists());
 
         $rules = [
             'language_id' => 'required',
             'image' => 'required',
-            'title' => [
-                'required',
-                'max:255',
+            'title' => ['required', 'max:255'],
+            'slug' => [
+                'nullable',
                 function ($attribute, $value, $fail) use ($slug) {
                     if (Blog::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists()) {
-                        $fail('The title field must be unique.');
+                        $fail('This URL slug is already in use — pick another.');
                     }
                 }
             ],
@@ -95,6 +99,7 @@ class BlogController extends Controller
         }
 
         $blog->save();
+        clear_slug_redirect('blog', $slug);
 
         Session::flash('success', 'Blog added successfully!');
         return "success";
@@ -102,21 +107,37 @@ class BlogController extends Controller
 
     public function update(Request $request)
     {
-        $slug = make_slug($request->title);
         $blog = Blog::findOrFail($request->blog_id);
         $blogId = $request->blog_id;
+        $oldSlug = $blog->slug;
+
+        // Editable slug, preserved across title edits: an explicit `slug`
+        // field wins; otherwise KEEP the existing slug — do NOT recompute
+        // from title (old behavior broke every shared/indexed link on save).
+        $blogSlugExists = fn ($s) => Blog::whereRaw('LOWER(slug) = ?', [strtolower($s)])->where('id', '!=', $blogId)->exists();
+
+        // "Regenerate URL" checkbox wins over everything else — same smart
+        // process as create, run against the (possibly just-edited) title,
+        // discarding whatever's in the Slug field.
+        if ($request->boolean('regenerate_slug')) {
+            $slug = unique_intelligent_slug($request->title, $blogSlugExists);
+        } else {
+            $slug = $request->filled('slug')
+                ? make_slug($request->slug)
+                : ($oldSlug ?: unique_intelligent_slug($request->title, $blogSlugExists));
+        }
 
         $image = $request->image;
         $allowedExts = allowed_image_extensions();
         $extImage = pathinfo($image, PATHINFO_EXTENSION);
 
         $rules = [
-            'title' => [
-                'required',
-                'max:255',
+            'title' => ['required', 'max:255'],
+            'slug' => [
+                'nullable',
                 function ($attribute, $value, $fail) use ($slug, $blogId) {
                     if (Blog::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $blogId)->exists()) {
-                        $fail('The title field must be unique.');
+                        $fail('This URL slug is already in use — pick another.');
                     }
                 }
             ],
@@ -142,6 +163,10 @@ class BlogController extends Controller
         }
 
         $blog = Blog::findOrFail($request->blog_id);
+        if ($slug !== $oldSlug) {
+            record_slug_redirect('blog', $oldSlug, $blog->id);
+            clear_slug_redirect('blog', $slug);
+        }
         $blog->title = $request->title;
         $blog->slug = $slug;
         $blog->bcategory_id = $request->category;

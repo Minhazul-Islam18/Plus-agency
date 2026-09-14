@@ -96,6 +96,72 @@
                   <p id="errtitle" class="mb-0 text-danger em"></p>
                 </div>
                 <div class="form-group">
+                  <label for="">URL Slug</label>
+                  <div class="slug-input-group">
+                    <input id="slugInput" type="text" class="form-control ltr" name="slug" value="{{ $blog->slug }}" placeholder="url-slug">
+                    <button type="button" id="regenerateSlugBtn" class="slug-regen-btn" title="Rebuild a short, meaningful slug from the current title">
+                      <i class="fas fa-sync-alt"></i> Regenerate
+                    </button>
+                  </div>
+                  <p id="errslug" class="mb-0 text-danger em"></p>
+                  <p class="text-warning mb-0"><small>Changing the title above will NOT change this. Edit it here manually, or click Regenerate to rebuild it from the title above — the old URL redirects (301) automatically either way.</small></p>
+                  <style>
+                    .slug-input-group { display: flex; gap: 8px; }
+                    .slug-input-group input { flex: 1; min-width: 0; }
+                    .slug-regen-btn {
+                      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+                      padding: 0 14px; border-radius: 6px; border: 1px solid rgba(21,114,232,.35);
+                      background: rgba(21,114,232,.12); color: #6ea8f7; font-size: 12.5px; font-weight: 600;
+                      white-space: nowrap; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease;
+                    }
+                    .slug-regen-btn:hover:not(:disabled) { background: rgba(21,114,232,.24); border-color: rgba(21,114,232,.55); color: #fff; }
+                    .slug-regen-btn:disabled { opacity: .6; cursor: wait; }
+                    .slug-regen-btn i { font-size: 11.5px; }
+                    .slug-regen-btn.is-loading i { animation: slugRegenSpin .6s linear infinite; }
+                    @keyframes slugRegenSpin { to { transform: rotate(360deg); } }
+                    #slugInput.slug-just-regenerated { animation: slugRegenFlash 1s ease; }
+                    @keyframes slugRegenFlash {
+                      0% { box-shadow: 0 0 0 3px rgba(21,114,232,.45); }
+                      100% { box-shadow: 0 0 0 0 rgba(21,114,232,0); }
+                    }
+                  </style>
+                  <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var btn = document.getElementById('regenerateSlugBtn');
+                        var input = document.getElementById('slugInput');
+                        if (!btn || !input) return;
+                        btn.addEventListener('click', function () {
+                            var title = (document.querySelector('[name="title"]').value || '').trim();
+                            if (!title) { alert('Enter a title first.'); return; }
+                            btn.disabled = true;
+                            btn.classList.add('is-loading');
+                            fetch("{{ route('admin.slug.preview') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                                body: JSON.stringify({ title: title, module: 'blog', id: {{ $blog->id }} }),
+                            })
+                                .then(function (r) { return r.json(); })
+                                .then(function (data) {
+                                    if (!data.slug) return;
+                                    input.value = data.slug;
+                                    input.classList.remove('slug-just-regenerated');
+                                    void input.offsetWidth;
+                                    input.classList.add('slug-just-regenerated');
+                                })
+                                .catch(function () { alert('Could not regenerate the URL — try again.'); })
+                                .finally(function () {
+                                    btn.disabled = false;
+                                    btn.classList.remove('is-loading');
+                                });
+                        });
+                    });
+                  </script>
+                </div>
+                <div class="form-group">
                   <label for="">Category **</label>
                   <select class="form-control" name="category">
                     <option value="" selected disabled>Select a category</option>

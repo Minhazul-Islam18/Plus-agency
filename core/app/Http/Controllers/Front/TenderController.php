@@ -167,10 +167,22 @@ class TenderController extends Controller
             return back();
         }
 
-        $data['tender'] = Tender::where('language_id', $currentLang->id)
+        $tender = Tender::where('language_id', $currentLang->id)
             ->where('slug', $slug)
             ->where('status', 1)
-            ->firstOrFail();
+            ->first();
+
+        if (!$tender) {
+            // Editable-slug feature — see FrontendController::portfoliodetails()
+            // for the full explanation. 301 preserves the old URL's SEO ranking.
+            $target = resolve_slug_redirect('tender', $slug);
+            if ($target && $target->status == 1) {
+                return redirect()->route('tender_details', $target->slug, 301);
+            }
+            abort(404);
+        }
+
+        $data['tender'] = $tender;
 
         $tender = $data['tender'];
 

@@ -162,6 +162,18 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 </div>
               </div>
 
+              {{-- URL Slug --}}
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>URL Slug</label>
+                    <input type="text" class="form-control ltr" name="slug" placeholder="Leave blank to auto-generate from title">
+                    <p id="errslug" class="mb-0 text-danger em"></p>
+                    <p class="text-warning mb-0"><small>Auto-generated from the title if left blank. Editable later without breaking existing links (old URL redirects automatically).</small></p>
+                  </div>
+                </div>
+              </div>
+
               {{-- Current Price & Previous Price --}}
               <div class="row">
                 <div class="col-md-6">

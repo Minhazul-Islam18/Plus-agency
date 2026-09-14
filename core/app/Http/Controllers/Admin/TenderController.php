@@ -258,7 +258,11 @@ class TenderController extends Controller
 
     public function store(Request $request)
     {
-        $slug = slug_create($request->title);
+        // Editable slug: admin-typed value wins if present, else auto-
+        // generate from the title (unchanged default behavior).
+        $slug = $request->filled('slug')
+            ? slug_create($request->slug)
+            : unique_intelligent_slug($request->title, fn ($s) => Tender::whereRaw('LOWER(slug) = ?', [strtolower($s)])->exists());
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
         $allowedExts = allowed_image_extensions();
@@ -270,13 +274,13 @@ class TenderController extends Controller
             'tender_category_id'  => 'required',
             'country'             => 'required',
             'tender_code'         => 'required',
-            'title'               => [
-                'required',
-                'max:255',
+            'title'               => ['required', 'max:255'],
+            'slug'                => [
+                'nullable',
                 function ($attribute, $value, $fail) use ($slug) {
                     $exists = Tender::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists();
                     if ($exists) {
-                        $fail('The title field must be unique.');
+                        $fail('This URL slug is already in use — pick another.');
                     }
                 }
             ],
@@ -394,6 +398,7 @@ class TenderController extends Controller
         $tender->expert_whatsapp   = $request->expert_whatsapp;
         $tender->expert_email      = $request->expert_email;
         $tender->save();
+        clear_slug_redirect('tender', $slug);
 
         // A new tender doesn't change any cached front-end page's content by
         // itself (nothing links to it yet), but the listing pages' cached
@@ -423,7 +428,23 @@ class TenderController extends Controller
     {
         $tenderId = $request->tender_id;
         $tender   = Tender::findOrFail($tenderId);
-        $slug     = slug_create($request->title);
+        $oldSlug  = $tender->slug;
+
+        // Editable slug, preserved across title edits: an explicit `slug`
+        // field wins; otherwise KEEP the existing slug — do NOT recompute
+        // from title (old behavior broke every shared/indexed link on save).
+        $tenderSlugExists = fn ($s) => Tender::whereRaw('LOWER(slug) = ?', [strtolower($s)])->where('id', '!=', $tenderId)->exists();
+
+        // "Regenerate URL" checkbox wins over everything else — same smart
+        // process as create, run against the (possibly just-edited) title,
+        // discarding whatever's in the Slug field.
+        if ($request->boolean('regenerate_slug')) {
+            $slug = unique_intelligent_slug($request->title, $tenderSlugExists);
+        } else {
+            $slug = $request->filled('slug')
+                ? slug_create($request->slug)
+                : ($oldSlug ?: unique_intelligent_slug($request->title, $tenderSlugExists));
+        }
 
         $image    = $request->tender_image;
         $expImage = $request->expert_image;
@@ -437,6 +458,15 @@ class TenderController extends Controller
             'country'             => 'required',
             'tender_code'         => 'required',
             'title'               => 'required|max:255',
+            'slug'                => [
+                'nullable',
+                function ($attribute, $value, $fail) use ($slug, $tenderId) {
+                    $exists = Tender::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $tenderId)->exists();
+                    if ($exists) {
+                        $fail('This URL slug is already in use — pick another.');
+                    }
+                }
+            ],
             'submission_deadline' => 'required|after_or_equal:today',
             'overview'            => 'required',
             'expert_source'       => 'required|in:custom,member',
@@ -490,6 +520,11 @@ class TenderController extends Controller
         if ($validator->fails()) {
             $validator->getMessageBag()->add('error', 'true');
             return response()->json($validator->errors());
+        }
+
+        if ($slug !== $oldSlug) {
+            record_slug_redirect('tender', $oldSlug, $tender->id);
+            clear_slug_redirect('tender', $slug);
         }
 
         $tender->language_id        = $request->language_id;

@@ -46,8 +46,16 @@ ul.language-dropdown li,
 .main-menu li.dropdown ul.dropdown-lists li,
 ul.slicknav_nav {
   background: rgba(10, 25, 20, 0.9) !important;
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* backdrop-filter removed — at 90% opaque background, at most 10% of
+     whatever sits behind these ever shows through, so the blur itself is
+     visually near-imperceptible. It was NOT free: .mega-dropdown-content
+     alone adds 3 always-composited blur surfaces to every page (rendered,
+     just closed — confirmed live via getBoundingClientRect), and the
+     language/submenu <li> selectors match every row in those dropdowns
+     (~9+ more) — one of the largest contributors to a 45-element
+     backdrop-filter count found while investigating reported scroll
+     jank. Border/background/text all unchanged; the frosted look was
+     already coming almost entirely from the opacity, not the blur. */
   border: 1px solid var(--glass-border);
 }
 
@@ -4000,7 +4008,7 @@ a.testi-company-logo:hover::after {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 340px;
-  gap: 54px;
+  gap: 28px;
   align-items: start;
 }
 .dark-svcp-inner--full {
@@ -5820,7 +5828,7 @@ button.dark-sheet-submit[type="submit"]:active {
    against the top edge) and the thumbs their rounded BOTTOM corners
    (flush against the bottom edge); neither child needs its own radius. */
 .dark-pd-gallery {
-  margin-bottom: 40px;
+  margin-bottom: 26px;
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid var(--glass-border);
@@ -5894,7 +5902,13 @@ button.dark-sheet-submit[type="submit"]:active {
     width: 100%;
   }
 }
+/* Dots (bottom-left) now show position instead — see .dark-pd-gallery-dots
+   below, matching the approved mockup's layout (dots left, playback
+   controls grouped right). This text counter is no longer rendered
+   (portfolio-details.blade.php) but the rule is left in place rather than
+   deleted, in case something still targets the class. */
 .dark-pd-gallery-counter {
+  display: none;
   position: absolute;
   z-index: 3;
   bottom: 16px;
@@ -5947,8 +5961,21 @@ button.dark-sheet-submit[type="submit"]:active {
   background: rgba(var(--accent-2-rgb), 0.35);
   border-color: rgba(var(--accent-2-rgb), 0.6);
 }
+/* Prev/next/play grouped bottom-right, dots bottom-left (see
+   .dark-pd-gallery-dots below) — matches the approved mockup's layout;
+   previously prev/next sat at the far left/right edges, vertically
+   centered over the whole image (top:50%), which is what put a nav
+   button directly on top of the hero overlay's title text once that
+   overlay switched from a bottom-only scrim to covering the full left
+   height (see .dark-pd-hero-overlay). Grouping every control into one
+   bottom-right cluster (like the dots on the opposite corner) avoids
+   that collision entirely regardless of how tall the overlay text runs. */
 .dark-pd-gallery-nav-prev {
-  left: 16px;
+  top: auto;
+  bottom: 16px;
+  right: 68px;
+  left: auto;
+  transform: none;
 }
 .dark-pd-gallery-nav-prev svg {
   margin-right: 2px;
@@ -5957,10 +5984,13 @@ button.dark-sheet-submit[type="submit"]:active {
   transform: translateX(-2px);
 }
 .dark-pd-gallery-nav-prev:active {
-  transform: translateY(-50%) scale(0.9);
+  transform: scale(0.9);
 }
 .dark-pd-gallery-nav-next {
+  top: auto;
+  bottom: 16px;
   right: 16px;
+  transform: none;
 }
 .dark-pd-gallery-nav-next svg {
   margin-left: 2px;
@@ -5969,7 +5999,7 @@ button.dark-sheet-submit[type="submit"]:active {
   transform: translateX(2px);
 }
 .dark-pd-gallery-nav-next:active {
-  transform: translateY(-50%) scale(0.9);
+  transform: scale(0.9);
 }
 .dark-pd-gallery-zoom {
   top: 16px;
@@ -5986,7 +6016,8 @@ button.dark-sheet-submit[type="submit"]:active {
 .dark-pd-gallery-play {
   top: auto;
   bottom: 16px;
-  left: 16px;
+  right: 120px;
+  left: auto;
   transform: none;
   width: 36px;
   height: 36px;
@@ -5996,6 +6027,37 @@ button.dark-sheet-submit[type="submit"]:active {
 }
 .dark-pd-gallery-play:active {
   transform: scale(0.9);
+}
+/* Dots — bottom-left, same baseline as the prev/next/play cluster on the
+   opposite side. Built by JS (one per gallery image, count varies) into
+   #pdGalleryDots; .is-active grows into a pill, same treatment as the
+   approved mockup. */
+.dark-pd-gallery-dots {
+  position: absolute;
+  z-index: 3;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.dark-pd-gallery-dots button {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: width 0.25s ease, border-radius 0.25s ease, background 0.25s ease;
+}
+.dark-pd-gallery-dots button:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+.dark-pd-gallery-dots button.is-active {
+  width: 20px;
+  border-radius: 5px;
+  background: #fff;
 }
 .dark-pd-gallery-play svg {
   width: 13px;
@@ -6237,6 +6299,20 @@ button.dark-sheet-submit[type="submit"]:active {
 /* ===== Sidebar identity card — pixel match to the approved mockup
    (Portfolio Detail Redesign artifact): glass panel, client row with logo
    chip top-right, 2-col label/value grid, status pill, full-width CTA. ===== */
+/* The actual CSS Grid item (child of .dark-svcp-inner, the 340px column)
+   is THIS wrapper — not .dark-pd-side-card itself, which is nested one
+   level inside it. Same fix/root cause as .dark-pd-main-col above: grid
+   items default to min-width:auto, so they won't shrink below their
+   content's intrinsic min-content size. The Partners marquee's track is
+   `width: max-content` (all 8 duplicated logos in one row) — without this
+   override THAT intrinsic width wins and balloons the whole grid column
+   outward to fit it, regardless of overflow:hidden on the marquee's own
+   viewport div (intrinsic sizing is computed before clipping, not after).
+   (An earlier attempt put this same rule on .dark-pd-side-card — the
+   wrong element, since it isn't the grid item — which had no effect.) */
+.dark-pd-side-col {
+  min-width: 0;
+}
 .dark-pd-side-card {
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid var(--glass-border);
@@ -6301,6 +6377,74 @@ button.dark-sheet-submit[type="submit"]:active {
 }
 .dark-pd-side-full {
   grid-column: 1 / -1;
+}
+/* Partners — picked from the "Our Partners" module; shown as small logos
+   under the spec grid, grayscale until hover (same treatment as the
+   homepage Partners section's own .dark-partner-item img). */
+.dark-pd-side-partners {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 18px;
+}
+.dark-pd-side-partner-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+}
+.dark-pd-side-partner-logos a {
+  display: inline-flex;
+  align-items: center;
+}
+.dark-pd-side-partner-logo {
+  height: 26px;
+  width: auto;
+  max-width: 90px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.6);
+  opacity: 0.75;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.dark-pd-side-partner-logo:hover {
+  filter: none;
+  opacity: 1;
+}
+/* Marquee variant — same pure-CSS transform-loop technique as the homepage
+   hero's .dark-hero-marquee (see that comment for the full reasoning): the
+   track is the partner list duplicated exactly once in the blade, so
+   translateX(-50%) wraps seamlessly with no library and no reset stutter.
+   Sized down from the hero's version to fit a narrow sidebar column. */
+.dark-pd-side-partner-marquee-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.dark-pd-side-partner-marquee {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: max-content;
+  animation: darkPdSidePartnerMarquee 22s linear infinite;
+}
+.dark-pd-side-partner-marquee-viewport:hover .dark-pd-side-partner-marquee {
+  animation-play-state: paused;
+}
+.dark-pd-side-partner-marquee-item {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+@keyframes darkPdSidePartnerMarquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-pd-side-partner-marquee {
+    animation: none;
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }
 .dark-pd-side-value {
   display: block;
@@ -11167,6 +11311,27 @@ body.dark-oc-lock {
   max-width: 60px;
   object-fit: contain;
 }
+.dark-pic-partner-logos {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+/* Same grayscale-until-hover treatment as the homepage's own
+   .dark-partner-item img (Partners section) — these logos are the exact
+   same admin-managed assets, just shown small and inline here instead of
+   in their own carousel. */
+.dark-pic-partner-logo {
+  height: 20px;
+  width: auto;
+  max-width: 70px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.6);
+  opacity: 0.75;
+  transition: filter 0.2s, opacity 0.2s;
+}
+.dark-pic-partner-logo:hover {
+  filter: none;
+  opacity: 1;
+}
 .dark-pic-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -11284,10 +11449,25 @@ body.dark-oc-lock {
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
   border-radius: 14px;
   padding: 16px 16px 18px;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.dark-pic-block:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--accent-2-rgb, 22, 185, 153), 0.45);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 16px 32px -18px rgba(0, 0, 0, 0.5);
 }
 .dark-pic-block-accent {
   border-color: rgba(var(--accent-2-rgb, 22, 185, 153), 0.4);
   background: rgba(var(--accent-2-rgb, 22, 185, 153), 0.06);
+}
+.dark-pic-block-accent:hover {
+  border-color: rgba(var(--accent-2-rgb, 22, 185, 153), 0.7);
+  background: rgba(var(--accent-2-rgb, 22, 185, 153), 0.1);
+}
+.dark-pic-block:hover .dark-pic-block-icon {
+  transform: scale(1.1);
 }
 .dark-pic-block-head {
   display: flex;
@@ -11306,6 +11486,7 @@ body.dark-oc-lock {
   justify-content: center;
   flex-shrink: 0;
   font-size: 13px;
+  transition: transform 0.3s ease;
 }
 .dark-pic-block-icon--accent {
   background: rgba(var(--accent-rgb, 59, 112, 255), 0.16);
@@ -11347,6 +11528,43 @@ body.dark-oc-lock {
   height: 4px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.42);
+}
+/* Show more/less for the 6 pipeline/impact boxes under the main gallery —
+   same idea as #pdProse's own clamp above, just sized for a small card
+   instead of a full article, and class-based (.dark-pic-toggle) since
+   there are several of these on one page instead of a single #id. Only
+   rendered on the real frontend page (see $pdClampOpen/$pdToggle's own
+   comment) — the admin preview/eye-modal show these unclamped. */
+.dark-pic-block-content {
+  max-height: 100px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.dark-pic-block-content.is-expanded {
+  max-height: none;
+}
+.dark-pic-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-2, #16b999);
+  cursor: pointer;
+}
+.dark-pic-toggle:hover {
+  text-decoration: underline;
+}
+.dark-pic-toggle svg {
+  transition: transform 0.25s ease;
+}
+.dark-pic-toggle.is-open svg {
+  transform: rotate(-90deg);
 }
 
 .dark-pic-documents {
@@ -11420,9 +11638,9 @@ body.dark-oc-lock {
 }
 .dark-pd-desc-docs-row {
   max-width: 1320px;
-  margin: 40px auto 0;
+  margin: 26px auto 0;
   display: grid;
-  gap: 40px;
+  gap: 28px;
   align-items: start;
 }
 .dark-pd-docs-col .dark-pic-documents {
@@ -11640,13 +11858,61 @@ body.dark-oc-lock {
   max-width: 1320px;
   margin: 40px auto 0;
 }
+.dark-pd-similar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
 .dark-pd-similar-title {
   color: #fff;
   font-size: 21px;
   font-weight: 600;
-  margin-bottom: 18px;
+  margin: 0;
   display: flex;
   align-items: baseline;
+}
+/* Prev/Next — top-right of the section header, same glass-circle look as
+   the Blog carousel's #darkBlogPrev/#darkBlogNext (.dark-blog-nav). */
+.dark-pd-similar-nav {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.dark-pd-similar-nav button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+.dark-pd-similar-nav button svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dark-pd-similar-nav button:hover {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  background: rgba(var(--accent-rgb), 0.12);
+  transform: translateY(-1px);
+}
+@media (max-width: 640px) {
+  .dark-pd-similar-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 .dark-pd-similar-rule {
   width: 40px;
@@ -11665,37 +11931,166 @@ body.dark-oc-lock {
 }
 .dark-pd-similar-card {
   display: block;
-  background: rgba(9, 13, 22, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
-  border-radius: 12px;
-  overflow: hidden;
   position: relative;
+  background: rgba(13, 18, 30, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  border-radius: 14px;
+  overflow: hidden;
   text-decoration: none;
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.38s ease, background 0.38s ease, box-shadow 0.38s ease;
+}
+/* Thin accent line that draws in left-to-right on hover, on top of
+   everything else in the card (z-index above the image/scrim). */
+.dark-pd-similar-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--accent, #25d06f),
+    var(--accent-2, #2dd4bf)
+  );
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* z-index:3 lost a stacking tie against the thumbnail <img> — it gets
+     promoted to its own compositor layer by its `transition: transform`
+     (used for the hover zoom) and, empirically, painted above a z-index
+     of exactly 3 regardless of DOM/source order. Bumped clear of that;
+     3 hid the line completely, 4+ reliably shows it. Confined to this
+     card's own stacking context (the card's backdrop-filter roots it),
+     so this can't leak z-order fights onto the rest of the page. */
+  z-index: 6;
 }
 .dark-pd-similar-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(var(--accent-2-rgb, 45, 212, 191), 0.5);
+  transform: translateY(-7px);
+  background: rgba(15, 21, 36, 0.7);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(var(--accent-rgb), 0.12);
+}
+.dark-pd-similar-card:hover::before {
+  width: 100%;
+}
+/* Gradient-ring border on hover — same accent->accent-2 gradient as the
+   top accent line/year ribbon/arrow chip, not just a flat accent color.
+   border-color can't take a gradient directly, so this is a second
+   pseudo-element (::before is already the top accent line) drawn as a
+   1px ring via the mask "xor" trick — same technique as .dark-case-card's
+   own hover ring elsewhere in this file. */
+.dark-pd-similar-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.38s ease;
+  pointer-events: none;
+  z-index: 6;
+}
+.dark-pd-similar-card:hover::after {
+  opacity: 1;
 }
 .dark-pd-similar-img {
   position: relative;
-  height: 140px;
+  height: 158px;
+  overflow: hidden;
 }
 .dark-pd-similar-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.dark-pd-similar-card:hover .dark-pd-similar-img img {
+  transform: scale(1.09);
+}
+/* Scrim baked permanently onto the thumbnail (not just on hover) so the
+   index/year/sector chips stay legible over any photo. */
+.dark-pd-similar-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 10, 18, 0) 35%,
+    rgba(7, 10, 18, 0.82) 100%
+  );
+  pointer-events: none;
+}
+.dark-pd-similar-index {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-family: "Plex Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.72);
+  z-index: 2;
+}
+.dark-pd-similar-year {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  font-family: "Plex Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #08130d;
+  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  padding: 4px 9px 5px;
+  border-radius: 0 0 6px 6px;
+  z-index: 2;
+  overflow: hidden;
+  transform-origin: top left;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s ease;
+}
+/* "Shine sweep" — a light streak sweeps across the ribbon as it pops
+   slightly bigger, like a foil/premium badge catching light. A plain
+   translateY here would net out to almost nothing on screen instead: the
+   card itself already lifts translateY(-4px) on hover, and the two
+   transforms compose, so an opposite offset on the ribbon barely reads
+   as movement. Scale isn't affected by that cancellation. */
+.dark-pd-similar-year::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  transform: skewX(-20deg);
+}
+.dark-pd-similar-card:hover .dark-pd-similar-year {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px -2px rgba(var(--accent-rgb), 0.65);
+}
+.dark-pd-similar-card:hover .dark-pd-similar-year::before {
+  animation: pdYearShine 0.85s ease forwards;
+}
+@keyframes pdYearShine {
+  to {
+    left: 140%;
+  }
 }
 .dark-pd-similar-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  left: 12px;
+  bottom: 11px;
   font-family: "Plex Mono", monospace;
-  background: rgba(6, 10, 18, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(var(--accent-rgb), 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-size: 10px;
   font-weight: 600;
@@ -11703,58 +12098,174 @@ body.dark-oc-lock {
   letter-spacing: 0.04em;
   padding: 4px 10px;
   border-radius: 999px;
+  z-index: 2;
 }
 .dark-pd-similar-body {
-  padding: 14px 16px 16px;
+  padding: 15px 16px 17px;
+  position: relative;
 }
-.dark-pd-similar-body h5 {
+.dark-pd-similar-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Plex Mono", monospace;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dark-pd-similar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-2, #2dd4bf);
+  box-shadow: 0 0 0 3px rgba(var(--accent-2-rgb, 45, 212, 191), 0.18);
+  flex: none;
+}
+.dark-pd-similar-sep {
+  color: rgba(255, 255, 255, 0.36);
+}
+/* Clamped to 2 lines so every card in the row starts at the same height
+   regardless of how long a given project's title is — a "Show more"
+   toggle (below) reveals the rest for the titles that actually got cut,
+   same pattern as the Description prose's own #pdReadMore above. */
+.dark-pd-similar-card-title {
   color: #fff;
   font-size: 14.5px;
   font-weight: 700;
-  margin-bottom: 4px;
+  line-height: 1.25;
+  margin: 0 0 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* line-clamp only caps long content at 2 lines — it doesn't reserve
+     that height for a SHORT (1-line) title, so cards ended up two
+     different heights depending on title length (confirmed live: 17px
+     vs 35px) instead of the uniform height this was meant to guarantee.
+     min-height (2 lines at the line-height above) makes every card
+     claim the same space regardless of how much of it a given title
+     actually needs. */
+  min-height: calc(1.25em * 2);
+  transition: color 0.3s ease;
+}
+.dark-pd-similar-card:hover .dark-pd-similar-card-title {
+  color: var(--accent-2, #2dd4bf);
+}
+.dark-pd-similar-card-title.is-expanded {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.dark-pd-similar-toggle {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent-2, #2dd4bf);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+.dark-pd-similar-toggle:hover {
+  text-decoration: underline;
 }
 .dark-pd-similar-body p {
   color: rgba(255, 255, 255, 0.6);
   font-size: 12.5px;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.dark-pd-similar-card > svg {
+.dark-pd-similar-cta {
   position: absolute;
   right: 14px;
   bottom: 14px;
-  width: 18px;
-  height: 18px;
-  color: var(--accent-2, #2dd4bf);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.62);
+  transition: all 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.dark-pd-similar-cta svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.35s ease;
+}
+.dark-pd-similar-card:hover .dark-pd-similar-cta {
+  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  border-color: transparent;
+  color: #08130d;
+  transform: translateX(2px);
+}
+.dark-pd-similar-card:hover .dark-pd-similar-cta svg {
+  transform: translateX(1px);
 }
 
-/* ===== Portfolio details hero overlay: sector badge + "on behalf of
-   {client}" line on top of the hero image (badge top-left, client line
-   bottom-left over a gradient scrim). Title/subtitle used to render here
-   too — dropped per feedback (busy over the photo; the real title is
-   already the page's own <h1> in the breadcrumb header). ===== */
+/* ===== Portfolio details hero overlay =====
+   LEFT: sector badge + overlay title/subtitle/description over a
+   controllable gradient scrim. RIGHT: a fixed "icon highlights" panel.
+   Same content on every image in the gallery (see the partial's own
+   comment) — only the photo underneath changes between slides.
+   Approved design: https://claude.ai/code/artifact/62a27330-ae43-4222-a702-a93fd0811d02
+
+   --pd-hero-overlay-color/-strength are set inline per-portfolio by
+   portfolio-hero-overlay.blade.php (admin-controllable color + opacity,
+   same value driving both halves so they read as one surface). */
 .dark-pd-hero-overlay {
   position: absolute;
   inset: 0;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 26px 30px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 0 0 32px;
   pointer-events: none;
-  background: linear-gradient(
-    0deg,
-    rgba(4, 7, 14, 0.86) 0%,
-    rgba(4, 7, 14, 0.25) 48%,
-    rgba(4, 7, 14, 0) 72%
-  );
 }
-.dark-pd-hero-text {
-  /* Pin to the bottom via margin, not the parent's justify-content:
-     space-between — the badge above is conditional (@if sector), and
-     space-between with a single flex child leaves it at flex-start
-     instead of the end, floating the client line up into the image's
-     busiest (unscrimmed) area when a record has no sector set. */
-  margin-top: auto;
+/* ===== Two-tier glow behind the left copy (approved design:
+   https://claude.ai/code/artifact/0a3590f1-a821-4fb4-baad-bd933e9a7eed #6) =====
+   1. .dark-pd-hero-overlay::before — a large, heavily blurred ambient wash
+      that extends the faded halo far out into the frame, anchored left.
+   2. The stacked text-shadow glow on the title/subtitle/description below
+      — dense right at the glyphs (readable core), falling off with
+      distance, following the text shape exactly (no box, any wrapping).
+   Both use the admin --pd-hero-overlay-color and the --pd-hero-bloom-
+   strength slider (falls back to --pd-hero-overlay-strength when unset —
+   portfolio-hero-overlay.blade.php). z-index:-1 = above the photo, below
+   the text (it paints as in-flow content of this stacking context). */
+.dark-pd-hero-overlay::before {
+  content: "";
+  position: absolute;
+  left: -8%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 78%;
+  height: 118%;
+  z-index: -1;
+  pointer-events: none;
+  /* 46px -> 24px: same visual falloff shape (gradient stops carry the
+     softness), less GPU blur-sampling cost. Blur cost scales with radius
+     AND element area — this layer sits directly in the 1st-viewport/hero
+     area the user reported freezing in, live for the whole time any
+     gallery slide is showing (not gated by hover/scroll). */
+  filter: blur(24px);
+  background: radial-gradient(
+    ellipse 78% 62% at 30% 50%,
+    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.72)) 0%,
+    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.4)) 42%,
+    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.14)) 68%,
+    transparent 88%
+  );
 }
 .dark-pd-hero-badge {
   align-self: flex-start;
@@ -11762,19 +12273,163 @@ body.dark-oc-lock {
   font-family: "Plex Mono", monospace;
   padding: 7px 16px;
   border-radius: 100px;
-  background: var(--accent-2, #16b999);
-  color: #06210f;
+  /* Tied to the same admin-controllable overlay color/opacity as the scrim
+     behind it (--pd-hero-overlay-color/-strength, set inline per-portfolio
+     by portfolio-hero-overlay.blade.php) instead of the fixed site accent
+     — a bright green pill clashed the moment an admin picked any other
+     overlay color. A solid-ish tint of that same color + a light border
+     for definition reads consistently at any hue, unlike trying to match
+     the exact color (which vanishes against its own near-identical
+     background when the overlay itself is dark, the common case). */
+  background: rgba(
+    var(--pd-hero-overlay-color),
+    min(var(--pd-hero-overlay-strength) * 1.15, 0.95)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
   font-size: 11.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  margin-bottom: 14px;
 }
-.dark-pd-hero-client {
+/* Stacked blurred text-shadows (0 offset) — a tight dark layer first for
+   crisp white text, then overlay-colour layers dense at the glyphs and
+   falling off far out. Exact px stack from the approved artifact. */
+.dark-pd-hero-title,
+.dark-pd-hero-subtitle,
+.dark-pd-hero-desc {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.55),
+    0 0 4px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
+    0 0 8px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
+    0 0 14px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
+    0 0 24px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.85)),
+    0 0 42px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.68)),
+    0 0 70px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.52)),
+    0 0 110px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.38)),
+    0 0 170px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.26)),
+    0 0 250px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.17)),
+    0 0 360px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.1)),
+    0 0 500px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.05));
+}
+.dark-pd-hero-overlay > * {
+  margin-bottom: 8px;
+}
+.dark-pd-hero-title {
+  font-size: clamp(20px, 2.4vw, 30px);
+  font-weight: 700;
+  line-height: 1.55;
+  color: #fff;
+  margin: 0 0 8px;
+  max-width: 520px;
+}
+.dark-pd-hero-subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 8px;
+  max-width: 520px;
+}
+.dark-pd-hero-desc {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.75);
-  margin: 0;
-  max-width: 640px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.65;
+  color: #fff;
+  margin: 0 0 8px;
+  max-width: 480px;
+}
+/* Right: icon highlights panel — height fits its own rows (not stretched
+   full-height) and is vertically centered, so it stays centered whether a
+   project has 3 highlights or 6. */
+.dark-pd-hero-points {
+  position: absolute;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
+  /* backdrop-filter removed (was blur(14px)) — same reasoning as the
+     nav-dropdown fix earlier this session: at ~0.9+ opacity the live
+     backdrop sampling is nearly invisible anyway, but stays fully GPU-
+     costly, continuously, for the whole time a gallery slide shows —
+     right in the 1st-viewport/carousel area the user reported freezing
+     in. Opacity multiplier bumped slightly (0.92->0.97) to cover the
+     small amount of see-through the blur used to mask. */
+  background: rgba(
+    var(--pd-hero-overlay-color),
+    calc(var(--pd-hero-overlay-strength) * 0.97)
+  );
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+}
+.dark-pd-hero-point {
+  display: flex;
+  /* center, not flex-start — the icon lost its fixed 34x34 box above, so
+     top-aligning it against the label's first line of text no longer
+     lines up the way it did when both were the same fixed height. */
+  align-items: center;
+  gap: 12px;
+  padding: 9px 6px;
+}
+.dark-pd-hero-point + .dark-pd-hero-point {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.dark-pd-hero-point-icon {
+  /* No chip/background of its own anymore — just a bigger bare glyph
+     sitting directly on the panel's own tint. White (not the site accent)
+     so it reads clearly against ANY overlay color an admin picks, not
+     just the ones close to --accent's own hue. */
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 22px;
+  width: 26px;
+}
+.dark-pd-hero-point-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #f2f5f3;
+}
+/* Hidden until the entrance script (portfolio-details.blade.php) reveals
+   it via Motion.animate — that script unhides everything immediately via
+   plain style.opacity if the CDN script fails to load, so this never
+   leaves the overlay permanently blank. */
+.dark-pd-hero-overlay [data-reveal],
+.dark-pd-hero-points [data-reveal] {
+  opacity: 0;
+}
+@media (max-width: 760px) {
+  /* Stays absolute/overlaid here (unlike the standalone mockup's own
+     stacked-below-image treatment) — .dark-pd-gallery-nav's prev/next
+     buttons are top:50% of this same .dark-pd-gallery-main, so letting
+     the overlay/points grow the container's in-flow height would drag
+     those buttons down into the text instead of staying on the image.
+     Just tightened for a narrower viewport instead. */
+  .dark-pd-hero-overlay {
+    padding: 0 60px 0 18px;
+  }
+  .dark-pd-hero-title {
+    font-size: 18px;
+  }
+  .dark-pd-hero-subtitle {
+    font-size: 14px;
+  }
+  .dark-pd-hero-desc {
+    display: none;
+  }
+  .dark-pd-hero-points {
+    display: none;
+  }
+}
+#pdSimilarCarousel .owl-stage-outer {
+  padding-top: 14px;
 }

@@ -123,6 +123,7 @@
                                     </button>
                                     <span class="dark-pd-gallery-counter" id="pdGalleryCounter">1 /
                                         {{ $portfolio->portfolio_images->count() }}</span>
+                                    <div class="dark-pd-gallery-dots" id="pdGalleryDots"></div>
                                 @endif
                             </div>
                         </div>
@@ -157,13 +158,14 @@
                             'portfolio' => $portfolio,
                             'showIdentityRow' => false,
                             'documentList' => [],
+                            'revealBlocks' => true,
                         ])
                     </div>
 
                 </div>
 
-                <div>
-                    <aside class="dark-pd-side-card">
+                <div class="dark-pd-side-col">
+                    <aside class="dark-pd-side-card reveal-right">
                         @if (!empty($portfolio->client_name))
                             <div class="dark-pd-side-client-row">
                                 <div>
@@ -204,6 +206,12 @@
                                 </div>
                             @endif
 
+                            {{-- Three distinct dates, always in this order: when work
+                                 started, when ICA finished the dossier, and the
+                                 tender's own submission deadline for the client.
+                                 This block previously mislabeled submission_date
+                                 as "End Date" and never showed the real end_date
+                                 at all — fixed. --}}
                             @if ($portfolio->start_date)
                                 @php $startDate = Carbon\Carbon::parse($portfolio->start_date); @endphp
                                 <div>
@@ -214,11 +222,21 @@
                                 </div>
                             @endif
 
+                            @if ($portfolio->end_date)
+                                @php $endDate = Carbon\Carbon::parse($portfolio->end_date); @endphp
+                                <div>
+                                    <span class="dark-pd-side-label"><i
+                                            class="fas fa-calendar-check dark-pd-side-icon"></i>{{ __('End Date') }}</span>
+                                    <span
+                                        class="dark-pd-side-value">{{ date_format($endDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}</span>
+                                </div>
+                            @endif
+
                             @if ($portfolio->submission_date)
                                 @php $submissionDate = Carbon\Carbon::parse($portfolio->submission_date); @endphp
                                 <div>
                                     <span class="dark-pd-side-label"><i
-                                            class="fas fa-calendar-check dark-pd-side-icon"></i>{{ __('End Date') }}</span>
+                                            class="fas fa-hourglass-end dark-pd-side-icon"></i>{{ __('Submission Deadline') }}</span>
                                     <span
                                         class="dark-pd-side-value">{{ date_format($submissionDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}</span>
                                 </div>
@@ -246,6 +264,69 @@
                                 </div>
                             @endif
                         </div>
+
+                        @if ($portfolio->partnerRefs->isNotEmpty())
+                            @php
+                                // A marquee for 2-3 logos is pointless motion in a narrow
+                                // sidebar — nothing to actually scroll past. Only worth it
+                                // once there are enough logos that a static wrapped row
+                                // would run several lines deep.
+                                $pdPartnerMarqueeThreshold = 5;
+                                $pdUsePartnerMarquee = $portfolio->partnerRefs->count() >= $pdPartnerMarqueeThreshold;
+                            @endphp
+                            <div class="dark-pd-side-partners">
+                                <span class="dark-pd-side-label">{{ __('Partners') }}</span>
+                                @if ($pdUsePartnerMarquee)
+                                    {{-- Marquee — pure-CSS transform loop, same technique as the
+                                         homepage hero's .dark-hero-marquee. The list is rendered
+                                         TWICE back to back so the animation's halfway point is
+                                         pixel-identical to the start, wrapping seamlessly. --}}
+                                    <div class="dark-pd-side-partner-marquee-viewport">
+                                        <div class="dark-pd-side-partner-marquee">
+                                            @for ($i = 0; $i < 2; $i++)
+                                                @foreach ($portfolio->partnerRefs as $partner)
+                                                    @php $pImg = 'assets/front/img/partners/' . $partner->image; @endphp
+                                                    @if (!empty($partner->url))
+                                                        <a href="{{ $partner->url }}" target="_blank" rel="noopener"
+                                                            title="{{ convertUtf8($partner->name) }}"
+                                                            class="dark-pd-side-partner-marquee-item">
+                                                            <img src="{{ asset($pImg) }}"
+                                                                alt="{{ convertUtf8($partner->name) }}"
+                                                                class="dark-pd-side-partner-logo">
+                                                        </a>
+                                                    @else
+                                                        <span class="dark-pd-side-partner-marquee-item">
+                                                            <img src="{{ asset($pImg) }}"
+                                                                alt="{{ convertUtf8($partner->name) }}"
+                                                                title="{{ convertUtf8($partner->name) }}"
+                                                                class="dark-pd-side-partner-logo">
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @else
+                                    {{-- Few logos — a plain static row, wraps normally, no
+                                         animation/duplication needed. --}}
+                                    <div class="dark-pd-side-partner-logos">
+                                        @foreach ($portfolio->partnerRefs as $partner)
+                                            @php $pImg = 'assets/front/img/partners/' . $partner->image; @endphp
+                                            @if (!empty($partner->url))
+                                                <a href="{{ $partner->url }}" target="_blank" rel="noopener"
+                                                    title="{{ convertUtf8($partner->name) }}">
+                                                    <img src="{{ asset($pImg) }}" alt="{{ convertUtf8($partner->name) }}"
+                                                        class="dark-pd-side-partner-logo">
+                                                </a>
+                                            @else
+                                                <img src="{{ asset($pImg) }}" alt="{{ convertUtf8($partner->name) }}"
+                                                    title="{{ convertUtf8($partner->name) }}" class="dark-pd-side-partner-logo">
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
 
                         @if ($portfolio->website_link)
                             <a href="{{ $portfolio->website_link }}" class="dark-pd-demo-btn" target="_blank">
@@ -291,7 +372,7 @@
                 </div>
 
                 @if ($pdHasGallery)
-                    <div class="dark-pd-gallery-col">
+                    <div class="dark-pd-gallery-col reveal-right">
                         <div class="dark-pd-gallery-panel">
                             <div class="dark-pd-section-heading">
                                 <span class="dark-pd-section-icon"><i class="fas fa-images"></i></span>
@@ -313,7 +394,7 @@
                 @endif
 
                 @if ($pdHasDocs)
-                    <div class="dark-pd-docs-col">
+                    <div class="dark-pd-docs-col reveal-right">
                         @include('front.default.partials.dark.portfolio-documents-list', [
                             'documentList' => $documentList,
                         ])
@@ -323,8 +404,22 @@
 
             @if (!empty($similarProjects) && $similarProjects->count() > 0)
                 <div class="dark-pd-similar-section">
-                    <h3 class="dark-pd-similar-title">{{ __('Similar projects') }} <span
-                            class="dark-pd-similar-rule"></span></h3>
+                    <div class="dark-pd-similar-head">
+                        <h3 class="dark-pd-similar-title reveal-text">{{ __('Latest projects') }} <span
+                                class="dark-pd-similar-rule"></span></h3>
+                        @if ($similarProjects->count() > 1)
+                            <div class="dark-pd-similar-nav">
+                                <button type="button" id="pdSimilarPrev" aria-label="{{ __('Previous') }}"><svg
+                                        viewBox="0 0 24 24">
+                                        <path d="M15 6l-6 6 6 6" />
+                                    </svg></button>
+                                <button type="button" id="pdSimilarNext" aria-label="{{ __('Next') }}"><svg
+                                        viewBox="0 0 24 24">
+                                        <path d="M9 6l6 6-6 6" />
+                                    </svg></button>
+                            </div>
+                        @endif
+                    </div>
                     <div class="owl-carousel dark-pd-similar-carousel" id="pdSimilarCarousel">
                         @foreach ($similarProjects as $sp)
                             <a href="{{ route('front.portfoliodetails', $sp->slug) }}" class="dark-pd-similar-card">
@@ -332,18 +427,38 @@
                                     <img class="lazy"
                                         data-src="{{ asset('assets/front/img/portfolios/featured/' . $sp->featured_image) }}"
                                         alt="">
+                                    <span class="dark-pd-similar-index">N°{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                    @if (!empty($sp->year))
+                                        <span class="dark-pd-similar-year">{{ $sp->year }}</span>
+                                    @endif
                                     @if (!empty($sp->sector))
                                         <span class="dark-pd-similar-badge">{{ convertUtf8($sp->sector->name) }}</span>
                                     @endif
                                 </div>
                                 <div class="dark-pd-similar-body">
-                                    <h5>{{ convertUtf8($sp->title) }}</h5>
-                                    <p>{{ convertUtf8($sp->client_name) }}{{ !empty($sp->country) ? ' — ' . ($countryNames[$sp->country] ?? $sp->country) : '' }}
-                                    </p>
+                                    @if (!empty($sp->statusInfo) || !empty($sp->country))
+                                        <div class="dark-pd-similar-meta">
+                                            @if (!empty($sp->statusInfo))
+                                                <span class="dark-pd-similar-dot"></span>
+                                                <span>{{ convertUtf8($sp->statusInfo->name) }}</span>
+                                            @endif
+                                            @if (!empty($sp->statusInfo) && !empty($sp->country))
+                                                <span class="dark-pd-similar-sep">•</span>
+                                            @endif
+                                            @if (!empty($sp->country))
+                                                <span>{{ $countryNames[$sp->country] ?? $sp->country }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <h5 class="dark-pd-similar-card-title">{{ convertUtf8($sp->title) }}</h5>
+                                    <button type="button" class="dark-pd-similar-toggle" hidden>{{ __('Show more') }}</button>
+                                    <p>{{ convertUtf8($sp->client_name) }}</p>
                                 </div>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-                                    <path d="M9 6l6 6-6 6" />
-                                </svg>
+                                <span class="dark-pd-similar-cta">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6">
+                                        <path d="M9 6l6 6-6 6" />
+                                    </svg>
+                                </span>
                             </a>
                         @endforeach
                     </div>
@@ -432,6 +547,9 @@
                                             </div>
                                         @endif
 
+                                        {{-- Start -> End -> Submission Deadline, always in this
+                                             order and always three distinct dates — see the
+                                             sidebar block above for the same fix/explanation. --}}
                                         @if ($portfolio->start_date)
                                             @php $startDate = Carbon\Carbon::parse($portfolio->start_date); @endphp
                                             <div class="info-row">
@@ -443,10 +561,21 @@
                                             </div>
                                         @endif
 
+                                        @if ($portfolio->end_date)
+                                            @php $endDate = Carbon\Carbon::parse($portfolio->end_date); @endphp
+                                            <div class="info-row">
+                                                <div class="label">{{ __('End Date') }}</div>
+                                                <div class="colon">:</div>
+                                                <div class="value">
+                                                    {{ date_format($endDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         @if ($portfolio->submission_date)
                                             @php $submissionDate = Carbon\Carbon::parse($portfolio->submission_date); @endphp
                                             <div class="info-row">
-                                                <div class="label">{{ __('End Date') }}</div>
+                                                <div class="label">{{ __('Submission Deadline') }}</div>
                                                 <div class="colon">:</div>
                                                 <div class="value">
                                                     {{ date_format($submissionDate, app()->getLocale() == 'fr' ? 'd-m-Y' : 'M d, Y') }}
@@ -543,6 +672,7 @@
 
 @section('scripts')
     @if ($be->theme_version == 'dark')
+        <script src="{{ asset_v('assets/front/js/vendor-framer-motion-dom.js') }}"></script>
         <script>
             {{-- No thumbnail strip — the main image is the whole gallery here,
                  advanced by the prev/next buttons and autoplay; the separate
@@ -570,6 +700,32 @@
                     var playBtn = document.getElementById('pdGalleryPlay');
                     var prevBtn = document.getElementById('pdGalleryPrev');
                     var nextBtn = document.getElementById('pdGalleryNext');
+                    var heroOverlay = mainWrap.querySelector('.dark-pd-hero-overlay');
+                    var heroPoints = mainWrap.querySelector('.dark-pd-hero-points');
+                    var dotsWrap = document.getElementById('pdGalleryDots');
+                    var dots = [];
+
+                    // Built here (not server-rendered) since the click
+                    // handler needs to call goTo() directly — one dot per
+                    // image, bottom-left, matching the approved mockup.
+                    if (dotsWrap && n > 1) {
+                        for (var di = 0; di < n; di++) {
+                            (function(i) {
+                                var dot = document.createElement('button');
+                                dot.type = 'button';
+                                dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+                                dot.addEventListener('click', function() {
+                                    goTo(i);
+                                    queueNext();
+                                });
+                                dotsWrap.appendChild(dot);
+                                dots.push(dot);
+                            })(di);
+                        }
+                        if (dots[0]) dots[0].classList.add('is-active');
+                    }
+                    var M = window.Motion;
+                    var EASE = [0.22, 0.61, 0.36, 1];
 
                     var hovering = false;
                     var manuallyPaused = false;
@@ -617,18 +773,62 @@
                     function showImage(newIndex) {
                         index = ((newIndex % n) + n) % n;
                         if (counter) counter.textContent = (index + 1) + ' / ' + n;
+                        dots.forEach(function(d, di) {
+                            d.classList.toggle('is-active', di === index);
+                        });
 
                         var full = images[index];
-                        // Crossfade instead of a hard swap — preload off-screen so
-                        // the fade-in only starts once the new image is actually
-                        // ready, avoiding a flash of the old frame at full opacity.
-                        mainImg.style.opacity = '0';
+
+                        if (M) {
+                            M.animate(mainImg, {
+                                opacity: [1, 0]
+                            }, {
+                                duration: 0.3,
+                                easing: EASE
+                            });
+                        } else {
+                            mainImg.style.opacity = '0';
+                        }
+                        // The overlay content is identical on every slide (see
+                        // portfolio-hero-overlay.blade.php) — this pulse is what
+                        // ties it to the transition instead of sitting dead while
+                        // the photo changes under it.
+                        if (M && heroOverlay) M.animate(heroOverlay, {
+                            opacity: [1, 0.55, 1]
+                        }, {
+                            duration: 0.6,
+                            easing: EASE
+                        });
+                        if (M && heroPoints) M.animate(heroPoints, {
+                            opacity: [1, 0.7, 1]
+                        }, {
+                            duration: 0.6,
+                            easing: EASE
+                        });
+
                         var preload = new Image();
                         preload.onload = function() {
                             mainImg.classList.remove('lazy');
                             mainImg.removeAttribute('data-src');
                             mainImg.src = full;
-                            mainImg.style.opacity = '1';
+                            // Opacity only — not scale. mainImg also carries
+                            // the .is-kenburns CSS animation just below,
+                            // which drives `transform` on this same element;
+                            // a Motion scale animation writes to that same
+                            // property via inline style and clobbers it
+                            // (confirmed the hard way on the hero points
+                            // panel above, which had the same conflict with
+                            // its own translateY(-50%) positioning).
+                            if (M) {
+                                M.animate(mainImg, {
+                                    opacity: [0, 1]
+                                }, {
+                                    duration: 0.5,
+                                    easing: EASE
+                                });
+                            } else {
+                                mainImg.style.opacity = '1';
+                            }
 
                             // Restart the Ken Burns drift for the new image.
                             mainImg.classList.remove('is-kenburns');
@@ -754,6 +954,80 @@
                             return index;
                         }
                     };
+                })();
+        </script>
+
+        <script>
+            {{-- One-time entrance for the hero overlay's [data-reveal]
+                 elements (badge, title, subtitle, description, each icon
+                 highlight) — staggered fade + rise/slide-in, same as the
+                 approved mockup. Plays once on page load, never again on a
+                 slide change (the overlay content is identical across every
+                 slide — see portfolio-hero-overlay.blade.php's own comment
+                 — so re-playing it on every transition would just replay
+                 the same text appearing, which reads as broken, not lively;
+                 that's why showImage() above only pulses opacity, not this
+                 reveal). Falls back to plainly unhiding everything if the
+                 CDN script didn't load, matching the [data-reveal]{opacity:0}
+                 CSS rule's own fallback comment in dark-glass.css. --}}
+                (function() {
+                    var reveal = document.querySelectorAll(
+                        '.dark-pd-hero-overlay [data-reveal], .dark-pd-hero-points [data-reveal]');
+                    if (!reveal.length) return;
+                    var EASE = [0.22, 0.61, 0.36, 1];
+
+                    function fallbackShow() {
+                        reveal.forEach(function(el) {
+                            el.style.opacity = 1;
+                        });
+                    }
+
+                    function playReveal() {
+                        if (!window.Motion) {
+                            fallbackShow();
+                            return;
+                        }
+                        window.Motion.animate('.dark-pd-hero-overlay [data-reveal]', {
+                            opacity: [0, 1],
+                            y: [14, 0]
+                        }, {
+                            duration: 0.55,
+                            delay: window.Motion.stagger(0.09, {
+                                startDelay: 0.15
+                            }),
+                            easing: EASE
+                        });
+                        window.Motion.animate('.dark-pd-hero-points [data-reveal]', {
+                            opacity: [0, 1],
+                            x: [16, 0]
+                        }, {
+                            duration: 0.5,
+                            delay: window.Motion.stagger(0.07, {
+                                startDelay: 0.35
+                            }),
+                            easing: EASE
+                        });
+                    }
+                    var mainImgEl = document.getElementById('pdMainImg');
+                    var played = false;
+
+                    function playOnce() {
+                        if (played) return;
+                        played = true;
+                        playReveal();
+                    }
+                    if (mainImgEl && mainImgEl.complete && mainImgEl.naturalWidth > 0) {
+                        playOnce();
+                    } else if (mainImgEl) {
+                        mainImgEl.addEventListener('load', playOnce, {
+                            once: true
+                        });
+                        // Belt-and-braces: a broken/missing image should never
+                        // permanently strand the overlay at opacity:0.
+                        setTimeout(playOnce, 4000);
+                    } else {
+                        playOnce();
+                    }
                 })();
         </script>
 
@@ -1048,10 +1322,20 @@
                 var $track = $('#pdSimilarCarousel');
                 if (!$ || !$track.length) return;
 
+                // Bound BEFORE init — owlCarousel() fires its own
+                // 'initialized.owl.carousel' event SYNCHRONOUSLY as the
+                // very last step of the call below, so chaining .on(...)
+                // AFTER .owlCarousel({...}) (as this originally read)
+                // attaches the listener too late to ever catch it; every
+                // toggle silently stayed hidden as a result. 'refreshed'
+                // (fires later, on responsive re-render) still needs this
+                // listener in place ahead of time regardless.
+                $track.on('refreshed.owl.carousel', measureSimilarTitles);
+
                 $track.owlCarousel({
                     loop: true,
                     margin: 20,
-                    nav: true,
+                    nav: false,
                     dots: false,
                     autoplay: true,
                     autoplayTimeout: 4500,
@@ -1072,6 +1356,45 @@
                         }
                     }
                 });
+                // Covers the initial build directly rather than relying on
+                // the mistimed event above.
+                measureSimilarTitles();
+
+                // Custom nav buttons in the section header (same pattern as
+                // the Blog carousel's #darkBlogPrev/#darkBlogNext) — Owl's
+                // own nav:true arrows aren't used here.
+                var $prevBtn = $('#pdSimilarPrev');
+                var $nextBtn = $('#pdSimilarNext');
+                $prevBtn.on('click', function() { $track.trigger('prev.owl.carousel'); });
+                $nextBtn.on('click', function() { $track.trigger('next.owl.carousel'); });
+
+                // Each card is a full <a> (the whole thing navigates to that
+                // project) — the toggle is a <button> inside it, so its
+                // click has to be stopped before it bubbles to the anchor,
+                // same idea as the drag-vs-click guard on the main gallery
+                // image above.
+                $(document).on('click', '.dark-pd-similar-toggle', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var $title = $(this).siblings('.dark-pd-similar-card-title');
+                    var expanded = $title.toggleClass('is-expanded').hasClass('is-expanded');
+                    $(this).text(expanded ? @json(__('Show less')) : @json(__('Show more')));
+                });
+
+                // Only a genuinely 2-line-clamped title (scrollHeight >
+                // clientHeight, same overflow check #pdReadMore uses below)
+                // gets the toggle — a short title that already fits within
+                // 2 lines would show a "Show more" that does nothing.
+                // Re-run on every Owl (re)build since loop:true clones
+                // nodes it creates itself, which this initial pass can't
+                // have measured yet.
+                function measureSimilarTitles() {
+                    document.querySelectorAll('.dark-pd-similar-card-title').forEach(function(title) {
+                        var btn = title.nextElementSibling;
+                        if (!btn || !btn.classList.contains('dark-pd-similar-toggle')) return;
+                        btn.hidden = title.scrollHeight <= title.clientHeight + 1;
+                    });
+                }
             })();
         </script>
 
@@ -1099,6 +1422,37 @@
                         readMoreLabel.textContent = expanded ? showLessText : readMoreText;
                     });
                 }
+            })();
+        </script>
+
+        {{-- Show more/less for the Problem/Mission/Expertise/Solution/
+             Result/Impact boxes under the main gallery (portfolio-identity-
+             card.blade.php's .dark-pic-block-content) — several per page,
+             so class-based + delegated rather than the single-#id pattern
+             #pdProse/#pdReadMore use above. --}}
+        <script>
+            (function() {
+                document.querySelectorAll('.dark-pic-block-content').forEach(function(content) {
+                    var btn = content.nextElementSibling;
+                    if (!btn || !btn.classList.contains('dark-pic-toggle')) return;
+                    // Only clamp (and only show the button) when the content
+                    // actually overflows the collapsed height — a short box
+                    // should never show a toggle that does nothing.
+                    if (content.scrollHeight > content.clientHeight + 4) {
+                        btn.hidden = false;
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.dark-pic-toggle');
+                    if (!btn) return;
+                    var content = btn.previousElementSibling;
+                    if (!content || !content.classList.contains('dark-pic-block-content')) return;
+                    var expanded = content.classList.toggle('is-expanded');
+                    btn.classList.toggle('is-open', expanded);
+                    btn.querySelector('span').textContent = expanded ?
+                        @json(__('Show less')) : @json(__('Show more'));
+                });
             })();
         </script>
     @endif

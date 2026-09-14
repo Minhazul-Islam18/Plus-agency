@@ -1,19 +1,41 @@
-{{--
-    Sector badge + "on behalf of {client}" line, overlaid on the hero image
-    with a bottom gradient scrim. Title/subtitle used to render here too but
-    were dropped per feedback (busy over the photo, and the real page title
-    already renders as the page's own <h1> in the breadcrumb header above —
-    no info lost). Included inside .dark-pd-gallery-main (position:relative)
-    by portfolio-details.blade.php, once per branch (multi-image gallery /
-    single featured-image fallback).
---}}
-<div class="dark-pd-hero-overlay">
+@php
+    $overlayColor = !empty($portfolio->overlay_color) ? $portfolio->overlay_color : '060a09';
+    $overlayOpacity = !empty($portfolio->overlay_opacity) ? ((int) $portfolio->overlay_opacity) / 100 : 0.82;
+    // Left "bloom" behind the copy has its own admin slider — falls back
+    // to the main overlay opacity when unset (older rows / not touched).
+    $bloomOpacity = !empty($portfolio->overlay_bloom_opacity)
+        ? ((int) $portfolio->overlay_bloom_opacity) / 100
+        : $overlayOpacity;
+    // hex -> "r,g,b" so dark-glass.css can build rgba() with a separate,
+    // independently-controllable alpha (see --pd-hero-overlay-color below).
+    $ohex = ltrim($overlayColor, '#');
+    $orgb =
+        strlen($ohex) === 6
+            ? implode(',', [hexdec(substr($ohex, 0, 2)), hexdec(substr($ohex, 2, 2)), hexdec(substr($ohex, 4, 2))])
+            : '6,10,9';
+@endphp
+<div class="dark-pd-hero-overlay"
+    style="--pd-hero-overlay-color: {{ $orgb }}; --pd-hero-overlay-strength: {{ $overlayOpacity }}; --pd-hero-bloom-strength: {{ $bloomOpacity }};">
     @if (!empty($portfolio->sector))
-        <span class="dark-pd-hero-badge">{{ convertUtf8($portfolio->sector->name) }}</span>
+        <span class="dark-pd-hero-badge" data-reveal>{{ convertUtf8($portfolio->sector->name) }}</span>
     @endif
-    @if (!empty($portfolio->client_name))
-        <div class="dark-pd-hero-text">
-            <p class="dark-pd-hero-client">{{ __('On behalf of') }} {{ convertUtf8($portfolio->client_name) }}</p>
-        </div>
+    <h2 class="dark-pd-hero-title" data-reveal>{{ convertUtf8($portfolio->overlayTitle()) }}</h2>
+    @if (!empty($portfolio->overlay_subtitle))
+        <p class="dark-pd-hero-subtitle" data-reveal>{{ convertUtf8($portfolio->overlay_subtitle) }}</p>
+    @endif
+    @if (!empty($portfolio->overlayDescription()))
+        <p class="dark-pd-hero-desc" data-reveal>{{ convertUtf8($portfolio->overlayDescription()) }}</p>
     @endif
 </div>
+
+@if ($portfolio->highlights->count() > 0)
+    <div class="dark-pd-hero-points"
+        style="--pd-hero-overlay-color: {{ $orgb }}; --pd-hero-overlay-strength: {{ $overlayOpacity }};">
+        @foreach ($portfolio->highlights as $highlight)
+            <div class="dark-pd-hero-point" data-reveal>
+                <span class="dark-pd-hero-point-icon"><i class="{{ $highlight->icon ?: 'fas fa-star' }}"></i></span>
+                <span class="dark-pd-hero-point-label">{{ convertUtf8($highlight->label) }}</span>
+            </div>
+        @endforeach
+    </div>
+@endif

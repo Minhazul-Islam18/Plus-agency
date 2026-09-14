@@ -603,6 +603,16 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/portfolio/sector/bulk-delete', 'Admin\PortfolioSectorController@bulkDelete')->name('admin.portfolio.sector.bulk_delete');
         Route::get('/portfolio/{langid}/get_sectors', 'Admin\PortfolioSectorController@getSectors')->name('admin.portfolio.sector.get');
 
+        // Subsectors (master-detail right panel — see sectors.blade.php)
+        Route::get('/portfolio/sector/{sectorId}/panel', 'Admin\PortfolioSectorController@subsectorPanel')->name('admin.portfolio.sector.panel');
+        Route::post('/portfolio/subsector/store', 'Admin\PortfolioSectorController@storeSubsector')->name('admin.portfolio.subsector.store');
+        Route::post('/portfolio/subsector/update', 'Admin\PortfolioSectorController@updateSubsector')->name('admin.portfolio.subsector.update');
+        Route::post('/portfolio/subsector/delete', 'Admin\PortfolioSectorController@deleteSubsector')->name('admin.portfolio.subsector.delete');
+        Route::post('/portfolio/subsector/toggle-status', 'Admin\PortfolioSectorController@toggleSubsectorStatus')->name('admin.portfolio.subsector.toggle_status');
+        Route::post('/portfolio/subsector/reorder', 'Admin\PortfolioSectorController@reorderSubsectors')->name('admin.portfolio.subsector.reorder');
+        // Cascading Sector -> Subsectors AJAX lookup (Portfolio admin form's "Subsector" select)
+        Route::get('/portfolio/sector/{sectorId}/get_subsectors', 'Admin\PortfolioSectorController@getSubsectorsForPortfolio')->name('admin.portfolio.subsector.get');
+
         // Portfolio Statuses (manageable list, mirrors Sectors above — see PortfolioStatusController)
         Route::get('/portfolio/statuses', 'Admin\PortfolioStatusController@index')->name('admin.portfolio.status.index');
         Route::post('/portfolio/status/store', 'Admin\PortfolioStatusController@store')->name('admin.portfolio.status.store');
@@ -610,6 +620,10 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/portfolio/status/delete', 'Admin\PortfolioStatusController@delete')->name('admin.portfolio.status.delete');
         Route::post('/portfolio/status/bulk-delete', 'Admin\PortfolioStatusController@bulkDelete')->name('admin.portfolio.status.bulk_delete');
         Route::get('/portfolio/{langid}/get_statuses', 'Admin\PortfolioStatusController@getStatuses')->name('admin.portfolio.status.get');
+        Route::get('/portfolio/{langid}/get_partners', 'Admin\PartnerController@getPartners')->name('admin.portfolio.partner.get');
+
+        // Shared "Regenerate URL" button (Portfolio/Blog/Tender edit forms)
+        Route::post('/slug/preview', 'Admin\SlugController@preview')->name('admin.slug.preview');
 
         // Admin Blog Category Routes
         Route::get('/bcategorys', 'Admin\BcategoryController@index')->name('admin.bcategory.index');

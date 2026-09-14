@@ -24,7 +24,19 @@
 
           <div class="form-group">
             <label for="">Sector Name*</label>
-            <input type="text" class="form-control" name="name" placeholder="Ex: Énergie">
+            <div class="d-flex" style="gap: 8px;">
+                <div class="portfolio-icon-picker">
+                    <div class="btn-group d-block">
+                        <button type="button" class="btn btn-sm btn-secondary iconpicker-component" tabindex="-1"
+                            title="Choose an icon"><i class="fas fa-building"></i></button>
+                        <button type="button" class="icp icp-dd btn btn-sm btn-secondary dropdown-toggle"
+                            data-toggle="dropdown"></button>
+                        <div class="dropdown-menu"></div>
+                    </div>
+                    <input type="hidden" class="portfolio-icon-input" name="icon" value="fas fa-building">
+                </div>
+                <input type="text" class="form-control" name="name" placeholder="Ex: Agriculture and Agri-food">
+            </div>
             <p id="errname" class="mt-1 mb-0 text-danger em"></p>
           </div>
 

@@ -14,8 +14,36 @@
           <input type="hidden" name="sectorId" id="inid">
 
           <div class="form-group">
+            <label for="">Language *</label>
+            <select name="language_id" id="inlanguage_id" class="form-control">
+                <option value="" selected disabled>Select a Language</option>
+                @foreach ($langs as $lang)
+                    <option value="{{ $lang->id }}">{{ $lang->name }}</option>
+                @endforeach
+            </select>
+            <p id="eerrlanguage_id" class="mt-1 mb-0 text-danger em"></p>
+            <p class="text-warning mt-2">
+                <small>Changing this moves the sector to a different language's list. Any portfolio still
+                    using it gets its Sector cleared (a sector under a different language no longer applies
+                    to it) — you'll need to re-pick one for those.</small>
+            </p>
+          </div>
+
+          <div class="form-group">
             <label for="">Sector Name*</label>
-            <input type="text" id="inname" class="form-control" name="name" placeholder="Ex: Énergie">
+            <div class="d-flex" style="gap: 8px;">
+                <div class="portfolio-icon-picker">
+                    <div class="btn-group d-block">
+                        <button type="button" class="btn btn-sm btn-secondary iconpicker-component" tabindex="-1"
+                            title="Choose an icon"><i class="fas fa-building"></i></button>
+                        <button type="button" class="icp icp-dd btn btn-sm btn-secondary dropdown-toggle"
+                            data-toggle="dropdown"></button>
+                        <div class="dropdown-menu"></div>
+                    </div>
+                    <input type="hidden" id="inicon" class="portfolio-icon-input" name="icon" value="fas fa-building">
+                </div>
+                <input type="text" id="inname" class="form-control" name="name" placeholder="Ex: Energy">
+            </div>
             <p id="eerrname" class="mt-1 mb-0 text-danger em"></p>
           </div>
 

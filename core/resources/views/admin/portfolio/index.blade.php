@@ -63,9 +63,8 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     @endif
                 </div>
                 <div class="col-lg-5 mt-2 mt-lg-0">
-                    <a href="{{route('admin.portfolio.create') . '?language=' . request()->input('language')}}" class="btn btn-primary float-right btn-sm ml-2"><i class="fas fa-plus"></i> {{ __('Add Portfolio') }}</a>
-                    <a href="{{route('admin.portfolio.export') . '?language=' . request()->input('language')}}" class="btn btn-outline-secondary float-right btn-sm ml-2"><i class="fas fa-download"></i> {{ __('Export') }}</a>
-                    <button class="btn btn-danger float-right btn-sm ml-2 d-none bulk-delete" data-href="{{route('admin.portfolio.bulk.delete')}}"><i class="flaticon-interface-5"></i> Delete</button>
+                    <a href="{{route('admin.portfolio.create') . '?language=' . request()->input('language')}}" class="btn btn-primary float-right btn-sm ml-2"><i class="fas fa-plus"></i> Add Portfolio</a>
+                    <a href="{{route('admin.portfolio.export') . '?language=' . request()->input('language')}}" class="btn btn-outline-secondary float-right btn-sm ml-2"><i class="fas fa-download"></i> Export</a>
                 </div>
             </div>
 
@@ -73,11 +72,11 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
             <form method="get" class="row mt-3 portfolio-filter-form">
                 <input type="hidden" name="language" value="{{ request()->input('language') }}">
                 <div class="col-lg-3 col-md-6 mt-2">
-                    <input type="text" name="search" class="form-control" value="{{ request()->input('search') }}" placeholder="{{ __('Search a project...') }}">
+                    <input type="text" name="search" class="form-control" value="{{ request()->input('search') }}" placeholder="Search a project...">
                 </div>
                 <div class="col-lg-3 col-md-6 mt-2">
                     <select name="sector_id" class="form-control" onchange="this.form.submit()">
-                        <option value="">{{ __('Sector') }} — {{ __('All') }}</option>
+                        <option value="">Sector — All</option>
                         @foreach ($sectors as $sector)
                             <option value="{{ $sector->id }}" {{ request()->input('sector_id') == $sector->id ? 'selected' : '' }}>{{ convertUtf8($sector->name) }}</option>
                         @endforeach
@@ -85,7 +84,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 </div>
                 <div class="col-lg-3 col-md-6 mt-2">
                     <select name="country" class="form-control" onchange="this.form.submit()">
-                        <option value="">{{ __('Country') }} — {{ __('All') }}</option>
+                        <option value="">Country — All</option>
                         @foreach ($countries as $c)
                             <option value="{{ $c['iso'] }}" {{ request()->input('country') == $c['iso'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
                         @endforeach
@@ -93,7 +92,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 </div>
                 <div class="col-lg-2 col-md-4 mt-2">
                     <select name="status_id" class="form-control" onchange="this.form.submit()">
-                        <option value="">{{ __('Status') }} — {{ __('All') }}</option>
+                        <option value="">Status — All</option>
                         @foreach ($statuses as $s)
                             <option value="{{ $s->id }}" {{ request()->input('status_id') == $s->id ? 'selected' : '' }}>{{ convertUtf8($s->name) }}</option>
                         @endforeach
@@ -104,12 +103,12 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 </div>
                 @if (request()->filled('search') || request()->filled('sector_id') || request()->filled('country') || request()->filled('status_id') || request()->filled('archived'))
                     <div class="col-12 mt-2">
-                        <a href="{{ url()->current() . '?language=' . request()->input('language') }}" class="btn btn-link btn-sm p-0"><i class="fas fa-undo"></i> {{ __('Reset') }}</a>
-                        <a href="{{ url()->current() . '?language=' . request()->input('language') . '&archived=1' }}" class="btn btn-link btn-sm p-0 ml-3">{{ request()->filled('archived') ? __('View active projects') : __('View archived projects') }}</a>
+                        <a href="{{ url()->current() . '?language=' . request()->input('language') }}" class="btn btn-link btn-sm p-0"><i class="fas fa-undo"></i> Reset</a>
+                        <a href="{{ url()->current() . '?language=' . request()->input('language') . '&archived=1' }}" class="btn btn-link btn-sm p-0 ml-3">{{ request()->filled('archived') ? 'View active projects' : 'View archived projects' }}</a>
                     </div>
                 @else
                     <div class="col-12 mt-2">
-                        <a href="{{ url()->current() . '?language=' . request()->input('language') . '&archived=1' }}" class="btn btn-link btn-sm p-0">{{ __('View archived projects') }}</a>
+                        <a href="{{ url()->current() . '?language=' . request()->input('language') . '&archived=1' }}" class="btn btn-link btn-sm p-0">View archived projects</a>
                     </div>
                 @endif
             </form>
@@ -126,49 +125,114 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <style>
                     .portfolios-list-table { table-layout: fixed !important; }
                     .portfolios-list-table th:nth-child(1), .portfolios-list-table td:nth-child(1) { width: 3%; }
-                    .portfolios-list-table th:nth-child(2), .portfolios-list-table td:nth-child(2) { width: 8%; }
-                    .portfolios-list-table th:nth-child(3), .portfolios-list-table td:nth-child(3) { width: 18%; }
-                    .portfolios-list-table th:nth-child(4), .portfolios-list-table td:nth-child(4) { width: 12%; }
-                    .portfolios-list-table th:nth-child(5), .portfolios-list-table td:nth-child(5) { width: 10%; }
-                    .portfolios-list-table th:nth-child(6), .portfolios-list-table td:nth-child(6) { width: 8%; }
-                    .portfolios-list-table th:nth-child(7), .portfolios-list-table td:nth-child(7) { width: 9%; }
+                    .portfolios-list-table th:nth-child(2), .portfolios-list-table td:nth-child(2) { width: 7%; }
+                    .portfolios-list-table th:nth-child(3), .portfolios-list-table td:nth-child(3) { width: 21%; }
+                    .portfolios-list-table th:nth-child(4), .portfolios-list-table td:nth-child(4) { width: 11%; }
+                    .portfolios-list-table th:nth-child(5), .portfolios-list-table td:nth-child(5) { width: 9%; }
+                    .portfolios-list-table th:nth-child(6), .portfolios-list-table td:nth-child(6) { width: 9%; }
+                    .portfolios-list-table th:nth-child(7), .portfolios-list-table td:nth-child(7) { width: 8%; }
                     .portfolios-list-table th:nth-child(8), .portfolios-list-table td:nth-child(8) { width: 8%; }
-                    .portfolios-list-table th:nth-child(9), .portfolios-list-table td:nth-child(9) { width: 24%; }
-                    .portfolio-title-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
-                    /* One neutral badge style for every status — the module is
-                       now an open, admin-managed list (like Sector) rather
-                       than 3 fixed values, so there's no fixed name to key a
-                       color off of anymore. */
-                    .portfolio-status-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #cfe2ff; color: #084298; }
+                    .portfolios-list-table th:nth-child(9), .portfolios-list-table td:nth-child(9) { width: 8%; }
+                    .portfolios-list-table th:nth-child(10), .portfolios-list-table td:nth-child(10) { width: 16%; white-space: nowrap; }
+                    .portfolios-list-table td { vertical-align: middle; }
+                    .portfolio-title-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; font-weight: 600; }
+                    .portfolio-subtitle-cell { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; font-size: 12px; color: #8a94a6; }
+                    .portfolio-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+                    /* Neutral default fill/text; the .status-border-* class
+                       (keyword-matched per the requested green/yellow/red
+                       meaning — Completed/In Progress/Suspended — see the
+                       loop below) tints the fill to match its border
+                       instead of leaving the old flat blue underneath
+                       every color, which read as mismatched/clashing. */
+                    .portfolio-status-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #cfe2ff; color: #084298; border: 1.5px solid transparent; }
+                    .portfolio-status-badge.status-border-green { background: #e6f7ec; color: #1e7e34; border-color: #28a745; }
+                    .portfolio-status-badge.status-border-yellow { background: #fff8e1; color: #8a6d00; border-color: #ffc107; }
+                    .portfolio-status-badge.status-border-red { background: #fdecea; color: #a71d2a; border-color: #dc3545; }
+                    .portfolio-status-badge.status-border-neutral { border-color: rgba(8, 66, 152, 0.25); }
+
+                    /* Icon-only action buttons — pastel square, tinted per
+                       action (view=blue, edit=neutral, delete=red, more=neutral).
+                       dark-glass.css (also loaded on this page, for the
+                       "View in Site" preview modal) carries a blanket
+                       `button[type="submit"]{background:linear-gradient(...) !important}`
+                       rule for the FRONT-END site — it was leaking onto the
+                       Delete button here (the only one that's type="submit").
+                       Beaten with a selector specific enough to out-rank
+                       that !important instead of touching the shared
+                       stylesheet — see the standing "dark-glass.css leak
+                       onto admin pages" pattern. */
+                    .portfolio-actions { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+                    .portfolio-actions button.portfolio-action-btn[type="submit"] {
+                        background: #ffe3e3 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                    }
+                    .portfolio-actions button.portfolio-action-btn[type="submit"]:hover {
+                        transform: none !important;
+                        box-shadow: none !important;
+                    }
+                    .portfolio-action-btn {
+                        display: inline-flex; align-items: center; justify-content: center;
+                        flex: 0 0 34px; width: 34px; height: 34px; border-radius: 8px; border: none;
+                        font-size: 14px; line-height: 1; cursor: pointer; transition: filter 0.15s ease;
+                    }
+                    .portfolio-action-btn:hover { filter: brightness(0.94); }
+                    .portfolio-action-view { background: #e7f1ff; color: #0d6efd; }
+                    .portfolio-action-edit { background: #eef0f3; color: #495057; }
+                    .portfolio-action-delete { background: #ffe3e3; color: #e03131; }
+                    .portfolio-action-more { background: #eef0f3; color: #495057; }
+                    /* Bootstrap's .dropdown-toggle adds its own ::after caret
+                       triangle — doubled up next to the ⋮ icon already inside
+                       the button. Hidden so it's just the plain icon, like
+                       the other three action buttons. */
+                    .portfolio-action-more.dropdown-toggle::after { display: none; }
+                    /* The menu has 9 items (Duplicate/Unpublish/Feature +
+                       a Change-status list + Copy link/Archive) — tall
+                       enough that Bootstrap's auto-flip on a bottom row
+                       pushed it up over several rows above. Capped with
+                       its own scrollbar instead of letting it grow past a
+                       sane height. */
+                    .portfolio-actions .dropdown-menu { max-height: 280px; overflow-y: auto; }
+                    /* Table rows paint in DOM order at the same stacking
+                       level by default, so an open dropdown can end up
+                       visually buried under (or burying) a NEIGHBOURING
+                       row's own cells instead of sitting cleanly above
+                       everything — the .dropdown-open-row class (toggled
+                       by show.bs.dropdown/hide.bs.dropdown below) lifts
+                       whichever row currently has its menu open above
+                       every other row, in either direction. */
+                    .portfolios-list-table tbody tr { position: relative; }
+                    .portfolios-list-table tbody tr.dropdown-open-row { z-index: 1055; }
                 </style>
+                @php $countryNames = collect($countries)->pluck('name', 'iso'); @endphp
                 <div class="table-responsive">
                   <table class="table table-striped mt-3 portfolios-list-table" id="basic-datatables">
                     <thead>
                       <tr>
-                        <th scope="col">
-                            <input type="checkbox" class="bulk-check" data-val="all">
-                        </th>
-                        <th scope="col">{{ __('Image') }}</th>
-                        <th scope="col">{{ __('Project Title') }}</th>
-                        <th scope="col">{{ __('Client') }}</th>
-                        <th scope="col">{{ __('Sector') }}</th>
-                        <th scope="col">{{ __('Country') }}</th>
-                        <th scope="col">{{ __('Status') }}</th>
-                        <th scope="col">Featured</th>
+                        <th scope="col">#</th>
+                        <th scope="col">Image</th>
+                        <th scope="col">Project Title</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Sector</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">End Date</th>
                         <th scope="col">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       @foreach ($portfolios as $key => $portfolio)
                         <tr>
-                          <td>
-                            <input type="checkbox" class="bulk-check" data-val="{{$portfolio->id}}">
-                          </td>
-                          <td><img src="{{asset('assets/front/img/portfolios/featured/'.$portfolio->featured_image)}}" width="60"></td>
+                          <td>{{ $key + 1 }}</td>
+                          <td><img class="portfolio-thumb" src="{{asset('assets/front/img/portfolios/featured/'.$portfolio->featured_image)}}"></td>
                           <td>
                             <span class="portfolio-title-cell" title="{{ convertUtf8($portfolio->title) }}">{{ convertUtf8($portfolio->title) }}</span>
+                            @if (!empty($portfolio->overlay_subtitle))
+                                <span class="portfolio-subtitle-cell" title="{{ convertUtf8($portfolio->overlay_subtitle) }}">{{ convertUtf8($portfolio->overlay_subtitle) }}</span>
+                            @endif
                             @if ($portfolio->is_published == 0)
-                                <span class="badge badge-secondary">{{ __('Unpublished') }}</span>
+                                <span class="badge badge-secondary">Unpublished</span>
                             @endif
                           </td>
                           <td>{{ convertUtf8($portfolio->client_name) }}</td>
@@ -179,70 +243,79 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                           </td>
                           <td>
                             @if (!empty($portfolio->country))
-                                <span class="fi fi-{{ strtolower($portfolio->country) }}" style="border-radius:2px;margin-right:4px;"></span>{{ $portfolio->country }}
+                                <span class="fi fi-{{ strtolower($portfolio->country) }}" style="font-size:20px;border-radius:2px;margin-right:6px;vertical-align:middle;"></span>{{ $countryNames[$portfolio->country] ?? $portfolio->country }}
                             @endif
                           </td>
                           <td>
                             @if (!empty($portfolio->statusInfo))
-                                <span class="portfolio-status-badge">{{ convertUtf8($portfolio->statusInfo->name) }}</span>
+                                @php
+                                    // Statuses are an open, admin-managed list (any name
+                                    // allowed, in whatever language the portfolio is in —
+                                    // e.g. "Réalisé"/"En cours" for French rows) — there's
+                                    // no fixed id to key a color off of, so this matches on
+                                    // keywords instead. Unrecognized names fall back to a
+                                    // neutral border rather than guessing.
+                                    $statusName = mb_strtolower(convertUtf8($portfolio->statusInfo->name));
+                                    $statusBorderClass = 'status-border-neutral';
+                                    if (Str::contains($statusName, ['complet', 'finish', 'réalisé', 'realise', 'done'])) {
+                                        $statusBorderClass = 'status-border-green';
+                                    } elseif (Str::contains($statusName, ['suspend', 'cancel', 'stop', 'hold'])) {
+                                        $statusBorderClass = 'status-border-red';
+                                    } elseif (Str::contains($statusName, ['progress', 'cours', 'pending', 'attente', 'ongoing'])) {
+                                        $statusBorderClass = 'status-border-yellow';
+                                    }
+                                @endphp
+                                <span class="portfolio-status-badge {{ $statusBorderClass }}">{{ convertUtf8($portfolio->statusInfo->name) }}</span>
                             @endif
                           </td>
+                          <td>{{ !empty($portfolio->start_date) ? \Carbon\Carbon::parse($portfolio->start_date)->format('d-m-Y') : '—' }}</td>
+                          <td>{{ !empty($portfolio->end_date) ? \Carbon\Carbon::parse($portfolio->end_date)->format('d-m-Y') : '—' }}</td>
                           <td>
-                            <form id="featureForm{{$portfolio->id}}" class="d-inline-block" action="{{route('admin.portfolio.feature')}}" method="post">
-                            @csrf
-                            <input type="hidden" name="portfolio_id" value="{{$portfolio->id}}">
-                            <select class="form-control {{$portfolio->feature == 1 ? 'bg-success' : 'bg-danger'}}" name="feature" onchange="document.getElementById('featureForm{{$portfolio->id}}').submit();">
-                                <option value="1" {{$portfolio->feature == 1 ? 'selected' : ''}}>Yes</option>
-                                <option value="0" {{$portfolio->feature == 0 ? 'selected' : ''}}>No</option>
-                            </select>
-                            </form>
-                          </td>
-                          <td>
-                            <button type="button" class="btn btn-info btn-sm portfolio-view-btn" data-id="{{ $portfolio->id }}">
-                                <span class="btn-label">
+                            <div class="portfolio-actions">
+                                <button type="button" class="portfolio-action-btn portfolio-action-view portfolio-view-btn" data-id="{{ $portfolio->id }}" title="Preview">
                                     <i class="fas fa-eye"></i>
-                                </span>
-                                {{ __('Preview') }}
-                            </button>
-                            <a class="btn btn-secondary btn-sm" href="{{route('admin.portfolio.edit', $portfolio->id) . '?language=' . request()->input('language')}}">
-                                <span class="btn-label">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                                Edit
-                            </a>
-                            <form class="deleteform d-inline-block" action="{{route('admin.portfolio.delete')}}" method="post">
-                              @csrf
-                              <input type="hidden" name="portfolio_id" value="{{$portfolio->id}}">
-                              <button type="submit" class="btn btn-danger btn-sm deletebtn">
-                                <span class="btn-label">
-                                  <i class="fas fa-trash"></i>
-                                </span>
-                                Delete
-                              </button>
-                            </form>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    {{ __('More') }}
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="{{ route('admin.portfolio.duplicate', $portfolio->id) }}"><i class="fas fa-copy mr-1"></i> {{ __('Duplicate project') }}</a>
-                                    <a class="dropdown-item portfolio-toggle-publish" href="#" data-id="{{ $portfolio->id }}" data-published="{{ $portfolio->is_published }}">
-                                        @if ($portfolio->is_published)
-                                            <i class="fas fa-times-circle mr-1"></i> {{ __('Unpublish') }}
-                                        @else
-                                            <i class="fas fa-check-circle mr-1"></i> {{ __('Publish') }}
-                                        @endif
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <h6 class="dropdown-header">{{ __('Change status') }}</h6>
-                                    @foreach ($statuses as $s)
-                                        <a class="dropdown-item portfolio-set-status" href="#" data-id="{{ $portfolio->id }}" data-status-id="{{ $s->id }}">{{ convertUtf8($s->name) }}</a>
-                                    @endforeach
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item portfolio-copy-link" href="#" data-url="{{ route('front.portfoliodetails', $portfolio->slug) }}"><i class="fas fa-link mr-1"></i> {{ __('Copy public link') }}</a>
-                                    <a class="dropdown-item portfolio-toggle-archive" href="#" data-id="{{ $portfolio->id }}" data-archived="{{ $portfolio->is_archived }}">
-                                        <i class="fas fa-box-archive mr-1"></i> {{ $portfolio->is_archived ? __('Unarchive') : __('Archive') }}
-                                    </a>
+                                <a class="portfolio-action-btn portfolio-action-edit" href="{{route('admin.portfolio.edit', $portfolio->id) . '?language=' . request()->input('language')}}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form class="deleteform d-inline-block" action="{{route('admin.portfolio.delete')}}" method="post">
+                                  @csrf
+                                  <input type="hidden" name="portfolio_id" value="{{$portfolio->id}}">
+                                  <button type="submit" class="portfolio-action-btn portfolio-action-delete deletebtn" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                  </button>
+                                </form>
+                                <div class="btn-group">
+                                    <button type="button" class="portfolio-action-btn portfolio-action-more dropdown-toggle" data-toggle="dropdown" data-boundary="window" aria-expanded="false" title="More">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{{ route('admin.portfolio.duplicate', $portfolio->id) }}"><i class="fas fa-copy mr-1"></i> Duplicate project</a>
+                                        <a class="dropdown-item portfolio-toggle-publish" href="#" data-id="{{ $portfolio->id }}" data-published="{{ $portfolio->is_published }}">
+                                            @if ($portfolio->is_published)
+                                                <i class="fas fa-times-circle mr-1"></i> Unpublish
+                                            @else
+                                                <i class="fas fa-check-circle mr-1"></i> Publish
+                                            @endif
+                                        </a>
+                                        <a class="dropdown-item portfolio-toggle-feature" href="#" data-id="{{ $portfolio->id }}" data-featured="{{ $portfolio->feature }}">
+                                            @if ($portfolio->feature)
+                                                <i class="fas fa-star mr-1"></i> Unfeature
+                                            @else
+                                                <i class="far fa-star mr-1"></i> Feature
+                                            @endif
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <h6 class="dropdown-header">Change status</h6>
+                                        @foreach ($statuses as $s)
+                                            <a class="dropdown-item portfolio-set-status" href="#" data-id="{{ $portfolio->id }}" data-status-id="{{ $s->id }}">{{ convertUtf8($s->name) }}</a>
+                                        @endforeach
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item portfolio-copy-link" href="#" data-url="{{ route('front.portfoliodetails', $portfolio->slug) }}"><i class="fas fa-link mr-1"></i> Copy public link</a>
+                                        <a class="dropdown-item portfolio-toggle-archive" href="#" data-id="{{ $portfolio->id }}" data-archived="{{ $portfolio->is_archived }}">
+                                            <i class="fas fa-box-archive mr-1"></i> {{ $portfolio->is_archived ? 'Unarchive' : 'Archive' }}
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                           </td>
@@ -332,14 +405,15 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title-icon"><i class="fas fa-eye"></i></span>
-                <h5 class="modal-title">{{ __('Project Details (read-only)') }}</h5>
+                <h5 class="modal-title">Project Details (read-only)</h5>
                 <button type="button" class="modal-close-btn" data-dismiss="modal" aria-label="Close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body" id="portfolioViewBody" style="max-height:75vh;overflow-y:auto;padding:26px;"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                <a id="portfolioViewEditBtn" href="#" class="btn btn-success"><i class="fas fa-edit"></i> Edit</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -354,9 +428,23 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 @section('scripts')
 <script>
     $(document).ready(function () {
+        // Lifts whichever row's ⋮ dropdown is currently open above every
+        // other row (see .dropdown-open-row in the styles above) — table
+        // rows paint in DOM order by default, so without this an opened
+        // menu could end up visually buried under (or burying) a
+        // neighbouring row instead of sitting cleanly on top.
+        $('.portfolios-list-table').on('show.bs.dropdown', function (e) {
+            $(e.target).closest('tr').addClass('dropdown-open-row');
+        }).on('hide.bs.dropdown', function (e) {
+            $(e.target).closest('tr').removeClass('dropdown-open-row');
+        });
+
         $('.portfolio-view-btn').on('click', function () {
             var id = $(this).data('id');
             $('#portfolioViewBody').html('<p class="text-center text-white">Loading…</p>');
+            $('#portfolioViewEditBtn').attr('href',
+                "{{ route('admin.portfolio.edit', '__ID__') }}?language={{ request()->input('language') }}".replace('__ID__', id)
+            );
             $('#portfolioViewModal').modal('show');
             $.get("{{ url('/') }}/admin/portfolio/" + id + "/show", function (html) {
                 $('#portfolioViewBody').html(html);
@@ -385,6 +473,17 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
             }, function () { location.reload(); });
         });
 
+        $('.portfolio-toggle-feature').on('click', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var current = $(this).data('featured');
+            $.post("{{ route('admin.portfolio.feature') }}", {
+                _token: "{{ csrf_token() }}",
+                portfolio_id: id,
+                feature: current ? 0 : 1
+            }, function () { location.reload(); });
+        });
+
         $('.portfolio-toggle-archive').on('click', function (e) {
             e.preventDefault();
             var id = $(this).data('id');
@@ -400,7 +499,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
             e.preventDefault();
             var url = $(this).data('url');
             navigator.clipboard.writeText(url).then(function () {
-                $.notify({ message: {!! json_encode(__('Link copied to clipboard!')) !!} }, { type: 'success', placement: { from: 'top', align: 'right' }, time: 1000 });
+                $.notify({ message: {!! json_encode('Link copied to clipboard!') !!} }, { type: 'success', placement: { from: 'top', align: 'right' }, time: 1000 });
             });
         });
     });

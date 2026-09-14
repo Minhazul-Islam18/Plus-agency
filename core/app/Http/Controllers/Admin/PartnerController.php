@@ -216,4 +216,10 @@ class PartnerController extends Controller
         Session::flash('success', 'Partner section updated successfully!');
         return back();
     }
+
+    /** Same shape as PortfolioSectorController::getSectors — feeds the Portfolio form's partners multi-select cascade when the language is switched. */
+    public function getPartners($langid)
+    {
+        return Partner::where('language_id', $langid)->where('status', 1)->orderBy('serial_number', 'asc')->get();
+    }
 }

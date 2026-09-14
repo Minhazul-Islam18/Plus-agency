@@ -8,10 +8,13 @@ use App\Megamenu;
 use App\Portfolio;
 use App\BasicSetting;
 use App\BasicExtended;
+use App\BasicExtra;
 use App\PortfolioImage;
 use App\PortfolioSector;
 use App\PortfolioStatus;
 use App\PortfolioDocument;
+use App\PortfolioHighlight;
+use App\Partner;
 use App\Http\Helpers\Countries;
 use App\Exports\PortfolioExport;
 use Illuminate\Support\Str;
@@ -20,6 +23,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class PortfolioController extends Controller
 {
@@ -30,6 +34,54 @@ class PortfolioController extends Controller
 
     /** Extensions accepted by the Documents picker (LFM "file" category — see mockup: PDF, DOC, DOCX, XLSX). */
     private const ALLOWED_DOCUMENT_EXTS = ['pdf', 'doc', 'docx', 'xlsx'];
+
+    /**
+     * Parses a date the way the admin's datepicker widgets actually submit
+     * it ('m/d/Y' — bootstrap-datepicker's default format; nothing in
+     * create/edit.blade.php overrides it). start_date/submission_date are
+     * legacy `varchar` columns, so any string saves there without complaint;
+     * end_date is a real `date` column (added later, see the portfolio
+     * migration), which is why a raw '09/17/2026' string reaching it
+     * straight from $request->all() throws a raw MySQL "Incorrect date
+     * value" error instead of a friendly validation message — this
+     * normalizes it to 'Y-m-d' before it ever reaches the query.
+     */
+    private function parseAdminDate(?string $value): ?Carbon
+    {
+        if (!$value) {
+            return null;
+        }
+        try {
+            return Carbon::createFromFormat('m/d/Y', trim($value))->startOfDay();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Shared end_date rule for store()/update(): must be a real date, and —
+     * only once a Submission Date (the tender's submission deadline) is
+     * actually filled in — must fall on or before it. No Submission Date
+     * yet = no restriction at all, per spec.
+     */
+    private function endDateRule(Request $request): \Closure
+    {
+        return function ($attribute, $value, $fail) use ($request) {
+            if (!$value) {
+                return;
+            }
+            $end = $this->parseAdminDate($value);
+            if (!$end) {
+                return $fail('End Date is not a valid date.');
+            }
+            if ($request->filled('submission_date')) {
+                $deadline = $this->parseAdminDate($request->submission_date);
+                if ($deadline && $end->gt($deadline)) {
+                    $fail('End Date must be on or before the Submission Date (' . $deadline->format('M d, Y') . ').');
+                }
+            }
+        };
+    }
 
     public function index(Request $request)
     {
@@ -61,7 +113,7 @@ class PortfolioController extends Controller
         }
 
         $data['portfolios'] = $query->with('statusInfo')->orderBy('id', 'DESC')->get();
-        $data['sectors'] = PortfolioSector::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $data['sectors'] = PortfolioSector::topLevel()->where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['statuses'] = PortfolioStatus::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['countries'] = Countries::all();
 
@@ -80,8 +132,12 @@ class PortfolioController extends Controller
         }
 
         $data['services'] = Service::all();
-        $data['sectors'] = PortfolioSector::where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $data['sectors'] = PortfolioSector::topLevel()->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        // Empty on create — no sector picked yet, cascades via AJAX same as
+        // Sector/Service/Status already do once a language is chosen.
+        $data['subsectors'] = collect();
         $data['statuses'] = PortfolioStatus::where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $data['partners'] = Partner::where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['countries'] = Countries::all();
         $data['tportfolios'] = Portfolio::where('language_id', 0)->get();
         return view('admin.portfolio.create', $data);
@@ -89,13 +145,20 @@ class PortfolioController extends Controller
 
     public function edit($id)
     {
-        $data['portfolio'] = Portfolio::findOrFail($id);
+        $data['portfolio'] = Portfolio::with('partnerRefs')->findOrFail($id);
         if (!empty($data['portfolio']->language)) {
             app()->setLocale($data['portfolio']->language->code);
         }
         $data['services'] = Service::where('language_id', $data['portfolio']->language_id)->get();
-        $data['sectors'] = PortfolioSector::where('language_id', $data['portfolio']->language_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $data['sectors'] = PortfolioSector::topLevel()->where('language_id', $data['portfolio']->language_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        // Pre-populated for whichever sector is already saved (if any) —
+        // same reasoning as Sector/Service/Status already being fully
+        // loaded upfront on edit instead of purely AJAX-cascaded.
+        $data['subsectors'] = $data['portfolio']->sector_id
+            ? PortfolioSector::where('parent_id', $data['portfolio']->sector_id)->where('status', 1)->orderBy('serial_number', 'asc')->get()
+            : collect();
         $data['statuses'] = PortfolioStatus::where('language_id', $data['portfolio']->language_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
+        $data['partners'] = Partner::where('language_id', $data['portfolio']->language_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['countries'] = Countries::all();
         return view('admin.portfolio.edit', $data);
     }
@@ -111,7 +174,11 @@ class PortfolioController extends Controller
 
     public function store(Request $request)
     {
-        $slug = make_slug($request->title);
+        // Editable slug: admin-typed value wins if present, else auto-
+        // generate from the title (unchanged default behavior).
+        $slug = $request->filled('slug')
+            ? make_slug($request->slug)
+            : unique_intelligent_slug($request->title, fn ($s) => Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($s)])->exists());
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
@@ -124,12 +191,12 @@ class PortfolioController extends Controller
         $rules = [
             'slider' => 'required',
             'language_id' => 'required',
-            'title' => [
-                'required',
-                'max:300',
+            'title' => ['required', 'max:300'],
+            'slug' => [
+                'nullable',
                 function ($attribute, $value, $fail) use ($slug) {
                     if (Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->exists()) {
-                        $fail('The title field must be unique.');
+                        $fail('This URL slug is already in use — pick another.');
                     }
                 }
             ],
@@ -144,6 +211,7 @@ class PortfolioController extends Controller
             'serial_number' => 'required|integer',
             // Portfolio module overhaul — structured reference fields.
             'sector_id' => 'nullable|integer',
+            'subsector_id' => 'nullable|integer',
             'country' => 'nullable|max:2',
             'year' => 'nullable|max:10',
             'partners' => 'nullable|max:255',
@@ -159,6 +227,17 @@ class PortfolioController extends Controller
             'solution_approche_icon' => 'nullable|max:60',
             'resultat_statut_icon' => 'nullable|max:60',
             'impact_icon' => 'nullable|max:60',
+            // Carousel/hero overlay
+            'overlay_title' => 'nullable|max:300',
+            'overlay_subtitle' => 'nullable|max:255',
+            'overlay_description' => 'nullable',
+            'overlay_color' => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/',
+            'overlay_opacity' => 'nullable|integer|min:30|max:95',
+            'overlay_bloom_opacity' => 'nullable|integer|min:30|max:95',
+            'highlights_json' => 'nullable|json',
+            'partner_ids' => 'nullable|array',
+            'partner_ids.*' => 'integer',
+            'end_date' => ['nullable', $this->endDateRule($request)],
         ];
 
         if ($request->filled('slider')) {
@@ -226,6 +305,12 @@ class PortfolioController extends Controller
         // Now a select (Published/Unpublished), not a checkbox — always
         // submits a real value, so read it directly instead of filled().
         $in['is_published'] = $request->is_published == 1 ? 1 : 0;
+        // Native <input type="color"> always submits a leading '#' —
+        // stored without one (see the migration's own comment).
+        $in['overlay_color'] = $request->filled('overlay_color') ? ltrim($request->overlay_color, '#') : null;
+        // end_date is a real `date` column — see parseAdminDate()'s comment.
+        // Validated as parseable above, so this is safe to trust here.
+        $in['end_date'] = $request->filled('end_date') ? $this->parseAdminDate($request->end_date)->format('Y-m-d') : null;
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
@@ -241,6 +326,14 @@ class PortfolioController extends Controller
         }
 
         $portfolio = Portfolio::create($in);
+        clear_slug_redirect('portfolio', $slug);
+
+        // The Portfolios listing page (/portfolios) is Cloudflare-edge-
+        // cached (see routes/web.php's $cfCacheableTypes) — a new/renamed
+        // portfolio's link on it otherwise wouldn't show/update until that
+        // cache's own TTL expires. Same call TenderController already
+        // makes after its own store()/update() for the identical reason.
+        CloudflareController::purge();
 
         foreach ($sliders as $key => $slider) {
             $extSlider = pathinfo($slider, PATHINFO_EXTENSION);
@@ -254,6 +347,8 @@ class PortfolioController extends Controller
         }
 
         $this->storeDocuments($portfolio, $documents);
+        $this->storeHighlights($portfolio, $request->highlights_json);
+        $portfolio->partnerRefs()->sync($request->input('partner_ids', []));
 
         Session::flash('success', 'Portfolio added successfully!');
         return "success";
@@ -331,9 +426,26 @@ class PortfolioController extends Controller
 
     public function update(Request $request)
     {
-        $slug = make_slug($request->title);
         $portfolio = Portfolio::findOrFail($request->portfolio_id);
         $portfolioId = $request->portfolio_id;
+        $oldSlug = $portfolio->slug;
+
+        // Editable slug, preserved across title edits: an explicit `slug`
+        // field wins; otherwise KEEP the existing slug as-is — do NOT
+        // recompute from title (that was the old behavior, and it silently
+        // broke every previously-shared/indexed link on every save).
+        $portfolioSlugExists = fn ($s) => Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($s)])->where('id', '!=', $portfolioId)->exists();
+
+        // "Regenerate URL" checkbox wins over everything else — same smart
+        // process as create, run against the (possibly just-edited) title,
+        // discarding whatever's in the Slug field.
+        if ($request->boolean('regenerate_slug')) {
+            $slug = unique_intelligent_slug($request->title, $portfolioSlugExists);
+        } else {
+            $slug = $request->filled('slug')
+                ? make_slug($request->slug)
+                : ($oldSlug ?: unique_intelligent_slug($request->title, $portfolioSlugExists));
+        }
 
         $sliders = !empty($request->slider) ? explode(',', $request->slider) : [];
         $image = $request->image;
@@ -345,12 +457,12 @@ class PortfolioController extends Controller
 
         $rules = [
             'slider' => 'required',
-            'title' => [
-                'required',
-                'max:300',
+            'title' => ['required', 'max:300'],
+            'slug' => [
+                'nullable',
                 function ($attribute, $value, $fail) use ($slug, $portfolioId) {
                     if (Portfolio::whereRaw('LOWER(slug) = ?', [strtolower($slug)])->where('id', '!=', $portfolioId)->exists()) {
-                        $fail('The title field must be unique.');
+                        $fail('This URL slug is already in use — pick another.');
                     }
                 }
             ],
@@ -361,6 +473,7 @@ class PortfolioController extends Controller
             'status_id' => 'required|integer',
             'serial_number' => 'required|integer',
             'sector_id' => 'nullable|integer',
+            'subsector_id' => 'nullable|integer',
             'country' => 'nullable|max:2',
             'year' => 'nullable|max:10',
             'partners' => 'nullable|max:255',
@@ -376,6 +489,17 @@ class PortfolioController extends Controller
             'solution_approche_icon' => 'nullable|max:60',
             'resultat_statut_icon' => 'nullable|max:60',
             'impact_icon' => 'nullable|max:60',
+            // Carousel/hero overlay
+            'overlay_title' => 'nullable|max:300',
+            'overlay_subtitle' => 'nullable|max:255',
+            'overlay_description' => 'nullable',
+            'overlay_color' => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/',
+            'overlay_opacity' => 'nullable|integer|min:30|max:95',
+            'overlay_bloom_opacity' => 'nullable|integer|min:30|max:95',
+            'highlights_json' => 'nullable|json',
+            'partner_ids' => 'nullable|array',
+            'partner_ids.*' => 'integer',
+            'end_date' => ['nullable', $this->endDateRule($request)],
         ];
 
         if ($request->filled('image')) {
@@ -442,6 +566,10 @@ class PortfolioController extends Controller
         // Now a select (Published/Unpublished), not a checkbox — always
         // submits a real value, so read it directly instead of filled().
         $in['is_published'] = $request->is_published == 1 ? 1 : 0;
+        $in['overlay_color'] = $request->filled('overlay_color') ? ltrim($request->overlay_color, '#') : null;
+        // end_date is a real `date` column — see parseAdminDate()'s comment.
+        // Validated as parseable above, so this is safe to trust here.
+        $in['end_date'] = $request->filled('end_date') ? $this->parseAdminDate($request->end_date)->format('Y-m-d') : null;
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::FEATURED_SUBDIR . $portfolio->featured_image);
@@ -460,7 +588,17 @@ class PortfolioController extends Controller
             $in['client_logo'] = $filename;
         }
 
+        if ($slug !== $oldSlug) {
+            record_slug_redirect('portfolio', $oldSlug, $portfolio->id);
+            clear_slug_redirect('portfolio', $slug);
+        }
+
         $portfolio->fill($in)->save();
+
+        // Same reasoning as store() above — the listing page's cached HTML
+        // otherwise keeps showing the old slug/title until its edge TTL
+        // expires on its own.
+        CloudflareController::purge();
 
         // copy the sliders first
         $fileNames = [];
@@ -496,8 +634,47 @@ class PortfolioController extends Controller
         }
         $this->storeDocuments($portfolio, $documents);
 
+        // Highlights: same wipe-then-recreate approach as sliders/documents
+        // above — the drag-drop list always resubmits its full current
+        // state (order included), so a full replace stays in sync without
+        // diffing against what's already stored.
+        PortfolioHighlight::where('portfolio_id', $portfolio->id)->delete();
+        $this->storeHighlights($portfolio, $request->highlights_json);
+        $portfolio->partnerRefs()->sync($request->input('partner_ids', []));
+
         Session::flash('success', 'Portfolio updated successfully!');
         return "success";
+    }
+
+    /**
+     * Decodes the drag-drop-ordered highlights list (JSON array of
+     * {icon, label}, built client-side right before submit — see
+     * _form.blade.php) and (re)creates the rows in that exact order.
+     */
+    private function storeHighlights(Portfolio $portfolio, ?string $highlightsJson): void
+    {
+        if (empty($highlightsJson)) {
+            return;
+        }
+
+        $items = json_decode($highlightsJson, true);
+        if (!is_array($items)) {
+            return;
+        }
+
+        foreach ($items as $i => $item) {
+            $label = trim($item['label'] ?? '');
+            if ($label === '') {
+                continue;
+            }
+
+            $highlight = new PortfolioHighlight();
+            $highlight->portfolio_id = $portfolio->id;
+            $highlight->icon = $item['icon'] ?? null;
+            $highlight->label = $label;
+            $highlight->serial_number = $i;
+            $highlight->save();
+        }
     }
 
     public function delete(Request $request)
@@ -511,6 +688,7 @@ class PortfolioController extends Controller
             @unlink(FRONT_IMG_PATH . self::DOCUMENT_SUBDIR . $pd->file);
             $pd->delete();
         }
+        PortfolioHighlight::where('portfolio_id', $portfolio->id)->delete();
         if ($portfolio->client_logo) {
             @unlink(FRONT_IMG_PATH . self::LOGO_SUBDIR . $portfolio->client_logo);
         }
@@ -636,15 +814,28 @@ class PortfolioController extends Controller
         ];
     }
 
-    /** Read-only "eye" modal — renders the real saved portfolio through the shared partial. */
+    /**
+     * Read-only "eye" modal — a dedicated admin-styled, tabbed data review
+     * (Overview / Evidence of Competence / Carousel Overlay / Media),
+     * deliberately its OWN view rather than the shared preview_content
+     * partial: that partial exists specifically to render the real
+     * front-end dark-glass markup so the "Aperçu" preview (below) is a
+     * true WYSIWYG match for what gets published — admin chrome here
+     * would defeat that purpose there. This modal's job is the opposite:
+     * reviewing the record's data as an admin, not previewing the page.
+     * Approved design: https://claude.ai/code/artifact/67559e95-7b57-4b4e-b0cc-00ebade4a20c
+     */
     public function show($id)
     {
-        $portfolio = Portfolio::with(['sector', 'statusInfo', 'portfolio_images', 'documents'])->findOrFail($id);
+        $portfolio = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])->findOrFail($id);
         if (!empty($portfolio->language)) {
             app()->setLocale($portfolio->language->code);
         }
 
-        return view('admin.portfolio.preview_content', $this->identityCardDataFor($portfolio));
+        return view('admin.portfolio.details_modal', array_merge(
+            $this->identityCardDataFor($portfolio),
+            ['bex' => BasicExtra::first()]
+        ));
     }
 
     /**
@@ -681,7 +872,7 @@ class PortfolioController extends Controller
             'sector' => $sector,
             'country' => $request->country,
             'statusInfo' => $statusInfo,
-            'partners' => $request->partners,
+            'partnerRefs' => Partner::whereIn('id', $request->input('partner_ids', []))->get(),
             'problematique' => $request->problematique,
             'mission_ica' => $request->mission_ica,
             'expertise_mobilisee' => $request->expertise_mobilisee,

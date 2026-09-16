@@ -1202,14 +1202,38 @@
                     $('#subsectors').html('<option value="" selected disabled>Select a sector first</option>').prop('disabled', true).trigger('change');
                     return;
                 }
-                $('#subsectors').removeAttr('disabled');
+                // Loading state — the fetch is usually near-instant, but on a
+                // slow connection the select otherwise just sits on whatever
+                // the PREVIOUS sector's subsectors were for a moment, which
+                // reads as "did my click even register?". Disabling it during
+                // the fetch also blocks picking a stale option mid-request.
+                $('#subsectors').prop('disabled', true)
+                    .html('<option value="" selected disabled>Loading subsectors…</option>')
+                    .trigger('change');
                 $.get("{{ url('/') }}/admin/portfolio/sector/" + sectorId + "/get_subsectors", function (data) {
-                    var options = '<option value="" selected disabled>Select a subsector</option>';
-                    for (var i = 0; i < data.length; i++) {
-                        options += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
+                    var options;
+                    if (data.length === 0) {
+                        // Empty state — a real, distinct message instead of
+                        // either a blank list or the generic "Select a
+                        // subsector" prompt, which would look identical to
+                        // "you haven't picked one yet" even though there's
+                        // genuinely nothing TO pick for this sector.
+                        options = '<option value="" selected disabled>No subsectors for this sector</option>';
+                    } else {
+                        options = '<option value="" selected disabled>Select a subsector</option>';
+                        for (var i = 0; i < data.length; i++) {
+                            options += '<option value="' + data[i].id + '">' + data[i].name + '</option>';
+                        }
                     }
-                    $('#subsectors').html(options);
-                    $('#subsectors').trigger('change');
+                    $('#subsectors').html(options).prop('disabled', data.length === 0).trigger('change');
+                }).fail(function () {
+                    // Was previously silent on a network/server error — the
+                    // select would just keep showing "Loading subsectors…"
+                    // forever with no indication anything went wrong.
+                    $('#subsectors')
+                        .html('<option value="" selected disabled>Could not load subsectors — try again</option>')
+                        .prop('disabled', true)
+                        .trigger('change');
                 });
             });
 

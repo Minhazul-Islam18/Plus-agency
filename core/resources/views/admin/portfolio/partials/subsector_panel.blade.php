@@ -40,10 +40,17 @@
                         data-icon="{{ $sector->icon ?: 'fas fa-building' }}">
                         <i class="fas fa-edit"></i> Edit sector
                     </a>
+                    {{-- Deliberately NOT the global .deletebtn class custom.js binds
+                         directly (non-delegated) at page-ready time: this whole panel
+                         gets replaced via AJAX every time a different sector is opened,
+                         so a fresh copy of this button would have NO confirm handler
+                         attached at all — a click would just submit the form immediately,
+                         no warning. .sector-delete-btn is wired as a delegated handler in
+                         sectors.blade.php's own script instead, which survives every swap. --}}
                     <form action="{{ route('admin.portfolio.sector.delete') }}" method="post">
                         @csrf
                         <input type="hidden" name="sectorId" value="{{ $sector->id }}">
-                        <button type="submit" class="dropdown-item text-danger deletebtn">
+                        <button type="submit" class="dropdown-item text-danger sector-delete-btn">
                             <i class="fas fa-trash"></i> Delete sector
                         </button>
                     </form>
@@ -97,7 +104,6 @@
                                             {{ $subsector->status == 1 ? 'checked' : '' }}>
                                         <span class="slider round"></span>
                                     </label>
-                                    <span class="subsector-status-label ml-1">{{ $subsector->status == 1 ? 'Active' : 'Deactivated' }}</span>
                                 </td>
                                 <td><span class="subsector-order-box">{{ $subsector->serial_number }}</span></td>
                                 <td>

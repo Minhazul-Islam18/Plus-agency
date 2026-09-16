@@ -206,6 +206,49 @@
     .subsector-actions button.subsector-action-btn[type="submit"] {
       background: #ffe3e3 !important; border: none !important; box-shadow: none !important;
     }
+
+    /* Right-panel loading state — a scoped spinner over just this column
+       instead of the sitewide full-page .request-loader, which would feel
+       heavy for something as small as a single search keystroke or page
+       flip. #subsectorPanelContainer itself becomes the positioning
+       context; the overlay sits on top of whatever content is already
+       there (old content stays visible, dimmed, until the new content is
+       ready — no blank flash). */
+    /* The overlay is a SIBLING of #subsectorPanelContainer, not a child of
+       it — that container's own innerHTML gets fully replaced on every
+       AJAX swap (loadSectorPanel's $.get success does .html(html)), which
+       would wipe out an overlay living inside it. #subsectorPanelWrapper
+       is the actual positioning context so the sibling overlay's
+       position:absolute covers exactly the panel's area either way. */
+    #subsectorPanelWrapper { position: relative; min-height: 160px; }
+    .subsector-panel-loading {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 15, 22, 0.55);
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+    .subsector-panel-loading.is-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .subsector-panel-spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid rgba(110, 168, 247, 0.25);
+      border-top-color: #6ea8f7;
+      animation: subsectorSpin 0.7s linear infinite;
+    }
+    @keyframes subsectorSpin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 
   <div class="row">
@@ -258,7 +301,11 @@
     </div>
 
     <div class="col-lg-8 mb-4">
-      <div id="subsectorPanelContainer">
+      <div id="subsectorPanelWrapper">
+        <div id="subsectorPanelLoading" class="subsector-panel-loading">
+          <div class="subsector-panel-spinner"></div>
+        </div>
+        <div id="subsectorPanelContainer">
         @if ($activeSector)
           {!! $panelHtml !!}
         @else
@@ -268,6 +315,7 @@
             </div>
           </div>
         @endif
+        </div>
       </div>
     </div>
   </div>
@@ -372,14 +420,29 @@
 
       // ---- Left panel: click a sector -> AJAX-load its subsector panel
       // into the right column, no full page reload. ----
-      function loadSectorPanel(sectorId, extraParams) {
+      function loadSectorPanel(sectorId, extraParams, opts) {
+        opts = opts || {};
         var url = "{{ url('/admin/portfolio/sector') }}/" + sectorId + "/panel";
         if (extraParams) url += '?' + $.param(extraParams);
-        $('#subsectorPanelContainer').css('opacity', 0.5);
+        $('#subsectorPanelLoading').addClass('is-active');
         $.get(url, function (html) {
-          $('#subsectorPanelContainer').html(html).css('opacity', 1);
-        }).fail(function () {
-          $('#subsectorPanelContainer').css('opacity', 1);
+          $('#subsectorPanelContainer').html(html);
+          // Typing into the search box replaces the WHOLE panel (including
+          // the box itself) on every debounced reload — the new <input> is
+          // a fresh DOM node, so it loses focus/cursor by default, which is
+          // what made continuous typing feel broken (each pause-and-resume
+          // had to be re-clicked into). Re-focus the new instance and put
+          // the cursor back at the end of what was already typed.
+          if (opts.refocusSearch) {
+            var $input = $('#subsectorSearchInput');
+            if ($input.length) {
+              $input.trigger('focus');
+              var v = $input.val();
+              $input[0].setSelectionRange(v.length, v.length);
+            }
+          }
+        }).always(function () {
+          $('#subsectorPanelLoading').removeClass('is-active');
         });
       }
 
@@ -393,18 +456,34 @@
 
       // ---- Right panel (AJAX-swapped) — every handler below is delegated
       // on #subsectorPanelContainer so it survives repeated .html() swaps. ----
+      //
+      // BUG THIS FIXES: jQuery's .data() reads a data-* attribute ONCE and
+      // caches the value in its own internal store from then on — later
+      // changes to the attribute made via plain setAttribute() (which is
+      // exactly how the panel partial's own <script> tag updates
+      // data-sector-id after every swap) are invisible to .data() forever
+      // after that first read. In practice: the FIRST sector a user opened
+      // got cached, and every later search/filter/reorder call on ANY
+      // other sector kept silently acting on that first one instead — from
+      // the user's side, typing a search felt like it randomly "switched
+      // to another sector" mid-word. .attr() always re-reads the live DOM
+      // attribute, no caching, so it can't go stale like this.
       function activeSectorId() {
-        return $('#subsectorPanelContainer').data('sector-id');
+        return $('#subsectorPanelContainer').attr('data-sector-id');
       }
 
       // Search / status filter -> reload the panel with those params.
+      // 500ms — long enough that a normal typing cadence never fires mid-
+      // word (300ms was still catching the gap between fast keystrokes,
+      // reloading before the admin had actually finished typing), short
+      // enough it still feels immediate once they do stop.
       var searchDebounce;
       $(document).on('input', '#subsectorSearchInput', function () {
         var val = $(this).val();
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(function () {
-          loadSectorPanel(activeSectorId(), { search: val });
-        }, 300);
+          loadSectorPanel(activeSectorId(), { search: val }, { refocusSearch: true });
+        }, 500);
       });
       $(document).on('change', '#subsectorStatusFilter', function () {
         loadSectorPanel(activeSectorId(), { status: $(this).val(), search: $('#subsectorSearchInput').val() });
@@ -415,14 +494,17 @@
         e.preventDefault();
         var href = $(this).attr('href');
         if (!href) return;
-        $('#subsectorPanelContainer').css('opacity', 0.5);
+        $('#subsectorPanelLoading').addClass('is-active');
         $.get(href, function (html) {
-          $('#subsectorPanelContainer').html(html).css('opacity', 1);
+          $('#subsectorPanelContainer').html(html);
+        }).always(function () {
+          $('#subsectorPanelLoading').removeClass('is-active');
         });
       });
 
-      // Subsector status toggle — same delegated pattern this admin already
-      // uses elsewhere (Gallery/Language/etc's own .status-toggle).
+      // Subsector status toggle — same delegated pattern AND same $.notify
+      // toast this admin already uses elsewhere (Gallery/Language/etc's
+      // own .status-toggle handler).
       $(document).on('change', '.subsector-status-toggle', function () {
         var $toggle = $(this);
         var id = $toggle.data('id');
@@ -430,9 +512,32 @@
           _token: "{{ csrf_token() }}",
           subsectorId: id,
         }, function (resp) {
-          $toggle.closest('tr').find('.subsector-status-label').text(resp.status == 1 ? 'Active' : 'Deactivated');
+          if (resp.success) {
+            $.notify({
+              title: 'Success',
+              message: 'Status updated successfully!',
+              icon: 'fa fa-check',
+            }, {
+              type: 'success',
+              placement: { from: 'top', align: 'right' },
+              showProgressbar: true,
+              time: 1000,
+              delay: 3000,
+            });
+          }
         }).fail(function () {
           $toggle.prop('checked', !$toggle.is(':checked'));
+          $.notify({
+            title: 'Error',
+            message: 'Error updating status!',
+            icon: 'fa fa-times',
+          }, {
+            type: 'danger',
+            placement: { from: 'top', align: 'right' },
+            showProgressbar: true,
+            time: 1000,
+            delay: 3000,
+          });
         });
       });
 
@@ -454,13 +559,45 @@
         $('#editSubsectorModal').modal('show');
       });
 
-      // Delete subsector — same confirm UX as custom.js's generic
-      // .deletebtn (window.confirm then submit), reimplemented locally for
-      // the same reason as above (AJAX content).
+      // Delete subsector — same sweetalert confirm UX as custom.js's
+      // generic .deletebtn (title/text/Yes-cancel buttons), reimplemented
+      // locally with a delegated handler since this button is AJAX content
+      // that custom.js's own non-delegated page-ready binding never sees.
       $(document).on('click', '.subsector-delete-btn', function (e) {
         e.preventDefault();
-        if (!confirm('Delete this subsector?')) return;
-        $(this).closest('form').trigger('submit');
+        var $form = $(this).closest('form');
+        swal({
+          title: 'Delete this subsector?',
+          text: "You won't be able to revert this!",
+          type: 'warning',
+          buttons: {
+            confirm: { text: 'Yes, delete it!', className: 'btn btn-success' },
+            cancel: { visible: true, className: 'btn btn-danger' },
+          },
+        }).then(function (confirmed) {
+          if (confirmed) $form.trigger('submit');
+        });
+      });
+
+      // Delete sector (⋮ menu, right-panel header) — same treatment. A
+      // sector delete can fail server-side (still has portfolios/
+      // subsectors using it) — that comes back as a normal redirect with a
+      // flash message via the existing full-page form submit, same as
+      // every other delete form on this admin.
+      $(document).on('click', '.sector-delete-btn', function (e) {
+        e.preventDefault();
+        var $form = $(this).closest('form');
+        swal({
+          title: 'Delete this sector?',
+          text: "This can't be undone. Any portfolios or subsectors still using it must be reassigned first.",
+          type: 'warning',
+          buttons: {
+            confirm: { text: 'Yes, delete it!', className: 'btn btn-success' },
+            cancel: { visible: true, className: 'btn btn-danger' },
+          },
+        }).then(function (confirmed) {
+          if (confirmed) $form.trigger('submit');
+        });
       });
 
       // Create/Update subsector — AJAX submit, then just reload the panel

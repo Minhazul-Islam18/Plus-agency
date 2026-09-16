@@ -501,4 +501,86 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
   });
 </script>
+
+<script>
+    // Every field flagged ** above is `required` in the backend validator
+    // (TenderController@store) — this enforces the same list on the client
+    // so a missing field is caught instantly instead of only after a round
+    // trip. #submitBtn is `type="button"` (custom.js builds the AJAX
+    // request directly, no native form submit/constraint-validation step
+    // at all) — plain HTML5 `required` attributes never fired here.
+    //
+    // Registered on `document` with capture:true so it always runs BEFORE
+    // custom.js's own bubble-phase listener on #submitBtn — capturing
+    // listeners on an ancestor fire before any listener on the target
+    // itself, no matter which script tag ran first. Calling
+    // stopPropagation() here when invalid stops the event before it ever
+    // reaches that handler, so no AJAX call goes out.
+    document.addEventListener('click', function (e) {
+        if (!e.target || e.target.id !== 'submitBtn' || !window.jQuery) return;
+        var $ = window.jQuery;
+
+        var required = [
+            { name: 'country' },
+            { name: 'tender_code' },
+            { name: 'language_id' },
+            { name: 'tender_category_id' },
+            { name: 'title' },
+            { name: 'submission_deadline' },
+            { name: 'overview', summernote: true },
+            { name: 'expert_name' },
+            { name: 'expert_position' },
+            { name: 'expert_details', summernote: true },
+            { name: 'expert_whatsapp' },
+            { name: 'expert_email' },
+            { name: 'tender_image' },
+        ];
+
+        // expert_member_id is only required when "Existing team member" is
+        // picked; expert_image is only required for a custom (non-member)
+        // expert — mirrors TenderController@store's own conditional rules
+        // (required_if / the expert_source !== 'member' branch) exactly.
+        var expertSource = $('input[name="expert_source"]:checked').val();
+        if (expertSource === 'member') {
+            required.push({ name: 'expert_member_id' });
+        } else {
+            required.push({ name: 'expert_image' });
+        }
+
+        $('.em').each(function () { $(this).html(''); });
+
+        var firstInvalid = null;
+        required.forEach(function (f) {
+            var value;
+            if (f.summernote) {
+                var $sn = $('.summernote[name="' + f.name + '"]');
+                value = $sn.length ? $sn.summernote('code').replace(/<[^>]*>/g, '').trim() : '';
+            } else {
+                value = ($('[name="' + f.name + '"]').first().val() || '').toString().trim();
+            }
+            if (!value) {
+                var $err = $('#err' + f.name);
+                if ($err.length) $err.html('This field is required.');
+                if (!firstInvalid) firstInvalid = f.name;
+            }
+        });
+
+        if (firstInvalid) {
+            e.preventDefault();
+            e.stopPropagation();
+            $.notify({
+                message: 'Please fill in all required fields.',
+                title: 'Validation Error!',
+                icon: 'fa fa-bell',
+            }, {
+                type: 'danger',
+                placement: { from: 'top', align: 'right' },
+                showProgressbar: true,
+                time: 1000,
+                allow_dismiss: true,
+                delay: 4000,
+            });
+        }
+    }, true);
+</script>
 @endsection

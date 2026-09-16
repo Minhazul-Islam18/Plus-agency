@@ -150,6 +150,7 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <p id="errtender_category_id" class="mb-0 text-danger em"></p>
                                         </div>
                                     </div>
                                 </div>
@@ -624,4 +625,74 @@
 
         });
     </script>
+
+<script>
+    // Same client-side required-field check as create.blade.php — see
+    // that file's comment for the full "why" (custom.js's #submitBtn
+    // handler is a plain click listener with no native form validation
+    // step at all). tender_image is NOT in this list — TenderController@
+    // update() never force-requires it (the existing image just persists
+    // if the admin doesn't pick a new one), unlike store().
+    document.addEventListener('click', function (e) {
+        if (!e.target || e.target.id !== 'submitBtn' || !window.jQuery) return;
+        var $ = window.jQuery;
+
+        var required = [
+            { name: 'country' },
+            { name: 'tender_code' },
+            { name: 'language_id' },
+            { name: 'tender_category_id' },
+            { name: 'title' },
+            { name: 'submission_deadline' },
+            { name: 'overview', summernote: true },
+            { name: 'expert_name' },
+            { name: 'expert_position' },
+            { name: 'expert_details', summernote: true },
+            { name: 'expert_whatsapp' },
+            { name: 'expert_email' },
+        ];
+
+        // expert_member_id is only required when "Existing team member" is
+        // picked — mirrors TenderController@update's own required_if rule.
+        var expertSource = $('input[name="expert_source"]:checked').val();
+        if (expertSource === 'member') {
+            required.push({ name: 'expert_member_id' });
+        }
+
+        $('.em').each(function () { $(this).html(''); });
+
+        var firstInvalid = null;
+        required.forEach(function (f) {
+            var value;
+            if (f.summernote) {
+                var $sn = $('.summernote[name="' + f.name + '"]');
+                value = $sn.length ? $sn.summernote('code').replace(/<[^>]*>/g, '').trim() : '';
+            } else {
+                value = ($('[name="' + f.name + '"]').first().val() || '').toString().trim();
+            }
+            if (!value) {
+                var $err = $('#err' + f.name);
+                if ($err.length) $err.html('This field is required.');
+                if (!firstInvalid) firstInvalid = f.name;
+            }
+        });
+
+        if (firstInvalid) {
+            e.preventDefault();
+            e.stopPropagation();
+            $.notify({
+                message: 'Please fill in all required fields.',
+                title: 'Validation Error!',
+                icon: 'fa fa-bell',
+            }, {
+                type: 'danger',
+                placement: { from: 'top', align: 'right' },
+                showProgressbar: true,
+                time: 1000,
+                allow_dismiss: true,
+                delay: 4000,
+            });
+        }
+    }, true);
+</script>
 @endsection

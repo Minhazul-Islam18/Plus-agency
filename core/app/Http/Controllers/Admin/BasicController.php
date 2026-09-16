@@ -735,6 +735,14 @@ class BasicController extends Controller
             $be->save();
         }
 
+        // These carousel-speed values render as a static inline <script>
+        // block in every page's shared layout (front/default/layout.blade.php)
+        // — on a Cloudflare-cached public page that block is baked into the
+        // cached HTML too, so a save here otherwise silently does nothing
+        // visible until that cache's own TTL expires. Same root cause/fix as
+        // Portfolio's own missing purge earlier.
+        CloudflareController::purge();
+
         Session::flash('success', 'Sections customized successfully!');
         return back();
     }

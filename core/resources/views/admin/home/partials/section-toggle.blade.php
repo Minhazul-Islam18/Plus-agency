@@ -27,7 +27,7 @@
             <div class="sec-speed">
                 <i class="fas fa-tachometer-alt"></i>
                 <input type="number" class="form-control form-control-sm ltr" name="{{ $speedField }}"
-                    value="{{ $abe->{$speedField} ?? 4500 }}" min="2000" max="15000" step="500">
+                    value="{{ $abe->{$speedField} ?? 4500 }}" min="2000" max="30000" step="500">
                 <span>ms</span>
             </div>
         @endif

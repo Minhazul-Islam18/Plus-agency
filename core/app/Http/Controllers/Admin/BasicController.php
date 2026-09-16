@@ -691,13 +691,13 @@ class BasicController extends Controller
     public function updatesections(Request $request)
     {
         $request->validate([
-            'tender_carousel_speed'      => 'nullable|integer|min:2000|max:15000',
-            'blog_carousel_speed'        => 'nullable|integer|min:2000|max:15000',
-            'portfolio_carousel_speed'   => 'nullable|integer|min:2000|max:15000',
-            'testimonial_carousel_speed' => 'nullable|integer|min:2000|max:15000',
-            'team_carousel_speed'        => 'nullable|integer|min:2000|max:15000',
-            'partner_carousel_speed'     => 'nullable|integer|min:2000|max:15000',
-            'approach_carousel_speed'    => 'nullable|integer|min:2000|max:15000',
+            'tender_carousel_speed'      => 'nullable|integer|min:2000|max:30000',
+            'blog_carousel_speed'        => 'nullable|integer|min:2000|max:30000',
+            'portfolio_carousel_speed'   => 'nullable|integer|min:2000|max:30000',
+            'testimonial_carousel_speed' => 'nullable|integer|min:2000|max:30000',
+            'team_carousel_speed'        => 'nullable|integer|min:2000|max:30000',
+            'partner_carousel_speed'     => 'nullable|integer|min:2000|max:30000',
+            'approach_carousel_speed'    => 'nullable|integer|min:2000|max:30000',
         ]);
 
         $be = BasicExtended::select('theme_version')->first();

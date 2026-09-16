@@ -1047,7 +1047,7 @@ class PortfolioController extends Controller
         $request->validate([
             'portfolio_breadcrumb_overlay_color' => 'nullable|max:20',
             'portfolio_breadcrumb_overlay_opacity' => 'nullable|numeric|min:0|max:1',
-            'portfolio_details_gallery_speed' => 'nullable|integer|min:2000|max:15000',
+            'portfolio_details_gallery_speed' => 'nullable|integer|min:2000|max:30000',
         ]);
 
         $bs = BasicSetting::where('language_id', $langid)->firstOrFail();

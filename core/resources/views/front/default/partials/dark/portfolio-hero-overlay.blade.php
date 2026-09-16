@@ -17,7 +17,7 @@
 <div class="dark-pd-hero-overlay"
     style="--pd-hero-overlay-color: {{ $orgb }}; --pd-hero-overlay-strength: {{ $overlayOpacity }}; --pd-hero-bloom-strength: {{ $bloomOpacity }};">
     @if (!empty($portfolio->sector))
-        <span class="dark-pd-hero-badge" data-reveal>{{ convertUtf8($portfolio->sector->name) }}</span>
+        <span class="dark-pd-hero-badge" data-reveal>{{ convertUtf8($portfolio->sector->name) }}@if (!empty($portfolio->subsector)) &rsaquo; {{ convertUtf8($portfolio->subsector->name) }}@endif</span>
     @endif
     <h2 class="dark-pd-hero-title" data-reveal>{{ convertUtf8($portfolio->overlayTitle()) }}</h2>
     @if (!empty($portfolio->overlay_subtitle))

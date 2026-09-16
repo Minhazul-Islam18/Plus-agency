@@ -218,7 +218,7 @@ class FrontendController extends Controller
     {
         $currentLang = currentLang();
 
-        $portfolio = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])
+        $portfolio = Portfolio::with(['sector', 'subsector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])
             ->where('slug', $slug)->where('language_id', $currentLang->id)
             ->where('is_archived', 0)->where('is_published', 1)
             ->first();

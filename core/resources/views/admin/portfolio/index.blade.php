@@ -238,7 +238,19 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                           <td>{{ convertUtf8($portfolio->client_name) }}</td>
                           <td>
                             @if (!empty($portfolio->sector))
-                                {{ convertUtf8($portfolio->sector->name) }}
+                                <span class="d-block">{{ convertUtf8($portfolio->sector->name) }}</span>
+                                @if (!empty($portfolio->subsector))
+                                    {{-- Same visual treatment as the Project Title
+                                         column's own title+subtitle stack — a
+                                         subsector is a MORE SPECIFIC pick under
+                                         its sector, not a separate value, so it
+                                         reads as "belongs under the line above"
+                                         rather than a second unrelated fact. --}}
+                                    <span class="portfolio-subtitle-cell">
+                                        <i class="fas fa-level-up-alt fa-rotate-90" style="font-size:10px;"></i>
+                                        {{ convertUtf8($portfolio->subsector->name) }}
+                                    </span>
+                                @endif
                             @endif
                           </td>
                           <td>

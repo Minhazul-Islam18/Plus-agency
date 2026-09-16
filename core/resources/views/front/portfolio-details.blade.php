@@ -186,6 +186,14 @@
                                 <div>
                                     <span class="dark-pd-side-label">{{ __('Sector') }}</span>
                                     <span class="dark-pd-side-value">{{ convertUtf8($portfolio->sector->name) }}</span>
+                                    @if (!empty($portfolio->subsector))
+                                        {{-- Shown UNDER its sector, not as a separate
+                                             grid cell — a subsector only makes sense
+                                             in relation to the sector above it. --}}
+                                        <span class="dark-pd-side-subvalue">
+                                            <i class="fas fa-level-up-alt fa-rotate-90"></i> {{ convertUtf8($portfolio->subsector->name) }}
+                                        </span>
+                                    @endif
                                 </div>
                             @endif
 

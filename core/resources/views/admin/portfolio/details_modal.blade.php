@@ -648,10 +648,13 @@ $evidenceBlocks = [
         <div class="pdm-head-main">
             <div class="pdm-eyebrow">
                 @if (!empty($portfolio->sector))
+                    {{-- A subsector reads inline as "Sector › Subsector" here (a
+                         single compact pill, not two lines) — the spec grid
+                         further down repeats it stacked, where there's room. --}}
                     <span class="pdm-pill pdm-pill-sector"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5">
                             <circle cx="12" cy="12" r="9" />
-                        </svg>{{ convertUtf8($portfolio->sector->name) }}</span>
+                        </svg>{{ convertUtf8($portfolio->sector->name) }}@if (!empty($portfolio->subsector)) &rsaquo; {{ convertUtf8($portfolio->subsector->name) }}@endif</span>
                 @endif
                 @if (!empty($portfolio->statusInfo))
                     <span class="pdm-pill pdm-pill-status"><svg viewBox="0 0 24 24" fill="currentColor">

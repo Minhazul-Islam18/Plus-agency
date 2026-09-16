@@ -74,6 +74,14 @@
                 <div>
                     <span class="dark-pic-identity-label">{{ __('Sector') }}</span>
                     <span class="dark-pic-identity-value">{{ convertUtf8($portfolio->sector->name) }}</span>
+                    @if (!empty($portfolio->subsector))
+                        {{-- Shown UNDER its sector, not as a sibling fact — a
+                             subsector only ever makes sense in relation to the
+                             sector above it. --}}
+                        <span class="dark-pic-identity-value dark-pic-identity-subvalue">
+                            <i class="fas fa-level-up-alt fa-rotate-90"></i> {{ convertUtf8($portfolio->subsector->name) }}
+                        </span>
+                    @endif
                 </div>
             </div>
         @endif

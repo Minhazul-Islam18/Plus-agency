@@ -6453,6 +6453,21 @@ button.dark-sheet-submit[type="submit"]:active {
   font-weight: 600;
   color: #fff;
 }
+/* Subsector line under its own Sector row — dimmer/smaller than the
+   sector name above so it reads as "belongs to that line", not a
+   separate fact of equal weight. */
+.dark-pd-side-subvalue {
+  display: block;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+.dark-pd-side-subvalue i {
+  font-size: 10px;
+  margin-right: 2px;
+}
 .dark-pd-side-value--dim {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.68);
@@ -11304,6 +11319,19 @@ body.dark-oc-lock {
   gap: 8px;
   font-weight: 600;
   font-size: 14px;
+}
+/* Subsector line under its own sector — dimmer/smaller than the sector
+   name above it so it visually reads as "belongs to that line", not a
+   second equal-weight fact. */
+.dark-pic-identity-subvalue {
+  font-weight: 500;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+.dark-pic-identity-subvalue i {
+  font-size: 10px;
+  margin-right: 2px;
 }
 .dark-pic-client-logo {
   height: 22px;

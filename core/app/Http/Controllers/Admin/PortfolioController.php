@@ -112,7 +112,7 @@ class PortfolioController extends Controller
             $query = Portfolio::where('language_id', $lang_id)->where('is_archived', 1);
         }
 
-        $data['portfolios'] = $query->with('statusInfo')->orderBy('id', 'DESC')->get();
+        $data['portfolios'] = $query->with(['sector', 'subsector', 'statusInfo'])->orderBy('id', 'DESC')->get();
         $data['sectors'] = PortfolioSector::topLevel()->where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['statuses'] = PortfolioStatus::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'asc')->get();
         $data['countries'] = Countries::all();
@@ -827,7 +827,7 @@ class PortfolioController extends Controller
      */
     public function show($id)
     {
-        $portfolio = Portfolio::with(['sector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])->findOrFail($id);
+        $portfolio = Portfolio::with(['sector', 'subsector', 'statusInfo', 'service', 'portfolio_images', 'documents', 'highlights', 'partnerRefs'])->findOrFail($id);
         if (!empty($portfolio->language)) {
             app()->setLocale($portfolio->language->code);
         }
@@ -854,6 +854,7 @@ class PortfolioController extends Controller
         }
 
         $sector = $request->filled('sector_id') ? PortfolioSector::find($request->sector_id) : null;
+        $subsector = $request->filled('subsector_id') ? PortfolioSector::find($request->subsector_id) : null;
         $statusInfo = $request->filled('status_id') ? PortfolioStatus::find($request->status_id) : null;
 
         $countryName = null;
@@ -870,6 +871,7 @@ class PortfolioController extends Controller
             'title' => $request->title,
             'client_name' => $request->client_name,
             'sector' => $sector,
+            'subsector' => $subsector,
             'country' => $request->country,
             'statusInfo' => $statusInfo,
             'partnerRefs' => Partner::whereIn('id', $request->input('partner_ids', []))->get(),
@@ -998,7 +1000,7 @@ class PortfolioController extends Controller
     public function export(Request $request)
     {
         $lang = Language::where('code', $request->language)->first();
-        $query = Portfolio::with(['sector', 'statusInfo'])->where('language_id', $lang->id ?? 0);
+        $query = Portfolio::with(['sector', 'subsector', 'statusInfo'])->where('language_id', $lang->id ?? 0);
 
         if ($request->filled('sector_id')) {
             $query->where('sector_id', $request->sector_id);

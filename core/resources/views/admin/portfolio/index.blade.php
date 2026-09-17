@@ -350,6 +350,19 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
        plain flat Bootstrap default — that's what read as "not
        professional" here, not just the width. --}}
   <style>
+    /* Backdrop blur so the eye-modal reads as a clearly separate layer
+       above the table, not just a dark overlay — scoped to THIS modal's
+       own backdrop only (.portfolio-view-backdrop, added via show.bs.modal
+       below) rather than a blanket .modal-backdrop rule, which would blur
+       every other modal on this admin theme too. */
+    .portfolio-view-backdrop {
+      background-color: rgba(15, 23, 42, 0.45) !important;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .portfolio-view-backdrop.show {
+      opacity: 1 !important;
+    }
     #portfolioViewModal .modal-dialog {
       max-width: 1320px;
     }
@@ -458,6 +471,10 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 "{{ route('admin.portfolio.edit', '__ID__') }}?language={{ request()->input('language') }}".replace('__ID__', id)
             );
             $('#portfolioViewModal').modal('show');
+            // Bootstrap appends a fresh, unscoped .modal-backdrop <div> to
+            // <body> on every show — tagging THIS one right after so the
+            // blur CSS above only ever applies to this modal's own backdrop.
+            $('.modal-backdrop').last().addClass('portfolio-view-backdrop');
             $.get("{{ url('/') }}/admin/portfolio/" + id + "/show", function (html) {
                 $('#portfolioViewBody').html(html);
             });

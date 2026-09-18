@@ -376,8 +376,43 @@
 
                                     .portfolio-actions-menu-portal .dropdown-item,
                                     .portfolio-actions-menu-portal .dropdown-header {
-                                        padding: 0.45rem 1.1rem;
+                                        padding: 0.45rem 1.6rem;
                                         font-size: 13.5px;
+                                    }
+                                    /* Plain <h6> — browsers apply their own bold
+                                       heading weight/size to it regardless of
+                                       Bootstrap's .dropdown-header padding, so it
+                                       rendered bigger/bolder than a group label
+                                       should look next to the normal-weight items
+                                       around it. Restyled as a proper small caps
+                                       section label instead. */
+                                    .portfolio-actions-menu-portal .dropdown-header {
+                                        font-size: 11px;
+                                        font-weight: 700;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.04em;
+                                        color: #9aa3af;
+                                        padding-top: 0.6rem;
+                                        padding-bottom: 0.2rem;
+                                    }
+                                    /* Small rotated-square "speech bubble" caret that
+                                       visually ties the menu back to the ⋮ button it
+                                       opened from — a real ::before/::after on the
+                                       menu itself would get clipped by its own
+                                       overflow-y:auto, so it's a separate fixed-
+                                       position element (added/positioned in JS,
+                                       removed on close) sitting just BEHIND the menu
+                                       (lower z-index) so only its outward corner peeks
+                                       out past the menu's edge. */
+                                    .portfolio-actions-menu-caret {
+                                        position: fixed;
+                                        width: 12px;
+                                        height: 12px;
+                                        background: #fff;
+                                        border: 1px solid rgba(0, 0, 0, 0.15);
+                                        transform: rotate(45deg);
+                                        z-index: 1070;
+                                        pointer-events: none;
                                     }
                                 </style>
                                 @php $countryNames = collect($countries)->pluck('name', 'iso'); @endphp
@@ -722,7 +757,8 @@ if (
             (function() {
                 var $openMenu = null,
                     $openToggle = null,
-                    $scrollParent = null;
+                    $scrollParent = null,
+                    $caret = null;
 
                 function positionMenu() {
                     if (!$openMenu || !$openToggle) return;
@@ -733,14 +769,28 @@ if (
                     if (left < 4) left = 4;
                     var maxLeft = $(window).width() - menuWidth - 4;
                     if (left > maxLeft) left = Math.max(4, maxLeft);
+                    var flipped = false;
                     var top = rect.bottom + 4;
                     if (top + menuHeight > $(window).height() && rect.top - menuHeight - 4 > 0) {
                         top = rect.top - menuHeight - 4;
+                        flipped = true;
                     }
                     $openMenu.css({
                         top: top + 'px',
                         left: left + 'px'
                     });
+
+                    if ($caret) {
+                        var caretLeft = (rect.left + rect.right) / 2 - 6;
+                        var minLeft = left + 8;
+                        var maxCaretLeft = left + menuWidth - 8 - 12;
+                        caretLeft = Math.min(Math.max(caretLeft, minLeft), maxCaretLeft);
+                        var caretTop = flipped ? (top + menuHeight - 6) : (top - 6);
+                        $caret.css({
+                            top: caretTop + 'px',
+                            left: caretLeft + 'px'
+                        });
+                    }
                 }
 
                 function closeOpenMenu() {
@@ -753,6 +803,10 @@ if (
                     if ($origin && $origin.length) $openMenu.appendTo($origin);
                     if ($openToggle) $openToggle.attr('aria-expanded', 'false');
                     if ($scrollParent) $scrollParent.off('scroll.portfolioActionsMenu');
+                    if ($caret) {
+                        $caret.remove();
+                        $caret = null;
+                    }
                     $(window).off('resize.portfolioActionsMenu scroll.portfolioActionsMenu');
                     $(document).off('click.portfolioActionsMenu keydown.portfolioActionsMenu');
                     $openMenu = null;
@@ -774,6 +828,7 @@ if (
                     $openMenu = $menu;
                     $openToggle = $toggle;
                     $toggle.attr('aria-expanded', 'true');
+                    $caret = $('<div class="portfolio-actions-menu-caret"></div>').appendTo('body');
                     positionMenu();
 
                     $scrollParent = $toggle.closest('.table-responsive');

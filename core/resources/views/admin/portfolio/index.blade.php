@@ -192,17 +192,22 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                        pushed it up over several rows above. Capped with
                        its own scrollbar instead of letting it grow past a
                        sane height. */
-                    .portfolio-actions .dropdown-menu { max-height: 280px; overflow-y: auto; }
-                    /* Table rows paint in DOM order at the same stacking
-                       level by default, so an open dropdown can end up
-                       visually buried under (or burying) a NEIGHBOURING
-                       row's own cells instead of sitting cleanly above
-                       everything — the .dropdown-open-row class (toggled
-                       by show.bs.dropdown/hide.bs.dropdown below) lifts
-                       whichever row currently has its menu open above
-                       every other row, in either direction. */
-                    .portfolios-list-table tbody tr { position: relative; }
-                    .portfolios-list-table tbody tr.dropdown-open-row { z-index: 1055; }
+                    .portfolio-actions .dropdown-menu { max-height: 280px; overflow-y: auto; overflow-x: hidden; min-width: 210px; }
+                    /* .table-responsive clips anything with overflow (that's
+                       its whole job) — a dropdown-menu positioned inside it
+                       gets cut off on the last few rows/columns and, in
+                       Firefox/Safari, doesn't escape via z-index tricks at
+                       all (clipping isn't a stacking issue). Real fix: on
+                       open, detach the menu to <body> and position it with
+                       JS from the toggle button's own viewport rect (see
+                       script below) — same approach used by Bootstrap
+                       itself when boundary:'viewport' isn't enough. */
+                    .portfolio-actions-menu-portal {
+                        position: fixed !important;
+                        margin: 0 !important;
+                        transform: none !important;
+                        z-index: 1071;
+                    }
                 </style>
                 @php $countryNames = collect($countries)->pluck('name', 'iso'); @endphp
                 <div class="table-responsive">
@@ -298,7 +303,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                   </button>
                                 </form>
                                 <div class="btn-group">
-                                    <button type="button" class="portfolio-action-btn portfolio-action-more dropdown-toggle" data-toggle="dropdown" data-boundary="window" aria-expanded="false" title="More">
+                                    <button type="button" class="portfolio-action-btn portfolio-action-more dropdown-toggle" aria-haspopup="true" aria-expanded="false" title="More">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right">
@@ -453,16 +458,85 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 @section('scripts')
 <script>
     $(document).ready(function () {
-        // Lifts whichever row's ⋮ dropdown is currently open above every
-        // other row (see .dropdown-open-row in the styles above) — table
-        // rows paint in DOM order by default, so without this an opened
-        // menu could end up visually buried under (or burying) a
-        // neighbouring row instead of sitting cleanly on top.
-        $('.portfolios-list-table').on('show.bs.dropdown', function (e) {
-            $(e.target).closest('tr').addClass('dropdown-open-row');
-        }).on('hide.bs.dropdown', function (e) {
-            $(e.target).closest('tr').removeClass('dropdown-open-row');
-        });
+        // Custom ⋮ menu, NOT Bootstrap's data-toggle="dropdown" (the button
+        // has no such attribute anymore). Two independent problems ruled
+        // that out:
+        //  1) Kept inside the table, .table-responsive's own overflow clips
+        //     the menu on the last rows/columns — no z-index fix escapes an
+        //     ancestor's overflow clipping, in any browser.
+        //  2) Portaling the existing dropdown-menu to <body> while still
+        //     letting Bootstrap manage it fought its own Popper instance,
+        //     which kept re-applying its computed `transform` over ours on
+        //     every animation frame (confirmed live — inline style flips
+        //     back to Popper's translate3d() right after we set top/left).
+        // So this owns the whole show/hide/position/close lifecycle itself.
+        (function () {
+            var $openMenu = null, $openToggle = null, $scrollParent = null;
+
+            function positionMenu() {
+                if (!$openMenu || !$openToggle) return;
+                var rect = $openToggle[0].getBoundingClientRect();
+                var menuWidth = $openMenu.outerWidth();
+                var menuHeight = $openMenu.outerHeight();
+                var left = rect.right - menuWidth;
+                if (left < 4) left = 4;
+                var maxLeft = $(window).width() - menuWidth - 4;
+                if (left > maxLeft) left = Math.max(4, maxLeft);
+                var top = rect.bottom + 4;
+                if (top + menuHeight > $(window).height() && rect.top - menuHeight - 4 > 0) {
+                    top = rect.top - menuHeight - 4;
+                }
+                $openMenu.css({ top: top + 'px', left: left + 'px' });
+            }
+
+            function closeOpenMenu() {
+                if (!$openMenu) return;
+                var $origin = $openMenu.data('portal-origin');
+                $openMenu.removeClass('show portfolio-actions-menu-portal').css({ top: '', left: '' });
+                if ($origin && $origin.length) $openMenu.appendTo($origin);
+                if ($openToggle) $openToggle.attr('aria-expanded', 'false');
+                if ($scrollParent) $scrollParent.off('scroll.portfolioActionsMenu');
+                $(window).off('resize.portfolioActionsMenu scroll.portfolioActionsMenu');
+                $(document).off('click.portfolioActionsMenu keydown.portfolioActionsMenu');
+                $openMenu = null; $openToggle = null; $scrollParent = null;
+            }
+
+            $('.portfolios-list-table').on('click', '.portfolio-action-more', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var $toggle = $(this);
+                var $menu = $toggle.closest('.btn-group').find('.dropdown-menu');
+                var reopening = $openMenu && $openMenu.is($menu);
+                closeOpenMenu();
+                if (reopening) return;
+
+                $menu.data('portal-origin', $toggle.closest('.btn-group')).addClass('portfolio-actions-menu-portal show').appendTo('body');
+                $openMenu = $menu;
+                $openToggle = $toggle;
+                $toggle.attr('aria-expanded', 'true');
+                positionMenu();
+
+                $scrollParent = $toggle.closest('.table-responsive');
+                $scrollParent.on('scroll.portfolioActionsMenu', positionMenu);
+                $(window).on('resize.portfolioActionsMenu scroll.portfolioActionsMenu', positionMenu);
+
+                $(document).on('click.portfolioActionsMenu', function (ev) {
+                    if (!$openMenu) return;
+                    // A click on an actual item closes the menu after it
+                    // does its thing; a click anywhere else inside the menu
+                    // (e.g. the "Change status" header) leaves it open.
+                    if ($(ev.target).closest('.dropdown-item').length && $openMenu.has(ev.target).length) {
+                        closeOpenMenu();
+                        return;
+                    }
+                    if ($openMenu.is(ev.target) || $openMenu.has(ev.target).length) return;
+                    closeOpenMenu();
+                });
+                $(document).on('keydown.portfolioActionsMenu', function (ev) {
+                    if (ev.key === 'Escape') closeOpenMenu();
+                });
+            });
+        })();
 
         $('.portfolio-view-btn').on('click', function () {
             var id = $(this).data('id');

@@ -192,7 +192,20 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                        pushed it up over several rows above. Capped with
                        its own scrollbar instead of letting it grow past a
                        sane height. */
-                    .portfolio-actions .dropdown-menu { max-height: 280px; overflow-y: auto; overflow-x: hidden; min-width: 210px; }
+                    /* Was scoped ".portfolio-actions .dropdown-menu" — dead
+                       once the menu moves to <body> on open, since it's no
+                       longer a descendant of .portfolio-actions. Rescoped
+                       to the portal class so it actually applies, and
+                       padding tightened: Bootstrap's default 1.5rem side
+                       padding on .dropdown-item made the menu size itself
+                       to the longest item ("Duplicate project") while short
+                       ones ("Ongoing") sat in a lot of leftover whitespace. */
+                    .portfolio-actions-menu-portal { max-height: 280px; overflow-y: auto; overflow-x: hidden; min-width: 180px; }
+                    .portfolio-actions-menu-portal .dropdown-item,
+                    .portfolio-actions-menu-portal .dropdown-header {
+                        padding: 0.4rem 0.9rem;
+                        font-size: 13.5px;
+                    }
                     /* .table-responsive clips anything with overflow (that's
                        its whole job) — a dropdown-menu positioned inside it
                        gets cut off on the last few rows/columns and, in

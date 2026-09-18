@@ -200,7 +200,12 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                        padding on .dropdown-item made the menu size itself
                        to the longest item ("Duplicate project") while short
                        ones ("Ongoing") sat in a lot of leftover whitespace. */
-                    .portfolio-actions-menu-portal { max-height: 280px; overflow-y: auto; overflow-x: hidden; min-width: 180px; }
+                    /* position:fixed still falls back to shrink-to-fit
+                       sizing, which measured 15-40px wider than the text
+                       actually needed (icon-font metrics inflate it) —
+                       width:max-content sizes the box to its real content
+                       instead of that approximation. */
+                    .portfolio-actions-menu-portal { max-height: 280px; overflow-y: auto; overflow-x: hidden; width: max-content; max-width: 240px; min-width: 0; }
                     .portfolio-actions-menu-portal .dropdown-item,
                     .portfolio-actions-menu-portal .dropdown-header {
                         padding: 0.4rem 0.9rem;

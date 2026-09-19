@@ -13,7 +13,13 @@ class SummernoteController extends Controller
         $filename = uniqid() . '.' . $img->getClientOriginalExtension();
         $img->move(FRONT_IMG_PATH . self::IMG_SUBDIR, $filename);
 
-        return url('/') . "/assets/front/img/summernote/" . $filename;
+        $url = url('/') . "/assets/front/img/summernote/" . $filename;
+        // A bare string return gets wrapped as text/html, which Laravel
+        // Debugbar (enabled on both dev and prod here) appends its own
+        // widget markup to — summernote's insertImage() then set that
+        // whole contaminated blob as the <img src>, so nothing ever
+        // rendered. Explicit text/plain makes Debugbar skip injecting.
+        return response($url)->header('Content-Type', 'text/plain');
     }
     public function uploadFileManager(Request $request) {
         $items = $request->items;

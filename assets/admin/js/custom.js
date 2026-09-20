@@ -263,8 +263,12 @@ $(function ($) {
   var ImageButton = function(context) {
     var ui = $.summernote.ui;
     var button = ui.button({
-      contents: '<i class="far fa-images"></i>',
-      tooltip: 'File Manager',
+      // fa-images looked near-identical to the native "Picture" button
+      // right next to it, so users couldn't tell them apart at a glance.
+      // fa-folder-open reads as "browse a library" instead of "upload a
+      // photo", and the tooltip spells out the difference directly.
+      contents: '<i class="fas fa-folder-open"></i>',
+      tooltip: 'Choose from File Manager',
       click: function() {
         let id = context.$note[0].id;
         $("#lfmModalSummernote").find('iframe').attr('src', "");
@@ -283,6 +287,12 @@ $(function ($) {
   return '_' + Math.random().toString(36).substr(2, 9);
  }
 
+  if ($.summernote && $.summernote.lang && !$.summernote.lang['en-CUSTOM']) {
+    $.summernote.lang['en-CUSTOM'] = $.extend(true, {}, $.summernote.lang['en-US'], {
+      image: { image: 'Upload from Computer' }
+    });
+  }
+
   $(".summernote").each(function (i) {
     let theight;
     let $summernote = $(this);
@@ -296,6 +306,13 @@ $(function ($) {
       height: theight,
       dialogsInBody: true,
       dialogsFade: false,
+      // Distinguishes the native "Picture" button's tooltip from the
+      // custom File Manager one above, since both now sit side by side
+      // in the toolbar and used to be easy to confuse. Summernote reads
+      // its strings from $.summernote.lang[options.lang], merged over
+      // 'en-US' — registered once, just above, not passed as an init
+      // option (there's no such option; it'd be silently ignored).
+      lang: 'en-CUSTOM',
       toolbar: [
         ['style', ['style']],
         ['font', ['bold', 'underline', 'clear']],

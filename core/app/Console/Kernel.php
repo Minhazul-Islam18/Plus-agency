@@ -71,6 +71,18 @@ class Kernel extends ConsoleKernel
             ->name('notify-incomplete-tender-payments')
             ->everyTenMinutes()
             ->withoutOverlapping();
+
+        // Summernote image uploads (Service/Blog/Portfolio content, cookie
+        // text, email templates, tender fields, etc.) are never deleted at
+        // editor-remove time — see CleanupOrphanedSummernoteImages for why.
+        // Runs once a day instead, off-peak, to sweep anything that ended up
+        // unreferenced everywhere.
+        $schedule->call(function () {
+            Artisan::call('summernote:cleanup-orphaned-images');
+        })
+            ->name('cleanup-orphaned-summernote-images')
+            ->dailyAt('03:30')
+            ->withoutOverlapping();
     }
 
     /**

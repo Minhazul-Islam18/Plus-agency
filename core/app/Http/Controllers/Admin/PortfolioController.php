@@ -301,7 +301,7 @@ class PortfolioController extends Controller
         $in = $request->all();
         $in['language_id'] = $request->language_id;
         $in['slug'] = $slug;
-        $in['content'] = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
+        $in['content'] = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
         // Now a select (Published/Unpublished), not a checkbox — always
         // submits a real value, so read it directly instead of filled().
         $in['is_published'] = $request->is_published == 1 ? 1 : 0;
@@ -561,7 +561,7 @@ class PortfolioController extends Controller
 
         $in = $request->all();
         $portfolio = Portfolio::findOrFail($request->portfolio_id);
-        $in['content'] = clean(str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", $request->content));
+        $in['content'] = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
         $in['slug'] = $slug;
         // Now a select (Published/Unpublished), not a checkbox — always
         // submits a real value, so read it directly instead of filled().

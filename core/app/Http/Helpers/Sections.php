@@ -56,7 +56,15 @@ if (!function_exists('convertHtml') ) {
 
 if (!function_exists('replaceBaseUrl') ) {
     function replaceBaseUrl($content) {
-        $content = str_replace("{base_url}", url('/'), $content);
+        // Every save site-wide ran this token through clean() (HTMLPurifier)
+        // AFTER inserting it into an <img src>, and Purifier percent-encodes
+        // "{"/"}" as invalid URI characters — so every already-saved image
+        // is stuck as "%7Bbase_url%7D/..." in the DB, not the literal
+        // "{base_url}" this used to look for. Handling both forms fixes
+        // existing rows immediately; the controllers were also fixed to
+        // stop corrupting new saves (clean() now runs before the token is
+        // inserted, not after).
+        $content = str_replace(["%7Bbase_url%7D", "{base_url}"], url('/'), $content);
         return $content;
     }
 }

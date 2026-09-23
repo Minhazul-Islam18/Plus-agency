@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use App\Slider;
 use App\Scategory;
 use App\Portfolio;
+use App\PortfolioSector;
+use Illuminate\Support\Str;
 use App\Feature;
 use App\Point;
 use App\Statistic;
@@ -187,23 +189,96 @@ class FrontendController extends Controller
 
         $data['currentLang'] = $currentLang;
         $be = $currentLang->basic_extended;
+        $data['countryNames'] = array_column(\App\Http\Helpers\Countries::all(), 'name', 'iso');
 
-        $category = $request->category;
+        // Filtering moved from Service Category (an indirect two-hop join:
+        // portfolio -> service -> scategory) to Portfolio's own Sector —
+        // every portfolio already carries a direct sector_id, and that's
+        // the classification that actually describes the portfolio itself.
+        $sectorId = $request->sector;
 
-        if (!empty($category)) {
-            $data['category'] = Scategory::findOrFail($category);
+        if (!empty($sectorId)) {
+            $data['sector'] = PortfolioSector::where('language_id', $currentLang->id)
+                ->whereNull('parent_id')
+                ->findOrFail($sectorId);
         }
 
-        $data['portfolios'] = Portfolio::with('service.scategory', 'sector')->when($category, function ($query, $category) {
-            $serviceIdArr = [];
-            $serviceids = Service::select('id')->where('scategory_id', $category)->get();
-            foreach ($serviceids as $key => $serviceid) {
-                $serviceIdArr[] = $serviceid->id;
+        // Only sectors with at least one published project — with 15+
+        // sector names already, the list only gets taller as more get
+        // added, most with nothing behind them yet.
+        $data['sectors'] = PortfolioSector::where('language_id', $currentLang->id)
+            ->whereNull('parent_id')
+            ->where('status', 1)
+            ->whereHas('portfolios', function ($query) {
+                $query->where('is_published', 1)->where('is_archived', 0);
+            })
+            ->orderBy('serial_number', 'ASC')
+            ->get();
+
+        // Per-sector project counts for the sidebar's count badges — always
+        // the real total per sector, regardless of which sector is
+        // currently filtered (so "All sectors" keeps showing the grand
+        // total, not just whatever's on screen right now).
+        $data['sectorCounts'] = Portfolio::where('language_id', $currentLang->id)
+            ->where('is_archived', 0)->where('is_published', 1)
+            ->whereNotNull('sector_id')
+            ->selectRaw('sector_id, count(*) as cnt')
+            ->groupBy('sector_id')
+            ->pluck('cnt', 'sector_id');
+        // NOT sectorCounts->sum() — a portfolio without a sector_id (legacy/
+        // unassigned) still shows under "All sectors" itself, so that total
+        // must count every published portfolio, not just the ones grouped
+        // into a sector above.
+        $data['totalPortfoliosCount'] = Portfolio::where('language_id', $currentLang->id)
+            ->where('is_archived', 0)->where('is_published', 1)
+            ->count();
+
+        $search = trim((string) $request->search);
+        $data['search'] = $search;
+
+        $year = $request->year;
+        $data['year'] = $year;
+
+        $data['years'] = Portfolio::where('language_id', $currentLang->id)
+            ->where('is_archived', 0)->where('is_published', 1)
+            ->whereNotNull('year')
+            ->distinct()
+            ->orderBy('year', 'DESC')
+            ->pluck('year');
+
+        $baseQuery = Portfolio::with('service.scategory', 'sector', 'statusInfo')
+            ->when($sectorId, function ($query) use ($sectorId) {
+                return $query->where('sector_id', $sectorId);
+            })
+            ->when($search !== '', function ($query) use ($search) {
+                return $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->when($year, function ($query) use ($year) {
+                return $query->where('year', $year);
+            })
+            ->when($currentLang, function ($query, $currentLang) {
+                return $query->where('language_id', $currentLang->id);
+            })
+            ->where('is_archived', 0)->where('is_published', 1);
+
+        // Status names are open, admin-managed free text (see the same
+        // keyword matching in Portfolio admin's own status badge colors) —
+        // there's no fixed id to group by, so bucket by keyword instead.
+        $data['statusCounts'] = (clone $baseQuery)->get()->groupBy(function ($portfolio) {
+            $name = mb_strtolower(convertUtf8(optional($portfolio->statusInfo)->name ?? ''));
+            if (Str::contains($name, ['complet', 'finish', 'réalisé', 'realise', 'done'])) {
+                return 'completed';
             }
-            return $query->whereIn('service_id', $serviceIdArr);
-        })->when($currentLang, function ($query, $currentLang) {
-            return $query->where('language_id', $currentLang->id);
-        })->where('is_archived', 0)->where('is_published', 1)->orderBy('serial_number', 'ASC');
+            if (Str::contains($name, ['progress', 'cours', 'ongoing'])) {
+                return 'in_progress';
+            }
+            if (Str::contains($name, ['pending', 'attente'])) {
+                return 'pending';
+            }
+            return 'other';
+        })->map->count();
+
+        $data['portfolios'] = $baseQuery->orderBy('serial_number', 'ASC');
 
         $version = $be->theme_version;
 

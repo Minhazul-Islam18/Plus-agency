@@ -440,22 +440,17 @@
                                         <span class="dark-pd-similar-year">{{ $sp->year }}</span>
                                     @endif
                                     @if (!empty($sp->sector))
-                                        <span class="dark-pd-similar-badge">{{ convertUtf8($sp->sector->name) }}</span>
+                                        <span class="dark-pd-similar-badge">
+                                            <i class="{{ $sp->sector->icon ?: 'fas fa-building' }}"></i>
+                                            <span class="dark-pd-similar-badge-text">{{ convertUtf8($sp->sector->name) }}</span>
+                                        </span>
                                     @endif
                                 </div>
                                 <div class="dark-pd-similar-body">
-                                    @if (!empty($sp->statusInfo) || !empty($sp->country))
+                                    @if (!empty($sp->country))
                                         <div class="dark-pd-similar-meta">
-                                            @if (!empty($sp->statusInfo))
-                                                <span class="dark-pd-similar-dot"></span>
-                                                <span>{{ convertUtf8($sp->statusInfo->name) }}</span>
-                                            @endif
-                                            @if (!empty($sp->statusInfo) && !empty($sp->country))
-                                                <span class="dark-pd-similar-sep">•</span>
-                                            @endif
-                                            @if (!empty($sp->country))
-                                                <span>{{ $countryNames[$sp->country] ?? $sp->country }}</span>
-                                            @endif
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ $countryNames[$sp->country] ?? $sp->country }}</span>
                                         </div>
                                     @endif
                                     <h5 class="dark-pd-similar-card-title">{{ convertUtf8($sp->title) }}</h5>

@@ -4272,10 +4272,17 @@ a.testi-company-logo:hover::after {
 }
 @media (max-width: 860px) {
   .dark-svcp-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+  /* minmax(0, 1fr), not bare 1fr — a bare 1fr track's implicit minimum
+     width is "auto" (content-based), same as flex's min-width:auto
+     default, so any nowrap text inside the stacked sidebar column (e.g.
+     a long category/sector name in the new pill list) pushed this whole
+     track — and the page — wider than the viewport instead of letting
+     the column's own ellipsis/overflow rules clip it. Confirmed live:
+     body scrollWidth was 671px on a 375px viewport before this. */
   .dark-svcp-inner {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .dark-svcp-section {
     padding: 35px 24px 140px;
@@ -5619,10 +5626,203 @@ button.dark-sheet-submit[type="submit"]:active {
    sidebar consistency). Only the case grid below is still page-specific.
    ===================================================================== */
 
+/* .dark-svcp-inner's 1320px max-width is shared by Blog/Services/FAQ/
+   Portfolio-details too (see the comment above) — widened here scoped to
+   .dark-pf-section only, so this page's own container grows without
+   touching any of the others that reuse the same class. */
+.dark-pf-section .dark-svcp-inner {
+  max-width: 1520px;
+}
+
+/* Sectors/Categories sidebar — icon + name + count badge + chevron pill
+   rows, active one filled solid. .dark-svcp-cat-list's own plain-link
+   styling (shared with Blog/FAQ's sidebars too) is overridden here scoped
+   to .dark-pf-section (Portfolios) and .dark-svc-list-section (Services)
+   only — both asked for this redesign, Blog/FAQ didn't, so they keep the
+   plain-link version by not carrying either class. */
+.dark-pf-section .dark-svcp-cat-list li,
+.dark-svc-list-section .dark-svcp-cat-list li {
+  border-bottom: none;
+  margin-bottom: 6px;
+}
+.dark-pf-section .dark-svcp-cat-list a,
+.dark-svc-list-section .dark-svcp-cat-list a {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  gap: 12px;
+}
+.dark-pf-section .dark-svcp-cat-list a:hover,
+.dark-svc-list-section .dark-svcp-cat-list a:hover {
+  padding-left: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.dark-pf-section .dark-svcp-cat-list a::after,
+.dark-svc-list-section .dark-svcp-cat-list a::after {
+  content: none;
+}
+.dark-pf-cat-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.dark-pf-cat-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dark-pf-cat-count {
+  flex: none;
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: "Plex Mono", monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.dark-pf-cat-chevron {
+  flex: none;
+  display: flex;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.dark-pf-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron,
+.dark-svc-list-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron {
+  color: var(--accent-2);
+  transform: translateX(2px);
+}
+.dark-pf-section .dark-svcp-cat-list li.is-active a,
+.dark-svc-list-section .dark-svcp-cat-list li.is-active a {
+  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  color: #08130d;
+}
+.dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon,
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon {
+  background: rgba(8, 19, 13, 0.18);
+  color: #08130d;
+}
+.dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count,
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count {
+  background: rgba(8, 19, 13, 0.18);
+  color: #08130d;
+}
+.dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron,
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron {
+  color: #08130d;
+}
+
+/* ---- search + year toolbar, above the grid ---- */
+.dark-pf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+.dark-pf-toolbar .dark-svcp-search {
+  flex: 1 1 260px;
+  margin: 0;
+}
+.dark-pf-year-select {
+  position: relative;
+  flex: 0 0 auto;
+  /* A <select> is inline-block with vertical-align:baseline by default,
+     which reserves descender space below it inside a block container —
+     the classic "mystery gap under an inline element" bug, measured live
+     as a real 20px gap (wrapper 70px tall vs the select itself only
+     50px). display:flex here sidesteps it entirely instead of chasing
+     line-height/vertical-align tweaks on the select. */
+  display: flex;
+  align-items: center;
+}
+.dark-pf-year-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* A sitewide bare `select{background:var(--glass-bg) !important;
+     border:1px solid var(--glass-border) !important}` rule (further up
+     this same file) otherwise wins regardless of this selector's own
+     specificity — same fight documented on .dark-tp-sort select below,
+     same fix: !important on every property that rule or style.css's own
+     bare select reset could touch. */
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 100px !important;
+  color: #eaf0fb !important;
+  font-family: "Plex Sans", sans-serif;
+  font-size: 14px !important;
+  padding: 14px 40px 14px 20px !important;
+  /* style.css's own bare `select{height:50px}` otherwise wins outright —
+     it's the only rule setting `height` at all, so it applies regardless
+     of the padding above (padding: 14px 0 → still exactly 50px measured
+     live). height:auto lets padding actually determine the real height,
+     matching the search bar's own 55px next to it. */
+  height: auto !important;
+  /* common-style.css has an unrelated ".feedback-area-v1 ... , select"
+     rule that bundles a blanket margin-bottom:20px onto every <select>
+     sitewide — confirmed live as the actual source of a 20px gap under
+     this one (wrapper measured 70px tall vs the select's own 50px). */
+  margin: 0 !important;
+  cursor: pointer;
+  outline: none;
+}
+.dark-pf-year-select select:hover {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+.dark-pf-year-select select option {
+  background: #0b0f1a;
+  color: #eaf0fb;
+}
+.dark-pf-year-select::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .dark-pf-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  /* .dark-svcp-search's own "flex: 1 1 260px" sets flex-basis:260px,
+     which controls WIDTH in the toolbar's normal row layout — but once
+     flex-direction switches to column right above, the main axis is
+     vertical, so that same 260px basis became the search bar's HEIGHT
+     instead. Confirmed live: a 260px-tall pill instead of a normal ~55px
+     one. Reset back to auto now that height should just track content. */
+  .dark-pf-toolbar .dark-svcp-search {
+    flex-basis: auto;
+  }
+  .dark-pf-year-select select {
+    width: 100%;
+  }
+}
+
 /* ---- case grid ---- */
 .dark-pf-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 26px;
 }
 .dark-pf-card {
@@ -5757,6 +5957,11 @@ button.dark-sheet-submit[type="submit"]:active {
   width: 12px;
   height: 12px;
   flex-shrink: 0;
+}
+@media (max-width: 992px) {
+  .dark-pf-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 @media (max-width: 620px) {
   .dark-pf-grid {

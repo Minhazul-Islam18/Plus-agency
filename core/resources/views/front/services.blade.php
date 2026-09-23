@@ -48,7 +48,7 @@
 
 @if ($be->theme_version == 'dark')
     <!--    dark services section start   -->
-    <div class="dark-svcp-section">
+    <div class="dark-svcp-section dark-svc-list-section">
         <div class="dark-svcp-inner">
             <div>
                 @if (count($services) == 0)
@@ -107,9 +107,22 @@
                     <div class="dark-svcp-widget">
                         <h4>{{ __('Categories') }}</h4>
                         <ul class="dark-svcp-cat-list">
+                            <li class="{{ request()->filled('category') ? '' : 'is-active' }}">
+                                <a href="{{ route('front.services', ['term' => request()->input('term')]) }}">
+                                    <span class="dark-pf-cat-icon"><i class="fas fa-th-large"></i></span>
+                                    <span class="dark-pf-cat-name">{{ __('All categories') }}</span>
+                                    <span class="dark-pf-cat-count">{{ $servicesCount }}</span>
+                                    <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+                                </a>
+                            </li>
                             @foreach ($scats as $key => $scat)
                                 <li class="{{ $scat->id == request()->input('category') ? 'is-active' : '' }}">
-                                    <a href="{{ route('front.services', ['category' => $scat->id, 'term' => request()->input('term')]) }}">{{ convertUtf8($scat->name) }}</a>
+                                    <a href="{{ route('front.services', ['category' => $scat->id, 'term' => request()->input('term')]) }}">
+                                        <span class="dark-pf-cat-icon"><i class="fas fa-tag"></i></span>
+                                        <span class="dark-pf-cat-name">{{ convertUtf8($scat->name) }}</span>
+                                        <span class="dark-pf-cat-count">{{ $scategoryCounts->get($scat->id, 0) }}</span>
+                                        <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>

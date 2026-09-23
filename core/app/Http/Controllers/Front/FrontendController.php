@@ -143,6 +143,15 @@ class FrontendController extends Controller
 
         $data['servicesCount'] = Service::where('language_id', $currentLang->id)->count();
 
+        // Per-category counts for the sidebar's count badges — same
+        // icon+name+count+chevron pill design as the Portfolios page's
+        // own Sectors sidebar.
+        $data['scategoryCounts'] = Service::where('language_id', $currentLang->id)
+            ->whereNotNull('scategory_id')
+            ->selectRaw('scategory_id, count(*) as cnt')
+            ->groupBy('scategory_id')
+            ->pluck('cnt', 'scategory_id');
+
         $version = $be->theme_version;
 
         if ($version == 'default' || $version == 'dark') {

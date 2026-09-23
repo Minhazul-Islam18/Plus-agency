@@ -47,11 +47,11 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <div class="row">
-                    <div class="col-lg-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-3">
                         <div class="card-title d-inline-block">Services</div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-2 mt-2 mt-lg-0">
                         @if (!empty($langs))
                         <select name="language" class="form-control" onchange="window.location='{{url()->current() . '?language='}}'+this.value">
                             <option value="" selected disabled>Select a Language</option>
@@ -61,7 +61,23 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         </select>
                         @endif
                     </div>
-                    <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
+                    @if (serviceCategory())
+                    <div class="col-lg-3 mt-2 mt-lg-0 d-flex align-items-center">
+                        <form method="get" class="flex-grow-1">
+                            <input type="hidden" name="language" value="{{ request()->input('language') }}">
+                            <select name="category_id" class="form-control" onchange="this.form.submit()">
+                                <option value="">Category — All</option>
+                                @foreach ($scategories as $scategory)
+                                <option value="{{ $scategory->id }}" {{ request()->input('category_id') == $scategory->id ? 'selected' : '' }}>{{ convertUtf8($scategory->name) }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                        @if (request()->filled('category_id'))
+                        <a href="{{ url()->current() . '?language=' . request()->input('language') }}" class="ml-2 text-muted" title="Clear category filter"><i class="fas fa-times-circle"></i></a>
+                        @endif
+                    </div>
+                    @endif
+                    <div class="col-lg-{{ serviceCategory() ? 4 : 7 }} mt-2 mt-lg-0">
                         <a href="#" class="btn btn-primary float-right btn-sm" data-toggle="modal" data-target="#createModal"><i class="fas fa-plus"></i> Add Service</a>
                         <button class="btn btn-danger float-right btn-sm mr-2 d-none bulk-delete" data-href="{{route('admin.service.bulk.delete')}}"><i class="flaticon-interface-5"></i> Delete</button>
                     </div>
@@ -73,6 +89,56 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         @if (count($services) == 0)
                         <h3 class="text-center">NO SERVICE FOUND</h3>
                         @else
+                        <style>
+                            /* Toggle switch — same markup/CSS every other page with a
+                               status toggle already uses (Gallery/Language/Sectors/
+                               etc's own local copy; there's no global version). */
+                            .switch { position: relative; display: inline-block; width: 44px; height: 22px; vertical-align: middle; }
+                            .switch input { opacity: 0; width: 0; height: 0; }
+                            .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+                            .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+                            input:checked + .slider { background-color: #1572E8; }
+                            input:focus + .slider { box-shadow: 0 0 1px #1572E8; }
+                            input:checked + .slider:before { transform: translateX(22px); }
+                            .slider.round { border-radius: 22px; }
+                            .slider.round:before { border-radius: 50%; }
+
+                            /* Icon-only action buttons, same pastel-square treatment
+                               as the Portfolio list's actions column. dark-glass.css
+                               (also loaded admin-wide) carries a blanket
+                               button[type="submit"]{background:linear-gradient(...) !important}
+                               rule meant for the front-end site that leaks onto the
+                               Delete button here (the only type="submit" one) —
+                               beaten with a selector specific enough to out-rank
+                               that !important, same fix as Portfolio's own list. */
+                            .service-actions { display: flex; align-items: center; gap: 6px; }
+                            .service-actions button.service-action-btn[type="submit"] {
+                                background: #ffe3e3 !important;
+                                border: none !important;
+                                box-shadow: none !important;
+                            }
+                            .service-actions button.service-action-btn[type="submit"]:hover {
+                                transform: none !important;
+                                box-shadow: none !important;
+                            }
+                            .service-action-btn {
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                flex: 0 0 34px;
+                                width: 34px;
+                                height: 34px;
+                                border-radius: 8px;
+                                border: none;
+                                font-size: 14px;
+                                line-height: 1;
+                                cursor: pointer;
+                                transition: filter 0.15s ease;
+                            }
+                            .service-action-btn:hover { filter: brightness(0.94); }
+                            .service-action-edit { background: #eef0f3; color: #495057; }
+                            .service-action-delete { background: #ffe3e3; color: #e03131; }
+                        </style>
                         <div class="table-responsive">
                             <table class="table table-striped mt-3" id="basic-datatables">
                                 <thead>
@@ -87,7 +153,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         @endif
                                         <th scope="col">Featured</th>
                                         <th scope="col">Serial Number</th>
-                                        <th scope="col">Sidebar</th>
+                                        <th scope="col">Published</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
@@ -111,50 +177,27 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         @endif
 
                                         <td>
-                                            <form id="featureForm{{$service->id}}" class="d-inline-block" action="{{route('admin.service.feature')}}" method="post">
-                                                @csrf
-                                                <input type="hidden" name="service_id" value="{{$service->id}}">
-                                                <select class="form-control {{$service->feature == 1 ? 'bg-success' : 'bg-danger'}}" name="feature" onchange="document.getElementById('featureForm{{$service->id}}').submit();">
-                                                    <option value="1" {{$service->feature == 1 ? 'selected' : ''}}>Yes</option>
-                                                    <option value="0" {{$service->feature == 0 ? 'selected' : ''}}>No</option>
-                                                </select>
-                                            </form>
+                                            <label class="switch mb-0">
+                                                <input type="checkbox" class="service-feature-toggle" data-id="{{$service->id}}" {{$service->feature == 1 ? 'checked' : ''}}>
+                                                <span class="slider round"></span>
+                                            </label>
                                         </td>
 
                                         <td>{{$service->serial_number}}</td>
-                                        <td>
-                                            <form id="statusForm{{$service->id}}" class="d-inline-block" action="{{route('admin.service.sidebar')}}" method="post">
+                                        <td>{{ !empty($service->created_at) ? $service->created_at->format('d-m-Y') : '—' }}</td>
+                                    <td>
+                                        <div class="service-actions">
+                                            <a class="service-action-btn service-action-edit" href="{{route('admin.service.edit', $service->id) . '?language=' . request()->input('language')}}" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form class="deleteform d-inline-block" action="{{route('admin.service.delete')}}" method="post">
                                                 @csrf
                                                 <input type="hidden" name="service_id" value="{{$service->id}}">
-                                                <select class="form-control form-control-sm
-                                                @if ($service->sidebar == 1)
-                                                bg-success
-                                                @elseif ($service->sidebar == 0)
-                                                bg-danger
-                                                @endif
-                                                " name="sidebar" onchange="document.getElementById('statusForm{{$service->id}}').submit();">
-                                                <option value="1" {{$service->sidebar == 1 ? 'selected' : ''}}>Enabled</option>
-                                                <option value="0" {{$service->sidebar == 0 ? 'selected' : ''}}>Disabled</option>
-                                            </select>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-secondary btn-sm" href="{{route('admin.service.edit', $service->id) . '?language=' . request()->input('language')}}">
-                                            <span class="btn-label">
-                                                <i class="fas fa-edit"></i>
-                                            </span>
-                                            Edit
-                                        </a>
-                                        <form class="deleteform d-inline-block" action="{{route('admin.service.delete')}}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="service_id" value="{{$service->id}}">
-                                            <button type="submit" class="btn btn-danger btn-sm deletebtn">
-                                                <span class="btn-label">
+                                                <button type="submit" class="service-action-btn service-action-delete deletebtn" title="Delete">
                                                     <i class="fas fa-trash"></i>
-                                                </span>
-                                                Delete
-                                            </button>
-                                        </form>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -246,6 +289,21 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <p id="errdetails_page_status" class="mb-0 text-danger em"></p>
                 </div>
 
+                <div class="form-group">
+                    <label>Sidebar **</label>
+                    <div class="selectgroup w-100">
+                        <label class="selectgroup-item">
+                            <input type="radio" name="sidebar" value="1" class="selectgroup-input" checked>
+                            <span class="selectgroup-button">Enabled</span>
+                        </label>
+                        <label class="selectgroup-item">
+                            <input type="radio" name="sidebar" value="0" class="selectgroup-input">
+                            <span class="selectgroup-button">Disabled</span>
+                        </label>
+                    </div>
+                    <p id="errsidebar" class="mb-0 text-danger em"></p>
+                </div>
+
                 <div class="form-group" id="contentFg">
                     <label for="">Content **</label>
                     <textarea id="serviceContent" class="form-control summernote" name="content" data-height="300" placeholder="Enter content"></textarea>
@@ -298,6 +356,48 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
 
 <script>
+    // Featured toggle — same delegated pattern + $.notify toast the
+    // Sectors/Subsectors admin page's own status switch uses.
+    $(document).ready(function () {
+        $(document).on('change', '.service-feature-toggle', function () {
+            var $toggle = $(this);
+            var id = $toggle.data('id');
+            var checked = $toggle.is(':checked');
+            $.post("{{ route('admin.service.feature') }}", {
+                _token: "{{ csrf_token() }}",
+                service_id: id,
+                feature: checked ? 1 : 0,
+            }, function (resp) {
+                if (resp.success) {
+                    $.notify({
+                        title: 'Success',
+                        message: checked ? 'Featured successfully!' : 'Unfeatured successfully!',
+                        icon: 'fa fa-check',
+                    }, {
+                        type: 'success',
+                        placement: { from: 'top', align: 'right' },
+                        showProgressbar: true,
+                        time: 1000,
+                        delay: 3000,
+                    });
+                }
+            }).fail(function () {
+                $toggle.prop('checked', !checked);
+                $.notify({
+                    title: 'Error',
+                    message: 'Error updating status!',
+                    icon: 'fa fa-times',
+                }, {
+                    type: 'danger',
+                    placement: { from: 'top', align: 'right' },
+                    showProgressbar: true,
+                    time: 1000,
+                    delay: 3000,
+                });
+            });
+        });
+    });
+
     function toggleDetails() {
         let val = $("input[name='details_page_status']:checked").val();
 

@@ -8,7 +8,6 @@ use App\Traits\InvalidatesHomeListingCache;
 class Service extends Model
 {
     use InvalidatesHomeListingCache;
-  public $timestamps = false;
 
   public function scategory()
   {

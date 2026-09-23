@@ -140,6 +140,21 @@
                         <p id="errdetails_page_status" class="mb-0 text-danger em"></p>
                     </div>
 
+                    <div class="form-group">
+                        <label>Sidebar **</label>
+                        <div class="selectgroup w-100">
+                            <label class="selectgroup-item">
+                                <input type="radio" name="sidebar" value="1" class="selectgroup-input" {{$service->sidebar == 1 ? 'checked' : ''}}>
+                                <span class="selectgroup-button">Enabled</span>
+                            </label>
+                            <label class="selectgroup-item">
+                                <input type="radio" name="sidebar" value="0" class="selectgroup-input" {{$service->sidebar == 0 ? 'checked' : ''}}>
+                                <span class="selectgroup-button">Disabled</span>
+                            </label>
+                        </div>
+                        <p id="errsidebar" class="mb-0 text-danger em"></p>
+                    </div>
+
                      <div class="form-group" id="contentFg">
                         <label for="">Content **</label>
                         <textarea id="serviceContent" class="form-control summernote" name="content" data-height="300" placeholder="Enter content">{{replaceBaseUrl($service->content)}}</textarea>

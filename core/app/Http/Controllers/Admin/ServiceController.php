@@ -84,10 +84,23 @@ class ServiceController extends Controller
         $lang = Language::where('code', $request->language)->first();
 
         $lang_id = $lang->id;
-        $data['services'] = Service::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
+        $query = Service::where('language_id', $lang_id);
+
+        if (serviceCategory() && $request->filled('category_id')) {
+            $query->where('scategory_id', $request->category_id);
+        }
+
+        $data['services'] = $query->orderBy('id', 'DESC')->get();
 
         $data['lang_id'] = $lang_id;
         $data['abe'] = BasicExtended::where('language_id', $lang_id)->first();
+
+        if (serviceCategory()) {
+            // Every category for this language, not just active ones — an
+            // admin filtering the list should be able to find services
+            // under a category they've since disabled, not have it hidden.
+            $data['scategories'] = Scategory::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
+        }
 
         return view('admin.service.service.index', $data);
     }
@@ -131,6 +144,7 @@ class ServiceController extends Controller
             'content' => 'required',
             'details_page_status' => 'required',
             'summary' => 'required',
+            'sidebar' => 'required',
         ];
         if ($request->filled('image')) {
             $rules['image'] = [
@@ -175,6 +189,7 @@ class ServiceController extends Controller
         }
         $service->summary = $request->summary;
         $service->details_page_status = $request->details_page_status;
+        $service->sidebar = $request->sidebar;
         $service->meta_description = $request->meta_description;
         $service->meta_keywords = $request->meta_keywords;
         $service->serial_number = $request->serial_number;
@@ -212,6 +227,7 @@ class ServiceController extends Controller
             'serial_number' => 'required',
             'details_page_status' => 'required',
             'summary' => 'required',
+            'sidebar' => 'required',
         ];
 
         if ($request->filled('image')) {
@@ -245,6 +261,7 @@ class ServiceController extends Controller
         }
         $service->summary = $request->summary;
         $service->details_page_status = $request->details_page_status;
+        $service->sidebar = $request->sidebar;
         $service->serial_number = $request->serial_number;
         $service->meta_keywords = $request->meta_keywords;
         $service->meta_description = $request->meta_description;
@@ -345,13 +362,7 @@ class ServiceController extends Controller
         $service->feature = $request->feature;
         $service->save();
 
-        if ($request->feature == 1) {
-            Session::flash('success', 'Featured successfully!');
-        } else {
-            Session::flash('success', 'Unfeatured successfully!');
-        }
-
-        return back();
+        return response()->json(['success' => true]);
     }
 
     public function sidebar(Request $request)

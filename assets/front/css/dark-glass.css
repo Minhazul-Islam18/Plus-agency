@@ -12162,6 +12162,15 @@ body.dark-oc-lock {
 .dark-pd-similar-carousel .owl-stage-outer {
   overflow: hidden;
 }
+.dark-pd-similar-card,
+.dark-pd-similar-card:hover,
+.dark-pd-similar-card * {
+  /* Bootstrap's own a:hover{text-decoration:underline} wins over the
+     plain text-decoration:none above on hover (same/later cascade
+     position) — every text node inside the card (title, meta, client
+     name) got underlined as soon as you hovered anywhere on it. */
+  text-decoration: none;
+}
 .dark-pd-similar-card {
   display: block;
   position: relative;
@@ -12171,7 +12180,6 @@ body.dark-oc-lock {
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
   border-radius: 14px;
   overflow: hidden;
-  text-decoration: none;
   transition: transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1),
     border-color 0.38s ease, background 0.38s ease, box-shadow 0.38s ease;
 }
@@ -12235,7 +12243,7 @@ body.dark-oc-lock {
 }
 .dark-pd-similar-img {
   position: relative;
-  height: 158px;
+  height: 230px;
   overflow: hidden;
 }
 .dark-pd-similar-img img {
@@ -12321,6 +12329,13 @@ body.dark-oc-lock {
   position: absolute;
   left: 12px;
   bottom: 11px;
+  /* Right edge left free (not right:12px) — width is capped below by
+     max-width instead, so short names still hug their own content
+     instead of always stretching edge-to-edge. */
+  max-width: calc(100% - 24px);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: "Plex Mono", monospace;
   background: rgba(var(--accent-rgb), 0.88);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -12333,6 +12348,16 @@ body.dark-oc-lock {
   border-radius: 999px;
   z-index: 2;
 }
+.dark-pd-similar-badge i {
+  flex: none;
+  font-size: 10px;
+}
+.dark-pd-similar-badge-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dark-pd-similar-body {
   padding: 15px 16px 17px;
   position: relative;
@@ -12340,13 +12365,21 @@ body.dark-oc-lock {
 .dark-pd-similar-meta {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font-family: "Plex Mono", monospace;
   font-size: 10.5px;
   color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   margin-bottom: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.dark-pd-similar-meta i {
+  flex: none;
+  font-size: 10px;
+  color: var(--accent-2);
 }
 .dark-pd-similar-dot {
   width: 6px;

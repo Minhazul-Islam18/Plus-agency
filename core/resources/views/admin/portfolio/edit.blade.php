@@ -87,22 +87,13 @@
                 var langid = $(this).val();
                 if (langid === prevLanguageId) return;
 
-                if (!confirm('Changing language will clear Sector, Service, Status and Partners below — you\'ll need to re-pick them for the new language. Continue?')) {
+                if (!confirm('Changing language will clear Sector, Status and Partners below — you\'ll need to re-pick them for the new language. Continue?')) {
                     $(this).val(prevLanguageId).trigger('change');
                     return;
                 }
                 prevLanguageId = langid;
 
-                $("#services, #sectors, #portfolioStatuses, #partnerIds").removeAttr('disabled');
-
-                $.get("{{ url('/') }}/admin/portfolio/" + langid + "/getservices", function(data) {
-                    let options = `<option value="" disabled selected>Select a service</option>`;
-                    for (let i = 0; i < data.length; i++) {
-                        options += `<option value="${data[i].id}">${data[i].title}</option>`;
-                    }
-                    $("#services").html(options);
-                    $("#services").trigger('change');
-                });
+                $("#sectors, #portfolioStatuses, #partnerIds").removeAttr('disabled');
 
                 $.get("{{ url('/') }}/admin/portfolio/" + langid + "/get_sectors", function(data) {
                     let options = `<option value="" disabled selected>Ex: Energy</option>`;

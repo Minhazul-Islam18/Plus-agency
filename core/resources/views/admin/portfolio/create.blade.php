@@ -64,25 +64,11 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            // sectors + services + statuses + partners load according to language selection
+            // sectors + statuses + partners load according to language selection
             $("select[name='language_id']").on('change', function() {
-                $("#services, #sectors, #portfolioStatuses, #partnerIds").removeAttr('disabled');
+                $("#sectors, #portfolioStatuses, #partnerIds").removeAttr('disabled');
 
                 let langid = $(this).val();
-
-                $.get("{{ url('/') }}/admin/portfolio/" + langid + "/getservices", function(data) {
-                    let options = `<option value="" disabled selected>Select a service</option>`;
-                    for (let i = 0; i < data.length; i++) {
-                        options += `<option value="${data[i].id}">${data[i].title}</option>`;
-                    }
-                    $("#services").html(options);
-                    // #services is select2-enhanced (see _form.blade.php) —
-                    // swapping the underlying <option>s via .html() doesn't
-                    // by itself redraw select2's own closed-control text or
-                    // its dropdown list; .trigger('change') tells it to
-                    // resync from the DOM it now wraps.
-                    $("#services").trigger('change');
-                });
 
                 $.get("{{ url('/') }}/admin/portfolio/" + langid + "/get_sectors", function(data) {
                     let options = `<option value="" disabled selected>Ex: Energy</option>`;
@@ -90,7 +76,11 @@
                         options += `<option value="${data[i].id}">${data[i].name}</option>`;
                     }
                     $("#sectors").html(options);
-                    // Same select2 resync as #services above.
+                    // #sectors is select2-enhanced (see _form.blade.php) —
+                    // swapping the underlying <option>s via .html() doesn't
+                    // by itself redraw select2's own closed-control text or
+                    // its dropdown list; .trigger('change') tells it to
+                    // resync from the DOM it now wraps.
                     $("#sectors").trigger('change');
                 });
 

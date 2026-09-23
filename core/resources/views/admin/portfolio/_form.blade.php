@@ -264,7 +264,6 @@
        site-wide init pass `theme:'bootstrap'` — reskinned dark here
        rather than touching the shared global init. */
     #portfolioCountrySelect + .select2-container,
-    #services + .select2-container,
     #sectors + .select2-container,
     #portfolioStatuses + .select2-container {
         width: 100% !important;
@@ -347,7 +346,7 @@
        dates — in a sidebar (right) column. Sticky so it stays in view
        while the main column (Evidence of Competence, Carousel Overlay...)
        scrolls past it. Language is the FIRST sidebar card: it used to sit
-       far down the page while Sector/Service/Status/Partners (which all
+       far down the page while Sector/Status/Partners (which all
        load FROM it) were scattered elsewhere, forcing a scroll-down-then-
        back-up round trip just to set up a new portfolio. */
     @media (min-width: 992px) {
@@ -454,7 +453,7 @@
 {{-- Shopify/WordPress-style layout: content-heavy fields in the main
      (left) column, everything else — language, publish state, taxonomy,
      dates — in a sticky sidebar (right) column. Language is the FIRST
-     sidebar card: Sector/Service/Status/Partners below it all cascade
+     sidebar card: Sector/Status/Partners below it all cascade
      from it, so picking it first — instead of scrolling down to it after
      everything else — is what actually lets that cascade fire before you
      need those fields. --}}
@@ -829,7 +828,7 @@
     <div class="col-lg-4 portfolio-sidebar-col">
 
         {{-- Language — first sidebar card, always the first thing visible.
-             Sector/Service/Status/Partners below all cascade FROM this
+             Sector/Status/Partners below all cascade FROM this
              (see create.blade.php's language-change AJAX handlers), so
              picking it here first — instead of scrolling down to a
              "Project Details" card further down the page — is the actual
@@ -840,7 +839,7 @@
                 <label>Language **</label>
                 {{-- Editable on edit too now — changing it re-runs the same
                      language cascade AJAX as create (see edit.blade.php),
-                     which clears+reloads Sector/Service/Status/Partners for
+                     which clears+reloads Sector/Status/Partners for
                      the new language (those FK rows are language-scoped, so
                      old selections wouldn't exist under the new language). --}}
                 <select id="language" name="language_id" class="form-control" required
@@ -934,20 +933,6 @@
                 <p id="errsubsector_id" class="mb-0 text-danger em"></p>
             </div>
 
-            <div class="form-group">
-                <label>Service **</label>
-                <select id="services" class="form-control" name="service_id" required
-                    {{ $isEdit ? '' : 'disabled' }}>
-                    <option value="" selected disabled>Select a service</option>
-                    @foreach ($services as $service)
-                        <option value="{{ $service->id }}"
-                            {{ $old('service_id') == $service->id ? 'selected' : '' }}>{{ $service->title }}
-                        </option>
-                    @endforeach
-                </select>
-                <p id="errservice_id" class="mb-0 text-danger em"></p>
-            </div>
-
             <div class="row">
                 <div class="col-6">
                     <div class="form-group">
@@ -987,7 +972,7 @@
                      admin/home/partner) instead of free text, so a
                      partner's real logo can be shown against this
                      project. Cascades on language change same as
-                     Sector/Service/Status. --}}
+                     Sector/Status. --}}
                 <select id="partnerIds" class="form-control" name="partner_ids[]" multiple
                     {{ $isEdit ? '' : 'disabled' }}>
                     @foreach ($partners as $partner)
@@ -1171,20 +1156,6 @@
                 templateSelection: countryFlagTemplate,
             });
 
-            // Service <select> — some titles are long tender names ("Ex:
-            // Call for tenders for 15 kV and 33 kV mobile substations").
-            // A plain native <select>'s dropdown popup grows to fit its
-            // widest option (no CSS can stop that); select2's own dropdown
-            // always matches the closed control's width instead, so a long
-            // title just gets clipped with an ellipsis (CSS above) rather
-            // than blowing the popup out wide. Starts disabled on the
-            // create page (enabled once a language is picked, same as
-            // #sectors/#portfolioStatuses) — select2 renders fine on a
-            // disabled select and picks up the enable via its own
-            // attribute observer once create.blade.php's cascade removes
-            // `disabled`, same as it already does for `<option>` swaps.
-            $('#services').select2({ width: '100%' });
-
             // Sector / Status — same treatment: same disabled-until-
             // language-picked lifecycle, same reskin, same width fix.
             $('#sectors').select2({ width: '100%' });
@@ -1192,7 +1163,7 @@
             $('#subsectors').select2({ width: '100%' });
 
             // Sector -> Subsector cascade — same AJAX-swap-options pattern
-            // as Language -> Sector/Service/Status/Partners (create/edit
+            // as Language -> Sector/Status/Partners (create/edit
             // .blade.php), just one level deeper. Picking a DIFFERENT
             // sector always resets Subsector (a subsector from the old
             // sector wouldn't be valid under the new one).
@@ -1288,7 +1259,6 @@
             { name: 'title' },
             { name: 'content', summernote: true },
             { name: 'client_name' },
-            { name: 'service_id' },
             { name: 'status_id' },
             { name: 'serial_number' },
             // Always resubmitted in full on save (see storeDocuments/

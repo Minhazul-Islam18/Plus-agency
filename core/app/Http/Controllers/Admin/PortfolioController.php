@@ -201,7 +201,9 @@ class PortfolioController extends Controller
                 }
             ],
             'client_name' => 'required|max:1000',
-            'service_id' => 'required',
+            // No longer collected on the form — kept nullable (not removed)
+            // so old rows still validate, same precedent as 'tags' just above.
+            'service_id' => 'nullable',
             // Legacy field, dropped from the redesigned form — kept nullable
             // rather than removed so old rows/imports with tags still validate.
             'tags' => 'nullable',
@@ -288,7 +290,6 @@ class PortfolioController extends Controller
 
         $messages = [
             'language_id.required' => 'The language field is required',
-            'service_id.required' => 'service is required'
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -467,7 +468,9 @@ class PortfolioController extends Controller
                 }
             ],
             'client_name' => 'required|max:1000',
-            'service_id' => 'required',
+            // No longer collected on the form — kept nullable (not removed)
+            // so old rows still validate, same precedent as 'tags' just above.
+            'service_id' => 'nullable',
             'tags' => 'nullable',
             'content' => 'required',
             'status_id' => 'required|integer',
@@ -548,9 +551,7 @@ class PortfolioController extends Controller
             ];
         }
 
-        $messages = [
-            'service_id.required' => 'service is required'
-        ];
+        $messages = [];
 
         $validator = Validator::make($request->all(), $rules, $messages);
 

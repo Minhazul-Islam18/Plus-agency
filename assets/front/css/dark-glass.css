@@ -275,9 +275,15 @@ a.proceed-checkout-btn:hover {
   border-bottom: 1px solid var(--glass-border) !important;
 }
 .footer-section {
-  background: rgba(5, 16, 13, 0.9) !important;
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* Was rgba(...,0.9) with a backdrop-filter blur — 10% see-through onto
+     the body's own background, which has several radial-gradient glows
+     positioned at fixed points (15% 0%, 100% 30%, etc.). Wherever the
+     footer happened to sit relative to those, a patch of it tinted
+     differently from the rest — confirmed live, not a deliberate two-tone
+     design. Fully opaque removes any bleed-through, so the footer reads
+     as one flat color everywhere; backdrop-filter is a no-op once nothing
+     shows through it, so it's dropped too. */
+  background: rgb(5, 16, 13) !important;
 }
 .footer-newsletter button[type="submit"],
 .footer-newsletter input[type="submit"] {
@@ -373,35 +379,6 @@ a.proceed-checkout-btn:hover {
   position: relative;
   padding: 70px 0 50px;
   overflow: hidden;
-}
-.dark-footer-mesh {
-  position: absolute;
-  border-radius: 40% 60% 65% 35% / 45% 40% 60% 55%;
-  filter: blur(100px);
-  opacity: 0.22;
-  pointer-events: none;
-}
-.dark-footer-mesh--a {
-  width: 480px;
-  height: 480px;
-  background: radial-gradient(
-    circle,
-    rgba(var(--accent-rgb), 0.35),
-    transparent 70%
-  );
-  top: -30%;
-  left: -8%;
-}
-.dark-footer-mesh--b {
-  width: 380px;
-  height: 380px;
-  background: radial-gradient(
-    circle,
-    rgba(var(--accent-2-rgb), 0.3),
-    transparent 70%
-  );
-  top: -10%;
-  right: -6%;
 }
 
 .dark-footer-grid {

@@ -1,7 +1,4 @@
 <div class="dark-footer-top">
-    <span class="dark-footer-mesh dark-footer-mesh--a"></span>
-    <span class="dark-footer-mesh dark-footer-mesh--b"></span>
-
     <div class="dark-footer-grid reveal-fade">
 
         <div class="dark-footer-about">

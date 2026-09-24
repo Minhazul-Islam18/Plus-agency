@@ -12676,3 +12676,33 @@ body.dark-oc-lock {
 #pdSimilarCarousel .owl-stage-outer {
   padding-top: 14px;
 }
+
+/* Single Service: "Related Services" carousel (same category), below the
+   article. Header/nav reuse the Portfolio "similar" classes; cards are the
+   Services list's own .dark-svcp-card. Equal-height cards in the track. */
+.dark-svcrel-section {
+  margin-top: 64px;
+}
+.dark-svcrel-cat {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  margin-left: 8px;
+}
+.dark-svcrel-carousel .owl-stage-outer {
+  overflow: hidden;
+  padding: 14px 2px 10px;
+  margin: -14px -2px -10px;
+}
+.dark-svcrel-carousel .owl-stage {
+  display: flex;
+}
+.dark-svcrel-carousel .owl-item {
+  display: flex;
+}
+.dark-svcrel-carousel .dark-svcp-card {
+  width: 100%;
+}
+.dark-svcrel-section .dark-pd-similar-title {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}

@@ -139,5 +139,9 @@
     "Please select a rating.": "Please select a rating.",
     "Please select a valid rating.": "Please select a valid rating.",
     "Feedback is required.": "Feedback is required.",
-    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "تم قفل حسابك لأنك تجاوزت الحد الأقصى لعدد محاولات تسجيل الدخول. يمكنك المحاولة مرة أخرى بعد :time."
+    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "تم قفل حسابك لأنك تجاوزت الحد الأقصى لعدد محاولات تسجيل الدخول. يمكنك المحاولة مرة أخرى بعد :time.",
+    "Related Services": "خدمات ذات صلة",
+    "Previous": "السابق",
+    "Next": "التالي",
+    "All categories": "جميع الفئات"
 }

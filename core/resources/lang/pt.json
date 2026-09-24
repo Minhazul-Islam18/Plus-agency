@@ -140,5 +140,9 @@
     "Please select a rating.": "Please select a rating.",
     "Please select a valid rating.": "Please select a valid rating.",
     "Feedback is required.": "Feedback is required.",
-    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "Sua conta foi bloqueada porque você excedeu o número máximo de tentativas de login. Você poderá tentar novamente após :time."
+    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "Sua conta foi bloqueada porque você excedeu o número máximo de tentativas de login. Você poderá tentar novamente após :time.",
+    "Related Services": "Serviços relacionados",
+    "Previous": "Anterior",
+    "Next": "Seguinte",
+    "All categories": "Todas as categorias"
 }

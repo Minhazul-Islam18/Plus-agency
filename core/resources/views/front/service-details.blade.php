@@ -103,7 +103,7 @@
 
 @if ($be->theme_version == 'dark')
     <!--    dark service details section start   -->
-    <div class="dark-svcp-section">
+    <div class="dark-svcp-section dark-svc-list-section">
         <div class="dark-svcp-inner @if ($service->sidebar != 1) dark-svcp-inner--full @endif">
             <div>
                 <div class="dark-svcd-panel reveal-left">
@@ -127,9 +127,22 @@
                         <div class="dark-svcp-widget">
                             <h4>{{ __('Categories') }}</h4>
                             <ul class="dark-svcp-cat-list">
+                                <li>
+                                    <a href="{{ route('front.services') }}">
+                                        <span class="dark-pf-cat-icon"><i class="fas fa-th-large"></i></span>
+                                        <span class="dark-pf-cat-name">{{ __('All categories') }}</span>
+                                        <span class="dark-pf-cat-count">{{ $servicesCount }}</span>
+                                        <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+                                    </a>
+                                </li>
                                 @foreach ($scats as $key => $scat)
                                     <li class="{{ !empty($service->scategory) && $service->scategory->id == $scat->id ? 'is-active' : '' }}">
-                                        <a href="{{ route('front.services', ['category' => $scat->id, 'term' => request()->input('term')]) }}">{{ convertUtf8($scat->name) }}</a>
+                                        <a href="{{ route('front.services', ['category' => $scat->id]) }}">
+                                            <span class="dark-pf-cat-icon"><i class="fas fa-tag"></i></span>
+                                            <span class="dark-pf-cat-name">{{ convertUtf8($scat->name) }}</span>
+                                            <span class="dark-pf-cat-count">{{ $scategoryCounts->get($scat->id, 0) }}</span>
+                                            <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+                                        </a>
                                     </li>
                                 @endforeach
                             </ul>
@@ -150,6 +163,46 @@
                 </div>
             @endif
         </div>
+
+        @if ($relatedServices->count() > 0)
+            <div class="dark-pd-similar-section dark-svcrel-section">
+                <div class="dark-pd-similar-head">
+                    <h3 class="dark-pd-similar-title reveal-text">
+                        {{ __('Related Services') }}
+                        @if (!empty($service->scategory))
+                            <span class="dark-svcrel-cat">&mdash; {{ convertUtf8($service->scategory->name) }}</span>
+                        @endif
+                        <span class="dark-pd-similar-rule"></span>
+                    </h3>
+                    @if ($relatedServices->count() > 1)
+                        <div class="dark-pd-similar-nav">
+                            <button type="button" id="svcRelPrev" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg></button>
+                            <button type="button" id="svcRelNext" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg></button>
+                        </div>
+                    @endif
+                </div>
+                <div class="owl-carousel dark-svcrel-carousel" id="svcRelCarousel">
+                    @foreach ($relatedServices as $rs)
+                        <div class="dark-svcp-card">
+                            <div class="dark-svcp-img-wrap">
+                                <span class="dark-svcp-num">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                <img src="{{ asset('assets/front/img/services/' . $rs->main_image) }}" alt="{{ convertUtf8($rs->title) }}">
+                            </div>
+                            <div class="dark-svcp-body">
+                                <h3><a @if ($rs->details_page_status == 1) href="{{ route('front.servicedetails', [$rs->slug]) }}" @endif>{{ convertUtf8($rs->title) }}</a></h3>
+                                <p>{{ \Illuminate\Support\Str::limit(strip_tags($rs->summary), 150) }}</p>
+                                @if ($rs->details_page_status == 1)
+                                    <a href="{{ route('front.servicedetails', [$rs->slug]) }}" class="dark-svcp-link">
+                                        {{ __('Read More') }}
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 
     {{-- Image lightbox for images embedded in the service's own WYSIWYG
@@ -501,6 +554,35 @@
                         pinch = null;
                     }
                 });
+            })();
+        </script>
+
+        <script>
+            (function () {
+                var $ = window.jQuery;
+                var $track = $('#svcRelCarousel');
+                if (!$ || !$track.length || !$.fn.owlCarousel) return;
+
+                var n = $track.children().length;
+                $track.owlCarousel({
+                    loop: n > 3,
+                    rewind: n <= 3,
+                    autoplay: n > 1,
+                    autoplayTimeout: 4500,
+                    autoplaySpeed: 900,
+                    autoplayHoverPause: true,
+                    smartSpeed: 600,
+                    margin: 22,
+                    nav: false,
+                    dots: false,
+                    responsive: {
+                        0: { items: 1 },
+                        640: { items: 2 },
+                        992: { items: 3 }
+                    }
+                });
+                $('#svcRelPrev').on('click', function () { $track.trigger('prev.owl.carousel'); });
+                $('#svcRelNext').on('click', function () { $track.trigger('next.owl.carousel'); });
             })();
         </script>
     @endsection

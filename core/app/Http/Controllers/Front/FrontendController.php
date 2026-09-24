@@ -383,6 +383,29 @@ class FrontendController extends Controller
             return back();
         }
 
+        // Sidebar category pills show the same per-category counts as the
+        // Services list page.
+        $data['servicesCount'] = Service::where('language_id', $currentLang->id)->where('status', 1)->count();
+        $data['scategoryCounts'] = Service::where('language_id', $currentLang->id)
+            ->where('status', 1)
+            ->whereNotNull('scategory_id')
+            ->selectRaw('scategory_id, count(*) as cnt')
+            ->groupBy('scategory_id')
+            ->pluck('cnt', 'scategory_id');
+
+        // Other active services in the same category, shown as an
+        // auto-scrolling carousel below the article.
+        $data['relatedServices'] = collect();
+        if (!empty($data['service']->scategory_id)) {
+            $data['relatedServices'] = Service::where('language_id', $currentLang->id)
+                ->where('status', 1)
+                ->where('scategory_id', $data['service']->scategory_id)
+                ->where('id', '!=', $data['service']->id)
+                ->orderBy('serial_number', 'ASC')
+                ->limit(12)
+                ->get();
+        }
+
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
 

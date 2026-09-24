@@ -140,5 +140,9 @@
     "Please select a rating.": "Please select a rating.",
     "Please select a valid rating.": "Please select a valid rating.",
     "Feedback is required.": "Feedback is required.",
-    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "Maksimum giriş deneme sayısını aştığınız için hesabınız kilitlendi. :time sonra tekrar deneyebilirsiniz."
+    "Your account has been locked because you have exceeded the maximum number of login attempts. You can try again after :time.": "Maksimum giriş deneme sayısını aştığınız için hesabınız kilitlendi. :time sonra tekrar deneyebilirsiniz.",
+    "Related Services": "İlgili Hizmetler",
+    "Previous": "Önceki",
+    "Next": "Sonraki",
+    "All categories": "Tüm kategoriler"
 }

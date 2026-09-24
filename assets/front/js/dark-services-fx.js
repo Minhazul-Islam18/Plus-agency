@@ -65,7 +65,9 @@
                 .then(function (data) {
                     var tmp = document.createElement('div');
                     tmp.innerHTML = data.html;
-                    Array.prototype.forEach.call(tmp.children, function (card, i) {
+                    // Snapshot first: tmp.children is live, and appendChild moves each card
+                    // out of it, which made the loop skip every other card.
+                    Array.prototype.slice.call(tmp.children).forEach(function (card, i) {
                         card.style.animationDelay = (i * 0.08) + 's';
                         grid.appendChild(card);
                     });

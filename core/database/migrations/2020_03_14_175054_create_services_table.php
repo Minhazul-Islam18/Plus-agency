@@ -24,6 +24,7 @@ class CreateServicesTable extends Migration
             $table->integer('serial_number')->default(0);
             $table->text('meta_keywords')->nullable();
             $table->text('meta_description')->nullable();
+            $table->tinyInteger('status')->default(1)->comment('1 - active, 0 - deactivated');
             $table->timestamps();
         });
     }

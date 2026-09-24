@@ -564,6 +564,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/service/bulk-delete', 'Admin\ServiceController@bulkDelete')->name('admin.service.bulk.delete');
         Route::get('/service/{langid}/getcats', 'Admin\ServiceController@getcats')->name('admin.service.getcats');
         Route::post('/service/feature', 'Admin\ServiceController@feature')->name('admin.service.feature');
+        Route::post('/service/status', 'Admin\ServiceController@toggleStatus')->name('admin.service.status');
         Route::post('/service/sidebar', 'Admin\ServiceController@sidebar')->name('admin.service.sidebar');
 
 

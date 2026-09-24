@@ -145,6 +145,7 @@ class ServiceController extends Controller
             'details_page_status' => 'required',
             'summary' => 'required',
             'sidebar' => 'required',
+            'feature' => 'required',
         ];
         if ($request->filled('image')) {
             $rules['image'] = [
@@ -190,12 +191,14 @@ class ServiceController extends Controller
         $service->summary = $request->summary;
         $service->details_page_status = $request->details_page_status;
         $service->sidebar = $request->sidebar;
+        $service->feature = $request->feature;
         $service->meta_description = $request->meta_description;
         $service->meta_keywords = $request->meta_keywords;
         $service->serial_number = $request->serial_number;
         $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
         $service->save();
 
+        \App\Http\Controllers\Admin\CloudflareController::purge();
         Session::flash('success', 'Service added successfully!');
         return "success";
     }
@@ -228,6 +231,7 @@ class ServiceController extends Controller
             'details_page_status' => 'required',
             'summary' => 'required',
             'sidebar' => 'required',
+            'feature' => 'required',
         ];
 
         if ($request->filled('image')) {
@@ -262,6 +266,7 @@ class ServiceController extends Controller
         $service->summary = $request->summary;
         $service->details_page_status = $request->details_page_status;
         $service->sidebar = $request->sidebar;
+        $service->feature = $request->feature;
         $service->serial_number = $request->serial_number;
         $service->meta_keywords = $request->meta_keywords;
         $service->meta_description = $request->meta_description;
@@ -274,8 +279,17 @@ class ServiceController extends Controller
             $service->main_image = $filename;
         }
 
+        // Legacy rows predate the timestamps columns, so created_at is NULL
+        // and the list's Published column showed "—" forever. First save
+        // after this stamps it, so the date appears as soon as an article
+        // is edited (and stays put on later edits).
+        if (empty($service->created_at)) {
+            $service->created_at = now();
+        }
+
         $service->save();
 
+        \App\Http\Controllers\Admin\CloudflareController::purge();
         Session::flash('success', 'Service updated successfully!');
         return "success";
     }
@@ -361,6 +375,23 @@ class ServiceController extends Controller
         $service = Service::find($request->service_id);
         $service->feature = $request->feature;
         $service->save();
+
+        \App\Http\Controllers\Admin\CloudflareController::purge();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        $service = Service::findOrFail($request->service_id);
+        $service->status = $request->status == 1 ? 1 : 0;
+        // Activation isn't an edit of the article's content — leave the
+        // Published/updated timestamps alone.
+        $service->timestamps = false;
+        $service->save();
+
+        // Cached public pages would otherwise keep serving (or missing) it.
+        \App\Http\Controllers\Admin\CloudflareController::purge();
 
         return response()->json(['success' => true]);
     }

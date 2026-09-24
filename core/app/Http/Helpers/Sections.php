@@ -175,7 +175,7 @@ if (!function_exists('servicesSection')) {
     function servicesSection($currentLang, $version) {
 
         if (!empty($currentLang->services)) {
-            $services = $currentLang->services()->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
+            $services = $currentLang->services()->where('status', 1)->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
         } else {
             $services = [];
         }

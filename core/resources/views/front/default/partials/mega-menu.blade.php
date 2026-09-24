@@ -82,6 +82,15 @@
         } else {
             $megaItemsById = $itemModel::whereIn('id', $megaMenus)->get()->keyBy('id');
         }
+
+        // Deactivated services must not appear in the menu; prune the id
+        // list too so the 5-per-row grouping below stays intact.
+        if ($link['type'] == 'services-megamenu') {
+            $megaItemsById = $megaItemsById->filter(fn ($i) => (int) $i->status === 1);
+            if (!$catAvailable) {
+                $megaMenus = array_values(array_filter($megaMenus, fn ($id) => $megaItemsById->has($id)));
+            }
+        }
     }
 @endphp
 

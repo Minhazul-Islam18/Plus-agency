@@ -151,7 +151,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         @if (serviceCategory())
                                         <th scope="col">Category</th>
                                         @endif
-                                        <th scope="col">Featured</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Serial Number</th>
                                         <th scope="col">Published</th>
                                         <th scope="col">Actions</th>
@@ -178,13 +178,13 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
                                         <td>
                                             <label class="switch mb-0">
-                                                <input type="checkbox" class="service-feature-toggle" data-id="{{$service->id}}" {{$service->feature == 1 ? 'checked' : ''}}>
+                                                <input type="checkbox" class="service-status-toggle" data-id="{{$service->id}}" {{$service->status == 1 ? 'checked' : ''}}>
                                                 <span class="slider round"></span>
                                             </label>
                                         </td>
 
                                         <td>{{$service->serial_number}}</td>
-                                        <td>{{ !empty($service->created_at) ? $service->created_at->format('d-m-Y') : '—' }}</td>
+                                        <td>{{ optional($service->created_at ?? $service->updated_at)->format('d-m-Y') ?: '—' }}</td>
                                     <td>
                                         <div class="service-actions">
                                             <a class="service-action-btn service-action-edit" href="{{route('admin.service.edit', $service->id) . '?language=' . request()->input('language')}}" title="Edit">
@@ -304,6 +304,21 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <p id="errsidebar" class="mb-0 text-danger em"></p>
                 </div>
 
+                <div class="form-group">
+                    <label>Featured **</label>
+                    <div class="selectgroup w-100">
+                        <label class="selectgroup-item">
+                            <input type="radio" name="feature" value="1" class="selectgroup-input">
+                            <span class="selectgroup-button">Yes</span>
+                        </label>
+                        <label class="selectgroup-item">
+                            <input type="radio" name="feature" value="0" class="selectgroup-input" checked>
+                            <span class="selectgroup-button">No</span>
+                        </label>
+                    </div>
+                    <p id="errfeature" class="mb-0 text-danger em"></p>
+                </div>
+
                 <div class="form-group" id="contentFg">
                     <label for="">Content **</label>
                     <textarea id="serviceContent" class="form-control summernote" name="content" data-height="300" placeholder="Enter content"></textarea>
@@ -356,22 +371,22 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
 
 
 <script>
-    // Featured toggle — same delegated pattern + $.notify toast the
+    // Status (activate/deactivate) toggle — same delegated pattern + $.notify toast the
     // Sectors/Subsectors admin page's own status switch uses.
     $(document).ready(function () {
-        $(document).on('change', '.service-feature-toggle', function () {
+        $(document).on('change', '.service-status-toggle', function () {
             var $toggle = $(this);
             var id = $toggle.data('id');
             var checked = $toggle.is(':checked');
-            $.post("{{ route('admin.service.feature') }}", {
+            $.post("{{ route('admin.service.status') }}", {
                 _token: "{{ csrf_token() }}",
                 service_id: id,
-                feature: checked ? 1 : 0,
+                status: checked ? 1 : 0,
             }, function (resp) {
                 if (resp.success) {
                     $.notify({
                         title: 'Success',
-                        message: checked ? 'Featured successfully!' : 'Unfeatured successfully!',
+                        message: checked ? 'Activated successfully!' : 'Deactivated successfully!',
                         icon: 'fa fa-check',
                     }, {
                         type: 'success',

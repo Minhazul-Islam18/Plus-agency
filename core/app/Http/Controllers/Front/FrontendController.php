@@ -99,7 +99,7 @@ class FrontendController extends Controller
                 ];
 
                 if (!serviceCategory()) {
-                    $blocks['services'] = Service::where('language_id', $lang_id)->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
+                    $blocks['services'] = Service::where('language_id', $lang_id)->where('status', 1)->where('feature', 1)->orderBy('serial_number', 'ASC')->get();
                 }
 
                 return $blocks;
@@ -133,7 +133,9 @@ class FrontendController extends Controller
             $data['category'] = Scategory::findOrFail($category);
         }
 
-        $data['services'] = Service::when($category, function ($query, $category) {
+        // status=1 only — a deactivated article must vanish from the list,
+        // its counts and its details page, not just be flagged in admin.
+        $data['services'] = Service::where('status', 1)->when($category, function ($query, $category) {
             return $query->where('scategory_id', $category);
         })->when($term, function ($query, $term) {
             return $query->where('title', 'like', '%' . $term . '%');
@@ -141,12 +143,13 @@ class FrontendController extends Controller
             return $query->where('language_id', $currentLang->id);
         })->orderBy('serial_number', 'ASC')->paginate(6);
 
-        $data['servicesCount'] = Service::where('language_id', $currentLang->id)->count();
+        $data['servicesCount'] = Service::where('language_id', $currentLang->id)->where('status', 1)->count();
 
         // Per-category counts for the sidebar's count badges — same
         // icon+name+count+chevron pill design as the Portfolios page's
         // own Sectors sidebar.
         $data['scategoryCounts'] = Service::where('language_id', $currentLang->id)
+            ->where('status', 1)
             ->whereNotNull('scategory_id')
             ->selectRaw('scategory_id, count(*) as cnt')
             ->groupBy('scategory_id')
@@ -374,7 +377,7 @@ class FrontendController extends Controller
 
         $currentLang = currentLang();
 
-        $data['service'] = Service::where('slug', $slug)->where('language_id', $currentLang->id)->firstOrFail();
+        $data['service'] = Service::where('slug', $slug)->where('language_id', $currentLang->id)->where('status', 1)->firstOrFail();
 
         if ($data['service']->details_page_status == 0) {
             return back();

@@ -155,6 +155,21 @@
                         <p id="errsidebar" class="mb-0 text-danger em"></p>
                     </div>
 
+                    <div class="form-group">
+                        <label>Featured **</label>
+                        <div class="selectgroup w-100">
+                            <label class="selectgroup-item">
+                                <input type="radio" name="feature" value="1" class="selectgroup-input" {{$service->feature == 1 ? 'checked' : ''}}>
+                                <span class="selectgroup-button">Yes</span>
+                            </label>
+                            <label class="selectgroup-item">
+                                <input type="radio" name="feature" value="0" class="selectgroup-input" {{$service->feature != 1 ? 'checked' : ''}}>
+                                <span class="selectgroup-button">No</span>
+                            </label>
+                        </div>
+                        <p id="errfeature" class="mb-0 text-danger em"></p>
+                    </div>
+
                      <div class="form-group" id="contentFg">
                         <label for="">Content **</label>
                         <textarea id="serviceContent" class="form-control summernote" name="content" data-height="300" placeholder="Enter content">{{replaceBaseUrl($service->content)}}</textarea>

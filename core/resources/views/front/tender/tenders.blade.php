@@ -179,141 +179,144 @@
         </div>
     @endsection
 
-    @if ($featured_tenders->count() > 0)
-        <div class="dark-tp-spotlight">
-            <div class="dark-tp-spotlight-head reveal-text">
-                <span class="dark-tp-spotlight-label">{{ __('Featured') }}</span>
-                @if ($featured_tenders->count() > 1)
-                    <div class="dark-tp-spotlight-nav">
-                        <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotPrev" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6" /></svg></button>
-                        <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotNext" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6" /></svg></button>
-                    </div>
-                @endif
-            </div>
-            <div class="dark-tp-spotlight-track-wrap">
-                <div class="dark-tp-spotlight-track" id="darkTpSpotTrack">
-                    @foreach ($featured_tenders as $key => $ft)
-                        @php
-                            // A non-empty tender_image doesn't guarantee the file is actually
-                            // on disk (real data has rows pointing at deleted/missing files) —
-                            // check existence too, otherwise the thumb silently renders blank
-                            // instead of falling back to the "no image" dossier-icon state.
-                            $ftHasImage = !empty($ft->tender_image) && file_exists(base_path('../assets/front/img/tenders/' . $ft->tender_image));
-                        @endphp
-                        <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}" class="dark-tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
-                            <div class="dark-tender-thumb @if (!$ftHasImage) no-image @endif"
-                                @if ($ftHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $ft->tender_image) }}');" @endif>
-                                @if (!$ftHasImage)
-                                    <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" /><path d="M15 3v4h4" /><path d="M9 12h6M9 16h6M9 8h2" /></svg>
-                                @endif
-                                @if (!empty($ft->tenderCategory))
-                                    <span class="dark-tender-cat">{{ convertUtf8($ft->tenderCategory->name) }}</span>
-                                @endif
-                                @if ($ft->submission_deadline)
-                                    @php $tenderCd = tenderCountdown($ft->submission_deadline); @endphp
-                                    <div class="dark-tender-countdown" data-deadline="{{ \Carbon\Carbon::parse($ft->submission_deadline)->toIso8601String() }}">
-                                        <span class="unit"><b data-d>{{ $tenderCd['d'] }}</b><span>{{ __('d') }}</span></span>
-                                        <span class="unit"><b data-h>{{ $tenderCd['h'] }}</b><span>{{ __('h') }}</span></span>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="dark-tender-body">
-                                <h3>{{ convertUtf8($ft->title) }}</h3>
-                                <div class="dark-tender-meta">
-                                    <span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $ft->country }}</span>
-                                    <span>{{ $ft->tender_code }}</span>
+    <div class="dark-tp-page">
+        @if ($featured_tenders->count() > 0)
+            <div class="dark-tp-spotlight">
+                <div class="dark-tp-spotlight-head reveal-text">
+                    <span class="dark-tp-spotlight-label">{{ __('Featured') }}</span>
+                    @if ($featured_tenders->count() > 1)
+                        <div class="dark-tp-spotlight-nav">
+                            <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotPrev" aria-label="{{ __('Previous') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6" /></svg></button>
+                            <button type="button" class="dark-tp-spotlight-arrow" id="darkTpSpotNext" aria-label="{{ __('Next') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6" /></svg></button>
+                        </div>
+                    @endif
+                </div>
+                <div class="dark-tp-spotlight-track-wrap">
+                    <div class="dark-tp-spotlight-track" id="darkTpSpotTrack">
+                        @foreach ($featured_tenders as $key => $ft)
+                            @php
+                                // A non-empty tender_image doesn't guarantee the file is actually
+                                // on disk (real data has rows pointing at deleted/missing files) —
+                                // check existence too, otherwise the thumb silently renders blank
+                                // instead of falling back to the "no image" dossier-icon state.
+                                $ftHasImage = !empty($ft->tender_image) && file_exists(base_path('../assets/front/img/tenders/' . $ft->tender_image));
+                            @endphp
+                            <a href="{{ route('tender_details', ['slug' => $ft->slug]) }}" class="dark-tender-card reveal-card" style="--d:{{ ($key % 3) * 0.1 }}s">
+                                <div class="dark-tender-thumb @if (!$ftHasImage) no-image @endif"
+                                    @if ($ftHasImage) style="background-image: url('{{ asset('assets/front/img/tenders/' . $ft->tender_image) }}');" @endif>
+                                    @if (!$ftHasImage)
+                                        <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" /><path d="M15 3v4h4" /><path d="M9 12h6M9 16h6M9 8h2" /></svg>
+                                    @endif
+                                    @if (!empty($ft->tenderCategory))
+                                        <span class="dark-tender-cat">{{ convertUtf8($ft->tenderCategory->name) }}</span>
+                                    @endif
+                                    @if ($ft->submission_deadline)
+                                        @php $tenderCd = tenderCountdown($ft->submission_deadline); @endphp
+                                        <div class="dark-tender-countdown" data-deadline="{{ \Carbon\Carbon::parse($ft->submission_deadline)->toIso8601String() }}">
+                                            <span class="unit"><b data-d>{{ $tenderCd['d'] }}</b><span>{{ __('d') }}</span></span>
+                                            <span class="unit"><b data-h>{{ $tenderCd['h'] }}</b><span>{{ __('h') }}</span></span>
+                                        </div>
+                                    @endif
                                 </div>
-                                <div class="dark-tender-foot">
-                                    <div class="dark-tender-price">
-                                        @if (is_null($ft->current_price))
-                                            <span class="now">{{ __('Free') }}</span>
-                                        @else
-                                            @if (!empty($ft->previous_price))
-                                                <span class="prev">{{ number_format($ft->previous_price, 0) }} {{ optional($bse)->base_currency_symbol }}</span>
+                                <div class="dark-tender-body">
+                                    <h3>{{ convertUtf8($ft->title) }}</h3>
+                                    <div class="dark-tender-meta">
+                                        <span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $ft->country }}</span>
+                                        <span>{{ $ft->tender_code }}</span>
+                                    </div>
+                                    <div class="dark-tender-foot">
+                                        <div class="dark-tender-price">
+                                            @if (is_null($ft->current_price))
+                                                <span class="now">{{ __('Free') }}</span>
+                                            @else
+                                                @if (!empty($ft->previous_price))
+                                                    <span class="prev">{{ number_format($ft->previous_price, 0) }} {{ optional($bse)->base_currency_symbol }}</span>
+                                                @endif
+                                                <span class="now">
+                                                    {{ optional($bse)->base_currency_symbol_position == 'left' ? optional($bse)->base_currency_symbol . ' ' : '' }}{{ number_format($ft->current_price, 0) }}
+                                                    <small>{{ optional($bse)->base_currency_symbol_position == 'right' ? optional($bse)->base_currency_symbol : '' }}</small>
+                                                </span>
                                             @endif
-                                            <span class="now">
-                                                {{ optional($bse)->base_currency_symbol_position == 'left' ? optional($bse)->base_currency_symbol . ' ' : '' }}{{ number_format($ft->current_price, 0) }}
-                                                <small>{{ optional($bse)->base_currency_symbol_position == 'right' ? optional($bse)->base_currency_symbol : '' }}</small>
-                                            </span>
-                                        @endif
+                                        </div>
+                                        <span class="dark-tender-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
                                     </div>
-                                    <span class="dark-tender-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
                                 </div>
-                            </div>
-                        </a>
-                    @endforeach
+                            </a>
+                        @endforeach
+                    </div>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
 
-    <div class="dark-tp-layout">
-        <div>
-            <span class="dark-tp-rail-label">{{ __('Filter') }}</span>
+        <div class="dark-tp-layout">
+            <div class="dark-tp-main">
+                <div class="dark-tp-toolbar">
+                    <div class="dark-svcp-search dark-tp-search">
+                        <input type="search" id="searchInput" placeholder="{{ __('Search By Tender Title or ID') }}" value="{{ request()->input('search') ?? '' }}">
+                        <button type="button" id="search-input-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+                    </div>
+                    <div class="dark-tp-sort">
+                        <select id="filterType">
+                            <option selected disabled>{{ __('Filter') }}</option>
+                            <option value="new" {{ request()->input('filterValue') == 'new' ? 'selected' : '' }}>{{ __('Newest First') }}</option>
+                            <option value="old" {{ request()->input('filterValue') == 'old' ? 'selected' : '' }}>{{ __('Oldest First') }}</option>
+                            <option value="deadline_asc" {{ request()->input('filterValue') == 'deadline_asc' ? 'selected' : '' }}>{{ __('Deadline (Soonest)') }}</option>
+                            <option value="expired" {{ request()->input('filterValue') == 'expired' ? 'selected' : '' }}>{{ __('Expired Tenders') }}</option>
+                        <option value="high-to-low" {{ request()->input('filterValue') == 'high-to-low' ? 'selected' : '' }}>{{ __('High To Low Price') }}</option>
+                            <option value="low-to-high" {{ request()->input('filterValue') == 'low-to-high' ? 'selected' : '' }}>{{ __('Low To High Price') }}</option>
+                        </select>
+                    </div>
+                </div>
 
-            <div class="dark-svcp-widget">
-                <h4>{{ __('Categories') }}</h4>
-                <ul class="dark-svcp-cat-list dark-tp-cat-list">
-                    <li class="{{ empty($darkTenderCatId) ? 'is-active' : '' }}">
-                        <a href="#" data-href="" class="categoryId">{{ __('All') }}<span class="count">({{ str_pad($tenderCount, 2, '0', STR_PAD_LEFT) }})</span></a>
-                    </li>
-                    @foreach ($tender_categories as $cat)
-                        <li class="{{ $darkTenderCatId == $cat->id ? 'is-active' : '' }}">
-                            <a href="#" data-href="{{ $cat->id }}" class="categoryId">{{ convertUtf8($cat->name) }}<span class="count">({{ str_pad($cat->tenders()->count(), 2, '0', STR_PAD_LEFT) }})</span></a>
-                        </li>
-                    @endforeach
-                </ul>
+                <div class="dark-tp-results-wrap" id="darkTpResultsWrap">
+                    <div class="dark-tp-loader" id="darkTpLoader">
+                        <span class="dark-tp-spinner"></span>
+                    </div>
+                    <div id="darkTpResults">
+                        @include('front.tender.partials.dark-results', ['tenders' => $tenders, 'bse' => $bse])
+                    </div>
+                </div>
             </div>
 
-            @if ($countries->count() > 0)
+            <div class="dark-tp-side">
+                <span class="dark-tp-rail-label">{{ __('Filter') }}</span>
+
                 <div class="dark-svcp-widget">
-                    <h4>{{ __('Country') }}</h4>
-                    <ul class="dark-tp-country-list">
-                        <li class="{{ empty(request()->input('country')) ? 'is-active' : '' }}">
-                            <a href="#" data-href="" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ __('All Countries') }}</a>
+                    <h4>{{ __('Categories') }}</h4>
+                    <ul class="dark-svcp-cat-list dark-tp-cat-list">
+                        <li class="{{ empty($darkTenderCatId) ? 'is-active' : '' }}">
+                            <a href="#" data-href="" class="categoryId">{{ __('All') }}<span class="count">({{ str_pad($tenderCount, 2, '0', STR_PAD_LEFT) }})</span></a>
                         </li>
-                        @foreach ($countries as $c)
-                            <li class="{{ request()->input('country') == $c ? 'is-active' : '' }}">
-                                <a href="#" data-href="{{ $c }}" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $c }}</a>
+                        @foreach ($tender_categories as $cat)
+                            <li class="{{ $darkTenderCatId == $cat->id ? 'is-active' : '' }}">
+                                <a href="#" data-href="{{ $cat->id }}" class="categoryId">{{ convertUtf8($cat->name) }}<span class="count">({{ str_pad($cat->tenders_count, 2, '0', STR_PAD_LEFT) }})</span></a>
                             </li>
                         @endforeach
                     </ul>
                 </div>
-            @endif
 
-            <div class="dark-svcp-widget">
-                <h4>{{ __('Filter By Price') }}</h4>
-                <div class="dark-tp-range">
-                    <div id="slider-range"></div>
-                    <input type="text" id="amount" class="dark-tp-range-value" readonly>
-                </div>
-            </div>
-        </div>
+                @if ($countries->count() > 0)
+                    <div class="dark-svcp-widget">
+                        <h4>{{ __('Country') }}</h4>
+                        <ul class="dark-tp-country-list">
+                            <li class="{{ empty(request()->input('country')) ? 'is-active' : '' }}">
+                                <a href="#" data-href="" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ __('All Countries') }}</a>
+                            </li>
+                            @foreach ($countries as $c)
+                                <li class="{{ request()->input('country') == $c ? 'is-active' : '' }}">
+                                    <a href="#" data-href="{{ $c }}" class="countryFilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.5" /></svg>{{ $c }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-        <div>
-            <div class="dark-tp-toolbar">
-                <div class="dark-svcp-search dark-tp-search">
-                    <input type="search" id="searchInput" placeholder="{{ __('Search By Tender Title or ID') }}" value="{{ request()->input('search') ?? '' }}">
-                    <button type="button" id="search-input-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
-                </div>
-                <div class="dark-tp-sort">
-                    <select id="filterType">
-                        <option selected disabled>{{ __('Filter') }}</option>
-                        <option value="new" {{ request()->input('filterValue') == 'new' ? 'selected' : '' }}>{{ __('Newest First') }}</option>
-                        <option value="old" {{ request()->input('filterValue') == 'old' ? 'selected' : '' }}>{{ __('Oldest First') }}</option>
-                        <option value="deadline_asc" {{ request()->input('filterValue') == 'deadline_asc' ? 'selected' : '' }}>{{ __('Deadline (Soonest)') }}</option>
-                        <option value="high-to-low" {{ request()->input('filterValue') == 'high-to-low' ? 'selected' : '' }}>{{ __('High To Low Price') }}</option>
-                        <option value="low-to-high" {{ request()->input('filterValue') == 'low-to-high' ? 'selected' : '' }}>{{ __('Low To High Price') }}</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="dark-tp-results-wrap" id="darkTpResultsWrap">
-                <div class="dark-tp-loader" id="darkTpLoader">
-                    <span class="dark-tp-spinner"></span>
-                </div>
-                <div id="darkTpResults">
-                    @include('front.tender.partials.dark-results', ['tenders' => $tenders, 'bse' => $bse])
+                <div class="dark-svcp-widget">
+                    <h4>{{ __('Filter By Price') }}</h4>
+                    <div class="dark-tp-range">
+                        <div id="slider-range"></div>
+                        <input type="text" id="amount" class="dark-tp-range-value" readonly>
+                    </div>
                 </div>
             </div>
         </div>
@@ -408,59 +411,6 @@
         <div class="container">
             <div class="row">
 
-                {{-- Sidebar --}}
-                <div class="col-lg-4">
-                    <div class="courses-sidebar">
-                        {{-- Categories --}}
-                        <div class="widget-box categories-widget">
-                            <h4>{{ __('Categories') }}</h4>
-                            <ul>
-                                <li class="{{ empty(request()->input('category_id')) ? 'active-search' : '' }}">
-                                    <a data-href="" class="categoryId">
-                                        {{ __('All') }} <span>({{ $tenderCount }})</span>
-                                    </a>
-                                </li>
-                                @foreach ($tender_categories as $cat)
-                                    <li class="{{ request()->input('category_id') == $cat->id ? 'active-search' : '' }}">
-                                        <a data-href="{{ $cat->id }}" class="categoryId">
-                                            {{ convertUtf8($cat->name) }} <span>({{ $cat->tenders()->count() }})</span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-
-                        {{-- Countries --}}
-                        @if ($countries->count() > 0)
-                            <div class="widget-box categories-widget">
-                                <h4>{{ __('Country') }}</h4>
-                                <ul>
-                                    <li class="{{ empty(request()->input('country')) ? 'active-search' : '' }}">
-                                        <a data-href="" class="countryFilter">{{ __('All Countries') }}</a>
-                                    </li>
-                                    @foreach ($countries as $c)
-                                        <li class="{{ request()->input('country') == $c ? 'active-search' : '' }}">
-                                            <a data-href="{{ $c }}" class="countryFilter">
-                                                <i class="fas fa-map-marker-alt mr-1 text-muted"
-                                                    style="font-size:11px;"></i>{{ $c }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        {{-- Price Range --}}
-                        <div class="widget-box price-range-widget">
-                            <h4>{{ __('Filter By Price') }}</h4>
-                            <div id="slider-range"></div>
-                            <label for="amount">{{ __('Price') . ':' }}</label>
-                            <input type="text" id="amount">
-                        </div>
-
-                    </div>
-                </div>
-
                 {{-- Tender Grid --}}
                 <div class="col-lg-8">
                     <div class="course-filter mb-50">
@@ -478,6 +428,9 @@
                                         <option value="deadline_asc"
                                             {{ request()->input('filterValue') == 'deadline_asc' ? 'selected' : '' }}>
                                             {{ __('Deadline (Soonest)') }}</option>
+                                        <option value="expired"
+                                            {{ request()->input('filterValue') == 'expired' ? 'selected' : '' }}>
+                                            {{ __('Expired Tenders') }}</option>
                                         <option value="high-to-low"
                                             {{ request()->input('filterValue') == 'high-to-low' ? 'selected' : '' }}>
                                             {{ __('High To Low Price') }}</option>
@@ -576,6 +529,59 @@
                                     ])->links() }}
                             </nav>
                         </div>
+                    </div>
+                </div>
+
+                {{-- Sidebar --}}
+                <div class="col-lg-4">
+                    <div class="courses-sidebar">
+                        {{-- Categories --}}
+                        <div class="widget-box categories-widget">
+                            <h4>{{ __('Categories') }}</h4>
+                            <ul>
+                                <li class="{{ empty(request()->input('category_id')) ? 'active-search' : '' }}">
+                                    <a data-href="" class="categoryId">
+                                        {{ __('All') }} <span>({{ $tenderCount }})</span>
+                                    </a>
+                                </li>
+                                @foreach ($tender_categories as $cat)
+                                    <li class="{{ request()->input('category_id') == $cat->id ? 'active-search' : '' }}">
+                                        <a data-href="{{ $cat->id }}" class="categoryId">
+                                            {{ convertUtf8($cat->name) }} <span>({{ $cat->tenders_count }})</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+
+                        {{-- Countries --}}
+                        @if ($countries->count() > 0)
+                            <div class="widget-box categories-widget">
+                                <h4>{{ __('Country') }}</h4>
+                                <ul>
+                                    <li class="{{ empty(request()->input('country')) ? 'active-search' : '' }}">
+                                        <a data-href="" class="countryFilter">{{ __('All Countries') }}</a>
+                                    </li>
+                                    @foreach ($countries as $c)
+                                        <li class="{{ request()->input('country') == $c ? 'active-search' : '' }}">
+                                            <a data-href="{{ $c }}" class="countryFilter">
+                                                <i class="fas fa-map-marker-alt mr-1 text-muted"
+                                                    style="font-size:11px;"></i>{{ $c }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        {{-- Price Range --}}
+                        <div class="widget-box price-range-widget">
+                            <h4>{{ __('Filter By Price') }}</h4>
+                            <div id="slider-range"></div>
+                            <label for="amount">{{ __('Price') . ':' }}</label>
+                            <input type="text" id="amount">
+                        </div>
+
                     </div>
                 </div>
 

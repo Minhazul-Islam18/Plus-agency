@@ -69,9 +69,14 @@ class TenderController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
+        // Only categories that actually have a visible tender attached — the
+        // count is constrained the same way as the listing itself (active +
+        // this language), so the sidebar number always matches the results.
         $data['tender_categories'] = TenderCategory::where('language_id', $currentLang->id)
             ->where('status', 1)
             ->select(['id', 'name'])
+            ->withCount(['tenders' => fn($q) => $q->where('status', 1)->where('language_id', $currentLang->id)])
+            ->having('tenders_count', '>', 0)
             ->orderBy('id', 'desc')
             ->get();
 
@@ -120,6 +125,10 @@ class TenderController extends Controller
                     return $q->orderBy('id', 'asc');
                 } elseif ($filterKey == 'deadline_asc') {
                     return $q->whereNotNull('submission_deadline')->orderBy('submission_deadline', 'asc');
+                } elseif ($filterKey == 'expired') {
+                    return $q->whereNotNull('submission_deadline')
+                        ->where('submission_deadline', '<', now())
+                        ->orderBy('submission_deadline', 'desc');
                 } elseif ($filterKey == 'high-to-low') {
                     return $q->whereNotNull('current_price')->orderBy('current_price', 'desc');
                 } elseif ($filterKey == 'low-to-high') {

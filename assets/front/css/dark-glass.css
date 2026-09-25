@@ -7657,15 +7657,28 @@ button.dark-cookie-consent__deny:hover {
   }
 }
 
+/* Same solid page background as .dark-svcp-section (Services/Portfolios/
+   Blog) — without it the Tenders page showed the body's green gradient. */
+.dark-tp-page,
+.dark-tender-details {
+  background: #090d16;
+}
+
 /* ---- layout ---- */
 .dark-tp-layout {
   max-width: 1320px;
   margin: 0 auto;
   padding: 60px 24px 150px;
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 54px;
   align-items: start;
+}
+/* Filters now sit on the right (same right-sidebar pattern as Services/
+   Portfolios); .dark-tp-main needs min-width:0 so wide result cards can't
+   push the grid track past the viewport. */
+.dark-tp-main {
+  min-width: 0;
 }
 .dark-tp-rail-label {
   display: block;
@@ -8009,7 +8022,11 @@ button.dark-cookie-consent__deny:hover {
 
 @media (max-width: 900px) {
   .dark-tp-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Stacked: keep the filters above the results, as before the move. */
+  .dark-tp-side {
+    order: -1;
   }
   .dark-tp-grid {
     grid-template-columns: 1fr;
@@ -8043,6 +8060,19 @@ button.dark-cookie-consent__deny:hover {
 .dark-tender-details .col-lg-6 {
   flex: 1 1 460px;
   max-width: none;
+  padding: 0;
+}
+/* Main column (thumb card, downloads link, tabs) + right sidebar (price +
+   purchase form) — same right-sidebar pattern as Services/Portfolios. */
+.dark-tender-details .tender-main-col {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+}
+.dark-tender-details .tender-side-col {
+  flex: 0 0 380px;
+  max-width: 100%;
   padding: 0;
 }
 
@@ -8195,7 +8225,13 @@ button.dark-cookie-consent__deny:hover {
 
 /* ---- purchase panel ---- */
 .dark-tender-details .tender-info-wrap {
-  max-width: 620px;
+  max-width: none;
+}
+.dark-tender-details .tender-side-col .tender-info-wrap {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  padding: 26px 22px;
 }
 .dark-tender-details .tender-price-wrap {
   margin-bottom: 26px;
@@ -8332,7 +8368,7 @@ button.dark-cookie-consent__deny:hover {
 }
 .dark-tender-details #purchaserInfo .row {
   display: grid !important;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   margin-right: 0;
 }
@@ -8514,7 +8550,7 @@ button.dark-cookie-consent__deny:hover {
 }
 .dark-tender-details .pay-methods {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 .dark-tender-details .pay-method-card {
@@ -9135,7 +9171,9 @@ button.dark-cookie-consent__deny:hover {
   .dark-tender-details .row {
     gap: 24px;
   }
-  .dark-tender-details .col-lg-6 {
+  .dark-tender-details .col-lg-6,
+  .dark-tender-details .tender-main-col,
+  .dark-tender-details .tender-side-col {
     flex: 1 1 100%;
   }
   .dark-tender-details #purchaserInfo .row {

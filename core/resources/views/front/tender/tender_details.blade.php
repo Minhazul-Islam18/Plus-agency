@@ -1275,103 +1275,280 @@
             @endif
 
             {{-- ═══════════════════════════════════════════
-         TOP ROW: Thumbnail (left) + Info (right)
+         MAIN (left): thumbnail card, downloads link, tabs
+         SIDEBAR (right): price + purchase form
     ═══════════════════════════════════════════ --}}
             <div class="row">
 
-                {{-- LEFT: Thumb card --}}
-                <div class="col-lg-6 mb-4">
-                    @php
-                        $deadline = $tender->submission_deadline
-                            ? \Carbon\Carbon::parse($tender->submission_deadline)
-                            : null;
-                        $daysLeft = $deadline ? (int) now()->diffInDays($deadline, false) : null;
-                        $isExpired = $daysLeft !== null && $daysLeft < 0;
-                        $iconState =
-                            $daysLeft === null
-                                ? null
-                                : ($isExpired
-                                    ? 'expired'
-                                    : ($daysLeft <= 3
-                                        ? 'urgent'
-                                        : ($daysLeft <= 7
-                                            ? 'soon'
-                                            : 'ok')));
-                    @endphp
-                    <div class="tender-thumb-card reveal-stagger">
-                        {{-- Thumbnail --}}
-                        <div class="tender-thumb-box">
-                            @if (!empty($tender->tender_image))
-                                <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}"
-                                    class="lazy" alt="{{ $tender->title }}">
-                            @else
-                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
-                            @endif
-                            @if (!empty($tender->video_link))
-                                <div class="video-overlay">
-                                    <a href="{{ $tender->video_link }}" class="video-popup video-play-button">
-                                        <span></span>
-                                    </a>
-                                </div>
-                            @endif
-                            {{-- Days badge overlay --}}
-                            @if ($daysLeft !== null)
-                                <div class="days-overlay-badge badge-{{ $iconState }}">
-                                    @if ($isExpired)
-                                        <span style="font-size:9px;font-weight:800;">{{ __('EXPIRED') }}</span>
-                                    @elseif ($daysLeft === 0)
-                                        <span style="font-size:9px;font-weight:800;">{{ __('TODAY') }}</span>
-                                    @else
-                                        <span class="days-num">{{ $daysLeft }}</span>
-                                        <span>{{ __('days') }}</span>
-                                    @endif
-                                </div>
-                            @endif
-                            {{-- Category pill: bottom-left overlay --}}
-                            @if ($tender->tenderCategory)
-                                <a href="{{ route('tenders', ['category_id' => $tender->tender_category_id]) }}"
-                                    class="td-cat-pill">
-                                    {{ $tender->tenderCategory->name }}
-                                </a>
-                            @endif
-                        </div>
-
-                        <div class="td-card-body">
-
-                            {{-- Date + Tender ID row --}}
-                            <div class="td-info-row">
-                                @if ($deadline)
-                                    <div class="td-deadline-pill">
-                                        <i class="far fa-clock"></i> {{ $deadline->format('d M Y, H:i') }}
+                <div class="col-lg-8 mb-4 mb-lg-0 tender-main-col">
+                    <div class="mb-4">
+                        @php
+                            $deadline = $tender->submission_deadline
+                                ? \Carbon\Carbon::parse($tender->submission_deadline)
+                                : null;
+                            $daysLeft = $deadline ? (int) now()->diffInDays($deadline, false) : null;
+                            $isExpired = $daysLeft !== null && $daysLeft < 0;
+                            $iconState =
+                                $daysLeft === null
+                                    ? null
+                                    : ($isExpired
+                                        ? 'expired'
+                                        : ($daysLeft <= 3
+                                            ? 'urgent'
+                                            : ($daysLeft <= 7
+                                                ? 'soon'
+                                                : 'ok')));
+                        @endphp
+                        <div class="tender-thumb-card reveal-stagger">
+                            {{-- Thumbnail --}}
+                            <div class="tender-thumb-box">
+                                @if (!empty($tender->tender_image))
+                                    <img data-src="{{ asset('assets/front/img/tenders/' . $tender->tender_image) }}"
+                                        class="lazy" alt="{{ $tender->title }}">
+                                @else
+                                    <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="">
+                                @endif
+                                @if (!empty($tender->video_link))
+                                    <div class="video-overlay">
+                                        <a href="{{ $tender->video_link }}" class="video-popup video-play-button">
+                                            <span></span>
+                                        </a>
                                     </div>
                                 @endif
-                                @if ($tender->tender_code)
-                                    <div class="td-id-pill">{{ $tender->tender_code }}</div>
+                                {{-- Days badge overlay --}}
+                                @if ($daysLeft !== null)
+                                    <div class="days-overlay-badge badge-{{ $iconState }}">
+                                        @if ($isExpired)
+                                            <span style="font-size:9px;font-weight:800;">{{ __('EXPIRED') }}</span>
+                                        @elseif ($daysLeft === 0)
+                                            <span style="font-size:9px;font-weight:800;">{{ __('TODAY') }}</span>
+                                        @else
+                                            <span class="days-num">{{ $daysLeft }}</span>
+                                            <span>{{ __('days') }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+                                {{-- Category pill: bottom-left overlay --}}
+                                @if ($tender->tenderCategory)
+                                    <a href="{{ route('tenders', ['category_id' => $tender->tender_category_id]) }}"
+                                        class="td-cat-pill">
+                                        {{ $tender->tenderCategory->name }}
+                                    </a>
                                 @endif
                             </div>
 
-                            {{-- Title --}}
-                            <p class="td-title">{{ convertUtf8($tender->title) }}</p>
+                            <div class="td-card-body">
 
-                            {{-- Footer: country + price --}}
-                            <div class="td-footer">
-                                <span class="td-country">
-                                    <i class="fas fa-map-marker-alt"></i> {{ $tender->country }}
-                                </span>
-                                <span class="td-price {{ !$tender->current_price ? 'free' : '' }}">
-                                    @if (!$tender->current_price)
-                                        {{ __('Free') }}
-                                    @else
-                                        {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($tender->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                {{-- Date + Tender ID row --}}
+                                <div class="td-info-row">
+                                    @if ($deadline)
+                                        <div class="td-deadline-pill">
+                                            <i class="far fa-clock"></i> {{ $deadline->format('d M Y, H:i') }}
+                                        </div>
                                     @endif
-                                </span>
+                                    @if ($tender->tender_code)
+                                        <div class="td-id-pill">{{ $tender->tender_code }}</div>
+                                    @endif
+                                </div>
+
+                                {{-- Title --}}
+                                <p class="td-title">{{ convertUtf8($tender->title) }}</p>
+
+                                {{-- Footer: country + price --}}
+                                <div class="td-footer">
+                                    <span class="td-country">
+                                        <i class="fas fa-map-marker-alt"></i> {{ $tender->country }}
+                                    </span>
+                                    <span class="td-price {{ !$tender->current_price ? 'free' : '' }}">
+                                        @if (!$tender->current_price)
+                                            {{ __('Free') }}
+                                        @else
+                                            {{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($tender->current_price, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }}
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {{-- CHECK THE PLANS TO PURCHASE --}}
+                    @if ($modules->count() > 0)
+                        <div class="mb-4">
+                            <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-cta">
+                                <span class="downloads-cta-icon"><i class="fas fa-cloud-download-alt"></i></span>
+                                <span class="downloads-cta-text">
+                                    <strong>{{ __('Already purchased this tender?') }}</strong>
+                                    <small>{{ __('Access and download your files here') }}</small>
+                                </span>
+                                <span class="downloads-cta-arrow"><i class="fas fa-arrow-right"></i></span>
+                            </a>
+                            {{-- The badges now live in the checkout form (step 1). They are only
+                                 repeated here when there is no form to hold them — an expired or
+                                 free tender — so free modules stay downloadable. --}}
+                            @unless ($tender->current_price && !$isExpired)
+                                <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>
+                                <div class="module-badges-row">
+                                    @include('front.tender.partials.module_badges')
+                                </div>
+                            @endunless
+                        </div>
+                    @endif
+
+                    {{-- TABS: Overview / Tender Fees / Expert --}}
+                    <div class="discription-area reveal-stagger">
+                        <div class="discription-tabs">
+                            <div class="tab-scroll-wrap">
+                                <button class="tab-arrow arrow-prev" id="tabArrowPrev"
+                                    aria-label="Scroll left">&#8249;</button>
+                                <div class="tab-nav-scroll" id="tabNavScroll">
+                                    <ul class="nav nav-tabs">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-toggle="tab"
+                                                href="#overview">{{ __('Tender Overview') }}</a>
+                                        </li>
+                                        @if ($modules->count() > 0)
+                                            <li class="nav-item">
+                                                <a class="nav-link" data-toggle="tab" href="#modules"
+                                                    id="modules-tab-link">{{ __('Tender Fees') }}</a>
+                                            </li>
+                                        @endif
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab"
+                                                href="#expert">{{ __('Tendering Expert') }}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="tab-arrow arrow-next" id="tabArrowNext"
+                                    aria-label="Scroll right">&#8250;</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-content">
+
+                            {{-- Tender Overview --}}
+                            <div id="overview" class="tab-pane active">
+                                <div class="content-box">
+                                    <h4>{{ __('Tender Overview') }}</h4>
+                                    <div
+                                        class="tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                        {!! $tender->overview !!}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Tender Fees – modules accordion (NO sections list) --}}
+                            @if ($modules->count() > 0)
+                                <div id="modules" class="tab-pane fade">
+                                    <div class="content-box">
+                                        @foreach ($modules as $module)
+                                            <div class="module-item">
+                                                <div class="module-header" data-toggle="collapse"
+                                                    data-target="#module-body-{{ $module->id }}">
+                                                    <span>{{ convertUtf8($module->name) }}</span>
+                                                    <div class="d-flex align-items-center">
+                                                        <span
+                                                            class="module-cost {{ is_null($module->cost) ? 'free' : 'paid' }}">
+                                                            @if (is_null($module->cost))
+                                                                ({{ __('Free of charge') }})
+                                                            @else
+                                                                ({{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($module->cost, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }})
+                                                            @endif
+                                                        </span>
+                                                        <i class="fas fa-chevron-down toggle-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div id="module-body-{{ $module->id }}" class="collapse module-body">
+                                                    @if (!empty($module->summary))
+                                                        <div
+                                                            class="mb-3 tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                            {!! $module->summary !!}
+                                                        </div>
+                                                    @endif
+                                                    @if ($module->sections->count() > 0)
+                                                        <ul class="module-sections-list">
+                                                            @foreach ($module->sections as $section)
+                                                                <li>
+                                                                    <i class="fas fa-check-circle text-success mr-2"></i>
+                                                                    {{ $section->name }}
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Tendering Expert --}}
+                            <div id="expert" class="tab-pane fade">
+                                <div class="content-box">
+                                    @if (!empty($tender->expert_name))
+                                        <div class="expert-wrap">
+                                            @php
+                                                $expertHasImage =
+                                                    $be->theme_version == 'dark' &&
+                                                    !empty($tender->expert_image) &&
+                                                    file_exists(
+                                                        base_path(
+                                                            '../assets/front/img/tender_experts/' .
+                                                                $tender->expert_image,
+                                                        ),
+                                                    );
+                                            @endphp
+                                            @if ($be->theme_version == 'dark' && !$expertHasImage)
+                                                <div class="dark-td-avatar-fallback">
+                                                    {{ strtoupper(mb_substr($tender->expert_name, 0, 1)) }}
+                                                </div>
+                                            @elseif (!empty($tender->expert_image))
+                                                <div class="thumb">
+                                                    <img data-src="{{ asset('assets/front/img/tender_experts/' . $tender->expert_image) }}"
+                                                        class="lazy img-fluid" alt="{{ $tender->expert_name }}">
+                                                </div>
+                                            @endif
+                                            <div class="content">
+                                                @if ($be->theme_version == 'dark')
+                                                    <span class="expert-eyebrow">{{ __('Tendering Expert') }}</span>
+                                                @endif
+                                                <h4>{{ $tender->expert_name }}</h4>
+                                                @if ($tender->expert_position)
+                                                    <span class="position">{{ $tender->expert_position }}</span>
+                                                @endif
+                                                @if ($tender->expert_details)
+                                                    <div
+                                                        class="text-box tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
+                                                        {!! $tender->expert_details !!}
+                                                    </div>
+                                                @endif
+                                                <div class="expert-contact-btns">
+                                                    @if (!empty($tender->expert_whatsapp))
+                                                        <a href="https://wa.me/{{ $waDigits }}" class="btn-whatsapp"
+                                                            target="_blank">
+                                                            <i class="fab fa-whatsapp"></i> {{ __('WhatsApp') }}:
+                                                            {{ $tender->expert_whatsapp }}
+                                                        </a>
+                                                    @endif
+                                                    @if (!empty($tender->expert_email))
+                                                        <a href="mailto:{{ $tender->expert_email }}" class="btn-phone">
+                                                            <i class="fas fa-envelope"></i> {{ $tender->expert_email }}
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <p class="text-muted">{{ __('No expert information available.') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
 
-                {{-- RIGHT: Tender Info & Purchase --}}
-                <div class="col-lg-6">
+                {{-- RIGHT SIDEBAR: Tender Info & Purchase --}}
+                <div class="col-lg-4 tender-side-col">
                     <div class="tender-info-wrap reveal-stagger" style="--d:.1s">
                         {{-- Price — the amount payable *now*. It starts at 0 and only
                              rises as modules are selected; the tender's own total is
@@ -1431,17 +1608,17 @@
                                         <span class="step-badge">2</span> {{ __('Your Information') }}
                                     </h6>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="text" name="first_name" class="form-control"
                                                 placeholder="{{ __('First Name') }} *"
                                                 value="{{ $resumePurchase->first_name ?? (Auth::check() ? Auth::user()->fname : '') }}" required>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="text" name="last_name" class="form-control"
                                                 placeholder="{{ __('Last Name') }} *"
                                                 value="{{ $resumePurchase->last_name ?? (Auth::check() ? Auth::user()->lname : '') }}" required>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="email" name="email" class="form-control"
                                                 placeholder="{{ __('Email Address') }} *"
                                                 value="{{ $resumePurchase->email ?? (Auth::check() ? Auth::user()->email : '') }}"
@@ -1457,7 +1634,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                         @endphp
 
                                         {{-- Phone: dialling code + number as one grouped control --}}
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <div class="phone-group">
                                                 <div class="ss ss-dial" data-target="#phoneCodeInput">
                                                     <button type="button" class="ss-toggle">
@@ -1504,7 +1681,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                         </div>
 
                                         {{-- Country: searchable picker (no free typing) --}}
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <div class="ss ss-country" data-target="#countryInput"
                                                 data-sync-dial="#phoneCodeInput">
                                                 <button type="button" class="ss-toggle">
@@ -1540,17 +1717,17 @@ $preFlag = $preCountry['flag'] ?? '';
                                                 * {{ __('Please select a country from the list.') }}
                                             </p>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="text" name="city" class="form-control"
                                                 placeholder="{{ __('City') }}"
                                                 value="{{ $resumePurchase->city ?? '' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="text" name="company_name" class="form-control"
                                                 placeholder="{{ __('Company Name') }}"
                                                 value="{{ $resumePurchase->company_name ?? '' }}">
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-6 col-lg-12 mb-3">
                                             <input type="text" name="company_address" class="form-control"
                                                 placeholder="{{ __('Company Address') }}"
                                                 value="{{ $resumePurchase->company_address ?? '' }}">
@@ -1980,191 +2157,6 @@ $preFlag = $preCountry['flag'] ?? '';
                                 class="share-li" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                         </div>
 
-                    </div>
-                </div>
-            </div>
-
-            {{-- ═══════════════════════════════════════════
-         CHECK THE PLANS TO PURCHASE
-    ═══════════════════════════════════════════ --}}
-            @if ($modules->count() > 0)
-                <div class="row mt-5">
-                    <div class="col-12">
-                        <a href="{{ route('find_my_files') }}?tender={{ $tender->slug }}" class="downloads-cta">
-                            <span class="downloads-cta-icon"><i class="fas fa-cloud-download-alt"></i></span>
-                            <span class="downloads-cta-text">
-                                <strong>{{ __('Already purchased this tender?') }}</strong>
-                                <small>{{ __('Access and download your files here') }}</small>
-                            </span>
-                            <span class="downloads-cta-arrow"><i class="fas fa-arrow-right"></i></span>
-                        </a>
-                        {{-- The badges now live in the checkout form (step 1). They are only
-                             repeated here when there is no form to hold them — an expired or
-                             free tender — so free modules stay downloadable. --}}
-                        @unless ($tender->current_price && !$isExpired)
-                            <div class="check-plans-bar">{{ __('Check the plans to purchase') }}</div>
-                            <div class="module-badges-row">
-                                @include('front.tender.partials.module_badges')
-                            </div>
-                        @endunless
-                    </div>
-                </div>
-            @endif
-
-            {{-- ═══════════════════════════════════════════
-         TABS: Overview / Tender Fees / Expert
-    ═══════════════════════════════════════════ --}}
-            <div class="row mt-5">
-                <div class="col-lg-12">
-                    <div class="discription-area reveal-stagger">
-                        <div class="discription-tabs">
-                            <div class="tab-scroll-wrap">
-                                <button class="tab-arrow arrow-prev" id="tabArrowPrev"
-                                    aria-label="Scroll left">&#8249;</button>
-                                <div class="tab-nav-scroll" id="tabNavScroll">
-                                    <ul class="nav nav-tabs">
-                                        <li class="nav-item">
-                                            <a class="nav-link active" data-toggle="tab"
-                                                href="#overview">{{ __('Tender Overview') }}</a>
-                                        </li>
-                                        @if ($modules->count() > 0)
-                                            <li class="nav-item">
-                                                <a class="nav-link" data-toggle="tab" href="#modules"
-                                                    id="modules-tab-link">{{ __('Tender Fees') }}</a>
-                                            </li>
-                                        @endif
-                                        <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab"
-                                                href="#expert">{{ __('Tendering Expert') }}</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button class="tab-arrow arrow-next" id="tabArrowNext"
-                                    aria-label="Scroll right">&#8250;</button>
-                            </div>
-                        </div>
-
-                        <div class="tab-content">
-
-                            {{-- Tender Overview --}}
-                            <div id="overview" class="tab-pane active">
-                                <div class="content-box">
-                                    <h4>{{ __('Tender Overview') }}</h4>
-                                    <div
-                                        class="tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
-                                        {!! $tender->overview !!}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Tender Fees – modules accordion (NO sections list) --}}
-                            @if ($modules->count() > 0)
-                                <div id="modules" class="tab-pane fade">
-                                    <div class="content-box">
-                                        @foreach ($modules as $module)
-                                            <div class="module-item">
-                                                <div class="module-header" data-toggle="collapse"
-                                                    data-target="#module-body-{{ $module->id }}">
-                                                    <span>{{ convertUtf8($module->name) }}</span>
-                                                    <div class="d-flex align-items-center">
-                                                        <span
-                                                            class="module-cost {{ is_null($module->cost) ? 'free' : 'paid' }}">
-                                                            @if (is_null($module->cost))
-                                                                ({{ __('Free of charge') }})
-                                                            @else
-                                                                ({{ $bse->base_currency_symbol_position == 'left' ? $bse->base_currency_symbol : '' }}{{ number_format($module->cost, 0) }}{{ $bse->base_currency_symbol_position == 'right' ? ' ' . $bse->base_currency_symbol : '' }})
-                                                            @endif
-                                                        </span>
-                                                        <i class="fas fa-chevron-down toggle-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div id="module-body-{{ $module->id }}" class="collapse module-body">
-                                                    @if (!empty($module->summary))
-                                                        <div
-                                                            class="mb-3 tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
-                                                            {!! $module->summary !!}
-                                                        </div>
-                                                    @endif
-                                                    @if ($module->sections->count() > 0)
-                                                        <ul class="module-sections-list">
-                                                            @foreach ($module->sections as $section)
-                                                                <li>
-                                                                    <i class="fas fa-check-circle text-success mr-2"></i>
-                                                                    {{ $section->name }}
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Tendering Expert --}}
-                            <div id="expert" class="tab-pane fade">
-                                <div class="content-box">
-                                    @if (!empty($tender->expert_name))
-                                        <div class="expert-wrap">
-                                            @php
-                                                $expertHasImage =
-                                                    $be->theme_version == 'dark' &&
-                                                    !empty($tender->expert_image) &&
-                                                    file_exists(
-                                                        base_path(
-                                                            '../assets/front/img/tender_experts/' .
-                                                                $tender->expert_image,
-                                                        ),
-                                                    );
-                                            @endphp
-                                            @if ($be->theme_version == 'dark' && !$expertHasImage)
-                                                <div class="dark-td-avatar-fallback">
-                                                    {{ strtoupper(mb_substr($tender->expert_name, 0, 1)) }}
-                                                </div>
-                                            @elseif (!empty($tender->expert_image))
-                                                <div class="thumb">
-                                                    <img data-src="{{ asset('assets/front/img/tender_experts/' . $tender->expert_image) }}"
-                                                        class="lazy img-fluid" alt="{{ $tender->expert_name }}">
-                                                </div>
-                                            @endif
-                                            <div class="content">
-                                                @if ($be->theme_version == 'dark')
-                                                    <span class="expert-eyebrow">{{ __('Tendering Expert') }}</span>
-                                                @endif
-                                                <h4>{{ $tender->expert_name }}</h4>
-                                                @if ($tender->expert_position)
-                                                    <span class="position">{{ $tender->expert_position }}</span>
-                                                @endif
-                                                @if ($tender->expert_details)
-                                                    <div
-                                                        class="text-box tender-wysiwyg @if ($be->theme_version == 'dark') dark-service-details @endif">
-                                                        {!! $tender->expert_details !!}
-                                                    </div>
-                                                @endif
-                                                <div class="expert-contact-btns">
-                                                    @if (!empty($tender->expert_whatsapp))
-                                                        <a href="https://wa.me/{{ $waDigits }}" class="btn-whatsapp"
-                                                            target="_blank">
-                                                            <i class="fab fa-whatsapp"></i> {{ __('WhatsApp') }}:
-                                                            {{ $tender->expert_whatsapp }}
-                                                        </a>
-                                                    @endif
-                                                    @if (!empty($tender->expert_email))
-                                                        <a href="mailto:{{ $tender->expert_email }}" class="btn-phone">
-                                                            <i class="fas fa-envelope"></i> {{ $tender->expert_email }}
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <p class="text-muted">{{ __('No expert information available.') }}</p>
-                                    @endif
-                                </div>
-                            </div>
-
-                        </div>
                     </div>
                 </div>
             </div>

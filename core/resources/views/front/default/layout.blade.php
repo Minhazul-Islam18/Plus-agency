@@ -235,12 +235,18 @@
     @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation') && !request()->routeIs('front.unsubscribe.token') && !($hideBreadcrumb ?? false))
         <!--   breadcrumb area start   -->
         @if ($be->theme_version == 'dark')
-            <div class="dark-breadcrumb-hero">
+            <div class="dark-breadcrumb-hero @yield('breadcrumb-hero-class')">
                 <span class="dark-bc-watermark">@yield('breadcrumb-link')</span>
+                @hasSection('breadcrumb-art')
+                    <div class="dark-bc-art">@yield('breadcrumb-art')</div>
+                @endif
                 <div class="dark-bc-inner">
                     <div class="dark-bc-text">
                         <span class="dark-bc-eyebrow">@yield('breadcrumb-title')</span>
                         <h1>@yield('breadcrumb-subtitle')</h1>
+                        @hasSection('breadcrumb-intro')
+                            <p class="dark-bc-intro">@yield('breadcrumb-intro')</p>
+                        @endif
                         <ul class="dark-bc-trail">
                             <li><a href="{{ route('front.index') }}">{{ __('Home') }}</a></li>
                             <li class="current">@yield('breadcrumb-link')</li>

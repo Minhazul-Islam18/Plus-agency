@@ -12776,6 +12776,14 @@ body.dark-oc-lock {
 .dark-faqx {
   padding-top: 32px;
 }
+/* .dark-svcp-section's 140px bottom padding suits desktop; on mobile it
+   leaves a big dead gap under the contact banner. Breakpoint matches
+   .dark-svcp-section's own mobile rule (860px) so the two never conflict. */
+@media (max-width: 860px) {
+  .dark-faqx {
+    padding-bottom: 50px;
+  }
+}
 .dark-faqx-inner {
   max-width: 1320px;
   margin: 0 auto;

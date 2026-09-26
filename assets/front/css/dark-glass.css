@@ -7659,7 +7659,8 @@ button.dark-cookie-consent__deny:hover {
 
 /* Same solid page background as .dark-svcp-section (Services/Portfolios/
    Blog) — without it the Tenders page showed the body's green gradient. */
-.dark-tp-page {
+.dark-tp-page,
+.dark-tender-details {
   background: #090d16;
 }
 

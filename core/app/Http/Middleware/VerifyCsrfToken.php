@@ -32,5 +32,10 @@ class VerifyCsrfToken extends Middleware
     // compensated by throttle:10,1 on the route. Stays unprefixed — /push
     // was deliberately left outside the /{locale} group.
     'push',
+    // FAQ view counter (fired from the Cloudflare-cached /faq page, so its
+    // baked-in CSRF token is another visitor's — same reasoning as
+    // '*/subscribe'). Compensated by throttle:30,1 on the route plus a
+    // 24h per-visitor-per-question dedupe in FrontendController@faqView.
+    '*/faq/*/view',
   ];
 }

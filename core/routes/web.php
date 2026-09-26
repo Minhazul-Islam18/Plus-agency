@@ -151,6 +151,9 @@ Route::group([], function () use ($cfCacheableExcept) {
     Route::get('/team', 'Front\FrontendController@team')->name('front.team');
     Route::get('/gallery', 'Front\FrontendController@gallery')->name('front.gallery');
     Route::get('/faq', 'Front\FrontendController@faq')->name('front.faq');
+    // FAQ "most viewed" panel: live JSON (the FAQ page itself is HTTP-cached) + view counter.
+    Route::get('/faq/most-viewed', 'Front\FrontendController@faqMostViewed')->name('front.faq.mostViewed')->middleware('throttle:60,1');
+    Route::post('/faq/{id}/view', 'Front\FrontendController@faqView')->whereNumber('id')->name('front.faq.view')->middleware('throttle:30,1');
 
     // change language routes
     Route::get('/changelanguage/{lang}', 'Front\FrontendController@changeLanguage')->name('changeLanguage');
@@ -684,6 +687,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/faq/settings', 'Admin\FAQCategoryController@settings')->name('admin.faq.settings');
         Route::post('/faq/{langid}/update_settings', 'Admin\FAQCategoryController@updateSettings')->name('admin.faq.update_settings');
         Route::post('/faq/{langid}/delete_breadcrumb_bg', 'Admin\FAQCategoryController@deleteBreadcrumbBg')->name('admin.faq.delete_breadcrumb_bg');
+        Route::post('/faq/{langid}/delete_hero_image', 'Admin\FAQCategoryController@deleteHeroImage')->name('admin.faq.delete_hero_image');
 
         // Admin FAQ Category Routes
         Route::get('/faq/categories', 'Admin\FAQCategoryController@index')->name('admin.faq.categories');

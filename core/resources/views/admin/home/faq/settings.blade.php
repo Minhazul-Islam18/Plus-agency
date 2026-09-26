@@ -90,7 +90,8 @@
                                             @if (!empty($bsData->faq_breadcrumb_bg))
                                                 <img src="{{ asset('assets/front/img/' . $bsData->faq_breadcrumb_bg) }}"
                                                     alt="Breadcrumb Background" class="uploaded-img">
-                                                <button type="button" class="btn btn-danger btn-sm remove-img-btn">
+                                                <button type="button" class="btn btn-danger btn-sm remove-img-btn"
+                                                    data-kind="bg">
                                                     <i class="fas fa-times"></i>
                                                 </button>
                                             @else
@@ -135,6 +136,86 @@
                                                 {{ $errors->first('faq_breadcrumb_overlay_opacity') }}</p>
                                         @endif
                                     </div>
+
+                                    <hr class="my-4">
+                                    <h5 class="mb-3">FAQ Page Content</h5>
+
+                                    <div class="form-group">
+                                        <label for="">Hero Illustration (top right of the FAQ page)</label>
+                                        <br>
+                                        <div class="thumb-preview" id="thumbPreview2">
+                                            @if (!empty($bsData->faq_hero_image))
+                                                <img src="{{ asset('assets/front/img/' . $bsData->faq_hero_image) }}"
+                                                    alt="Hero Illustration" class="uploaded-img">
+                                                <button type="button" class="btn btn-danger btn-sm remove-img-btn"
+                                                    data-kind="hero">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            @else
+                                                <img src="{{ asset('assets/admin/img/noimage.jpg') }}" alt="..."
+                                                    class="uploaded-img">
+                                            @endif
+                                        </div>
+                                        <br>
+                                        <br>
+                                        <input id="fileInput2" type="hidden" name="faq_hero_image" value="">
+                                        <button id="chooseImage2" class="choose-image btn btn-primary" type="button"
+                                            data-multiple="false" data-toggle="modal" data-target="#lfmModal2">Choose
+                                            Image</button>
+                                        <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
+                                        <p class="text-info mb-0"><small>A transparent PNG/WebP works best. Leave empty to
+                                                hide the illustration.</small></p>
+                                        @if ($errors->has('faq_hero_image'))
+                                            <p class="text-danger mb-0">{{ $errors->first('faq_hero_image') }}</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Introductory Text</label>
+                                        <textarea class="form-control" name="faq_intro_text" rows="3" maxlength="1000"
+                                            placeholder="Quickly find answers to your questions about our services, calls for tenders, and how to use the ICA platform.">{{ old('faq_intro_text', $bsData->faq_intro_text ?? '') }}</textarea>
+                                        <p class="text-warning mb-0">Shown under the page title. Leave empty to use the
+                                            default text.</p>
+                                        @if ($errors->has('faq_intro_text'))
+                                            <p class="text-danger mb-0">{{ $errors->first('faq_intro_text') }}</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Contact Email</label>
+                                        <input type="email" class="form-control" name="faq_contact_email"
+                                            value="{{ old('faq_contact_email', $bsData->faq_contact_email ?? '') }}"
+                                            placeholder="contact@example.com">
+                                        @if ($errors->has('faq_contact_email'))
+                                            <p class="text-danger mb-0">{{ $errors->first('faq_contact_email') }}</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>WhatsApp Number</label>
+                                        <input type="text" class="form-control" name="faq_whatsapp"
+                                            value="{{ old('faq_whatsapp', $bsData->faq_whatsapp ?? '') }}"
+                                            placeholder="+226 25 44 44 79">
+                                        <p class="text-warning mb-0">Include the country code. Used for the WhatsApp
+                                            button in the "Didn't find your answer?" banner.</p>
+                                        @if ($errors->has('faq_whatsapp'))
+                                            <p class="text-danger mb-0">{{ $errors->first('faq_whatsapp') }}</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Most Viewed Questions — Maximum Displayed **</label>
+                                        <input type="number" class="form-control" name="faq_frequent_max" min="1"
+                                            max="20" value="{{ old('faq_frequent_max', $bsData->faq_frequent_max ?? 5) }}">
+                                        <p class="text-warning mb-0">Questions clicked more than 5 times are added
+                                            automatically. When the list is full, the one that has been there longest is
+                                            replaced.</p>
+                                        @if ($errors->has('faq_frequent_max'))
+                                            <p class="text-danger mb-0">{{ $errors->first('faq_frequent_max') }}</p>
+                                        @endif
+                                    </div>
+
+                                    <hr class="my-4">
 
                                     <div class="form-group">
                                         <label>FAQ Category**</label>
@@ -186,6 +267,19 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle"
+            aria-hidden="true">
+            <i class="fas fa-times-circle"></i>
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <iframe src="{{ url('laravel-filemanager') }}?serial=2"
+                            style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endsection
 
     @section('scripts')
@@ -213,6 +307,7 @@
                             var deleteBtn = document.createElement('button');
                             deleteBtn.type = 'button';
                             deleteBtn.className = 'btn btn-danger btn-sm remove-img-btn';
+                            deleteBtn.setAttribute('data-kind', serial === '2' ? 'hero' : 'bg');
                             deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
                             thumbPreview.appendChild(deleteBtn);
                         }
@@ -224,12 +319,28 @@
 
             $(document).ready(function() {
                 // Delete breadcrumb background image
+                var deleteKinds = {
+                    bg: {
+                        url: '{{ route('admin.faq.delete_breadcrumb_bg', $lang_id) }}',
+                        preview: '#thumbPreview1',
+                        input: '#fileInput1',
+                        label: 'background image'
+                    },
+                    hero: {
+                        url: '{{ route('admin.faq.delete_hero_image', $lang_id) }}',
+                        preview: '#thumbPreview2',
+                        input: '#fileInput2',
+                        label: 'hero illustration'
+                    }
+                };
+
                 $(document).on('click', '.remove-img-btn', function(e) {
                     e.preventDefault();
+                    var kind = deleteKinds[$(this).data('kind')] || deleteKinds.bg;
 
                     swal({
                         title: 'Are you sure?',
-                        text: "You want to delete this background image?",
+                        text: "You want to delete this " + kind.label + "?",
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -246,7 +357,7 @@
                     }).then((willDelete) => {
                         if (willDelete) {
                             $.ajax({
-                                url: '{{ route('admin.faq.delete_breadcrumb_bg', $lang_id) }}',
+                                url: kind.url,
                                 type: 'POST',
                                 data: {
                                     _token: '{{ csrf_token() }}'
@@ -254,13 +365,13 @@
                                 success: function(response) {
                                     swal.close();
                                     if (response.success) {
-                                        $('#thumbPreview1 img').attr('src',
+                                        $(kind.preview + ' img').attr('src',
                                             '{{ asset('assets/admin/img/noimage.jpg') }}'
                                         );
-                                        $('#thumbPreview1 .remove-img-btn').remove();
-                                        $('#fileInput1').val('');
+                                        $(kind.preview + ' .remove-img-btn').remove();
+                                        $(kind.input).val('');
                                         $.notify({
-                                            message: 'Background image has been deleted.',
+                                            message: kind.label.charAt(0).toUpperCase() + kind.label.slice(1) + ' has been deleted.',
                                             title: 'Success!',
                                             icon: 'fa fa-check'
                                         }, {
@@ -278,7 +389,7 @@
                                 error: function(xhr) {
                                     swal.close();
                                     $.notify({
-                                        message: 'Failed to delete background image.',
+                                        message: 'Failed to delete the ' + kind.label + '.',
                                         title: 'Error!',
                                         icon: 'fa fa-times'
                                     }, {

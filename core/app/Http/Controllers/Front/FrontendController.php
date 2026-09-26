@@ -716,6 +716,10 @@ class FrontendController extends Controller
 
         $data['faqs'] = Faq::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
 
+        // Dark theme's FAQ page: server-rendered initial "most viewed" panel
+        // (refreshed live by the page's JS — the HTML itself is HTTP-cached).
+        $data['frequentFaqs'] = \App\Services\FaqViewService::panel($lang_id);
+
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;
 
@@ -726,6 +730,36 @@ class FrontendController extends Controller
         $data['version'] = $version;
 
         return view('front.faq', $data);
+    }
+
+    /**
+     * Counts a first-open of a FAQ answer toward the "most viewed" panel.
+     * One count per visitor (hashed IP) per question per 24h so refreshing or
+     * re-opening can't inflate it. Always 204: the client doesn't care.
+     */
+    public function faqView(Request $request, $id)
+    {
+        $key = 'faq_view:' . (int) $id . ':' . sha1($request->ip());
+
+        if (\Illuminate\Support\Facades\Cache::add($key, 1, now()->addDay())) {
+            \App\Services\FaqViewService::record((int) $id);
+        }
+
+        return response()->noContent();
+    }
+
+    /** Live "most viewed" panel — never cached (the FAQ page around it is). */
+    public function faqMostViewed()
+    {
+        $lang = currentLang();
+
+        $items = \App\Services\FaqViewService::panel($lang->id)->map(fn($f) => [
+            'id'       => $f->id,
+            'question' => convertUtf8($f->question),
+        ])->values();
+
+        return response()->json(['items' => $items])
+            ->header('Cache-Control', 'no-store, private');
     }
 
     public function dynamicPage($slug)

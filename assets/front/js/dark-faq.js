@@ -30,7 +30,27 @@
   var viewUrl = list.getAttribute('data-view-url');
   var panelUrl = list.getAttribute('data-panel-url');
   var SEEN_KEY = 'faqx_seen';
+  var VID_KEY = 'faqx_vid';
   var DAY = 24 * 60 * 60 * 1000;
+
+  /* Random per-browser id, sent with the view ping so the server can tell
+     distinct visitors apart even when they share one IP (NAT, office wifi,
+     mobile carriers) — see FrontendController@faqView. Persisted in
+     localStorage: a fresh incognito window has none, so it correctly reads
+     as a new visitor there, same as clearing site data. */
+  function visitorId() {
+    try {
+      var v = localStorage.getItem(VID_KEY);
+      if (!v) {
+        v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, '') :
+          (Date.now().toString(36) + Math.random().toString(36).slice(2)).padEnd(20, '0');
+        localStorage.setItem(VID_KEY, v);
+      }
+      return v;
+    } catch (e) {
+      return null; // private mode / storage blocked — server falls back to IP
+    }
+  }
 
   /* ---------- filtering + "load more" ---------- */
   function applyFilters(animate) {
@@ -115,11 +135,16 @@
     seen[id] = now;
     writeSeen(seen);
 
+    var vid = visitorId();
+    var body = new URLSearchParams();
+    if (vid) body.set('vid', vid);
+
     fetch(viewUrl.replace('__ID__', encodeURIComponent(id)), {
       method: 'POST',
       keepalive: true,
       credentials: 'same-origin',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
     }).then(function () {
       setTimeout(refreshPanel, 400);
     }).catch(function () { /* counting is best-effort */ });

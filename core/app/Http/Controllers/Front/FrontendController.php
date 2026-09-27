@@ -739,7 +739,21 @@ class FrontendController extends Controller
      */
     public function faqView(Request $request, $id)
     {
-        $key = 'faq_view:' . (int) $id . ':' . sha1($request->ip());
+        // "One visitor" is identified by a random id the page issues itself
+        // (dark-faq.js, localStorage) rather than the request IP: this app
+        // is commonly reached through NAT/office wifi/mobile carriers (and,
+        // on this dev box, minhazul.site *always* resolves to 127.0.0.1 —
+        // see /etc/hosts), so every distinct visitor behind the same IP
+        // would otherwise collide into a single counted view. The visitor
+        // id is trusted for nothing except this best-effort dedupe (it's
+        // trivial to fake or clear), so falling back to IP when it's
+        // missing — old cached page still running the previous JS, JS
+        // disabled — only weakens that same best-effort guarantee further,
+        // never anything security-sensitive.
+        $visitor = (string) $request->input('vid');
+        $visitor = preg_match('/^[A-Za-z0-9_-]{10,64}$/', $visitor) ? $visitor : $request->ip();
+
+        $key = 'faq_view:' . (int) $id . ':' . sha1($visitor);
 
         if (\Illuminate\Support\Facades\Cache::add($key, 1, now()->addDay())) {
             \App\Services\FaqViewService::record((int) $id);

@@ -151,6 +151,16 @@
   }
 
   /* ---------- most viewed panel ---------- */
+  // Clicking a panel question expands its answer right there (see faqx-pa
+  // below), instead of jumping into the main list — with a long question
+  // list, scrolling down to find where that question actually lives (it
+  // could be item #39) was the whole problem this panel exists to avoid.
+  function setPanelOpen(li, open) {
+    li.classList.toggle('is-open', open);
+    var btn = li.querySelector('.faqx-pitem');
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
   function renderPanel(entries) {
     // Only show questions that exist in the rendered list.
     entries = entries.filter(function (e) { return document.getElementById('faqx-item-' + e.id); });
@@ -158,14 +168,18 @@
     panelList.textContent = '';
     entries.forEach(function (e) {
       var li = document.createElement('li');
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'faqx-pitem';
-      b.setAttribute('data-faq', e.id);
-      b.innerHTML = '<span class="faqx-num" aria-hidden="true"></span><span class="faqx-pt"></span>' +
-        '<span class="faqx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>';
-      b.querySelector('.faqx-pt').textContent = e.question;
-      li.appendChild(b);
+      li.className = 'faqx-pli';
+      li.setAttribute('data-faq', e.id);
+      li.innerHTML =
+        '<button type="button" class="faqx-pitem" aria-expanded="false" aria-controls="faqx-pa-' + e.id + '">' +
+        '<span class="faqx-num" aria-hidden="true"></span><span class="faqx-pt"></span>' +
+        '<span class="faqx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></span>' +
+        '</button>' +
+        '<div class="faqx-pa" id="faqx-pa-' + e.id + '" role="region"><div class="faqx-pa-in"><p></p></div></div>';
+      li.querySelector('.faqx-pt').textContent = e.question;
+      // e.answer is server-escaped + nl2br'd (FrontendController@faqMostViewed,
+      // same treatment as the main list's own answer markup) — safe to insert.
+      li.querySelector('.faqx-pa-in p').innerHTML = e.answer;
       panelList.appendChild(li);
     });
 
@@ -184,18 +198,11 @@
   panelList.addEventListener('click', function (e) {
     var btn = e.target.closest('.faqx-pitem');
     if (!btn) return;
-    var item = document.getElementById('faqx-item-' + btn.getAttribute('data-faq'));
-    if (!item) return;
-
-    // Make sure the target isn't hidden by the search/category filter or the "show more" cap.
-    if (item.hidden) {
-      if (searchEl) searchEl.value = '';
-      if (catEl) catEl.value = '';
-      limit = Math.max(limit, items.length);
-      applyFilters();
-    }
-    if (!item.classList.contains('is-open')) item.querySelector('.faqx-q').click();
-    item.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+    var li = btn.closest('.faqx-pli');
+    var willOpen = !li.classList.contains('is-open');
+    panelList.querySelectorAll('.faqx-pli').forEach(function (o) { if (o !== li) setPanelOpen(o, false); });
+    setPanelOpen(li, willOpen);
+    if (willOpen) track(li.getAttribute('data-faq'));
   });
 
   applyFilters();

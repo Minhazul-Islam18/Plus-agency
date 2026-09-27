@@ -13102,6 +13102,32 @@ body.dark-oc-lock {
 .faqx-plist li:last-child {
   border-bottom: none;
 }
+/* Answer expands right under its own question — no jump into the main
+   list, no hunting through it for wherever that question happens to sit. */
+.faqx-pa {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+.faqx-pli.is-open .faqx-pa {
+  grid-template-rows: 1fr;
+}
+.faqx-pa-in {
+  overflow: hidden;
+  min-height: 0;
+}
+.faqx-pa-in p {
+  margin: 0;
+  padding: 0 28px 18px 6px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.68);
+}
+@media (prefers-reduced-motion: reduce) {
+  .faqx-pa {
+    transition: none;
+  }
+}
 .faqx-pitem {
   width: 100%;
   display: flex;
@@ -13145,6 +13171,18 @@ body.dark-oc-lock {
 }
 .faqx-pitem:hover .faqx-chev {
   transform: translateX(3px);
+}
+.faqx-pli.is-open .faqx-pitem {
+  color: #fff;
+}
+.faqx-pli.is-open .faqx-pt {
+  color: var(--accent-2);
+}
+.faqx-pli.is-open .faqx-chev {
+  transform: rotate(90deg);
+}
+.faqx-pli.is-open .faqx-pitem:hover .faqx-chev {
+  transform: rotate(90deg) translateX(3px);
 }
 
 /* contact banner */

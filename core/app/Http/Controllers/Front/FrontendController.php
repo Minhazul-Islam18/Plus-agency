@@ -770,6 +770,11 @@ class FrontendController extends Controller
         $items = \App\Services\FaqViewService::panel($lang->id)->map(fn($f) => [
             'id'       => $f->id,
             'question' => convertUtf8($f->question),
+            // Answer is rendered inline in the panel itself (clicking a "most
+            // viewed" question shows its answer right there, not by jumping
+            // into the long main list) — same escaping/nl2br as the main
+            // list's own answer markup, see faqx-a-in in faq.blade.php.
+            'answer'   => nl2br(e(convertUtf8($f->answer))),
         ])->values();
 
         return response()->json(['items' => $items])

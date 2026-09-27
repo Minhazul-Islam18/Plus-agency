@@ -510,8 +510,21 @@ $(function ($) {
   /* ***************************************************
   ==========Form Prepopulate After Clicking Edit Button Start==========
   ******************************************************/
-  $(".editbtn").on('click', function () {
-    
+  // Delegated (not a direct bind): a direct $(".editbtn").on('click', ...)
+  // only wires up whichever .editbtn elements are in the DOM at the moment
+  // this file runs. On any list using DataTables (e.g. admin FAQ list),
+  // DataTables' own init already runs earlier in this same file and
+  // synchronously detaches every row past its first page from the DOM —
+  // so a direct bind only ever reaches page 1's Edit buttons. Clicking Edit
+  // on any later page then fired no handler at all, leaving the modal
+  // showing whatever it last held instead of that row's own data — visible
+  // as the Question/Category in the popup not matching the clicked row.
+  // Delegating to $(document) matches page 1 exactly as before, plus every
+  // row DataTables re-inserts on later pages. Read-only fix: it only
+  // changes when the existing (unmodified) prepopulate logic below runs —
+  // no query, model, or stored data is touched.
+  $(document).on('click', '.editbtn', function () {
+
     let datas = $(this).data();
     console.log(datas);
     delete datas['toggle'];

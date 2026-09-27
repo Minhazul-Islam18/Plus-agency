@@ -106,11 +106,11 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="row">
-                        <div class="col-lg-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-3">
                             <div class="card-title d-inline-block">Faqs</div>
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-2 mt-2 mt-lg-0">
                             @if (!empty($langs))
                                 <select name="language" class="form-control"
                                     onchange="window.location='{{ url()->current() . '?language=' }}'+this.value">
@@ -123,7 +123,27 @@
                                 </select>
                             @endif
                         </div>
-                        <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
+                        @if ($categoryInfo->faq_category_status == 1)
+                            <div class="col-lg-3 mt-2 mt-lg-0 d-flex align-items-center">
+                                <form method="get" class="flex-grow-1">
+                                    <input type="hidden" name="language" value="{{ request()->input('language') }}">
+                                    <select name="category_id" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Category — All</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}"
+                                                {{ request()->input('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ convertUtf8($category->name) }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                                @if (request()->filled('category_id'))
+                                    <a href="{{ url()->current() . '?language=' . request()->input('language') }}"
+                                        class="ml-2 text-muted" title="Clear category filter"><i
+                                            class="fas fa-times-circle"></i></a>
+                                @endif
+                            </div>
+                        @endif
+                        <div class="col-lg-{{ $categoryInfo->faq_category_status == 1 ? 4 : 7 }} mt-2 mt-lg-0">
                             <a href="#" class="btn btn-primary float-right btn-sm" data-toggle="modal"
                                 data-target="#createModal"><i class="fas fa-plus"></i> Add Faq</a>
                             <button class="btn btn-danger float-right btn-sm mr-2 d-none bulk-delete"
@@ -146,6 +166,9 @@
                                                     <input type="checkbox" class="bulk-check" data-val="all">
                                                 </th>
                                                 <th scope="col">Question</th>
+                                                @if ($categoryInfo->faq_category_status == 1)
+                                                    <th scope="col">Category</th>
+                                                @endif
                                                 <th scope="col">Serial Number</th>
                                                 <th scope="col">Status</th>
                                                 <th scope="col">Actions</th>
@@ -161,6 +184,9 @@
                                                     <td>
                                                         {{ convertUtf8(strlen($faq->question)) > 50 ? convertUtf8(substr($faq->question, 0, 50)) . '...' : convertUtf8($faq->question) }}
                                                     </td>
+                                                    @if ($categoryInfo->faq_category_status == 1)
+                                                        <td>{{ $faq->faqCategory ? convertUtf8($faq->faqCategory->name) : '-' }}</td>
+                                                    @endif
                                                     <td>{{ $faq->serial_number }}</td>
                                                     <td>
                                                         <label class="switch">

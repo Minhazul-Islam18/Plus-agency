@@ -18,16 +18,25 @@ class FaqController extends Controller
     $lang = Language::where('code', $request->language)->first();
 
     $lang_id = $lang->id;
-    $data['faqs'] = Faq::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
+    $data['categoryInfo'] = BasicExtra::first();
 
+    $query = Faq::where('language_id', $lang_id);
+
+    if ($data['categoryInfo']->faq_category_status == 1 && $request->filled('category_id')) {
+      $query->where('category_id', $request->category_id);
+    }
+
+    $data['faqs'] = $query->with('faqCategory')->orderBy('id', 'DESC')->get();
+
+    // Every category for this language, not just active ones — an admin
+    // filtering the list should be able to find FAQs under a category
+    // they've since disabled, not have it hidden (same reasoning as
+    // ServiceController@index's $scategories).
     $data['categories'] = FAQCategory::where('language_id', $lang_id)
-      ->where('status', 1)
       ->orderBy('serial_number', 'desc')
       ->get();
 
     $data['lang_id'] = $lang_id;
-
-    $data['categoryInfo'] = BasicExtra::first();
 
     return view('admin.home.faq.index', $data);
   }

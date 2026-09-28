@@ -32,13 +32,28 @@
                     'Quickly find answers to your questions about our services, calls for tenders, and how to use the ICA platform.',
                 );
     @endphp
-    @section('breadcrumb-hero-class', 'dark-bc-faq')
+    @section(
+        'breadcrumb-hero-class',
+        'dark-bc-faq' . (!empty($bs->faq_hero_image) ? ' dark-bc-has-art' : ''),
+    )
     @section('breadcrumb-intro', convertUtf8($faqxIntro))
     @if (!empty($bs->faq_hero_image))
         @section('breadcrumb-art')
             <img src="{{ asset('assets/front/img/' . $bs->faq_hero_image) }}" alt="" loading="eager" decoding="async">
         @endsection
     @endif
+    @section('breadcrumb-ledger')
+        <div class="dark-bc-ledger-item">
+            <span class="dark-bc-ledger-num">{{ str_pad(count($faqs), 2, '0', STR_PAD_LEFT) }}</span>
+            <span class="dark-bc-ledger-label">{{ __('FAQs') }}</span>
+        </div>
+        @if (count($categories) > 0)
+            <div class="dark-bc-ledger-item">
+                <span class="dark-bc-ledger-num">{{ str_pad(count($categories), 2, '0', STR_PAD_LEFT) }}</span>
+                <span class="dark-bc-ledger-label">{{ __('Categories') }}</span>
+            </div>
+        @endif
+    @endsection
 @endif
 
 @section('content')

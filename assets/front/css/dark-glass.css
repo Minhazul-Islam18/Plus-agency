@@ -12747,8 +12747,8 @@ body.dark-oc-lock {
   width: min(38%, 620px);
   z-index: 0;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 10%);
 }
 .dark-bc-art img {
   width: 100%;
@@ -12759,6 +12759,45 @@ body.dark-oc-lock {
 }
 .dark-bc-faq .dark-bc-inner {
   padding-bottom: 40px;
+}
+/* With a hero illustration present, reserve its width so the ledger (pushed
+   to the far right by .dark-bc-inner's space-between) lands in the gap
+   between the intro text and the image instead of running underneath it. */
+.dark-bc-has-art .dark-bc-inner {
+  padding-right: min(32%, 520px);
+  /* Text+ledger are bottom-aligned everywhere else (.dark-bc-inner's own
+     align-items:flex-end), which reads fine when there's no image to sit
+     next to. With one, that left the (shorter) ledger sitting low against
+     the (taller) text block instead of centered between text and image. */
+  align-items: center;
+}
+/* .dark-bc-text is flex:1 1 420px (grows to fill the row) everywhere else,
+   which is fine when the ledger is its only neighbor — space-between then
+   puts all the daylight between them. With the image's width reserved via
+   padding-right above, that same growth ate the little room left, so the
+   ledger ended up sitting immediately next to the text with none of that
+   gap actually visible. Capping growth here + explicitly pushing the
+   ledger to the row's right edge (margin-left: auto, not dependent on
+   space-between having room to distribute) puts real breathing room on
+   both sides of the ledger, next to the image rather than glued to the text. */
+.dark-bc-has-art .dark-bc-text {
+  flex-grow: 0;
+}
+.dark-bc-has-art .dark-bc-ledger {
+  margin-left: auto;
+}
+@media (max-width: 991px) {
+  /* Matches .dark-bc-art's own width at this breakpoint (below) — still
+     reserved, just narrower, until the art disappears entirely at 640px. */
+  .dark-bc-has-art .dark-bc-inner {
+    padding-right: 46%;
+  }
+}
+@media (max-width: 640px) {
+  /* .dark-bc-art is display:none here (below) — no gap needed. */
+  .dark-bc-has-art .dark-bc-inner {
+    padding-right: 0;
+  }
 }
 @media (max-width: 991px) {
   .dark-bc-art {

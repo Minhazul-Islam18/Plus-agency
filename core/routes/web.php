@@ -651,6 +651,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/blog/bulk-delete', 'Admin\BlogController@bulkDelete')->name('admin.blog.bulk.delete');
         Route::get('/blog/{langid}/getcats', 'Admin\BlogController@getcats')->name('admin.blog.getcats');
         Route::post('/blog/sidebar', 'Admin\BlogController@sidebar')->name('admin.blog.sidebar');
+        Route::post('/blog/status', 'Admin\BlogController@toggleStatus')->name('admin.blog.status');
 
 
         // Admin Blog Archive Routes

@@ -678,7 +678,7 @@
                                     @endphp
 
                                     <p class="date"><small>{{ __('By') }} <span
-                                                class="username">{{ __('Admin') }}</span></small> |
+                                                class="username">{{ convertUtf8($blog->author_name) }}</span></small> |
                                         <small>{{ $blogDate }}</small>
                                     </p>
 

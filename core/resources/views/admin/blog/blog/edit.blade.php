@@ -183,6 +183,20 @@
                   <p class="text-warning"><small>The higher the serial number is, the later the blog will be shown.</small></p>
                 </div>
                 <div class="form-group">
+                  <label>Sidebar **</label>
+                  <div class="selectgroup w-100">
+                    <label class="selectgroup-item">
+                      <input type="radio" name="sidebar" value="1" class="selectgroup-input" {{ $blog->sidebar == 1 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">Enabled</span>
+                    </label>
+                    <label class="selectgroup-item">
+                      <input type="radio" name="sidebar" value="0" class="selectgroup-input" {{ $blog->sidebar == 0 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">Disabled</span>
+                    </label>
+                  </div>
+                  <p id="errsidebar" class="mb-0 text-danger em"></p>
+                </div>
+                <div class="form-group">
                   <label for="">Meta Keywords</label>
                   <input type="text" class="form-control" name="meta_keywords" value="{{$blog->meta_keywords}}" data-role="tagsinput">
                   <p id="errmeta_keywords" class="mb-0 text-danger em"></p>

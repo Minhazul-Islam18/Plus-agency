@@ -47,7 +47,7 @@
                 <div class="dark-article-byline">
                     <div class="dark-byline-avatar">{{ mb_strtoupper(mb_substr(convertUtf8($bex->site_title ?? 'ICA'), 0, 2)) }}</div>
                     <div class="dark-byline-text">
-                        <div class="name">{{ __('Admin') }}</div>
+                        <div class="name">{{ convertUtf8($blog->author_name) }}</div>
                         @if (!empty($blog->bcategory))
                             <div class="role">{{ convertUtf8($blog->bcategory->name) }}</div>
                         @endif
@@ -145,7 +145,7 @@
                         <img class="blog-details-img-1 lazy"
                             data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
                         <small class="date">{{ date('F d, Y', strtotime($blog->created_at)) }} - {{ __('BY') }}
-                            {{ __('Admin') }}</small>
+                            {{ convertUtf8($blog->author_name) }}</small>
                         <h2 class="blog-details-title">{{ convertUtf8($blog->title) }}</h2>
                         <div class="blog-details-body">
                             {!! replaceBaseUrl(convertUtf8($blog->content)) !!}

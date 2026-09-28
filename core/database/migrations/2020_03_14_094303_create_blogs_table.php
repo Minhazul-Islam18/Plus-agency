@@ -24,6 +24,14 @@ class CreateBlogsTable extends Migration
             $table->text('meta_keywords')->nullable();
             $table->text('meta_description')->nullable();
             $table->integer('serial_number')->default(0);
+            // Admin who published the post (front-end "By ..." byline) — set
+            // once at creation (BlogController@store) and never reassigned
+            // on edit, same as pages.updated_by_admin_id's belongsTo pattern.
+            $table->unsignedBigInteger('admin_id')->nullable();
+            // Activate/deactivate switch on the admin list (replaces the old
+            // per-row Sidebar select there — Sidebar moved into the
+            // create/edit forms as a radio group, same as services.sidebar).
+            $table->tinyInteger('status')->default(1)->comment('1 - active, 0 - inactive');
             $table->timestamps();
         });
     }

@@ -53,6 +53,29 @@
     </button>
     <div class="dark-svcp-inner">
       <div>
+        {{-- Search + Year filter — left column, horizontal, same
+             .faqx-search/.faqx-select pattern as the FAQ page's toolbar.
+             A real GET form (not FAQ's client-side JS filter): the blog
+             list is server-paginated, so filtering has to round-trip. --}}
+        <form method="GET" action="{{ route('front.blogs') }}" class="faqx-toolbar dark-blogp-toolbar">
+          <input type="hidden" name="category" value="{{ request()->input('category') }}">
+          <input type="hidden" name="month" value="{{ request()->input('month') }}">
+          <div class="faqx-search">
+            <input type="text" name="term" placeholder="{{ __('Search Blogs') }}" value="{{ request()->input('term') }}">
+            <button type="submit" class="faqx-search-btn" style="padding:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+          </div>
+          @if (count($years) > 0)
+            <div class="faqx-select">
+              <select name="year" aria-label="{{ __('All years') }}" onchange="this.form.submit()">
+                <option value="">{{ __('All years') }}</option>
+                @foreach ($years as $y)
+                  <option value="{{ $y }}" {{ (string) $year === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endforeach
+              </select>
+            </div>
+          @endif
+        </form>
+
         @if (count($blogs) == 0)
           <div class="dark-svcp-empty">
             <h3>{{ __('NO BLOG FOUND') }}</h3>
@@ -69,7 +92,7 @@
                 </div>
                 <div class="dark-blogp-feat-body">
                   <div class="dark-blogp-meta">
-                    <span>{{ __('Admin') }}</span><span class="dot"></span><span class="date">{{ $blogDate->translatedFormat('jS F, Y') }}</span>
+                    <span>{{ convertUtf8($blog->author_name) }}</span><span class="dot"></span><span class="date">{{ $blogDate->translatedFormat('jS F, Y') }}</span>
                   </div>
                   <h2><a href="{{ route('front.blogdetails', [$blog->slug]) }}">{{ strlen($blog->title) > 90 ? mb_substr($blog->title, 0, 90, 'utf-8') . '...' : $blog->title }}</a></h2>
                   <p>{!! strlen(strip_tags($blog->content)) > 150 ? mb_substr(strip_tags($blog->content), 0, 150, 'utf-8') . '...' : strip_tags($blog->content) !!}</p>
@@ -104,17 +127,10 @@
       </div>
 
       <div id="pfCatSource">
+        {{-- Search moved into the left-column toolbar above (was here) —
+             Categories is now the first pinned widget in the mobile
+             offcanvas instead. --}}
         <div class="dark-svcp-widget" data-pf-pin="top">
-          <form class="dark-svcp-search" action="{{ route('front.blogs', ['category' => request()->input('category'), 'month' => request()->input('month'), 'year' => request()->input('year')]) }}" method="GET">
-            <input name="category" type="hidden" value="{{ request()->input('category') }}">
-            <input name="month" type="hidden" value="{{ request()->input('month') }}">
-            <input name="year" type="hidden" value="{{ request()->input('year') }}">
-            <input name="term" type="text" placeholder="{{ __('Search Blogs') }}" value="{{ request()->input('term') }}">
-            <button type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
-          </form>
-        </div>
-
-        <div class="dark-svcp-widget">
           <h4>{{ __('Categories') }}</h4>
           <ul class="dark-svcp-cat-list">
             @foreach ($bcats as $key => $bcat)
@@ -204,7 +220,7 @@
 
                                 $blogDate = $blogDate->translatedFormat('jS F, Y');
                             @endphp
-                             <p class="date"><small>{{__('By')}} <span class="username">{{__('Admin')}}</span></small> | <small>{{$blogDate}}</small> </p>
+                             <p class="date"><small>{{__('By')}} <span class="username">{{ convertUtf8($blog->author_name) }}</span></small> | <small>{{$blogDate}}</small> </p>
 
                              <h4 class="blog-title"><a href="{{route('front.blogdetails', [$blog->slug])}}">{{strlen($blog->title) > 40 ? mb_substr($blog->title, 0, 40, 'utf-8') . '...' : $blog->title}}</a></h4>
 

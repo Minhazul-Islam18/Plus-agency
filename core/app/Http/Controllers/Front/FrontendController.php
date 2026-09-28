@@ -92,7 +92,7 @@ class FrontendController extends Controller
                     'testimonials' => Testimonial::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get(),
                     'faqs' => Faq::orderBy('serial_number', 'ASC')->get(),
                     'members' => Member::where('language_id', $lang_id)->where('feature', 1)->get(),
-                    'blogs' => Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->limit(6)->get(),
+                    'blogs' => Blog::where('language_id', $lang_id)->where('status', 1)->with('admin:id,first_name,last_name')->orderBy('id', 'DESC')->limit(6)->get(),
                     'partners' => Partner::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
                     'scategories' => Scategory::where('language_id', $lang_id)->where('feature', 1)->where('status', 1)->orderBy('serial_number', 'ASC')->get(),
                     'tenders' => Tender::where('language_id', $lang_id)->where('is_featured', 1)->where('status', 1)->with('tenderCategory:id,name')->orderBy('id', 'DESC')->limit(10)->get(),
@@ -444,7 +444,16 @@ class FrontendController extends Controller
             $archive = false;
         }
 
-        $data['blogs'] = Blog::when($catid, function ($query, $catid) {
+        // Standalone Year filter (toolbar, left column) — distinct from the
+        // Archives widget's month+year links: this filters by year alone.
+        $data['year'] = $year;
+        $data['years'] = Blog::where('language_id', $lang_id)
+            ->where('status', 1)
+            ->selectRaw('DISTINCT YEAR(created_at) as y')
+            ->orderByDesc('y')
+            ->pluck('y');
+
+        $data['blogs'] = Blog::where('status', 1)->with('admin:id,first_name,last_name')->when($catid, function ($query, $catid) {
             return $query->where('bcategory_id', $catid);
         })
             ->when($term, function ($query, $term) {
@@ -455,6 +464,12 @@ class FrontendController extends Controller
             })
             ->when($archive, function ($query) use ($month, $year) {
                 return $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
+            })
+            // Year-only (no month) — the new toolbar select, kept separate
+            // from $archive above so the existing month+year Archives links
+            // are unaffected.
+            ->when(!$archive && !empty($year), function ($query) use ($year) {
+                return $query->whereYear('created_at', $year);
             })
             ->when($currentLang, function ($query, $currentLang) {
                 return $query->where('language_id', $currentLang->id);
@@ -478,7 +493,7 @@ class FrontendController extends Controller
 
         $lang_id = $currentLang->id;
 
-        $blog = Blog::where('slug', $slug)->where('language_id', $lang_id)->first();
+        $blog = Blog::with('admin:id,first_name,last_name')->where('slug', $slug)->where('language_id', $lang_id)->where('status', 1)->first();
 
         if (!$blog) {
             // Editable-slug feature — see portfoliodetails() above for the

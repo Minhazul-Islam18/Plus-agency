@@ -38,7 +38,7 @@
                         <span class="blog-date-badge">{{ $blogDate }}</span>
                     </div>
                     <div class="blog-txt">
-                        <p class="date"><small>{{ __('By') }} <span class="username">{{ __('Admin') }}</span></small></p>
+                        <p class="date"><small>{{ __('By') }} <span class="username">{{ convertUtf8($blog->author_name) }}</span></small></p>
 
                         <h4 class="blog-title">{{ convertUtf8($blog->title) }}</h4>
 

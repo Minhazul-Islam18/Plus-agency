@@ -76,6 +76,49 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         @if (count($blogs) == 0)
                         <h3 class="text-center">NO BLOG FOUND</h3>
                         @else
+                        <style>
+                            /* Status switch — same markup/CSS as the Services list's own
+                               local copy; there's no global version. */
+                            .switch { position: relative; display: inline-block; width: 44px; height: 22px; vertical-align: middle; }
+                            .switch input { opacity: 0; width: 0; height: 0; }
+                            .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+                            .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+                            input:checked + .slider { background-color: #1572E8; }
+                            input:focus + .slider { box-shadow: 0 0 1px #1572E8; }
+                            input:checked + .slider:before { transform: translateX(22px); }
+                            .slider.round { border-radius: 22px; }
+                            .slider.round:before { border-radius: 50%; }
+
+                            /* Icon-only action buttons, same pastel-square treatment as
+                               the Services list's own Actions column. */
+                            .blog-actions { display: flex; align-items: center; gap: 6px; }
+                            .blog-actions button.blog-action-btn[type="submit"] {
+                                background: #ffe3e3 !important;
+                                border: none !important;
+                                box-shadow: none !important;
+                            }
+                            .blog-actions button.blog-action-btn[type="submit"]:hover {
+                                transform: none !important;
+                                box-shadow: none !important;
+                            }
+                            .blog-action-btn {
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                flex: 0 0 34px;
+                                width: 34px;
+                                height: 34px;
+                                border-radius: 8px;
+                                border: none;
+                                font-size: 14px;
+                                line-height: 1;
+                                cursor: pointer;
+                                transition: filter 0.15s ease;
+                            }
+                            .blog-action-btn:hover { filter: brightness(0.94); }
+                            .blog-action-edit { background: #eef0f3; color: #495057; }
+                            .blog-action-delete { background: #ffe3e3; color: #e03131; }
+                        </style>
                         <div class="table-responsive">
                             <table class="table table-striped mt-3" id="basic-datatables">
                                 <thead>
@@ -86,9 +129,10 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         <th scope="col">Image</th>
                                         <th scope="col">Category</th>
                                         <th scope="col">Title</th>
+                                        <th scope="col">Author</th>
                                         <th scope="col">Publish Date</th>
                                         <th scope="col">Serial Number</th>
-                                        <th scope="col">Sidebar</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
@@ -101,6 +145,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         <td><img src="{{asset('assets/front/img/blogs/'.$blog->main_image)}}" alt="" width="80"></td>
                                         <td>{{convertUtf8($blog->bcategory->name)}}</td>
                                         <td>{{convertUtf8(strlen($blog->title)) > 30 ? convertUtf8(substr($blog->title, 0, 30)) . '...' : convertUtf8($blog->title)}}</td>
+                                        <td>{{ convertUtf8($blog->author_name) }}</td>
                                         <td>
                                             @php
                                             $date = \Carbon\Carbon::parse($blog->created_at);
@@ -109,40 +154,26 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                         </td>
                                         <td>{{$blog->serial_number}}</td>
                                         <td>
-                                            <form id="statusForm{{$blog->id}}" class="d-inline-block" action="{{route('admin.blog.sidebar')}}" method="post">
-                                                @csrf
-                                                <input type="hidden" name="blog_id" value="{{$blog->id}}">
-                                                <select class="form-control form-control-sm
-                                                @if ($blog->sidebar == 1)
-                                                bg-success
-                                                @elseif ($blog->sidebar == 0)
-                                                bg-danger
-                                                @endif
-                                                " name="sidebar" onchange="document.getElementById('statusForm{{$blog->id}}').submit();">
-                                                <option value="1" {{$blog->sidebar == 1 ? 'selected' : ''}}>Enabled</option>
-                                                <option value="0" {{$blog->sidebar == 0 ? 'selected' : ''}}>Disabled</option>
-                                            </select>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        <a class="btn btn-secondary btn-sm" href="{{route('admin.blog.edit', $blog->id) . '?language=' . request()->input('language')}}">
-                                            <span class="btn-label">
-                                                <i class="fas fa-edit"></i>
-                                            </span>
-                                            Edit
-                                        </a>
-                                        <form class="deleteform d-inline-block" action="{{route('admin.blog.delete')}}" method="post">
-                                            @csrf
-                                            <input type="hidden" name="blog_id" value="{{$blog->id}}">
-                                            <button type="submit" class="btn btn-danger btn-sm deletebtn">
-                                                <span class="btn-label">
-                                                    <i class="fas fa-trash"></i>
-                                                </span>
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                            <label class="switch mb-0">
+                                                <input type="checkbox" class="blog-status-toggle" data-id="{{$blog->id}}" {{$blog->status == 1 ? 'checked' : ''}}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="blog-actions">
+                                                <a class="blog-action-btn blog-action-edit" href="{{route('admin.blog.edit', $blog->id) . '?language=' . request()->input('language')}}" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form class="deleteform d-inline-block" action="{{route('admin.blog.delete')}}" method="post">
+                                                    @csrf
+                                                    <input type="hidden" name="blog_id" value="{{$blog->id}}">
+                                                    <button type="submit" class="blog-action-btn blog-action-delete deletebtn" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -306,6 +337,20 @@ class="mb-0 text-danger em"
     <p class="text-warning mb-0"><small>The higher the serial number is, the later the blog will be shown.</small></p>
 </div>
 <div class="form-group">
+    <label>Sidebar **</label>
+    <div class="selectgroup w-100">
+        <label class="selectgroup-item">
+            <input type="radio" name="sidebar" value="1" class="selectgroup-input" checked>
+            <span class="selectgroup-button">Enabled</span>
+        </label>
+        <label class="selectgroup-item">
+            <input type="radio" name="sidebar" value="0" class="selectgroup-input">
+            <span class="selectgroup-button">Disabled</span>
+        </label>
+    </div>
+    <p id="errsidebar" class="mb-0 text-danger em"></p>
+</div>
+<div class="form-group">
     <label for="">Meta Keywords</label>
     <input
     type="text"
@@ -356,6 +401,47 @@ class="mb-0 text-danger em"
 @endsection
 @section('scripts')
 <script>
+    // Status (activate/deactivate) toggle — delegated so it keeps working
+    // across DataTables' own pagination (see faq/index.blade.php's identical
+    // note on .editbtn for why a direct bind would only reach page 1's rows).
+    $(document).on('change', '.blog-status-toggle', function () {
+        var $toggle = $(this);
+        var id = $toggle.data('id');
+        var checked = $toggle.is(':checked');
+        $.post("{{ route('admin.blog.status') }}", {
+            _token: "{{ csrf_token() }}",
+            blog_id: id,
+            status: checked ? 1 : 0,
+        }, function (resp) {
+            if (resp.success) {
+                $.notify({
+                    title: 'Success',
+                    message: checked ? 'Activated successfully!' : 'Deactivated successfully!',
+                    icon: 'fa fa-check',
+                }, {
+                    type: 'success',
+                    placement: { from: 'top', align: 'right' },
+                    showProgressbar: true,
+                    time: 1000,
+                    delay: 3000,
+                });
+            }
+        }).fail(function () {
+            $toggle.prop('checked', !checked);
+            $.notify({
+                title: 'Error',
+                message: 'Something went wrong. Please try again.',
+                icon: 'fa fa-times',
+            }, {
+                type: 'danger',
+                placement: { from: 'top', align: 'right' },
+                showProgressbar: true,
+                time: 1000,
+                delay: 3000,
+            });
+        });
+    });
+
     $(document).ready(function() {
         $("select[name='language_id']").on('change', function() {
 

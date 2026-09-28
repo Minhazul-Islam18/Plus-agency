@@ -21,7 +21,7 @@ class BlogController extends Controller
 
         $lang_id = $lang->id;
         $data['lang_id'] = $lang_id;
-        $data['blogs'] = Blog::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
+        $data['blogs'] = Blog::where('language_id', $lang_id)->with('admin:id,first_name,last_name')->orderBy('id', 'DESC')->get();
         $data['bcats'] = Bcategory::where('language_id', $lang_id)->where('status', 1)->get();
 
         return view('admin.blog.blog.index', $data);
@@ -65,6 +65,7 @@ class BlogController extends Controller
             'category' => 'required',
             'content' => 'required',
             'serial_number' => 'required|integer',
+            'sidebar' => 'required',
         ];
         if ($request->filled('image')) {
             $rules['image'] = [
@@ -84,6 +85,9 @@ class BlogController extends Controller
 
         $blog = new Blog;
         $blog->language_id = $request->language_id;
+        // Author of record — set once here, never touched by update() so
+        // editing someone else's post doesn't reassign who "published" it.
+        $blog->admin_id = \Illuminate\Support\Facades\Auth::guard('admin')->id();
         $blog->title = $request->title;
         $blog->slug = $slug;
         $blog->bcategory_id = $request->category;
@@ -91,6 +95,7 @@ class BlogController extends Controller
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
         $blog->serial_number = $request->serial_number;
+        $blog->sidebar = $request->sidebar;
 
         if ($request->filled('image')) {
             $filename = uniqid() .'.'. $extImage;
@@ -144,6 +149,7 @@ class BlogController extends Controller
             'category' => 'required',
             'content' => 'required',
             'serial_number' => 'required|integer',
+            'sidebar' => 'required',
         ];
 
         if ($request->filled('image')) {
@@ -174,6 +180,7 @@ class BlogController extends Controller
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
         $blog->serial_number = $request->serial_number;
+        $blog->sidebar = $request->sidebar;
 
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $blog->main_image);
@@ -186,6 +193,24 @@ class BlogController extends Controller
 
         Session::flash('success', 'Blog updated successfully!');
         return "success";
+    }
+
+    /**
+     * Admin list's Status switch (replaces the old per-row Sidebar select
+     * there — same activate/deactivate pattern as ServiceController@toggleStatus).
+     */
+    public function toggleStatus(Request $request)
+    {
+        $blog = Blog::findOrFail($request->blog_id);
+        $blog->status = $request->status == 1 ? 1 : 0;
+        // Activation isn't an edit of the article's content — leave the
+        // Published/updated timestamps alone.
+        $blog->timestamps = false;
+        $blog->save();
+
+        \App\Http\Controllers\Admin\CloudflareController::purge();
+
+        return response()->json(['success' => true]);
     }
 
     public function deleteFromMegaMenu($blog) {

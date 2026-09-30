@@ -160,7 +160,7 @@
                                                             data-target="#detailsModal{{ $tender->id }}">
                                                             <span class="admin-clamp-text">{{ $tender->title }}</span>
                                                         </a>
-                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                                        <a href="javascript:void(0)" class="admin-seemore-btn" hidden>See more</a>
                                                     </td>
 
                                                     <td>

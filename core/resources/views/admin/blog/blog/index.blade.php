@@ -147,13 +147,13 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                             <div class="admin-clamp-cell admin-clamp-cell--narrow">
                                                 <span class="admin-clamp-text">{{ convertUtf8($blog->bcategory->name) }}</span>
                                             </div>
-                                            <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                            <a href="javascript:void(0)" class="admin-seemore-btn" hidden>See more</a>
                                         </td>
                                         <td>
                                             <div class="admin-clamp-cell admin-clamp-cell--wide">
                                                 <span class="admin-clamp-text">{{ convertUtf8($blog->title) }}</span>
                                             </div>
-                                            <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                            <a href="javascript:void(0)" class="admin-seemore-btn" hidden>See more</a>
                                         </td>
                                         <td>{{ convertUtf8($blog->author_name) }}</td>
                                         <td>

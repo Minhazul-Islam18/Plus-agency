@@ -185,7 +185,7 @@
                                                         <div class="admin-clamp-cell">
                                                             <span class="admin-clamp-text">{{ convertUtf8($faq->question) }}</span>
                                                         </div>
-                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                                        <a href="javascript:void(0)" class="admin-seemore-btn" hidden>See more</a>
                                                     </td>
                                                     @if ($categoryInfo->faq_category_status == 1)
                                                         <td>{{ $faq->faqCategory ? convertUtf8($faq->faqCategory->name) : '-' }}</td>

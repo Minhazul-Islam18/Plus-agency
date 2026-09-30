@@ -633,6 +633,7 @@ select.form-control option {
   font-size: 12px;
   font-weight: 600;
   color: #1572E8;
+  text-decoration: none;
   cursor: pointer;
 }
 .admin-seemore-btn:hover {

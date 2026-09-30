@@ -157,7 +157,7 @@
                                                         <div class="admin-clamp-cell">
                                                             <span class="admin-clamp-text">{{ $gallery->title }}</span>
                                                         </div>
-                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                                        <a href="javascript:void(0)" class="admin-seemore-btn" hidden>See more</a>
                                                     </td>
                                                     <td>{{ $gallery->serial_number }}</td>
                                                     <td>

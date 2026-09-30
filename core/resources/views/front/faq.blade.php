@@ -72,7 +72,7 @@
                         <h3 class="text-center">{{ __('No FAQ Found!') }}</h3>
                     </div>
                 @else
-                    <div class="faqx-grid {{ count($frequentFaqs) == 0 ? 'is-solo' : '' }}" id="faqxGrid">
+                    <div class="faqx-grid" id="faqxGrid">
                         <div class="faqx-main">
                             <div class="faqx-toolbar">
                                 <div class="faqx-search">
@@ -136,6 +136,7 @@
                             </div>
                         </div>
 
+                        <div class="faqx-side">
                         <aside class="faqx-panel" id="faqxPanel" @if (count($frequentFaqs) == 0) hidden @endif>
                             <div class="faqx-panel-head">
                                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -164,6 +165,19 @@
                                 @endforeach
                             </ol>
                         </aside>
+
+                        <div class="dark-svcp-widget dark-svcp-newsletter">
+                            <span class="dark-bc-eyebrow">{{ __('SUBSCRIBE') }}</span>
+                            <h4 class="dark-svcp-newsletter-title">{{ __('SUBSCRIBE FOR NEWSLETTER') }}</h4>
+                            <form id="subscribeForm" class="dark-svcp-newsletter-form" action="{{ route('front.subscribe') }}"
+                                method="POST">
+                                @csrf
+                                <input name="email" type="email" placeholder="{{ __('Email') }}">
+                                <button type="submit">{{ __('Subscribe') }}</button>
+                            </form>
+                            <p id="erremail" class="text-danger mb-0 err-email"></p>
+                        </div>
+                        </div>
                     </div>
                 @endif
 

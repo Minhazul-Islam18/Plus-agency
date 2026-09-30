@@ -21,7 +21,6 @@
   var loading = false;
   var LOAD_DELAY = 650; // short, visible "loading" beat — all questions are already on the page
   var noneEl = document.getElementById('faqxNone');
-  var grid = document.getElementById('faqxGrid');
   var panel = document.getElementById('faqxPanel');
   var panelList = document.getElementById('faqxPanelList');
 
@@ -183,9 +182,10 @@
       panelList.appendChild(li);
     });
 
-    var has = entries.length > 0;
-    panel.hidden = !has;
-    grid.classList.toggle('is-solo', !has);
+    // Only the "most viewed" panel hides when empty — the right column
+    // never collapses to one column any more, since it also holds the
+    // Newsletter widget, which is always shown regardless.
+    panel.hidden = entries.length === 0;
   }
 
   function refreshPanel() {

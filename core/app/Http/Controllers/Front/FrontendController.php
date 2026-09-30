@@ -437,7 +437,18 @@ class FrontendController extends Controller
         $month = $request->month;
         $year = $request->year;
         $data['archives'] = Archive::orderBy('id', 'DESC')->get();
-        $data['bcats'] = Bcategory::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
+
+        // Only categories with at least one active post — same reasoning as
+        // FAQ's sidebar: an empty category is dead weight in the list, and
+        // its count would just read (00) anyway.
+        $data['bcats'] = Bcategory::where('language_id', $lang_id)
+            ->where('status', 1)
+            ->withCount(['blogs' => fn ($q) => $q->where('status', 1)])
+            ->having('blogs_count', '>', 0)
+            ->orderBy('serial_number', 'ASC')
+            ->get();
+        $data['totalBlogsCount'] = Blog::where('language_id', $lang_id)->where('status', 1)->count();
+
         if (!empty($month) && !empty($year)) {
             $archive = true;
         } else {
@@ -508,7 +519,27 @@ class FrontendController extends Controller
         $data['blog'] = $blog;
 
         $data['archives'] = Archive::orderBy('id', 'DESC')->get();
-        $data['bcats'] = Bcategory::where('status', 1)->where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
+        $data['bcats'] = Bcategory::where('status', 1)
+            ->where('language_id', $lang_id)
+            ->withCount(['blogs' => fn ($q) => $q->where('status', 1)])
+            ->having('blogs_count', '>', 0)
+            ->orderBy('serial_number', 'ASC')
+            ->get();
+        $data['totalBlogsCount'] = Blog::where('language_id', $lang_id)->where('status', 1)->count();
+
+        // Other active posts in the same category, shown as an
+        // auto-scrolling carousel below the article — same pattern as
+        // servicedetails()'s $relatedServices.
+        $data['relatedBlogs'] = collect();
+        if (!empty($blog->bcategory_id)) {
+            $data['relatedBlogs'] = Blog::where('language_id', $lang_id)
+                ->where('status', 1)
+                ->where('bcategory_id', $blog->bcategory_id)
+                ->where('id', '!=', $blog->id)
+                ->orderBy('serial_number', 'ASC')
+                ->limit(12)
+                ->get();
+        }
 
         $be = $currentLang->basic_extended;
         $version = $be->theme_version;

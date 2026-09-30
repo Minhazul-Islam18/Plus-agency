@@ -5613,29 +5613,33 @@ button.dark-sheet-submit[type="submit"]:active {
 
 /* Sectors/Categories sidebar — icon + name + count badge + chevron pill
    rows, active one filled solid. .dark-svcp-cat-list's own plain-link
-   styling (shared with Blog/FAQ's sidebars too) is overridden here scoped
-   to .dark-pf-section (Portfolios) and .dark-svc-list-section (Services)
-   only — both asked for this redesign, Blog/FAQ didn't, so they keep the
-   plain-link version by not carrying either class. */
+   styling (shared with FAQ's sidebar too) is overridden here scoped to
+   .dark-pf-section (Portfolios), .dark-svc-list-section (Services) and
+   .dark-blogp-section (Blogs) only — FAQ didn't ask for this redesign, so
+   it keeps the plain-link version by not carrying any of these classes. */
 .dark-pf-section .dark-svcp-cat-list li,
-.dark-svc-list-section .dark-svcp-cat-list li {
+.dark-svc-list-section .dark-svcp-cat-list li,
+.dark-blogp-section .dark-svcp-cat-list li {
   border-bottom: none;
   margin-bottom: 6px;
 }
 .dark-pf-section .dark-svcp-cat-list a,
-.dark-svc-list-section .dark-svcp-cat-list a {
+.dark-svc-list-section .dark-svcp-cat-list a,
+.dark-blogp-section .dark-svcp-cat-list a {
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   gap: 12px;
 }
 .dark-pf-section .dark-svcp-cat-list a:hover,
-.dark-svc-list-section .dark-svcp-cat-list a:hover {
+.dark-svc-list-section .dark-svcp-cat-list a:hover,
+.dark-blogp-section .dark-svcp-cat-list a:hover {
   padding-left: 12px;
   background: rgba(255, 255, 255, 0.06);
 }
 .dark-pf-section .dark-svcp-cat-list a::after,
-.dark-svc-list-section .dark-svcp-cat-list a::after {
+.dark-svc-list-section .dark-svcp-cat-list a::after,
+.dark-blogp-section .dark-svcp-cat-list a::after {
   content: none;
 }
 .dark-pf-cat-icon {
@@ -5679,27 +5683,32 @@ button.dark-sheet-submit[type="submit"]:active {
   transition: color 0.2s ease, transform 0.2s ease;
 }
 .dark-pf-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron,
-.dark-svc-list-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron {
+.dark-svc-list-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron,
+.dark-blogp-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron {
   color: var(--accent-2);
   transform: translateX(2px);
 }
 .dark-pf-section .dark-svcp-cat-list li.is-active a,
-.dark-svc-list-section .dark-svcp-cat-list li.is-active a {
+.dark-svc-list-section .dark-svcp-cat-list li.is-active a,
+.dark-blogp-section .dark-svcp-cat-list li.is-active a {
   background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
   color: #08130d;
 }
 .dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon,
-.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon {
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon,
+.dark-blogp-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon {
   background: rgba(8, 19, 13, 0.18);
   color: #08130d;
 }
 .dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count,
-.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count {
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count,
+.dark-blogp-section .dark-svcp-cat-list li.is-active .dark-pf-cat-count {
   background: rgba(8, 19, 13, 0.18);
   color: #08130d;
 }
 .dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron,
-.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron {
+.dark-svc-list-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron,
+.dark-blogp-section .dark-svcp-cat-list li.is-active .dark-pf-cat-chevron {
   color: #08130d;
 }
 

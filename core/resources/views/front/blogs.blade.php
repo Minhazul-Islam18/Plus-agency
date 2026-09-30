@@ -46,7 +46,7 @@
 
 @if ($be->theme_version == 'dark')
   <!--    dark blog page start   -->
-  <div class="dark-svcp-section">
+  <div class="dark-svcp-section dark-blogp-section">
     <button type="button" class="dark-pf-oc-trigger" id="pfOcToggle" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" /></svg>
         {{ __('Sidebar') }}
@@ -133,9 +133,22 @@
         <div class="dark-svcp-widget" data-pf-pin="top">
           <h4>{{ __('Categories') }}</h4>
           <ul class="dark-svcp-cat-list">
+            <li class="{{ empty(request()->input('category')) ? 'is-active' : '' }}">
+              <a href="{{ route('front.blogs', ['term' => request()->input('term'), 'month' => request()->input('month'), 'year' => request()->input('year')]) }}">
+                <span class="dark-pf-cat-icon"><i class="fas fa-th-large"></i></span>
+                <span class="dark-pf-cat-name">{{ __('All categories') }}</span>
+                <span class="dark-pf-cat-count">{{ $totalBlogsCount }}</span>
+                <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+              </a>
+            </li>
             @foreach ($bcats as $key => $bcat)
               <li class="{{ request()->input('category') == $bcat->slug ? 'is-active' : '' }}">
-                <a href="{{ route('front.blogs', ['term' => request()->input('term'), 'category' => $bcat->slug, 'month' => request()->input('month'), 'year' => request()->input('year')]) }}">{{ convertUtf8($bcat->name) }}</a>
+                <a href="{{ route('front.blogs', ['term' => request()->input('term'), 'category' => $bcat->slug, 'month' => request()->input('month'), 'year' => request()->input('year')]) }}">
+                  <span class="dark-pf-cat-icon"><i class="fas fa-tag"></i></span>
+                  <span class="dark-pf-cat-name">{{ convertUtf8($bcat->name) }}</span>
+                  <span class="dark-pf-cat-count">{{ $bcat->blogs_count }}</span>
+                  <span class="dark-pf-cat-chevron"><i class="fas fa-chevron-right"></i></span>
+                </a>
               </li>
             @endforeach
           </ul>

@@ -576,4 +576,66 @@ select.form-control option {
   background-color: #202940;
   color: #ffffff;
 }
+/* "See more / See less" truncated table-cell text — shared by every admin
+   list table with a long free-text column (title/question/...) sitting next
+   to fixed-width columns (a publish date, status, serial number, actions)
+   that a long untruncated string would otherwise squeeze out of view.
+   Clipped to one line with a "…" right at the cut, so it's visually obvious
+   there's more before the reader even reaches the See more button — plain
+   single-line white-space:nowrap + text-overflow:ellipsis, deliberately NOT
+   -webkit-line-clamp (the earlier attempt at this): that property is a
+   multi-line box model with its own ellipsis placement quirks, is what
+   caused the previous inconsistent-looking cut/no-cut behavior once paired
+   with a button shown/hidden by a separate (and, it turned out, wrong)
+   character-count guess. text-overflow:ellipsis here is a plain single-line
+   truncation, driven by the exact same real overflow condition
+   (custom.js's refreshSeeMoreButtons measures scrollWidth > clientWidth on
+   this same box) that decides the button — the two can't disagree, unlike
+   the line-clamp version. The button expands/collapses the SAME already-
+   rendered text in place, no reload, no separate "full text" markup. */
+.admin-clamp-cell {
+  /* display:block is the default for the <div> usage, but the Tender list
+     applies this class straight to an <a> (its title is itself the link
+     that opens a details modal) — max-width has no effect on an inline
+     element, so this is set explicitly rather than assumed. */
+  display: block;
+  max-width: 260px;
+}
+/* Per-column width overrides — same clamp/See-more behavior everywhere,
+   just a different cap where a specific column needs more or less of it
+   (e.g. the Blog list's Title vs. its (usually short, but occasionally
+   long) Category name sitting right next to it). */
+.admin-clamp-cell.admin-clamp-cell--wide {
+  max-width: 360px;
+}
+.admin-clamp-cell.admin-clamp-cell--narrow {
+  max-width: 200px;
+}
+.admin-clamp-text {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.admin-clamp-cell.is-expanded {
+  max-width: none;
+}
+.admin-clamp-cell.is-expanded .admin-clamp-text {
+  overflow: visible;
+  white-space: normal;
+}
+.admin-seemore-btn {
+  display: inline-block;
+  margin-top: 3px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1572E8;
+  cursor: pointer;
+}
+.admin-seemore-btn:hover {
+  text-decoration: underline;
+}
 /* Laravel File Manager CSS */

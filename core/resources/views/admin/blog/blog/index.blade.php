@@ -143,8 +143,18 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                             <input type="checkbox" class="bulk-check" data-val="{{$blog->id}}">
                                         </td>
                                         <td><img src="{{asset('assets/front/img/blogs/'.$blog->main_image)}}" alt="" width="80"></td>
-                                        <td>{{convertUtf8($blog->bcategory->name)}}</td>
-                                        <td>{{convertUtf8(strlen($blog->title)) > 30 ? convertUtf8(substr($blog->title, 0, 30)) . '...' : convertUtf8($blog->title)}}</td>
+                                        <td>
+                                            <div class="admin-clamp-cell admin-clamp-cell--narrow">
+                                                <span class="admin-clamp-text">{{ convertUtf8($blog->bcategory->name) }}</span>
+                                            </div>
+                                            <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                        </td>
+                                        <td>
+                                            <div class="admin-clamp-cell admin-clamp-cell--wide">
+                                                <span class="admin-clamp-text">{{ convertUtf8($blog->title) }}</span>
+                                            </div>
+                                            <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                        </td>
                                         <td>{{ convertUtf8($blog->author_name) }}</td>
                                         <td>
                                             @php

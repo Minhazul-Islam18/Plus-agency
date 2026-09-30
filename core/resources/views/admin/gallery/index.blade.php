@@ -154,7 +154,10 @@
                                                     <td><img src="{{ asset('assets/front/img/gallery/' . $gallery->image) }}"
                                                             alt="" width="80"></td>
                                                     <td>
-                                                        {{ strlen($gallery->title) > 70 ? mb_substr($gallery->title, 0, 70, 'UTF-8') . '...' : $gallery->title }}
+                                                        <div class="admin-clamp-cell">
+                                                            <span class="admin-clamp-text">{{ $gallery->title }}</span>
+                                                        </div>
+                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
                                                     </td>
                                                     <td>{{ $gallery->serial_number }}</td>
                                                     <td>

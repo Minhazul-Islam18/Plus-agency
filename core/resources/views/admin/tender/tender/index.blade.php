@@ -156,10 +156,11 @@
                                                     <td>{{ $tender->country }}</td>
 
                                                     <td>
-                                                        <a href="#" class="text-primary" data-toggle="modal"
+                                                        <a href="#" class="text-primary admin-clamp-cell" data-toggle="modal"
                                                             data-target="#detailsModal{{ $tender->id }}">
-                                                            {{ strlen($tender->title) > 35 ? mb_substr($tender->title, 0, 35, 'utf-8') . '...' : $tender->title }}
+                                                            <span class="admin-clamp-text">{{ $tender->title }}</span>
                                                         </a>
+                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
                                                     </td>
 
                                                     <td>

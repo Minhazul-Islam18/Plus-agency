@@ -508,6 +508,59 @@ $(function ($) {
   
   
   /* ***************************************************
+  =========="See more / See less" table-cell toggle==========
+  ******************************************************/
+  // Shared by every admin list table using .admin-clamp-cell (Services/FAQ/
+  // Blog/Tender/Gallery title|question columns — see custom.css).
+  //
+  // The button is always in the DOM (Blade renders it with the `hidden`
+  // attribute) and JS decides whether to actually show it, by measuring
+  // real overflow (scrollWidth > clientWidth) rather than guessing from a
+  // character count. A char-count guess was the original approach and was
+  // wrong in both directions: French text (accents, wider average glyphs)
+  // clips well before a generic threshold, and a threshold generous enough
+  // to catch that shows a dead button on plenty of text that never
+  // actually clips — real layout measurement is the only thing that's
+  // ever actually correct here.
+  //
+  // Rows on a DataTables page beyond the first are `display:none` (not
+  // removed from the DOM) until that page is shown, and a hidden element's
+  // scrollWidth/clientWidth both read 0 — measuring them early would wrongly
+  // decide nothing overflows. So this runs once immediately (covers page 1
+  // at initial load) AND again on every 'draw.dt' (covers every later
+  // pagination click, each of which only just made its own rows visible).
+  function refreshSeeMoreButtons() {
+    $('.admin-clamp-cell').each(function () {
+      var cell = this;
+      var $btn = $(cell).next('.admin-seemore-btn');
+      if (!$btn.length || cell.classList.contains('is-expanded')) return; // leave an open one alone
+      var textEl = cell.querySelector('.admin-clamp-text') || cell;
+      $btn.prop('hidden', textEl.scrollWidth <= textEl.clientWidth + 1); // +1: subpixel rounding
+    });
+  }
+  refreshSeeMoreButtons();
+  // Direct bind, not delegated: unlike individual row buttons, the
+  // #basic-datatables element itself is never destroyed/recreated by
+  // DataTables (only its rows are shuffled), so it's always there to
+  // bind to and always the element DataTables actually triggers this on.
+  $('#basic-datatables').on('draw.dt', refreshSeeMoreButtons);
+
+  // stopPropagation matters specifically for the Tender list, whose title
+  // cell wraps the text in a data-toggle="modal" link — without it, a click
+  // on this button would bubble up and pop that modal open behind it.
+  $(document).on('click', '.admin-seemore-btn', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $btn = $(this);
+    // The clamped text sits right before this button as a sibling (not an
+    // ancestor — .admin-clamp-cell is a <div>/<a> of its own, the button
+    // is a separate element after it in the same <td>), so .prev(), not
+    // .closest().
+    var expanded = $btn.prev('.admin-clamp-cell').toggleClass('is-expanded').hasClass('is-expanded');
+    $btn.text(expanded ? 'See less' : 'See more');
+  });
+
+  /* ***************************************************
   ==========Form Prepopulate After Clicking Edit Button Start==========
   ******************************************************/
   // Delegated (not a direct bind): a direct $(".editbtn").on('click', ...)

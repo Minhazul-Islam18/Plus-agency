@@ -166,7 +166,12 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                             <input type="checkbox" class="bulk-check" data-val="{{$service->id}}">
                                         </td>
                                         <td><img src="{{asset('assets/front/img/services/'.$service->main_image)}}" alt="" width="70"></td>
-                                        <td>{{strlen(convertUtf8($service->title)) > 100 ? convertUtf8(substr($service->title, 0, 100)) . '...' : convertUtf8($service->title)}}</td>
+                                        <td>
+                                            <div class="admin-clamp-cell">
+                                                <span class="admin-clamp-text">{{ convertUtf8($service->title) }}</span>
+                                            </div>
+                                            <button type="button" class="admin-seemore-btn" hidden>See more</button>
+                                        </td>
 
                                         @if (serviceCategory())
                                         <td>

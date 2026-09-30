@@ -182,7 +182,10 @@
                                                             data-val="{{ $faq->id }}">
                                                     </td>
                                                     <td>
-                                                        {{ convertUtf8(strlen($faq->question)) > 50 ? convertUtf8(substr($faq->question, 0, 50)) . '...' : convertUtf8($faq->question) }}
+                                                        <div class="admin-clamp-cell">
+                                                            <span class="admin-clamp-text">{{ convertUtf8($faq->question) }}</span>
+                                                        </div>
+                                                        <button type="button" class="admin-seemore-btn" hidden>See more</button>
                                                     </td>
                                                     @if ($categoryInfo->faq_category_status == 1)
                                                         <td>{{ $faq->faqCategory ? convertUtf8($faq->faqCategory->name) : '-' }}</td>

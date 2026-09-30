@@ -51,13 +51,12 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                             <div class="card-title d-inline-block">Blogs</div>
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-3 mt-2 mt-lg-0">
                             @if (!empty($langs))
-                                <select name="language" class="form-control"
-                                    onchange="window.location='{{ url()->current() . '?language=' }}'+this.value">
+                                <select id="blogLangFilter" class="form-control" onchange="blogFilterNavigate()">
                                     <option value="" selected disabled>Select a Language</option>
                                     @foreach ($langs as $lang)
                                         <option value="{{ $lang->code }}"
@@ -67,13 +66,32 @@
                                 </select>
                             @endif
                         </div>
-                        <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
+                        <div class="col-lg-3 mt-2 mt-lg-0">
+                            <select id="blogCatFilter" class="form-control" onchange="blogFilterNavigate()">
+                                <option value="">Category — All</option>
+                                @foreach ($bcats as $cat)
+                                    <option value="{{ $cat->id }}"
+                                        {{ request()->input('category_id') == $cat->id ? 'selected' : '' }}>
+                                        {{ convertUtf8($cat->name) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-lg-3 mt-2 mt-lg-0">
                             <a href="#" class="btn btn-primary float-right btn-sm" data-toggle="modal"
                                 data-target="#createModal"><i class="fas fa-plus"></i> Add Blog</a>
                             <button class="btn btn-danger float-right btn-sm mr-2 d-none bulk-delete"
                                 data-href="{{ route('admin.blog.bulk.delete') }}"><i class="flaticon-interface-5"></i>
                                 Delete</button>
                         </div>
+                        <script>
+                            function blogFilterNavigate() {
+                                var lang = document.getElementById('blogLangFilter').value;
+                                var cat = document.getElementById('blogCatFilter').value;
+                                var url = '{{ url()->current() }}' + '?language=' + lang;
+                                if (cat) url += '&category_id=' + cat;
+                                window.location = url;
+                            }
+                        </script>
                     </div>
                 </div>
                 <div class="card-body">

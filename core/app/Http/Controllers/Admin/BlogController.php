@@ -21,7 +21,13 @@ class BlogController extends Controller
 
         $lang_id = $lang->id;
         $data['lang_id'] = $lang_id;
-        $data['blogs'] = Blog::where('language_id', $lang_id)->with('admin:id,first_name,last_name')->orderBy('id', 'DESC')->get();
+
+        $blogs = Blog::where('language_id', $lang_id)->with('admin:id,first_name,last_name');
+        if ($request->filled('category_id')) {
+            $blogs->where('bcategory_id', $request->category_id);
+        }
+        $data['blogs'] = $blogs->orderBy('id', 'DESC')->get();
+
         $data['bcats'] = Bcategory::where('language_id', $lang_id)->where('status', 1)->get();
 
         return view('admin.blog.blog.index', $data);

@@ -4116,11 +4116,22 @@ a.testi-company-logo:hover::after {
   border-bottom-color: rgba(255, 255, 255, 0.14) !important;
 }
 .dark-service-details table {
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 16px 0;
 }
 .dark-service-details td,
 .dark-service-details th {
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 10px 14px;
+  text-align: left;
+}
+.dark-service-details th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  color: #fff !important;
 }
 .dark-svcp-empty {
   text-align: center;
@@ -5401,7 +5412,7 @@ button.dark-sheet-submit[type="submit"]:active {
 }
 .dark-article-cover img {
   width: 100%;
-  height: 420px;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   display: block;
 }
@@ -5436,12 +5447,6 @@ button.dark-sheet-submit[type="submit"]:active {
   width: 13px;
   height: 13px;
 }
-@media (max-width: 620px) {
-  .dark-article-cover img {
-    height: 260px;
-  }
-}
-
 .dark-article-byline {
   display: flex;
   align-items: center;
@@ -5566,10 +5571,23 @@ button.dark-sheet-submit[type="submit"]:active {
 .dark-article-prose div[style*="mso-element"] {
   border-bottom-color: rgba(255, 255, 255, 0.14) !important;
 }
-.dark-article-prose table,
+.dark-article-prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
 .dark-article-prose td,
 .dark-article-prose th {
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 10px 14px;
+  text-align: left;
+}
+.dark-article-prose th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  color: #fff !important;
 }
 
 .dark-article-tags {

@@ -32,6 +32,12 @@ return [
             'CSS.MaxImgLength' => null,
             'AutoFormat.AutoParagraph' => false,
             'AutoFormat.RemoveEmpty'   => true,
+            // Word/Google Docs paste leaves a `<p>&nbsp;</p>` for every blank
+            // line in the source doc. A non-breaking space isn't "empty" to
+            // RemoveEmpty by default, so these survive and each render as an
+            // extra blank paragraph with its own margin on top of the next
+            // paragraph's — the doubled-gap look. Strip those too.
+            'AutoFormat.RemoveEmpty.RemoveNbsp' => true,
         ],
         'test'    => [
             'Attr.EnableID' => 'true',

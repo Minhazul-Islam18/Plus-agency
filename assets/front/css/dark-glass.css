@@ -4068,6 +4068,12 @@ a.testi-company-logo:hover::after {
   font-size: 15px;
   line-height: 1.8;
 }
+.dark-service-details p {
+  margin: 0 0 16px;
+}
+.dark-service-details p:empty {
+  display: none;
+}
 .dark-service-details b,
 .dark-service-details strong {
   color: #fff !important;
@@ -5518,6 +5524,12 @@ button.dark-sheet-submit[type="submit"]:active {
   font-size: 15px;
   line-height: 1.85;
 }
+.dark-article-prose p {
+  margin: 0 0 16px;
+}
+.dark-article-prose p:empty {
+  display: none;
+}
 .dark-article-prose b,
 .dark-article-prose strong {
   color: #fff !important;
@@ -5537,15 +5549,6 @@ button.dark-sheet-submit[type="submit"]:active {
 }
 .dark-article-prose iframe {
   max-width: 100%;
-}
-.dark-article-prose h1,
-.dark-article-prose h2,
-.dark-article-prose h3,
-.dark-article-prose h4 {
-  font-family: "Fraunces", Georgia, serif !important;
-  color: #fff !important;
-  margin: 40px 0 16px;
-  line-height: 1.35;
 }
 .dark-article-prose ul,
 .dark-article-prose ol {

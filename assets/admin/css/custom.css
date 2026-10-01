@@ -639,4 +639,42 @@ select.form-control option {
 .admin-seemore-btn:hover {
   text-decoration: underline;
 }
+
+/* Theme's .wrapper/.main-panel lock to a literal height: 100vh (not
+   min-height), and .footer is position:absolute with no top/bottom, so it
+   lands at that fixed 100vh mark regardless of real content height. On a
+   short table (dev) that's invisibly fine — the table never exceeds one
+   viewport. On a long table (prod, 10+ rows) the table overflows right
+   past that box and the footer is left stranded mid-page, with more rows
+   rendered below it. Let both grow to fit real content instead, and put
+   the footer back in normal flow so it always lands after everything —
+   while still filling the viewport (pinned to the bottom) when content is
+   short, via .content as the flexed spacer. */
+.wrapper {
+  height: auto;
+  min-height: 100vh;
+}
+/* .main-panel is float:right (to sit beside the fixed-position sidebar) —
+   a floated child never expands an unclearfixed parent's height, which is
+   why .wrapper stayed stuck at one viewport even after the line above. */
+.wrapper::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.main-panel {
+  height: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.main-panel > .content {
+  flex: 1 0 auto;
+  height: auto;
+  overflow: visible;
+}
+.footer {
+  position: static;
+  width: auto;
+}
 /* Laravel File Manager CSS */

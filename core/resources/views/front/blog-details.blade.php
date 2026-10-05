@@ -109,6 +109,7 @@
     <div class="dark-svcp-section dark-blogp-section">
         <div class="dark-svcp-inner @if ($blog->sidebar != 1) dark-svcp-inner--full @endif">
             <div>
+                <div class="dark-svcd-panel reveal-left">
                 <div class="dark-article-cover">
                     <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
                     <div class="dark-cover-meta">
@@ -149,6 +150,7 @@
                 @endif
 
                 <div id="disqus_thread"></div>
+                </div>
             </div>
 
             @if ($blog->sidebar == 1)

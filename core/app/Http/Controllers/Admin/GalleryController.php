@@ -20,11 +20,17 @@ class GalleryController extends Controller
     $lang = Language::where('code', $request->language)->first();
 
     $lang_id = $lang->id;
-    $data['galleries'] = Gallery::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
+
+    $galleries = Gallery::where('language_id', $lang_id);
+    if ($request->filled('category_id')) {
+        $galleries->where('category_id', $request->category_id);
+    }
+    $data['galleries'] = $galleries->orderBy('id', 'DESC')->get();
 
     $data['lang_id'] = $lang_id;
 
     $data['categoryInfo'] = BasicExtra::first();
+    $data['gcats'] = GalleryCategory::where('language_id', $lang_id)->where('status', 1)->get();
 
     return view('admin.gallery.index', $data);
   }

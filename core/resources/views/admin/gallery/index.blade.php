@@ -99,13 +99,12 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-lg-4">
+                        <div class="col-lg-3">
                             <div class="card-title d-inline-block">Gallery Images</div>
                         </div>
-                        <div class="col-lg-3">
+                        <div class="col-lg-3 mt-2 mt-lg-0">
                             @if (!empty($langs))
-                                <select name="language" class="form-control"
-                                    onchange="window.location='{{ url()->current() . '?language=' }}'+this.value">
+                                <select id="galleryLangFilter" class="form-control" onchange="galleryFilterNavigate()">
                                     <option value="" selected disabled>Select a Language</option>
                                     @foreach ($langs as $lang)
                                         <option value="{{ $lang->code }}"
@@ -115,13 +114,35 @@
                                 </select>
                             @endif
                         </div>
-                        <div class="col-lg-4 offset-lg-1 mt-2 mt-lg-0">
+                        @if ($categoryInfo->gallery_category_status == 1)
+                            <div class="col-lg-3 mt-2 mt-lg-0">
+                                <select id="galleryCatFilter" class="form-control" onchange="galleryFilterNavigate()">
+                                    <option value="">Category — All</option>
+                                    @foreach ($gcats as $cat)
+                                        <option value="{{ $cat->id }}"
+                                            {{ request()->input('category_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ convertUtf8($cat->name) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                        <div class="col-lg-3 mt-2 mt-lg-0">
                             <a href="#" class="btn btn-primary float-right btn-sm" data-toggle="modal"
                                 data-target="#createModal"><i class="fas fa-plus"></i> Add Image</a>
                             <button class="btn btn-danger float-right btn-sm mr-2 d-none bulk-delete"
                                 data-href="{{ route('admin.gallery.bulk.delete') }}"><i class="flaticon-interface-5"></i>
                                 Delete</button>
                         </div>
+                        <script>
+                            function galleryFilterNavigate() {
+                                var lang = document.getElementById('galleryLangFilter').value;
+                                var catEl = document.getElementById('galleryCatFilter');
+                                var cat = catEl ? catEl.value : '';
+                                var url = '{{ url()->current() }}' + '?language=' + lang;
+                                if (cat) url += '&category_id=' + cat;
+                                window.location = url;
+                            }
+                        </script>
                     </div>
                 </div>
                 <div class="card-body">

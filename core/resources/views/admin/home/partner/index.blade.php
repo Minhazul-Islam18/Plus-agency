@@ -201,6 +201,49 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                         @if (count($partners) == 0)
                         <h3 class="text-center">NO PARTNER FOUND</h3>
                         @else
+                        <style>
+                            /* Icon-only action buttons, same pastel-square treatment as
+                               the Services list's own Actions column. */
+                            .partner-actions {
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                            }
+                            .partner-actions button.partner-action-btn[type="submit"] {
+                                background: #ffe3e3 !important;
+                                border: none !important;
+                                box-shadow: none !important;
+                            }
+                            .partner-actions button.partner-action-btn[type="submit"]:hover {
+                                transform: none !important;
+                                box-shadow: none !important;
+                            }
+                            .partner-action-btn {
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                flex: 0 0 34px;
+                                width: 34px;
+                                height: 34px;
+                                border-radius: 8px;
+                                border: none;
+                                font-size: 14px;
+                                line-height: 1;
+                                cursor: pointer;
+                                transition: filter 0.15s ease;
+                            }
+                            .partner-action-btn:hover {
+                                filter: brightness(0.94);
+                            }
+                            .partner-action-edit {
+                                background: #eef0f3;
+                                color: #495057;
+                            }
+                            .partner-action-delete {
+                                background: #ffe3e3;
+                                color: #e03131;
+                            }
+                        </style>
                         <div class="table-responsive">
                             <table class="table table-striped mt-3" id="basic-datatables">
                                 <thead>
@@ -237,22 +280,18 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                             </label>
                                         </td>
                                         <td>
-                                            <a class="btn btn-secondary btn-sm" href="{{route('admin.partner.edit', $partner->id) . '?language=' . request()->input('language')}}">
-                                                <span class="btn-label">
+                                            <div class="partner-actions">
+                                                <a class="partner-action-btn partner-action-edit" href="{{route('admin.partner.edit', $partner->id) . '?language=' . request()->input('language')}}" title="Edit">
                                                     <i class="fas fa-edit"></i>
-                                                </span>
-                                                Edit
-                                            </a>
-                                            <form class="deleteform d-inline-block" action="{{route('admin.partner.delete')}}" method="post">
-                                                @csrf
-                                                <input type="hidden" name="partner_id" value="{{$partner->id}}">
-                                                <button type="submit" class="btn btn-danger btn-sm deletebtn">
-                                                    <span class="btn-label">
+                                                </a>
+                                                <form class="deleteform d-inline-block" action="{{route('admin.partner.delete')}}" method="post">
+                                                    @csrf
+                                                    <input type="hidden" name="partner_id" value="{{$partner->id}}">
+                                                    <button type="submit" class="partner-action-btn partner-action-delete deletebtn" title="Delete">
                                                         <i class="fas fa-trash"></i>
-                                                    </span>
-                                                    Delete
-                                                </button>
-                                            </form>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                     @endforeach

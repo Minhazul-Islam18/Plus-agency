@@ -703,9 +703,9 @@ $(function ($) {
   /* ***************************************************
   ==========Delete Using AJAX Request Start==========
   ******************************************************/
-  $('.deletebtn').on('click', function (e) {
+  $(document).on('click', '.deletebtn', function (e) {
     e.preventDefault();
-    
+
     $(".request-loader").addClass("show");
     
     swal({

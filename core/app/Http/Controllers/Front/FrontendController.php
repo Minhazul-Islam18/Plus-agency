@@ -128,10 +128,24 @@ class FrontendController extends Controller
 
         $category = $request->category;
         $term = $request->term;
+        $year = $request->year;
 
         if (!empty($category)) {
             $data['category'] = Scategory::findOrFail($category);
         }
+
+        // Standalone Year filter (toolbar, left column) — same pattern as
+        // the Portfolio page's own Year select. whereNotNull matters here:
+        // several legacy services were seeded without a created_at, and an
+        // unguarded DISTINCT YEAR() turns each of those into a blank,
+        // label-less option in the dropdown.
+        $data['year'] = $year;
+        $data['years'] = Service::where('language_id', $currentLang->id)
+            ->where('status', 1)
+            ->whereNotNull('created_at')
+            ->selectRaw('DISTINCT YEAR(created_at) as y')
+            ->orderByDesc('y')
+            ->pluck('y');
 
         // status=1 only — a deactivated article must vanish from the list,
         // its counts and its details page, not just be flagged in admin.
@@ -139,6 +153,8 @@ class FrontendController extends Controller
             return $query->where('scategory_id', $category);
         })->when($term, function ($query, $term) {
             return $query->where('title', 'like', '%' . $term . '%');
+        })->when($year, function ($query, $year) {
+            return $query->whereYear('created_at', $year);
         })->when($currentLang, function ($query, $currentLang) {
             return $query->where('language_id', $currentLang->id);
         })->orderBy('serial_number', 'ASC')->paginate(6);

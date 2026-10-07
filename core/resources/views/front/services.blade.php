@@ -57,6 +57,27 @@
         @endif
         <div class="dark-svcp-inner">
             <div>
+                {{-- Search + Year filter — left column, horizontal, same
+                     .faqx-search/.faqx-select pattern as the Blog page's
+                     own toolbar. --}}
+                <form method="GET" action="{{ route('front.services') }}" class="faqx-toolbar">
+                    <input type="hidden" name="category" value="{{ request()->input('category') }}">
+                    <div class="faqx-search">
+                        <input type="text" name="term" placeholder="{{ __('Search Services') }}" value="{{ request()->input('term') }}">
+                        <button type="submit" class="faqx-search-btn" style="padding:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
+                    </div>
+                    @if (count($years) > 0)
+                        <div class="faqx-select">
+                            <select name="year" aria-label="{{ __('All years') }}" onchange="this.form.submit()">
+                                <option value="">{{ __('All years') }}</option>
+                                @foreach ($years as $y)
+                                    <option value="{{ $y }}" {{ (string) $year === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                </form>
+
                 @if (count($services) == 0)
                     <div class="dark-svcp-empty">
                         <h3>{{ __('NO SERVICE FOUND') }}</h3>
@@ -95,20 +116,11 @@
                 @endif
 
                 <nav class="dark-svcp-pagination">
-                    {{ $services->appends(['category' => request()->input('category'), 'term' => request()->input('term')])->links('vendor.pagination.dark-glass') }}
+                    {{ $services->appends(['category' => request()->input('category'), 'term' => request()->input('term'), 'year' => request()->input('year')])->links('vendor.pagination.dark-glass') }}
                 </nav>
             </div>
 
             <div>
-                <div class="dark-svcp-widget">
-                    <form class="dark-svcp-search" action="{{ route('front.services') }}">
-                        <input name="category" type="hidden" value="{{ request()->input('category') }}">
-                        <input name="term" type="text" placeholder="{{ __('Search Services') }}"
-                            value="{{ request()->input('term') }}">
-                        <button type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg></button>
-                    </form>
-                </div>
-
                 @if (serviceCategory())
                     <div id="pfCatSource">
                     <div class="dark-svcp-widget">

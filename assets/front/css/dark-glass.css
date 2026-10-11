@@ -2149,6 +2149,7 @@ a.proceed-checkout-btn:hover {
   color: rgba(255, 255, 255, 0.35);
 }
 .dark-svc-card-icon {
+  position: relative;
   width: 52px;
   height: 52px;
   border-radius: 50%;
@@ -2161,6 +2162,43 @@ a.proceed-checkout-btn:hover {
 }
 .dark-svc-card:hover .dark-svc-card-icon {
   transform: scale(1.08) rotate(-6deg);
+}
+/* Same expanding-ring pulse as the Testimonials company-logo badge
+   (.testi-company-logo) — the flat gradient circle read as barely there
+   against the dark background; the rings draw the eye even on a still
+   page. */
+.dark-svc-card-icon::before,
+.dark-svc-card-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent-2, var(--accent));
+  /* Testimonials' own 2.6s timing reads fine there (its carousel shows
+     one or two logos at a time), but on this full grid of cards the same
+     duration read as sluggish/laggy rather than lively — sped up instead
+     of reusing it verbatim. */
+  animation: testiLogoRing 1.6s ease-out infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+  /* Scaling a thin border-radius:50% stroke makes the browser
+     re-anti-alias the curve on every frame, which reads as a tremor on
+     the edge. backface-visibility pins the pseudo-element to its own
+     stable GPU layer; the matching translateZ(0) lives in the
+     @keyframes below (a static transform here would just be
+     overwritten by the animated one). */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.dark-svc-card-icon::after {
+  animation-delay: 0.8s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-svc-card-icon::before,
+  .dark-svc-card-icon::after {
+    animation: none !important;
+    display: none;
+  }
 }
 .dark-svc-card-icon img {
   width: 24px;
@@ -3514,11 +3552,11 @@ a.testi-company-logo:hover::after {
 }
 @keyframes testiLogoRing {
   0% {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     opacity: 0.9;
   }
   100% {
-    transform: scale(1.55);
+    transform: scale(1.55) translateZ(0);
     opacity: 0;
   }
 }

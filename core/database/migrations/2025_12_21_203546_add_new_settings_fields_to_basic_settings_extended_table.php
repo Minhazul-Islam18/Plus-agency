@@ -32,6 +32,7 @@ class AddNewSettingsFieldsToBasicSettingsExtendedTable extends Migration
             'partner_overlay_color'       => fn(Blueprint $t) => $t->string('partner_overlay_color', 20)->nullable(),
             'partner_overlay_opacity'     => fn(Blueprint $t) => $t->decimal('partner_overlay_opacity', 3, 2)->nullable(),
             'partner_bg'                  => fn(Blueprint $t) => $t->string('partner_bg', 50)->nullable(),
+            'partner_marquee_label'       => fn(Blueprint $t) => $t->string('partner_marquee_label', 255)->nullable(),
         ];
 
         foreach ($columns as $col => $addFn) {
@@ -44,7 +45,7 @@ class AddNewSettingsFieldsToBasicSettingsExtendedTable extends Migration
     public function down()
     {
         Schema::table('basic_settings_extended', function (Blueprint $table) {
-            $table->dropColumn(['blog_bg', 'partner_overlay_color', 'partner_overlay_opacity', 'partner_bg']);
+            $table->dropColumn(['blog_bg', 'partner_overlay_color', 'partner_overlay_opacity', 'partner_bg', 'partner_marquee_label']);
         });
     }
 }

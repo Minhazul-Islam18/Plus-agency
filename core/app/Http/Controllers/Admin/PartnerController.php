@@ -194,6 +194,7 @@ class PartnerController extends Controller
         // Update overlay color and opacity
         $be->partner_overlay_color = $request->partner_overlay_color;
         $be->partner_overlay_opacity = $request->partner_overlay_opacity;
+        $be->partner_marquee_label = $request->partner_marquee_label;
 
         // Handle background image deletion
         if ($request->delete_background == '1') {

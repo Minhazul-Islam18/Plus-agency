@@ -130,6 +130,14 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                                 @endif
                             </div>
 
+                            <div class="form-group">
+                                <label>Marquee Label (Optional)</label>
+                                <input type="text" class="form-control" name="partner_marquee_label"
+                                    value="{{ $abe->partner_marquee_label ?? '' }}"
+                                    placeholder="{{ __('Trusted across sectors') }}">
+                                <p class="text-warning mb-0"><small>Shown above the partner logos in the homepage hero. Leave blank to use the default text.</small></p>
+                            </div>
+
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">

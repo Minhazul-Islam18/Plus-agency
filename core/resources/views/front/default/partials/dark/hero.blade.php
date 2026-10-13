@@ -59,7 +59,7 @@
 
         @if ($bs->partner_section == 1 && !empty($partners) && count($partners) > 0)
             <div class="dark-hero-marquee">
-                <div class="dark-hero-marquee-label">{{ __('Trusted across sectors') }}</div>
+                <div class="dark-hero-marquee-label">{{ !empty($be->partner_marquee_label) ? convertUtf8($be->partner_marquee_label) : __('Trusted across sectors') }}</div>
                 <div class="dark-hero-marquee-track">
                     @for ($i = 0; $i < 2; $i++)
                         @foreach ($partners as $partner)

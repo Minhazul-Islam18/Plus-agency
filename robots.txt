@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin
+Disallow: /laravel-filemanager
+
+Sitemap: https://icagroupe.com/sitemap.xml

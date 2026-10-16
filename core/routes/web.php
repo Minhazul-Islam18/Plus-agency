@@ -170,6 +170,10 @@ Route::group([], function () use ($cfCacheableExcept) {
 /** Health probe for uptime monitors / load balancers **/
 Route::get('/health', 'HealthController')->name('health')->middleware('throttle:60,1');
 
+/** Model-driven sitemap, global (not locale-prefixed) — cached, cacheable at the edge **/
+Route::get('/sitemap.xml', 'Front\SitemapController@index')->name('sitemap')
+    ->withoutMiddleware($cfCacheableExcept)->middleware('public-cacheable');
+
 /** Tender Frontend Routes **/
 Route::post('/tender/purchase/submit', 'Front\TenderController@purchase')->name('tender.purchase.submit')->middleware('throttle:10,1');
 Route::get('/tender/purchase/complete', 'Front\TenderController@purchaseComplete')->name('tender.purchase.complete');

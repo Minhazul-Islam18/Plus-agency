@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\BasicExtra;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendAdminMail;
+use App\Jobs\SendFacebookCapiEvent;
 use App\Language;
 use App\OfflineGateway;
 use App\PaymentGateway;
@@ -502,6 +503,37 @@ class TenderController extends Controller
         $data['version']     = $this->getVersionData($currentLang);
         $data['bse']         = $currentLang->basic_extra;
         $data['currentLang'] = $currentLang;
+
+        // Meta Purchase event — same Pixel+CAPI dedup pattern as the
+        // Contact form (FrontendController::sendmail). This confirmation
+        // page is session-gated (fmf_purchase_id), never cached, so
+        // generating the event_id here is safe. Only fires once: session
+        // flash is consumed by layout.blade.php's bridge script and gone
+        // on the next request, so refreshing this page doesn't double-fire.
+        if ($purchase && trackingConsented()) {
+            $be = $currentLang->basic_extended;
+            if (!empty($be->facebook_pixel_id) && !empty($be->facebook_capi_access_token)) {
+                $modules = json_decode($purchase->purchased_modules, true) ?: [];
+                $value = array_sum(array_column($modules, 'cost'));
+                $eventId = (string) \Illuminate\Support\Str::uuid();
+
+                SendFacebookCapiEvent::dispatch($be->facebook_pixel_id, $be->facebook_capi_access_token, [
+                    'event_name' => 'Purchase',
+                    'event_id' => $eventId,
+                    'event_source_url' => url()->current(),
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'fbp' => request()->cookie('_fbp'),
+                    'fbc' => request()->cookie('_fbc'),
+                    'em' => $purchase->email,
+                    'ph' => $purchase->phone_number,
+                    'value' => $value,
+                    'currency' => $purchase->currency_code,
+                ]);
+
+                session()->flash('capi_event', ['name' => 'Purchase', 'id' => $eventId]);
+            }
+        }
 
         return view('front.tender.purchase_complete', $data);
     }

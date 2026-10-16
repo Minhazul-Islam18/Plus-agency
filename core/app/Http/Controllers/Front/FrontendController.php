@@ -9,6 +9,7 @@ use App\BasicExtended as BE;
 use App\ContactMessage;
 use App\Jobs\SendAdminMail;
 use App\Jobs\SendContactAdminNotifyMail;
+use App\Jobs\SendFacebookCapiEvent;
 use Illuminate\Support\Facades\Log;
 use App\Slider;
 use App\Scategory;
@@ -669,8 +670,68 @@ class FrontendController extends Controller
             ]);
         }
 
+        // Meta Contact event — Pixel (client) + CAPI (server), sharing one
+        // event_id for dedup. Contact form POSTs aren't a cached response
+        // (session-based redirect-back), so generating the id here is
+        // safe — not the PageView-on-a-cached-page situation.
+        if (trackingConsented() && !empty($be->facebook_pixel_id) && !empty($be->facebook_capi_access_token)) {
+            $eventId = (string) Str::uuid();
+
+            SendFacebookCapiEvent::dispatch($be->facebook_pixel_id, $be->facebook_capi_access_token, [
+                'event_name' => 'Contact',
+                'event_id' => $eventId,
+                'event_source_url' => url()->previous(),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'fbp' => $request->cookie('_fbp'),
+                'fbc' => $request->cookie('_fbc'),
+                'em' => $from,
+            ]);
+
+            // Picked up by the generic flash-bridge in layout.blade.php on
+            // the very next (redirected-back) page render, then cleared —
+            // fires the matching client-side fbq() call with the same id.
+            Session::flash('capi_event', ['name' => 'Contact', 'id' => $eventId]);
+        }
+
         Session::flash('success', 'Email sent successfully!');
         return back();
+    }
+
+    /**
+     * Facebook CAPI PageView beacon — fired via fetch() from every page's
+     * __activateTracking() (layout.blade.php), never from a cached page
+     * body itself. See app/Jobs/SendFacebookCapiEvent.php for why: the
+     * event_id, IP and user-agent all need to be this specific request's
+     * own, not whichever visitor's request happened to populate a cache.
+     */
+    public function trackPageview(Request $request)
+    {
+        if (!trackingConsented()) {
+            return response()->noContent();
+        }
+
+        $be = BE::first();
+        if (empty($be?->facebook_pixel_id) || empty($be?->facebook_capi_access_token)) {
+            return response()->noContent();
+        }
+
+        $fbc = $request->cookie('_fbc');
+        if (empty($fbc) && $request->filled('fbclid')) {
+            $fbc = 'fb.1.' . now()->timestamp . '.' . $request->input('fbclid');
+        }
+
+        SendFacebookCapiEvent::dispatch($be->facebook_pixel_id, $be->facebook_capi_access_token, [
+            'event_name' => 'PageView',
+            'event_id' => $request->input('event_id'),
+            'event_source_url' => $request->input('url'),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'fbp' => $request->cookie('_fbp'),
+            'fbc' => $fbc,
+        ]);
+
+        return response()->noContent();
     }
 
     public function subscribe(Request $request)
@@ -689,6 +750,26 @@ class FrontendController extends Controller
         $subsc->email = $request->email;
         $subsc->unsubscribe_token = \Illuminate\Support\Str::random(48);
         $subsc->save();
+
+        // Server-side CAPI only for this one event — the newsletter form
+        // posts via AJAX (no full page reload to carry a matching
+        // client-side fbq() call back to), so there's no client Pixel
+        // partner to dedup against here, unlike Contact/Purchase above.
+        if (trackingConsented()) {
+            $be = BE::first();
+            if (!empty($be->facebook_pixel_id) && !empty($be->facebook_capi_access_token)) {
+                SendFacebookCapiEvent::dispatch($be->facebook_pixel_id, $be->facebook_capi_access_token, [
+                    'event_name' => 'Lead',
+                    'event_id' => (string) Str::uuid(),
+                    'event_source_url' => url()->previous(),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'fbp' => $request->cookie('_fbp'),
+                    'fbc' => $request->cookie('_fbc'),
+                    'em' => $request->email,
+                ]);
+            }
+        }
 
         return "success";
     }

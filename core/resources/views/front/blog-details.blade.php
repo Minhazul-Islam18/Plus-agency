@@ -6,11 +6,13 @@
 
 @section('meta-keywords', "$blog->meta_keywords")
 @section('meta-description', "$blog->meta_description")
+@section('og-image', 'blogs/' . $blog->main_image)
 
 @section('breadcrumb-title', convertUtf8($bs->blog_details_title))
 @section('breadcrumb-subtitle', strlen($blog->title) > 30 ? mb_substr($blog->title, 0, 30, 'utf-8') . '...' :
     $blog->title)
 @section('breadcrumb-link', __('Blog Details'))
+
 
 @if (!empty($bs->blog_breadcrumb_bg))
     @section('breadcrumb-bg', asset('assets/front/img/' . $bs->blog_breadcrumb_bg))
@@ -100,6 +102,18 @@
 
 @section('content')
 
+<script type="application/ld+json">
+    {!! json_encode([
+        '@@context' => 'https://schema.org',
+        '@@type' => 'Article',
+        'headline' => convertUtf8($blog->title),
+        'image' => !empty($blog->main_image) ? [asset('assets/front/img/blogs/' . $blog->main_image)] : [],
+        'datePublished' => optional($blog->created_at)->toIso8601String(),
+        'dateModified' => optional($blog->updated_at ?? $blog->created_at)->toIso8601String(),
+        'author' => ['@@type' => 'Person', 'name' => convertUtf8($blog->author_name)],
+    ], JSON_UNESCAPED_SLASHES) !!}
+</script>
+
 @if ($be->theme_version == 'dark')
     @php
         $blogDate = !empty($currentLang) ? \Carbon\Carbon::parse($blog->created_at)->locale($currentLang->code) : \Carbon\Carbon::parse($blog->created_at)->locale('en');
@@ -111,7 +125,7 @@
             <div>
                 <div class="dark-svcd-panel reveal-left">
                 <div class="dark-article-cover">
-                    <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
+                    <img class="lazy" data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="{{ convertUtf8($blog->title) }}">
                     <div class="dark-cover-meta">
                         <span class="dark-cover-pill accent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>{{ $blogDate->translatedFormat('jS F, Y') }}</span>
                         <span class="dark-cover-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>{{ $readMins }} {{ __('min read') }}</span>
@@ -300,7 +314,7 @@
                 <div class="{{ $blog->sidebar == 1 ? 'col-lg-7' : 'col-12' }} reveal-left">
                     <div class="blog-details">
                         <img class="blog-details-img-1 lazy"
-                            data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="">
+                            data-src="{{ asset('assets/front/img/blogs/' . $blog->main_image) }}" alt="{{ convertUtf8($blog->title) }}">
                         <small class="date">{{ date('F d, Y', strtotime($blog->created_at)) }} - {{ __('BY') }}
                             {{ convertUtf8($blog->author_name) }}</small>
                         <h2 class="blog-details-title">{{ convertUtf8($blog->title) }}</h2>

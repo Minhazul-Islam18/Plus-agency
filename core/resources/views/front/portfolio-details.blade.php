@@ -93,7 +93,7 @@
                                     </div>
                                 @endif
                                 <img id="pdMainImg" class="lazy is-kenburns" draggable="false"
-                                    data-src="{{ $pdImageUrls->first() }}" alt="">
+                                    data-src="{{ $pdImageUrls->first() }}" alt="{{ convertUtf8($portfolio->title) }}">
                                 @include('front.default.partials.dark.portfolio-hero-overlay', [
                                     'portfolio' => $portfolio,
                                 ])
@@ -132,7 +132,7 @@
                             <div class="dark-pd-gallery-main">
                                 <img id="pdMainImg" class="lazy is-kenburns" draggable="false"
                                     data-src="{{ asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) }}"
-                                    alt="">
+                                    alt="{{ convertUtf8($portfolio->title) }}">
                                 @include('front.default.partials.dark.portfolio-hero-overlay', [
                                     'portfolio' => $portfolio,
                                 ])

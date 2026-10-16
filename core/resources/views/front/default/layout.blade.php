@@ -40,6 +40,69 @@
     @else
         <link rel="alternate" hreflang="{{ $currentLang->code ?? 'en' }}" href="{{ url()->current() }}">
     @endif
+
+    {{-- Canonical always self-references the current URL via the same
+         route-name/params the hreflang loop above already computed, so the
+         two can never disagree about what this page's "real" URL is. --}}
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    @php
+        $__ogTitle = trim(($bs->website_title ?? '') . ' ' . $__env->yieldContent('pagename'));
+        $__ogDescription = $__env->yieldContent('meta-description') ?: ($bs->website_title ?? '');
+        $__ogImagePath = $__env->yieldContent('og-image') ?: ($bs->default_social_image ?? '');
+    @endphp
+    <meta property="og:site_name" content="{{ $bs->website_title }}">
+    <meta property="og:locale" content="{{ $currentLang->code ?? 'en' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $__ogTitle }}">
+    <meta property="og:description" content="{{ $__ogDescription }}">
+    @if (!empty($__ogImagePath))
+        <meta property="og:image" content="{{ asset('assets/front/img/' . $__ogImagePath) }}">
+    @endif
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $__ogTitle }}">
+    <meta name="twitter:description" content="{{ $__ogDescription }}">
+    @if (!empty($__ogImagePath))
+        <meta name="twitter:image" content="{{ asset('assets/front/img/' . $__ogImagePath) }}">
+    @endif
+
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => $bs->website_title,
+            'url' => url('/'),
+            'logo' => !empty($bs->favicon) ? asset('assets/front/img/' . $bs->favicon) : null,
+            'sameAs' => $socials->pluck('url')->filter()->values(),
+        ], JSON_UNESCAPED_SLASHES) !!}
+    </script>
+
+    @php
+        $__breadcrumbTitle = $__env->yieldContent('breadcrumb-title');
+        $__breadcrumbLink = $__env->yieldContent('breadcrumb-link');
+    @endphp
+    @if (!empty($__breadcrumbLink))
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@@context' => 'https://schema.org',
+                '@@type' => 'BreadcrumbList',
+                'itemListElement' => array_values(array_filter([
+                    ['@@type' => 'ListItem', 'position' => 1, 'name' => __('Home'), 'item' => url('/')],
+                    !empty($__breadcrumbTitle) ? ['@@type' => 'ListItem', 'position' => 2, 'name' => strip_tags($__breadcrumbTitle), 'item' => url()->current()] : null,
+                    ['@@type' => 'ListItem', 'position' => !empty($__breadcrumbTitle) ? 3 : 2, 'name' => strip_tags($__breadcrumbLink), 'item' => url()->current()],
+                ])),
+            ], JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @endif
+
+    @if (!empty($bs->google_site_verification))
+        <meta name="google-site-verification" content="{{ $bs->google_site_verification }}">
+    @endif
+    @if (!empty($bs->bing_site_verification))
+        <meta name="msvalidate.01" content="{{ $bs->bing_site_verification }}">
+    @endif
+
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/front/img/' . $bs->favicon) }}" type="image/x-icon">
     {{-- Icon webfonts are only discovered once plugin.min.css finishes parsing,

@@ -562,6 +562,11 @@ class BasicController extends Controller
             $bs->disqus_script = $request->disqus_script;
             $bs->google_analytics_script = $request->google_analytics_script;
             $bs->is_analytics = $request->is_analytics;
+            $bs->google_analytics_measurement_id = $request->google_analytics_measurement_id;
+            $bs->gtm_container_id = $request->gtm_container_id;
+            $bs->google_site_verification = $request->google_site_verification;
+            $bs->bing_site_verification = $request->bing_site_verification;
+            $bs->default_social_image = $request->default_social_image;
             $bs->appzi_script = $request->appzi_script;
             $bs->is_appzi = $request->is_appzi;
             $bs->addthis_script = $request->addthis_script;
@@ -577,8 +582,16 @@ class BasicController extends Controller
         foreach ($bes as $key => $be) {
             $be->facebook_pexel_script = $request->facebook_pexel_script;
             $be->is_facebook_pexel = $request->is_facebook_pexel;
+            $be->facebook_pixel_id = $request->facebook_pixel_id;
+            $be->facebook_capi_access_token = $request->facebook_capi_access_token;
             $be->save();
         }
+
+        // New tracking/SEO fields above are read by the global '*' view
+        // composer's per-language cache (AppServiceProvider::globalViewData,
+        // flexible 25-30min TTL) — flush it so a saved change shows up on
+        // the next page load instead of waiting out the stale window.
+        \App\Providers\AppServiceProvider::flushGlobalViewCache();
 
         $bexs = BasicExtra::all();
         foreach ($bexs as $key => $bex) {

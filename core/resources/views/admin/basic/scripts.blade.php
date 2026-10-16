@@ -297,8 +297,26 @@
                                         @endif
                                     </div>
                                     <div class="form-group">
-                                        <label>Google Analytics Script</label>
+                                        <label>GA4 Measurement ID</label>
+                                        <input type="text" class="form-control ltr" name="google_analytics_measurement_id"
+                                            value="{{ $bs->google_analytics_measurement_id }}" placeholder="G-XXXXXXXXXX">
+                                        <p class="text-warning mb-0"><small>Renders the standard gtag.js snippet. Consent-gated — only loads after a visitor clicks Allow on the cookie banner.</small></p>
+                                        @if ($errors->has('google_analytics_measurement_id'))
+                                            <p class="mb-0 text-danger">{{ $errors->first('google_analytics_measurement_id') }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="form-group">
+                                        <label>GTM Container ID</label>
+                                        <input type="text" class="form-control ltr" name="gtm_container_id"
+                                            value="{{ $bs->gtm_container_id }}" placeholder="GTM-XXXXXXX">
+                                        @if ($errors->has('gtm_container_id'))
+                                            <p class="mb-0 text-danger">{{ $errors->first('gtm_container_id') }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Custom / advanced script (optional)</label>
                                         <textarea class="form-control" name="google_analytics_script" rows="5">{{ $bs->google_analytics_script }}</textarea>
+                                        <p class="text-warning mb-0"><small>Only for something the two ID fields above don't cover. Most sites don't need this.</small></p>
                                         @if ($errors->has('google_analytics_script'))
                                             <p class="mb-0 text-danger">{{ $errors->first('google_analytics_script') }}
                                             </p>
@@ -459,6 +477,59 @@
                                     <textarea class="form-control" name="facebook_pexel_script" rows="5">{{ $be->facebook_pexel_script }}</textarea>
                                     @if ($errors->has('facebook_pexel_script'))
                                         <p class="mb-0 text-danger">{{ $errors->first('facebook_pexel_script') }}</p>
+                                    @endif
+                                </div>
+                                <hr>
+                                <div class="form-group">
+                                    <label>Meta Pixel ID</label>
+                                    <input type="text" class="form-control ltr" name="facebook_pixel_id"
+                                        value="{{ $be->facebook_pixel_id }}" placeholder="123456789012345">
+                                    <p class="text-warning mb-0"><small>Fires both the client Pixel and server-side Conversions API, deduplicated (shared event_id). Consent-gated.</small></p>
+                                    @if ($errors->has('facebook_pixel_id'))
+                                        <p class="mb-0 text-danger">{{ $errors->first('facebook_pixel_id') }}</p>
+                                    @endif
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Conversions API Access Token</label>
+                                    <textarea class="form-control" name="facebook_capi_access_token" rows="2">{{ $be->facebook_capi_access_token }}</textarea>
+                                    <p class="text-warning mb-0"><small>From Events Manager → your Pixel → Settings → Conversions API. Required for server-side events (Contact/Lead/Purchase/PageView) — without it, only the client Pixel fires.</small></p>
+                                    @if ($errors->has('facebook_capi_access_token'))
+                                        <p class="mb-0 text-danger">{{ $errors->first('facebook_capi_access_token') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- SEO verification + default social share image --}}
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">SEO & Social</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Google Search Console Verification</label>
+                                    <input type="text" class="form-control ltr" name="google_site_verification"
+                                        value="{{ $bs->google_site_verification }}" placeholder="content value only, no <meta> tag">
+                                    @if ($errors->has('google_site_verification'))
+                                        <p class="mb-0 text-danger">{{ $errors->first('google_site_verification') }}</p>
+                                    @endif
+                                </div>
+                                <div class="form-group">
+                                    <label>Bing Webmaster Verification</label>
+                                    <input type="text" class="form-control ltr" name="bing_site_verification"
+                                        value="{{ $bs->bing_site_verification }}">
+                                    @if ($errors->has('bing_site_verification'))
+                                        <p class="mb-0 text-danger">{{ $errors->first('bing_site_verification') }}</p>
+                                    @endif
+                                </div>
+                                <div class="form-group">
+                                    <label>Default Social Share Image (filename, Optional)</label>
+                                    <input type="text" class="form-control ltr" name="default_social_image"
+                                        value="{{ $bs->default_social_image }}" placeholder="e.g. og-default.jpg">
+                                    <p class="text-warning mb-0"><small>Used for Open Graph/Twitter previews on pages with no image of their own (e.g. the homepage). File must already exist under assets/front/img/.</small></p>
+                                    @if ($errors->has('default_social_image'))
+                                        <p class="mb-0 text-danger">{{ $errors->first('default_social_image') }}</p>
                                     @endif
                                 </div>
                             </div>

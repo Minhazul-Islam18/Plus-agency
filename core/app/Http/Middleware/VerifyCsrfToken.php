@@ -37,5 +37,10 @@ class VerifyCsrfToken extends Middleware
     // '*/subscribe'). Compensated by throttle:30,1 on the route plus a
     // 24h per-visitor-per-question dedupe in FrontendController@faqView.
     '*/faq/*/view',
+    // Facebook CAPI PageView beacon — fires from every cached page via
+    // fetch(), same reasoning as the three above. Compensated by
+    // throttle:60,1 on the route; the dispatched job itself re-validates
+    // consent server-side before calling the Graph API.
+    'track/pageview',
   ];
 }

@@ -8,6 +8,108 @@
     @endif
     <!--End of Google Analytics script-->
 
+    {{-- GA4 / GTM / Meta Pixel — ID-driven fields, consent-gated.
+         Gating has to happen in each visitor's own browser, not server-side
+         here: most front-end pages are Cloudflare/LiteSpeed-cached, so a
+         PHP-side `if (trackingConsented())` baked into this shared HTML
+         would apply one visitor's consent state to everyone hitting that
+         cache entry. __activateTracking() re-checks the real cookie in the
+         browser that actually requested the page, every time — correct
+         even when the HTML itself is shared. Called once on DOMContentLoaded,
+         and again immediately from the consent dialog's Allow button (see
+         resources/views/vendor/cookie-consent/index.blade.php) so tracking
+         starts the same page load a visitor agrees, not just on their next
+         navigation. --}}
+    <script>
+        window.__hasTrackingConsent = function () {
+            return document.cookie.split('; ').indexOf('{{ config('cookie-consent.cookie_name', 'laravel_cookie_consent') }}=1') !== -1;
+        };
+
+        window.__activateTracking = function () {
+            if (window.__trackingActivated || !window.__hasTrackingConsent()) {
+                return;
+            }
+            window.__trackingActivated = true;
+
+            @if (!empty($bs->gtm_container_id))
+                (function (w, d, s, l, i) {
+                    w[l] = w[l] || [];
+                    w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+                    var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+                    j.async = true;
+                    j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                    f.parentNode.insertBefore(j, f);
+                })(window, document, 'script', 'dataLayer', '{{ $bs->gtm_container_id }}');
+            @endif
+
+            @if (!empty($bs->google_analytics_measurement_id))
+                var __gaScript = document.createElement('script');
+                __gaScript.async = true;
+                __gaScript.src = 'https://www.googletagmanager.com/gtag/js?id={{ $bs->google_analytics_measurement_id }}';
+                document.head.appendChild(__gaScript);
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', '{{ $bs->google_analytics_measurement_id }}');
+            @endif
+
+            @if (!empty($be->facebook_pixel_id))
+                !function (f, b, e, v, n, t, s) {
+                    if (f.fbq) return; n = f.fbq = function () {
+                        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    };
+                    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                    n.queue = []; t = b.createElement(e); t.async = !0;
+                    t.src = v; s = b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t, s)
+                }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+                fbq('init', '{{ $be->facebook_pixel_id }}');
+
+                // Shared event_id (Meta's own dedup key) generated here in
+                // the browser rather than server-side — this script block
+                // renders inside the same cached HTML as everyone else, so
+                // a server-generated id would be reused for every visitor
+                // who hits that cache entry. The matching CAPI PageView
+                // dispatch is a real-time fetch, not baked into any cache.
+                var __fbEventId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                fbq('track', 'PageView', {}, { eventID: __fbEventId });
+
+                fetch('{{ route('front.track.pageview') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    keepalive: true,
+                    body: JSON.stringify({ event_id: __fbEventId, url: window.location.href }),
+                }).catch(function () {});
+            @endif
+        };
+
+        document.addEventListener('DOMContentLoaded', window.__activateTracking);
+    </script>
+
+    @if (session()->has('capi_event') && !empty($be->facebook_pixel_id))
+        {{-- Bridges a server-side conversion (Contact/Purchase) back to the
+             client Pixel with the same event_id the CAPI dispatch already
+             used — see FrontendController@sendmail / TenderController's
+             purchaseComplete(). Session flash, so this never rides along
+             in cached HTML; it only exists on the one real request. --}}
+        <script>
+            // Registered after __activateTracking's own DOMContentLoaded
+            // listener (earlier in this file), so multiple listeners on the
+            // same event fire in registration order — fbq is already
+            // defined by the time this runs.
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.__hasTrackingConsent && window.__hasTrackingConsent() && window.fbq) {
+                    fbq('track', '{{ session('capi_event')['name'] }}', {}, { eventID: '{{ session('capi_event')['id'] }}' });
+                }
+            });
+        </script>
+    @endif
+
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -203,6 +305,15 @@
 
 
 <body @if ($rtl == 1) dir="rtl" @endif>
+    @if (!empty($bs->gtm_container_id))
+        {{-- GTM's noscript fallback can't be consent-gated — there's no
+             cookie read possible without JS in the first place, and this
+             is the one case Google's own install instructions don't gate
+             either. Negligible in practice: a visitor with JS disabled
+             doesn't run the JS-gated block above either. --}}
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $bs->gtm_container_id }}"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    @endif
 
     <!--   header area start   -->
     @if ($be->theme_version == 'dark')

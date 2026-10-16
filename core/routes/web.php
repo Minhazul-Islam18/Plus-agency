@@ -125,6 +125,7 @@ Route::get('/backup', 'Front\FrontendController@backup');
 =======================================================*/
 
 Route::post('/push', 'Front\PushController@store')->middleware('throttle:10,1');
+Route::post('/track/pageview', 'Front\FrontendController@trackPageview')->name('front.track.pageview')->middleware('throttle:60,1');
 Route::get('/push/track/{log}', 'Front\PushController@track')->name('push.track');
 
 Route::prefix('{locale}')->where(['locale' => $activeLocales])->withoutMiddleware($localeExcept)

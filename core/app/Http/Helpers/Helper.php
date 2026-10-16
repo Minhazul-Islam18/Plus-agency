@@ -371,6 +371,18 @@ if (!function_exists('currentLang')) {
     }
 }
 
+if (!function_exists('trackingConsented')) {
+    // Gate for GA4/GTM/Facebook Pixel+CAPI. spatie/laravel-cookie-consent
+    // only ever stores one cookie, value "1" for agreed — the dialog's own
+    // vendor-view override (resources/views/vendor/cookie-consent) now
+    // also persists "0" on an explicit decline (see its denyCookies()), so
+    // this checks the exact value, not just presence.
+    function trackingConsented(): bool
+    {
+        return request()->cookie(config('cookie-consent.cookie_name', 'laravel_cookie_consent')) === '1';
+    }
+}
+
 if (!function_exists('tenderCountdown')) {
     // Real days/hours remaining, computed server-side — the countdown
     // markup's static HTML previously always hardcoded "00j 00h" regardless

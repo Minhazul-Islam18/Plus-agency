@@ -100,6 +100,7 @@ class BlogController extends Controller
         $blog->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
+        $blog->meta_title = $request->meta_title;
         $blog->serial_number = $request->serial_number;
         $blog->sidebar = $request->sidebar;
 
@@ -107,6 +108,13 @@ class BlogController extends Controller
             $filename = uniqid() .'.'. $extImage;
             @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $blog->main_image = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::IMG_SUBDIR . $ogFilename);
+            $blog->og_image = $ogFilename;
         }
 
         $blog->save();
@@ -185,6 +193,7 @@ class BlogController extends Controller
         $blog->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
         $blog->meta_keywords = $request->meta_keywords;
         $blog->meta_description = $request->meta_description;
+        $blog->meta_title = $request->meta_title;
         $blog->serial_number = $request->serial_number;
         $blog->sidebar = $request->sidebar;
 
@@ -193,6 +202,14 @@ class BlogController extends Controller
             $filename = uniqid() .'.'. $extImage;
             @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $blog->main_image = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $blog->og_image);
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::IMG_SUBDIR . $ogFilename);
+            $blog->og_image = $ogFilename;
         }
 
         $blog->save();

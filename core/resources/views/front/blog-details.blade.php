@@ -1,12 +1,12 @@
 @extends("front.$version.layout")
 
 @section('pagename')
-    - {{ convertUtf8($blog->title) }}
+    - {{ !empty($blog->meta_title) ? convertUtf8($blog->meta_title) : convertUtf8($blog->title) }}
 @endsection
 
 @section('meta-keywords', "$blog->meta_keywords")
 @section('meta-description', "$blog->meta_description")
-@section('og-image', 'blogs/' . $blog->main_image)
+@section('og-image', 'blogs/' . (!empty($blog->og_image) ? $blog->og_image : $blog->main_image))
 
 @section('breadcrumb-title', convertUtf8($bs->blog_details_title))
 @section('breadcrumb-subtitle', strlen($blog->title) > 30 ? mb_substr($blog->title, 0, 30, 'utf-8') . '...' :

@@ -206,6 +206,22 @@
                   <textarea type="text" class="form-control" name="meta_description" rows="5">{{$blog->meta_description}}</textarea>
                   <p id="errmeta_description" class="mb-0 text-danger em"></p>
                 </div>
+
+                @php
+                    try {
+                        $seoPreviewUrl = route('front.blogdetails', ['locale' => $blog->language->code, 'slug' => $blog->slug]);
+                    } catch (\Throwable $e) {
+                        $seoPreviewUrl = url('/');
+                    }
+                @endphp
+                @include('admin.partials.seo-meta-box', [
+                    'seoSerial' => 2,
+                    'seoMetaTitle' => $blog->meta_title,
+                    'seoOgImageUrl' => !empty($blog->og_image) ? asset('assets/front/img/blogs/' . $blog->og_image) : null,
+                    'seoFallbackImageUrl' => !empty($blog->main_image) ? asset('assets/front/img/blogs/' . $blog->main_image) : null,
+                    'seoPreviewUrl' => $seoPreviewUrl,
+                    'seoSiteName' => $bs->website_title ?? config('app.name'),
+                ])
               </form>
             </div>
           </div>

@@ -408,6 +408,11 @@
                             <label for="">Meta Description</label>
                             <textarea type="text" class="form-control" name="meta_description" rows="5"></textarea>
                         </div>
+
+                        @include('admin.partials.seo-meta-box', [
+                            'seoSerial' => 2,
+                            'seoSiteName' => $bs->website_title ?? config('app.name'),
+                        ])
                     </form>
                 </div>
                 <div class="modal-footer">

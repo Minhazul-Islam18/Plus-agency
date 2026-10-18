@@ -140,6 +140,7 @@
                       </div>
                       <textarea class="form-control seo-desc-input" data-field="description" name="meta_description" rows="3" placeholder="Enter meta description">{{ $bs->meta_description }}</textarea>
                     </div>
+                    @include('admin.partials.og-image-picker', ['ogSerial' => 15, 'ogFieldName' => 'default_social_image', 'ogCurrentUrl' => !empty($bs->default_social_image) ? asset('assets/front/img/' . $bs->default_social_image) : null, 'ogHelperText' => 'Used for Open Graph/Twitter previews on any page with no image of its own (e.g. the homepage) and no page-type image override below. Shared across every language.'])
                   </div>
                   @include('admin.partials._seo-preview-card', ['tab' => 'global', 'path' => '/'])
                 </div>

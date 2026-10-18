@@ -405,6 +405,22 @@ class BasicController extends Controller
         $bs->meta_description = $request->meta_description;
         $bs->save();
 
+        // Default Social Share Image is one shared file regardless of
+        // which language this form is open on (an image doesn't need
+        // translating) — same "write the same value to every language
+        // row" convention as home_version/custom_page_pagebuilder
+        // elsewhere in this admin. Copied once, applied to every row.
+        if ($request->filled('default_social_image')) {
+            $ext = pathinfo($request->default_social_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @copy($request->default_social_image, FRONT_IMG_PATH . $filename);
+            foreach (BasicSetting::all() as $row) {
+                @unlink(FRONT_IMG_PATH . $row->default_social_image);
+                $row->default_social_image = $filename;
+                $row->save();
+            }
+        }
+
         $bex = \App\BasicExtra::where('language_id', $langid)->firstOrFail();
         $bex->tender_meta_keywords = $request->tender_meta_keywords;
         $bex->tender_meta_description = $request->tender_meta_description;
@@ -613,17 +629,6 @@ class BasicController extends Controller
 
         $bss = BasicSetting::all();
 
-        // Hidden input starts empty (same convention as the logo/favicon
-        // pickers above) — only a freshly LFM-picked path reaches here as
-        // a real file to copy. Copied once, outside the per-language loop
-        // below, since it's one shared file for every $bs row.
-        $socialImageFilename = null;
-        if ($request->filled('default_social_image')) {
-            $extSocialImage = pathinfo($request->default_social_image, PATHINFO_EXTENSION);
-            $socialImageFilename = uniqid() . '.' . $extSocialImage;
-            @copy($request->default_social_image, FRONT_IMG_PATH . $socialImageFilename);
-        }
-
         foreach ($bss as $bs) {
             $bs->tawk_to_script = $request->tawk_to_script;
             $bs->is_tawkto = $request->is_tawkto;
@@ -635,10 +640,6 @@ class BasicController extends Controller
             $bs->gtm_container_id = $request->gtm_container_id;
             $bs->google_site_verification = $request->google_site_verification;
             $bs->bing_site_verification = $request->bing_site_verification;
-            if ($socialImageFilename) {
-                @unlink(FRONT_IMG_PATH . $bs->default_social_image);
-                $bs->default_social_image = $socialImageFilename;
-            }
             $bs->appzi_script = $request->appzi_script;
             $bs->is_appzi = $request->is_appzi;
             $bs->addthis_script = $request->addthis_script;

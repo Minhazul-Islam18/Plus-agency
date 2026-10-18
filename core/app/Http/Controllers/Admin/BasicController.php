@@ -386,19 +386,77 @@ class BasicController extends Controller
         $lang = Language::where('code', $request->language)->firstOrFail();
         $data['lang_id'] = $lang->id;
         $data['abe'] = $lang->basic_extended;
+        // Explicitly scoped to the language picked in this page's own
+        // dropdown — overrides the globally-injected $bs/$bex (which
+        // reflect the admin session's current URL locale, not necessarily
+        // the one selected here) so the Tenders/global fields below always
+        // show the right language's values.
+        $data['bs'] = $lang->basic_setting;
+        $data['bex'] = $lang->basic_extra;
 
         return view('admin.basic.seo', $data);
     }
 
     public function updateseo(Request $request, $langid)
     {
+        $bs = BasicSetting::where('language_id', $langid)->firstOrFail();
+        $bs->meta_title = $request->meta_title;
+        $bs->meta_keywords = $request->meta_keywords;
+        $bs->meta_description = $request->meta_description;
+        $bs->save();
+
+        $bex = \App\BasicExtra::where('language_id', $langid)->firstOrFail();
+        $bex->tender_meta_keywords = $request->tender_meta_keywords;
+        $bex->tender_meta_description = $request->tender_meta_description;
+        $bex->tender_meta_title = $request->tender_meta_title;
+        if ($request->filled('tender_og_image')) {
+            $ext = pathinfo($request->tender_og_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @unlink(FRONT_IMG_PATH . $bex->tender_og_image);
+            @copy($request->tender_og_image, FRONT_IMG_PATH . $filename);
+            $bex->tender_og_image = $filename;
+        }
+        $bex->save();
+
         $be = BasicExtended::where('language_id', $langid)->firstOrFail();
         $be->home_meta_keywords = $request->home_meta_keywords;
         $be->home_meta_description = $request->home_meta_description;
+        $be->home_meta_title = $request->home_meta_title;
+        if ($request->filled('home_og_image')) {
+            $ext = pathinfo($request->home_og_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @unlink(FRONT_IMG_PATH . $be->home_og_image);
+            @copy($request->home_og_image, FRONT_IMG_PATH . $filename);
+            $be->home_og_image = $filename;
+        }
         $be->services_meta_keywords = $request->services_meta_keywords;
         $be->services_meta_description = $request->services_meta_description;
+        $be->services_meta_title = $request->services_meta_title;
+        if ($request->filled('services_og_image')) {
+            $ext = pathinfo($request->services_og_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @unlink(FRONT_IMG_PATH . $be->services_og_image);
+            @copy($request->services_og_image, FRONT_IMG_PATH . $filename);
+            $be->services_og_image = $filename;
+        }
         $be->portfolios_meta_keywords = $request->portfolios_meta_keywords;
         $be->portfolios_meta_description = $request->portfolios_meta_description;
+        $be->portfolios_meta_title = $request->portfolios_meta_title;
+        if ($request->filled('portfolios_og_image')) {
+            $ext = pathinfo($request->portfolios_og_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @unlink(FRONT_IMG_PATH . $be->portfolios_og_image);
+            @copy($request->portfolios_og_image, FRONT_IMG_PATH . $filename);
+            $be->portfolios_og_image = $filename;
+        }
+        $be->blogs_meta_title = $request->blogs_meta_title;
+        if ($request->filled('blogs_og_image')) {
+            $ext = pathinfo($request->blogs_og_image, PATHINFO_EXTENSION);
+            $filename = uniqid() . '.' . $ext;
+            @unlink(FRONT_IMG_PATH . $be->blogs_og_image);
+            @copy($request->blogs_og_image, FRONT_IMG_PATH . $filename);
+            $be->blogs_og_image = $filename;
+        }
         $be->team_meta_keywords = $request->team_meta_keywords;
         $be->team_meta_description = $request->team_meta_description;
         $be->calendar_meta_keywords = $request->calendar_meta_keywords;

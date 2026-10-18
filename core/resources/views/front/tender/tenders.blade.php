@@ -1,8 +1,14 @@
 @extends("front.$version.layout")
 
 @section('pagename')
-    - {{ __('All Tenders') }}
+    - {{ !empty($bex->tender_meta_title) ? convertUtf8($bex->tender_meta_title) : __('All Tenders') }}
 @endsection
+
+@section('meta-keywords', "$bex->tender_meta_keywords")
+@section('meta-description', "$bex->tender_meta_description")
+@if (!empty($bex->tender_og_image))
+    @section('og-image', $bex->tender_og_image)
+@endif
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/front/css/jquery-ui.min.css') }}">

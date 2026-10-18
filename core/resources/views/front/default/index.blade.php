@@ -1,7 +1,13 @@
 @extends('front.default.layout')
 
+@if (!empty($be->home_meta_title))
+    @section('pagename', '- ' . convertUtf8($be->home_meta_title))
+@endif
 @section('meta-keywords', "$be->home_meta_keywords")
 @section('meta-description', "$be->home_meta_description")
+@if (!empty($be->home_og_image))
+    @section('og-image', $be->home_og_image)
+@endif
 
 
 @section('styles')

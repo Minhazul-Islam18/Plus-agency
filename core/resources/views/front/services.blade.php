@@ -2,16 +2,20 @@
 
 @section('pagename')
     -
-    @if (empty($category))
-        {{ __('All') }}
+    @if (!empty($category))
+        {{ $category->name }} {{ __('Services') }}
+    @elseif (!empty($be->services_meta_title))
+        {{ convertUtf8($be->services_meta_title) }}
     @else
-        {{ $category->name }}
+        {{ __('All') }} {{ __('Services') }}
     @endif
-    {{ __('Services') }}
 @endsection
 
 @section('meta-keywords', "$be->services_meta_keywords")
 @section('meta-description', "$be->services_meta_description")
+@if (!empty($be->services_og_image))
+    @section('og-image', $be->services_og_image)
+@endif
 
 @section('content')
 

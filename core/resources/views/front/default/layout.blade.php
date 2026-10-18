@@ -114,11 +114,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="@yield('meta-description')">
-    <meta name="keywords" content="@yield('meta-keywords')">
+    @php
+        // Global fallback chain: a page's own @section wins when set; when
+        // it isn't, fall through to the site-wide default ($bs->meta_*,
+        // "SEO Informations" page) rather than rendering an empty tag.
+        // Computed once here so every tag below (and the OG/Twitter block
+        // further down) reads from the same three values.
+        $__pageMetaTitle = $__env->yieldContent('pagename');
+        $__metaDescription = $__env->yieldContent('meta-description') ?: ($bs->meta_description ?? '');
+        $__metaKeywords = $__env->yieldContent('meta-keywords') ?: ($bs->meta_keywords ?? '');
+        $__titleSuffix = $__pageMetaTitle ?: ($bs->meta_title ?? '');
+    @endphp
+    <meta name="description" content="{{ $__metaDescription }}">
+    <meta name="keywords" content="{{ $__metaKeywords }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $bs->website_title }} @yield('pagename')</title>
+    <title>{{ $bs->website_title }} {{ $__titleSuffix }}</title>
 
     @php
         // Dynamic Page-model catch-all (front.dynamicPage) has independent,
@@ -149,8 +160,8 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     @php
-        $__ogTitle = trim(($bs->website_title ?? '') . ' ' . $__env->yieldContent('pagename'));
-        $__ogDescription = $__env->yieldContent('meta-description') ?: ($bs->website_title ?? '');
+        $__ogTitle = trim(($bs->website_title ?? '') . ' ' . $__titleSuffix);
+        $__ogDescription = $__metaDescription ?: ($bs->website_title ?? '');
         $__ogImagePath = $__env->yieldContent('og-image') ?: ($bs->default_social_image ?? '');
     @endphp
     <meta property="og:site_name" content="{{ $bs->website_title }}">

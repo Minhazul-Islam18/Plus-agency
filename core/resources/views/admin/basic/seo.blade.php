@@ -64,7 +64,38 @@
           <div class="card-body pt-5 pb-5">
             <div class="row">
               @csrf
+
+              <div class="col-lg-12">
+                <div class="alert alert-info">
+                  <strong>Global Fallback</strong> — used only when a page below (or an individual Blog/Portfolio/Service/Tender/custom Page) has no meta of its own set. This is the last resort, not an override.
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Global Meta Title</label>
+                  <input class="form-control" name="meta_title" value="{{ $bs->meta_title }}" placeholder="Appended after the site name in <title>">
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Global Meta Keywords</label>
+                  <input class="form-control" name="meta_keywords" value="{{ $bs->meta_keywords }}" placeholder="Enter meta keywords" data-role="tagsinput">
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Global Meta Description</label>
+                  <textarea class="form-control" name="meta_description" rows="2" placeholder="Enter meta description">{{ $bs->meta_description }}</textarea>
+                </div>
+              </div>
+
+              <div class="col-lg-12"><hr></div>
+
               <div class="col-lg-6">
+                <div class="form-group">
+                  <label>Meta Title for Home Page</label>
+                  <input class="form-control" name="home_meta_title" value="{{$abe->home_meta_title}}" placeholder="Leave blank to use the global fallback">
+                </div>
                 <div class="form-group">
                   <label>Meta Keywords for Home Page</label>
                   <input class="form-control" name="home_meta_keywords" value="{{$abe->home_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
@@ -73,9 +104,14 @@
                   <label>Meta Description for Home Page</label>
                   <textarea class="form-control" name="home_meta_description" rows="5" placeholder="Enter meta description">{{$abe->home_meta_description}}</textarea>
                 </div>
+                @include('admin.partials.og-image-picker', ['ogSerial' => 10, 'ogFieldName' => 'home_og_image', 'ogCurrentUrl' => !empty($abe->home_og_image) ? asset('assets/front/img/' . $abe->home_og_image) : null])
               </div>
               <div class="col-lg-6">
                 <div class="form-group">
+                    <label>Meta Title for Services Page</label>
+                    <input class="form-control" name="services_meta_title" value="{{$abe->services_meta_title}}" placeholder="Leave blank to use the global fallback">
+                  </div>
+                  <div class="form-group">
                     <label>Meta Keywords for Services Page</label>
                     <input class="form-control" name="services_meta_keywords" value="{{$abe->services_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
                   </div>
@@ -83,9 +119,14 @@
                     <label>Meta Description for Services Page</label>
                     <textarea class="form-control" name="services_meta_description" rows="5" placeholder="Enter meta description">{{$abe->services_meta_description}}</textarea>
                   </div>
+                  @include('admin.partials.og-image-picker', ['ogSerial' => 11, 'ogFieldName' => 'services_og_image', 'ogCurrentUrl' => !empty($abe->services_og_image) ? asset('assets/front/img/' . $abe->services_og_image) : null])
               </div>
 
               <div class="col-lg-6">
+                  <div class="form-group">
+                    <label>Meta Title for Portfolios</label>
+                    <input class="form-control" name="portfolios_meta_title" value="{{$abe->portfolios_meta_title}}" placeholder="Leave blank to use the global fallback">
+                  </div>
                   <div class="form-group">
                     <label>Meta Keywords for Portfolios</label>
                     <input class="form-control" name="portfolios_meta_keywords" value="{{$abe->portfolios_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
@@ -94,7 +135,42 @@
                     <label>Meta Description for Portfolios</label>
                     <textarea class="form-control" name="portfolios_meta_description" rows="5" placeholder="Enter meta description">{{$abe->portfolios_meta_description}}</textarea>
                   </div>
+                  @include('admin.partials.og-image-picker', ['ogSerial' => 12, 'ogFieldName' => 'portfolios_og_image', 'ogCurrentUrl' => !empty($abe->portfolios_og_image) ? asset('assets/front/img/' . $abe->portfolios_og_image) : null])
               </div>
+
+              <div class="col-lg-6">
+                  <div class="form-group">
+                    <label>Meta Title for Blogs Page</label>
+                    <input class="form-control" name="blogs_meta_title" value="{{$abe->blogs_meta_title}}" placeholder="Leave blank to use the global fallback">
+                  </div>
+                  <div class="form-group">
+                    <label>Meta Keywords for Blogs Page</label>
+                    <input class="form-control" name="blogs_meta_keywords" value="{{$abe->blogs_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
+                  </div>
+                  <div class="form-group">
+                    <label>Meta Description for Blogs Page</label>
+                    <textarea class="form-control" name="blogs_meta_description" rows="5" placeholder="Enter meta description">{{$abe->blogs_meta_description}}</textarea>
+                  </div>
+                  @include('admin.partials.og-image-picker', ['ogSerial' => 13, 'ogFieldName' => 'blogs_og_image', 'ogCurrentUrl' => !empty($abe->blogs_og_image) ? asset('assets/front/img/' . $abe->blogs_og_image) : null])
+              </div>
+
+              <div class="col-lg-6">
+                  <div class="form-group">
+                    <label>Meta Title for Tenders Page</label>
+                    <input class="form-control" name="tender_meta_title" value="{{$bex->tender_meta_title}}" placeholder="Leave blank to use the global fallback">
+                  </div>
+                  <div class="form-group">
+                    <label>Meta Keywords for Tenders Page</label>
+                    <input class="form-control" name="tender_meta_keywords" value="{{$bex->tender_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
+                  </div>
+                  <div class="form-group">
+                    <label>Meta Description for Tenders Page</label>
+                    <textarea class="form-control" name="tender_meta_description" rows="5" placeholder="Enter meta description">{{$bex->tender_meta_description}}</textarea>
+                  </div>
+                  @include('admin.partials.og-image-picker', ['ogSerial' => 14, 'ogFieldName' => 'tender_og_image', 'ogCurrentUrl' => !empty($bex->tender_og_image) ? asset('assets/front/img/' . $bex->tender_og_image) : null])
+              </div>
+
+              <div class="col-lg-12"><hr></div>
 
               <div class="col-lg-6">
                   <div class="form-group">

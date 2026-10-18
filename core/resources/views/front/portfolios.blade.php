@@ -2,16 +2,20 @@
 
 @section('pagename')
     -
-    @if (empty($sector))
-        {{ __('All') }}
+    @if (!empty($sector))
+        {{ convertUtf8($sector->name) }} {{ __('Portfolios') }}
+    @elseif (!empty($be->portfolios_meta_title))
+        {{ convertUtf8($be->portfolios_meta_title) }}
     @else
-        {{ convertUtf8($sector->name) }}
+        {{ __('All') }} {{ __('Portfolios') }}
     @endif
-    {{ __('Portfolios') }}
 @endsection
 
 @section('meta-keywords', "$be->portfolios_meta_keywords")
 @section('meta-description', "$be->portfolios_meta_description")
+@if (!empty($be->portfolios_og_image))
+    @section('og-image', $be->portfolios_og_image)
+@endif
 
 @section('breadcrumb-title', convertUtf8($bs->portfolio_title))
 @section('breadcrumb-subtitle', convertUtf8($bs->portfolio_subtitle))

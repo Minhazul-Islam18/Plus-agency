@@ -2,16 +2,20 @@
 
 @section('pagename')
  -
- @if (empty($category))
- {{__('All')}}
+ @if (!empty($category))
+ {{convertUtf8($category->name)}} {{__('Blogs')}}
+ @elseif (!empty($be->blogs_meta_title))
+ {{convertUtf8($be->blogs_meta_title)}}
  @else
- {{convertUtf8($category->name)}}
+ {{__('All')}} {{__('Blogs')}}
  @endif
- {{__('Blogs')}}
 @endsection
 
 @section('meta-keywords', "$be->blogs_meta_keywords")
 @section('meta-description', "$be->blogs_meta_description")
+@if (!empty($be->blogs_og_image))
+    @section('og-image', $be->blogs_og_image)
+@endif
 
 @section('breadcrumb-title', convertUtf8($bs->blog_title))
 @section('breadcrumb-subtitle', convertUtf8($bs->blog_subtitle))

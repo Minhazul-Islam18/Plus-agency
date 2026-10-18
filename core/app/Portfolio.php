@@ -26,6 +26,7 @@ class Portfolio extends Model
       // Carousel/hero overlay — see the migration's own comment for why
       // these are separate from title/content rather than reusing them.
       'overlay_title', 'overlay_subtitle', 'overlay_description', 'overlay_color', 'overlay_opacity', 'overlay_bloom_opacity',
+      'meta_title', 'og_image',
   ];
 
   public function portfolio_images()

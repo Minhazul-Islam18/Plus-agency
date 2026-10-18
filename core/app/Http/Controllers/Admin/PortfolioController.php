@@ -326,6 +326,19 @@ class PortfolioController extends Controller
             $in['client_logo'] = $filename;
         }
 
+        // og_image's hidden input starts empty (see the main image field's
+        // identical convention) — only a freshly LFM-picked path reaches
+        // here as a real file to copy. Unset the raw empty value so a
+        // blank field doesn't mass-assign an empty string over nothing.
+        if ($request->filled('og_image')) {
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::FEATURED_SUBDIR . $ogFilename);
+            $in['og_image'] = $ogFilename;
+        } else {
+            unset($in['og_image']);
+        }
+
         $portfolio = Portfolio::create($in);
         clear_slug_redirect('portfolio', $slug);
 
@@ -587,6 +600,20 @@ class PortfolioController extends Controller
             $filename = uniqid() . '.' . $extLogo;
             @copy($logo, FRONT_IMG_PATH . self::LOGO_SUBDIR . $filename);
             $in['client_logo'] = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            if ($portfolio->og_image) {
+                @unlink(FRONT_IMG_PATH . self::FEATURED_SUBDIR . $portfolio->og_image);
+            }
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::FEATURED_SUBDIR . $ogFilename);
+            $in['og_image'] = $ogFilename;
+        } else {
+            // Not re-picked this save — leave the existing value alone
+            // rather than letting the empty hidden input blank it out.
+            unset($in['og_image']);
         }
 
         if ($slug !== $oldSlug) {

@@ -9,11 +9,14 @@
 @endphp
 
 @section('pagename')
-    - {{ convertUtf8($portfolio->title) }}
+    - {{ !empty($portfolio->meta_title) ? convertUtf8($portfolio->meta_title) : convertUtf8($portfolio->title) }}
 @endsection
 
 @section('meta-keywords', "$portfolio->meta_keywords")
 @section('meta-description', "$portfolio->meta_description")
+@if (!empty($portfolio->og_image) || !empty($portfolio->featured_image))
+    @section('og-image', 'portfolios/featured/' . (!empty($portfolio->og_image) ? $portfolio->og_image : $portfolio->featured_image))
+@endif
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css"

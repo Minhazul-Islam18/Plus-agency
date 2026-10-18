@@ -549,6 +549,26 @@
             </div>
         </div>
 
+        @php
+            $seoPreviewUrl = url('/');
+            if ($isEdit) {
+                try {
+                    $seoPreviewUrl = route('front.portfoliodetails', ['locale' => $portfolio->language->code, 'slug' => $portfolio->slug]);
+                } catch (\Throwable $e) {
+                }
+            }
+        @endphp
+        <div class="portfolio-form-col mt-4">
+            @include('admin.partials.seo-meta-box', [
+                'seoSerial' => 5,
+                'seoMetaTitle' => $old('meta_title'),
+                'seoOgImageUrl' => $isEdit && !empty($portfolio->og_image) ? asset('assets/front/img/portfolios/featured/' . $portfolio->og_image) : null,
+                'seoFallbackImageUrl' => $isEdit && !empty($portfolio->featured_image) ? asset('assets/front/img/portfolios/featured/' . $portfolio->featured_image) : null,
+                'seoPreviewUrl' => $seoPreviewUrl,
+                'seoSiteName' => $bs->website_title ?? config('app.name'),
+            ])
+        </div>
+
         <div class="portfolio-form-col mt-4">
             <h5><i class="fas fa-images"></i> Media</h5>
 

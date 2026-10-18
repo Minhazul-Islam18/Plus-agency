@@ -194,8 +194,17 @@ class ServiceController extends Controller
         $service->feature = $request->feature;
         $service->meta_description = $request->meta_description;
         $service->meta_keywords = $request->meta_keywords;
+        $service->meta_title = $request->meta_title;
         $service->serial_number = $request->serial_number;
         $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
+
+        if ($request->filled('og_image')) {
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::IMG_SUBDIR . $ogFilename);
+            $service->og_image = $ogFilename;
+        }
+
         $service->save();
 
         \App\Http\Controllers\Admin\CloudflareController::purge();
@@ -270,6 +279,7 @@ class ServiceController extends Controller
         $service->serial_number = $request->serial_number;
         $service->meta_keywords = $request->meta_keywords;
         $service->meta_description = $request->meta_description;
+        $service->meta_title = $request->meta_title;
         $service->content = str_replace(url('/') . '/assets/front/img/', "{base_url}/assets/front/img/", clean($request->content));
 
         if ($request->filled('image')) {
@@ -277,6 +287,14 @@ class ServiceController extends Controller
             $filename = uniqid() . '.' . $extImage;
             @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
             $service->main_image = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $service->og_image);
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            @copy($request->og_image, FRONT_IMG_PATH . self::IMG_SUBDIR . $ogFilename);
+            $service->og_image = $ogFilename;
         }
 
         // Legacy rows predate the timestamps columns, so created_at is NULL

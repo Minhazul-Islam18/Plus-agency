@@ -349,6 +349,11 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <textarea class="form-control" name="meta_description" rows="5" placeholder="Enter meta description"></textarea>
                     <p id="errmeta_description" class="mb-0 text-danger em"></p>
                 </div>
+
+                @include('admin.partials.seo-meta-box', [
+                    'seoSerial' => 2,
+                    'seoSiteName' => $bs->website_title ?? config('app.name'),
+                ])
             </form>
         </div>
         <div class="modal-footer">

@@ -195,6 +195,22 @@
                         <p class="mb-0 text-danger">{{$errors->first('meta_description')}}</p>
                         @endif
                      </div>
+
+                     @php
+                         try {
+                             $seoPreviewUrl = route('front.servicedetails', ['locale' => $service->language->code, 'slug' => $service->slug]);
+                         } catch (\Throwable $e) {
+                             $seoPreviewUrl = url('/');
+                         }
+                     @endphp
+                     @include('admin.partials.seo-meta-box', [
+                         'seoSerial' => 2,
+                         'seoMetaTitle' => $service->meta_title,
+                         'seoOgImageUrl' => !empty($service->og_image) ? asset('assets/front/img/services/' . $service->og_image) : null,
+                         'seoFallbackImageUrl' => !empty($service->main_image) ? asset('assets/front/img/services/' . $service->main_image) : null,
+                         'seoPreviewUrl' => $seoPreviewUrl,
+                         'seoSiteName' => $bs->website_title ?? config('app.name'),
+                     ])
                   </form>
                </div>
             </div>

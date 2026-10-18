@@ -1,11 +1,14 @@
 @extends("front.$version.layout")
 
 @section('pagename')
-    - {{ __('Service') }} - {{ convertUtf8($service->title) }}
+    - {{ __('Service') }} - {{ !empty($service->meta_title) ? convertUtf8($service->meta_title) : convertUtf8($service->title) }}
 @endsection
 
 @section('meta-keywords', "$service->meta_keywords")
 @section('meta-description', "$service->meta_description")
+@if (!empty($service->og_image) || !empty($service->main_image))
+    @section('og-image', 'services/' . (!empty($service->og_image) ? $service->og_image : $service->main_image))
+@endif
 
 @section('breadcrumb-title', convertUtf8($bs->service_details_title))
 @section('breadcrumb-subtitle', \Illuminate\Support\Str::limit(convertUtf8($service->title), 40))

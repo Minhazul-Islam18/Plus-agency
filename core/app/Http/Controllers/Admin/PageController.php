@@ -126,11 +126,23 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+        $page->meta_title = $request->meta_title;
         $page->updated_by_admin_id = Auth::guard('admin')->id();
 
         // Handle breadcrumb image from file manager
         if ($filename = $this->saveBreadcrumbImage($request)) {
             $page->breadcrumb_image = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            $extOg = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            if (in_array(strtolower($extOg), allowed_image_extensions())) {
+                $dir = FRONT_IMG_PATH . self::IMG_SUBDIR;
+                @mkdir($dir, 0775, true);
+                $ogFilename = uniqid() . '.' . $extOg;
+                @copy($request->og_image, $dir . $ogFilename);
+                $page->og_image = $ogFilename;
+            }
         }
 
         // Handle breadcrumb overlay settings
@@ -204,6 +216,7 @@ class PageController extends Controller
         $page->serial_number = $request->serial_number;
         $page->meta_keywords = $request->meta_keywords;
         $page->meta_description = $request->meta_description;
+        $page->meta_title = $request->meta_title;
         $page->updated_by_admin_id = Auth::guard('admin')->id();
 
         // Handle breadcrumb image from file manager
@@ -212,6 +225,20 @@ class PageController extends Controller
                 @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $page->breadcrumb_image);
             }
             $page->breadcrumb_image = $filename;
+        }
+
+        if ($request->filled('og_image')) {
+            $extOg = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            if (in_array(strtolower($extOg), allowed_image_extensions())) {
+                $dir = FRONT_IMG_PATH . self::IMG_SUBDIR;
+                @mkdir($dir, 0775, true);
+                if ($page->og_image) {
+                    @unlink($dir . $page->og_image);
+                }
+                $ogFilename = uniqid() . '.' . $extOg;
+                @copy($request->og_image, $dir . $ogFilename);
+                $page->og_image = $ogFilename;
+            }
         }
 
         // Handle breadcrumb overlay settings

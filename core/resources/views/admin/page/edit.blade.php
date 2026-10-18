@@ -204,6 +204,22 @@
                                     <label>Meta Description</label>
                                     <textarea class="form-control" name="meta_description" rows="5" placeholder="Enter meta description">{{ $page->meta_description }}</textarea>
                                 </div>
+
+                                @php
+                                    try {
+                                        $seoPreviewUrl = route('front.dynamicPage', ['locale' => $page->language->code, 'slug' => $page->slug]);
+                                    } catch (\Throwable $e) {
+                                        $seoPreviewUrl = url('/');
+                                    }
+                                @endphp
+                                @include('admin.partials.seo-meta-box', [
+                                    'seoSerial' => 2,
+                                    'seoMetaTitle' => $page->meta_title,
+                                    'seoOgImageUrl' => !empty($page->og_image) ? asset('assets/front/img/pages/' . $page->og_image) : null,
+                                    'seoFallbackImageUrl' => !empty($page->breadcrumb_image) ? asset('assets/front/img/pages/' . $page->breadcrumb_image) : null,
+                                    'seoPreviewUrl' => $seoPreviewUrl,
+                                    'seoSiteName' => $bs->website_title ?? config('app.name'),
+                                ])
                             </form>
 
                         </div>

@@ -524,13 +524,31 @@
                                     @endif
                                 </div>
                                 <div class="form-group">
-                                    <label>Default Social Share Image (filename, Optional)</label>
-                                    <input type="text" class="form-control ltr" name="default_social_image"
-                                        value="{{ $bs->default_social_image }}" placeholder="e.g. og-default.jpg">
-                                    <p class="text-warning mb-0"><small>Used for Open Graph/Twitter previews on pages with no image of their own (e.g. the homepage). File must already exist under assets/front/img/.</small></p>
+                                    <label>Default Social Share Image (Optional)</label>
+                                    <br>
+                                    <div class="thumb-preview" id="thumbPreview1">
+                                        <img src="{{ !empty($bs->default_social_image) ? asset('assets/front/img/' . $bs->default_social_image) : asset('assets/admin/img/noimage.jpg') }}" alt="Default Social Share Image">
+                                    </div>
+                                    <br>
+                                    <input id="fileInput1" type="hidden" name="default_social_image">
+                                    <button id="chooseImage1" class="choose-image btn btn-primary" type="button"
+                                        data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Image</button>
+                                    <p class="text-warning mb-0"><small>Used for Open Graph/Twitter previews on pages with no image of their own (e.g. the homepage).</small></p>
                                     @if ($errors->has('default_social_image'))
                                         <p class="mb-0 text-danger">{{ $errors->first('default_social_image') }}</p>
                                     @endif
+
+                                    <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <i class="fas fa-times-circle"></i>
+                                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-body p-0">
+                                                    <iframe src="{{ url('laravel-filemanager') }}?serial=1"
+                                                        style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -558,7 +558,7 @@
                 }
             }
         @endphp
-        <div class="portfolio-form-col mt-4">
+        <div class="mt-4">
             @include('admin.partials.seo-meta-box', [
                 'seoSerial' => 5,
                 'seoMetaTitle' => $old('meta_title'),

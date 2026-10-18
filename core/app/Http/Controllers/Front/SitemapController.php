@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Front;
 use App\Blog;
 use App\Http\Controllers\Controller;
 use App\Language;
+use App\Page;
 use App\Portfolio;
 use App\Service;
 use App\Tender;
@@ -47,6 +48,10 @@ class SitemapController extends Controller
             'front.services',
             'front.portfolios',
             'tenders',
+            'front.team',
+            'front.gallery',
+            'front.faq',
+            'front.contact',
         ];
 
         foreach ($listingRoutes as $routeName) {
@@ -82,6 +87,7 @@ class SitemapController extends Controller
             $this->addDetailUrls($sitemap, $lang, Service::where('language_id', $lang->id)->where('status', 1)->get(), 'front.servicedetails');
             $this->addDetailUrls($sitemap, $lang, Portfolio::where('language_id', $lang->id)->where('is_published', 1)->where('is_archived', 0)->get(), 'front.portfoliodetails');
             $this->addDetailUrls($sitemap, $lang, Tender::where('language_id', $lang->id)->where('status', 1)->get(), 'tender_details');
+            $this->addDetailUrls($sitemap, $lang, Page::where('language_id', $lang->id)->where('status', 1)->get(), 'front.dynamicPage');
         }
 
         return $sitemap;

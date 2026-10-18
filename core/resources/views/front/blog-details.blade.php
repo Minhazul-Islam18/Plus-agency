@@ -436,10 +436,6 @@
 @endsection
 
 @section('scripts')
-    @if ($bs->is_disqus == 1)
-        {!! $bs->disqus_script !!}
-    @endif
-
     <script>
         (function () {
             "use strict";

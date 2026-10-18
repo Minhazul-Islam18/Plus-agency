@@ -238,7 +238,7 @@
     <link rel="stylesheet" href="{{ asset_v('assets/front/css/common-style.css') }}">
     @yield('styles')
 
-    @if ($bs->is_tawkto == 1 || $bex?->is_whatsapp == 1)
+    @if ($bex?->is_whatsapp == 1)
         <style>
             .back-to-top.show {
                 right: auto;
@@ -294,23 +294,11 @@
     <!-- jquery js -->
     <script src="{{ asset('assets/front/js/jquery-3.3.1.min.js') }}"></script>
 
-    @if ($bs->is_appzi == 1)
-        <!-- Start of Appzi Feedback Script -->
-        <script async src="https://app.appzi.io/bootstrap/bundle.js?token={{ $bs->appzi_token }}"></script>
-        <!-- End of Appzi Feedback Script -->
-    @endif
-
     <!-- Start of Facebook Pixel Code -->
     @if ($be->is_facebook_pexel == 1)
         {!! $be->facebook_pexel_script !!}
     @endif
     <!-- End of Facebook Pixel Code -->
-
-    <!--Start of Appzi script-->
-    @if ($bs->is_appzi == 1)
-        {!! $bs->appzi_script !!}
-    @endif
-    <!--End of Appzi script-->
 </head>
 
 
@@ -881,17 +869,6 @@
     </script>
     <!--End of subscribe functionality-->
 
-    <!--Start of Tawk.to script-->
-    @if ($bs->is_tawkto == 1)
-        {!! $bs->tawk_to_script !!}
-    @endif
-    <!--End of Tawk.to script-->
-
-    <!--Start of AddThis script-->
-    @if ($bs->is_addthis == 1)
-        {!! $bs->addthis_script !!}
-    @endif
-    <!--End of AddThis script-->
     @stack('dark-offcanvas')
 </body>
 

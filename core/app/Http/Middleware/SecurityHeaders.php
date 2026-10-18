@@ -57,12 +57,12 @@ class SecurityHeaders
 
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://checkout.razorpay.com https://app.appzi.io https://maxcdn.bootstrapcdn.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://www.google.com https://www.gstatic.com",
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://checkout.razorpay.com https://maxcdn.bootstrapcdn.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://www.google.com https://www.gstatic.com",
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com",
             "font-src 'self' data: https://fonts.gstatic.com https://maxcdn.bootstrapcdn.com",
             "img-src 'self' data: https:",
             "frame-src 'self' https://maps.google.com https://www.google.com https://checkout.razorpay.com",
-            "connect-src 'self' https://checkout.razorpay.com https://app.appzi.io https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://graph.facebook.com",
+            "connect-src 'self' https://checkout.razorpay.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://graph.facebook.com",
             "base-uri 'self'",
             "form-action 'self' https://checkout.razorpay.com",
             "object-src 'none'",

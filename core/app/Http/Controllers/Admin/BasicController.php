@@ -630,20 +630,12 @@ class BasicController extends Controller
         $bss = BasicSetting::all();
 
         foreach ($bss as $bs) {
-            $bs->tawk_to_script = $request->tawk_to_script;
-            $bs->is_tawkto = $request->is_tawkto;
-            $bs->is_disqus = $request->is_disqus;
-            $bs->disqus_script = $request->disqus_script;
             $bs->google_analytics_script = $request->google_analytics_script;
             $bs->is_analytics = $request->is_analytics;
             $bs->google_analytics_measurement_id = $request->google_analytics_measurement_id;
             $bs->gtm_container_id = $request->gtm_container_id;
             $bs->google_site_verification = $request->google_site_verification;
             $bs->bing_site_verification = $request->bing_site_verification;
-            $bs->appzi_script = $request->appzi_script;
-            $bs->is_appzi = $request->is_appzi;
-            $bs->addthis_script = $request->addthis_script;
-            $bs->is_addthis = $request->is_addthis;
             $bs->is_recaptcha = $request->is_recaptcha;
             $bs->google_recaptcha_site_key = $request->google_recaptcha_site_key;
             $bs->google_recaptcha_secret_key = $request->google_recaptcha_secret_key;
@@ -668,14 +660,6 @@ class BasicController extends Controller
 
         $bexs = BasicExtra::all();
         foreach ($bexs as $key => $bex) {
-            $bex->is_facebook_login = $request->is_facebook_login;
-            $bex->facebook_app_id = $request->facebook_app_id;
-            $bex->facebook_app_secret = $request->facebook_app_secret;
-
-            $bex->is_google_login = $request->is_google_login;
-            $bex->google_client_id = $request->google_client_id;
-            $bex->google_client_secret = $request->google_client_secret;
-
             $bex->is_whatsapp = $request->is_whatsapp;
             $bex->whatsapp_number = $request->whatsapp_number;
             $bex->whatsapp_header_title = $request->whatsapp_header_title;

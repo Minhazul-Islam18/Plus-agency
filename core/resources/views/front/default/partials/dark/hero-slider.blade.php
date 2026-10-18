@@ -1,8 +1,44 @@
 @php
     $dhsSlides = $sliders ?? collect();
+
+    // Admin-controlled scrim — same one-color/one-opacity-for-the-whole-
+    // section convention as hero_overlay_color/opacity (basicinfo.blade.php,
+    // the light-theme hero variants) and every breadcrumb overlay pair
+    // elsewhere in admin. Scales the existing 2-layer gradient's alpha
+    // stops by the admin's opacity value rather than flattening it to a
+    // single flat tint — preserves the left-to-right/bottom legibility
+    // shape the gradient was designed for; only the strength changes.
+    $dhsHex = ltrim($be->hero_slider_overlay_color ?? '090d16', '#');
+    $dhsOpacity = is_numeric($be->hero_slider_overlay_opacity ?? null) ? (float) $be->hero_slider_overlay_opacity : 1.0;
+    [$dhsR, $dhsG, $dhsB] = sscanf($dhsHex, '%02x%02x%02x') ?: [9, 13, 22];
+    $dhsRgb = "{$dhsR}, {$dhsG}, {$dhsB}";
 @endphp
 
 @if ($dhsSlides->count() > 0)
+    <style>
+        .dark-hslider-scrim {
+            background: linear-gradient(
+                    90deg,
+                    rgba({{ $dhsRgb }}, {{ 0.92 * $dhsOpacity }}) 0%,
+                    rgba({{ $dhsRgb }}, {{ 0.6 * $dhsOpacity }}) 45%,
+                    rgba({{ $dhsRgb }}, {{ 0.25 * $dhsOpacity }}) 75%,
+                    rgba({{ $dhsRgb }}, {{ 0.55 * $dhsOpacity }}) 100%
+                ),
+                linear-gradient(0deg, rgba({{ $dhsRgb }}, {{ 0.9 * $dhsOpacity }}) 0%, transparent 30%);
+        }
+        @media (max-width: 860px) {
+            .dark-hslider-scrim {
+                background: linear-gradient(
+                    0deg,
+                    rgba({{ $dhsRgb }}, {{ 0.96 * $dhsOpacity }}) 0%,
+                    rgba({{ $dhsRgb }}, {{ 0.8 * $dhsOpacity }}) 30%,
+                    rgba({{ $dhsRgb }}, {{ 0.35 * $dhsOpacity }}) 58%,
+                    rgba({{ $dhsRgb }}, {{ 0.08 * $dhsOpacity }}) 78%,
+                    transparent 92%
+                );
+            }
+        }
+    </style>
     <div class="dark-hslider">
         <div class="dark-hslider-viewport" id="darkHeroSlider">
             @foreach ($dhsSlides as $key => $slide)

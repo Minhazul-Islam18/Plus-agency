@@ -21,6 +21,7 @@ class SliderController extends Controller
         $data['sliders'] = Slider::where('language_id', $lang_id)->orderBy('id', 'DESC')->get();
 
         $data['lang_id'] = $lang_id;
+        $data['abe'] = $lang->basic_extended;
         return view('admin.home.hero.slider.index', $data);
     }
 
@@ -175,5 +176,34 @@ class SliderController extends Controller
 
         Session::flash('success', 'Slider deleted successfully!');
         return back();
+    }
+
+    /**
+     * Shared across every slide (the scrim sits over whichever image is
+     * showing, not per-slide) — same one-color/one-opacity-for-the-whole-
+     * section convention as hero_overlay_color/opacity (Admin\BasicController)
+     * and every breadcrumb_overlay_color/opacity pair elsewhere in admin.
+     */
+    public function updateOverlay(Request $request)
+    {
+        $rules = [
+            'language_id' => 'required',
+            'hero_slider_overlay_color' => 'required',
+            'hero_slider_overlay_opacity' => 'required|numeric|max:1|min:0',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            $errmsgs = $validator->getMessageBag()->add('error', 'true');
+            return response()->json($validator->errors());
+        }
+
+        $be = BasicExtended::where('language_id', $request->language_id)->firstOrFail();
+        $be->hero_slider_overlay_color = $request->hero_slider_overlay_color;
+        $be->hero_slider_overlay_opacity = $request->hero_slider_overlay_opacity;
+        $be->save();
+
+        Session::flash('success', 'Hero slider overlay updated successfully!');
+        return "success";
     }
 }

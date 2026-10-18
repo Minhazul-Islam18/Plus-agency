@@ -34,6 +34,42 @@
 
         <div class="card">
             <div class="card-header">
+                <div class="card-title">Hero Slider Overlay</div>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('admin.slider.updateOverlay') }}" method="post" id="heroOverlayForm">
+                    @csrf
+                    <input type="hidden" name="language_id" value="{{ $lang_id }}">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Overlay Color Code **</label>
+                                <input class="jscolor form-control ltr" name="hero_slider_overlay_color" value="{{ $abe->hero_slider_overlay_color ?? '090d16' }}">
+                                @if ($errors->has('hero_slider_overlay_color'))
+                                    <p class="mb-0 text-danger">{{ $errors->first('hero_slider_overlay_color') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Overlay Opacity **</label>
+                                <input type="text" class="form-control ltr" name="hero_slider_overlay_opacity" value="{{ $abe->hero_slider_overlay_opacity ?? '1.00' }}">
+                                <p class="text-warning mb-0">Opacity can be between 0 to 1. Darkens the hero image behind the slider text — lower for a brighter image, higher for stronger text contrast.</p>
+                                @if ($errors->has('hero_slider_overlay_opacity'))
+                                    <p class="mb-0 text-danger">{{ $errors->first('hero_slider_overlay_opacity') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-success btn-sm">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="card-title d-inline-block">Sliders</div>

@@ -427,6 +427,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/herosection/slider/{id}/edit', 'Admin\SliderController@edit')->name('admin.slider.edit');
         Route::post('/herosection/sliderupdate', 'Admin\SliderController@update')->name('admin.slider.update');
         Route::post('/herosection/slider/delete', 'Admin\SliderController@delete')->name('admin.slider.delete');
+        Route::post('/herosection/slider/overlay', 'Admin\SliderController@updateOverlay')->name('admin.slider.updateOverlay');
 
 
         // Admin Hero Section (Video Version) Routes

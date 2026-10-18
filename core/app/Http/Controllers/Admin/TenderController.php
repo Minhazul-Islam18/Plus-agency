@@ -397,6 +397,19 @@ class TenderController extends Controller
         $tender->expert_details    = clean($request->expert_details);
         $tender->expert_whatsapp   = $request->expert_whatsapp;
         $tender->expert_email      = $request->expert_email;
+        $tender->meta_keywords     = $request->meta_keywords;
+        $tender->meta_description  = $request->meta_description;
+        $tender->meta_title        = $request->meta_title;
+
+        if ($request->filled('og_image')) {
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
+            @mkdir($dir, 0775, true);
+            @copy($request->og_image, $dir . $ogFilename);
+            $tender->og_image = $ogFilename;
+        }
+
         $tender->save();
         clear_slug_redirect('tender', $slug);
 
@@ -577,6 +590,22 @@ class TenderController extends Controller
         $tender->expert_details    = clean($request->expert_details);
         $tender->expert_whatsapp   = $request->expert_whatsapp;
         $tender->expert_email      = $request->expert_email;
+        $tender->meta_keywords     = $request->meta_keywords;
+        $tender->meta_description  = $request->meta_description;
+        $tender->meta_title        = $request->meta_title;
+
+        if ($request->filled('og_image')) {
+            $extOgImage = pathinfo($request->og_image, PATHINFO_EXTENSION);
+            $ogFilename = uniqid() . '.' . $extOgImage;
+            $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
+            @mkdir($dir, 0775, true);
+            if (!empty($tender->og_image)) {
+                @unlink($dir . $tender->og_image);
+            }
+            @copy($request->og_image, $dir . $ogFilename);
+            $tender->og_image = $ogFilename;
+        }
+
         $tender->save();
 
         // Front-end listing + detail pages are cached at Cloudflare's edge —

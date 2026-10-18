@@ -317,6 +317,20 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <p class="em text-danger mb-0" id="errexpert_image"></p>
               </div>
 
+              <div class="form-group">
+                <label>Meta Keywords</label>
+                <input type="text" class="form-control" name="meta_keywords" value="" data-role="tagsinput">
+              </div>
+              <div class="form-group">
+                <label>Meta Description</label>
+                <textarea class="form-control" name="meta_description" rows="5"></textarea>
+              </div>
+
+              @include('admin.partials.seo-meta-box', [
+                  'seoSerial' => 3,
+                  'seoSiteName' => $bs->website_title ?? config('app.name'),
+              ])
+
             </form>
           </div>
         </div>

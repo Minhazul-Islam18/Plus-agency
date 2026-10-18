@@ -32,6 +32,10 @@ class Tender extends Model
         'expert_image',
         'is_featured',
         'status',
+        'meta_keywords',
+        'meta_description',
+        'meta_title',
+        'og_image',
     ];
 
     public function tenderCategory()

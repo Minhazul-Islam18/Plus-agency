@@ -1,8 +1,14 @@
 @extends("front.$version.layout")
 
 @section('pagename')
-    - {{ __('Tender') }} - {{ convertUtf8($tender->title) }}
+    - {{ __('Tender') }} - {{ !empty($tender->meta_title) ? convertUtf8($tender->meta_title) : convertUtf8($tender->title) }}
 @endsection
+
+@section('meta-keywords', "$tender->meta_keywords")
+@section('meta-description', "$tender->meta_description")
+@if (!empty($tender->og_image) || !empty($tender->tender_image))
+    @section('og-image', 'tenders/' . (!empty($tender->og_image) ? $tender->og_image : $tender->tender_image))
+@endif
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('assets/front/css/magnific-popup.css') }}">

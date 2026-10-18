@@ -400,6 +400,31 @@
                                     <p class="em text-danger mb-0" id="errexpert_image"></p>
                                 </div>
 
+                                <div class="form-group">
+                                    <label>Meta Keywords</label>
+                                    <input type="text" class="form-control" name="meta_keywords" value="{{ $tender->meta_keywords }}" data-role="tagsinput">
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Description</label>
+                                    <textarea class="form-control" name="meta_description" rows="5">{{ $tender->meta_description }}</textarea>
+                                </div>
+
+                                @php
+                                    try {
+                                        $seoPreviewUrl = route('tender_details', ['locale' => $tender->language->code, 'slug' => $tender->slug]);
+                                    } catch (\Throwable $e) {
+                                        $seoPreviewUrl = url('/');
+                                    }
+                                @endphp
+                                @include('admin.partials.seo-meta-box', [
+                                    'seoSerial' => 3,
+                                    'seoMetaTitle' => $tender->meta_title,
+                                    'seoOgImageUrl' => !empty($tender->og_image) ? asset('assets/front/img/tenders/' . $tender->og_image) : null,
+                                    'seoFallbackImageUrl' => !empty($tender->tender_image) ? asset('assets/front/img/tenders/' . $tender->tender_image) : null,
+                                    'seoPreviewUrl' => $seoPreviewUrl,
+                                    'seoSiteName' => $bs->website_title ?? config('app.name'),
+                                ])
+
                             </form>
                         </div>
                     </div>

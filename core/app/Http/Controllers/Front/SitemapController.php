@@ -14,10 +14,10 @@ use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
 /**
- * Model-driven /sitemap.xml — replaces the admin-only crawler tool
- * (Admin\SitemapController, which just crawls a given URL and writes a
- * static file) with one built straight from the content tables, so it
+ * Model-driven /sitemap.xml, built straight from the content tables so it
  * always matches what's actually published, in every active language.
+ * (The old admin-only "crawl a URL, write a static file" tool this
+ * replaced — Admin\SitemapController — has since been removed entirely.)
  *
  * Listing/section pages share one route name across languages (same
  * permalink-driven pattern the hreflang <head> tags already use), so they

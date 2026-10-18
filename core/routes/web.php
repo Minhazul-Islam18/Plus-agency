@@ -403,13 +403,6 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/language/status', 'Admin\LanguageController@status')->name('admin.language.status');
 
 
-        // Admin Sitemap Routes
-        Route::get('/sitemap', 'Admin\SitemapController@index')->name('admin.sitemap.index');
-        Route::post('/sitemap/store', 'Admin\SitemapController@store')->name('admin.sitemap.store');
-        Route::get('/sitemap/{id}/update', 'Admin\SitemapController@update')->name('admin.sitemap.update');
-        Route::post('/sitemap/{id}/delete', 'Admin\SitemapController@delete')->name('admin.sitemap.delete');
-        Route::post('/sitemap/download', 'Admin\SitemapController@download')->name('admin.sitemap.download');
-
         // Admin Database Backup
         Route::get('/backup', 'Admin\BackupController@index')->name('admin.backup.index');
         Route::post('/backup/store', 'Admin\BackupController@store')->name('admin.backup.store');

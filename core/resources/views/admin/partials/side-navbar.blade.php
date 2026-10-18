@@ -498,8 +498,7 @@
 @elseif(request()->is(config('app.admin_prefix','admin').'/language/*/edit/keyword')) active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/gateways') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/offline/gateways') active
-@elseif(request()->path() == config('app.admin_prefix','admin').'/backup') active
-@elseif(request()->path() == config('app.admin_prefix','admin').'/sitemap') active @endif">
+@elseif(request()->path() == config('app.admin_prefix','admin').'/backup') active @endif">
                         <a data-toggle="collapse" href="#basic">
                             <i class="la flaticon-settings"></i>
                             <p>Settings</p>
@@ -527,8 +526,7 @@
 @elseif(request()->is(config('app.admin_prefix','admin').'/language/*/edit/keyword')) show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/gateways') show
 @elseif(request()->path() == config('app.admin_prefix','admin').'/offline/gateways') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/backup') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/sitemap') show @endif"
+@elseif(request()->path() == config('app.admin_prefix','admin').'/backup') show @endif"
                             id="basic">
                             <ul class="nav nav-collapse">
                                 <li class="@if (request()->path() == config('app.admin_prefix','admin').'/basicinfo') active @endif">
@@ -657,24 +655,15 @@
 
                                 <li
                                     class="
-@if (request()->path() == config('app.admin_prefix','admin').'/backup') selected
-@elseif(request()->path() == config('app.admin_prefix','admin').'/sitemap') selected @endif">
+@if (request()->path() == config('app.admin_prefix','admin').'/backup') selected @endif">
                                     <a data-toggle="collapse" href="#misc">
                                         <span class="sub-item">MISC</span>
                                         <span class="caret"></span>
                                     </a>
                                     <div class="collapse
-@if (request()->path() == config('app.admin_prefix','admin').'/backup') show
-@elseif(request()->path() == config('app.admin_prefix','admin').'/sitemap') show @endif"
+@if (request()->path() == config('app.admin_prefix','admin').'/backup') show @endif"
                                         id="misc">
                                         <ul class="nav nav-collapse subnav">
-                                            <li class="
-    @if (request()->path() == config('app.admin_prefix','admin').'/sitemap') selected @endif">
-                                                <a
-                                                    href="{{ route('admin.sitemap.index') . '?language=' . $default->code }}">
-                                                    <span class="sub-item">Sitemap</span>
-                                                </a>
-                                            </li>
                                             <li class="
 @if (request()->path() == config('app.admin_prefix','admin').'/backup') selected @endif">
                                                 <a href="{{ route('admin.backup.index') }}">

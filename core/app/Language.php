@@ -110,10 +110,6 @@ class Language extends Model
     return $this->hasMany('App\Menu');
   }
 
-  public function sitemaps()
-  {
-    return $this->hasMany('App\Sitemap');
-  }
   public function tender_categories()
   {
     return $this->hasMany('App\TenderCategory');

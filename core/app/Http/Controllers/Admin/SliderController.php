@@ -186,17 +186,16 @@ class SliderController extends Controller
      */
     public function updateOverlay(Request $request)
     {
-        $rules = [
+        // Plain native form submit (no #ajaxForm/#ajaxEditForm id, so
+        // custom.js's global AJAX interceptor doesn't catch it) — must
+        // redirect back with a flash message like basicinfo.blade.php's
+        // save does, not return a bare "success" string (that string
+        // would render as the entire next page on a real navigation).
+        $request->validate([
             'language_id' => 'required',
             'hero_slider_overlay_color' => 'required',
             'hero_slider_overlay_opacity' => 'required|numeric|max:1|min:0',
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            $errmsgs = $validator->getMessageBag()->add('error', 'true');
-            return response()->json($validator->errors());
-        }
+        ]);
 
         $be = BasicExtended::where('language_id', $request->language_id)->firstOrFail();
         $be->hero_slider_overlay_color = $request->hero_slider_overlay_color;
@@ -204,6 +203,6 @@ class SliderController extends Controller
         $be->save();
 
         Session::flash('success', 'Hero slider overlay updated successfully!');
-        return "success";
+        return back();
     }
 }

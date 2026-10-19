@@ -1,0 +1,364 @@
+/* Custom WhatsApp chat widget — replaces the floatingWhatsApp jQuery
+   plugin (generic button + plain default popup, no theming at all).
+   Renders on both themes (this file is only linked when the admin's
+   WhatsApp toggle is on — see layout.blade.php), so its own tokens are
+   self-contained here rather than reused from dark-glass-vars.php,
+   which only exists on dark-theme pages. Approved design:
+   https://claude.ai/artifact/K6ehDRg6TeHyiSbS4naHZT */
+.wa-widget {
+  --wa-surface: #0e111a;
+  --wa-border: rgba(255, 255, 255, 0.14);
+  --wa-glass: rgba(255, 255, 255, 0.06);
+  --wa-muted: #8893a4;
+  --wa-green: #25d366;
+  --wa-green-rgb: 37, 211, 102;
+
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  /* Above .popup-wrapper.dark-popup's full-screen z-index:99999 overlay —
+     without this, the announcement popup's backdrop sat on top of the
+     whole widget and ate every click (close button included) whenever
+     an announcement was open. A persistent chat widget should always
+     stay reachable, same convention as Intercom/Crisp/Tawk. */
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  font-family: "Plex Sans", "Segoe UI", sans-serif;
+}
+/* The dark video hero's own mute/pause row sits bottom-right of a
+   near-full-viewport-height section, the same corner this fixed widget
+   always occupies — without this, the two sat flush against each other
+   on the homepage specifically. Desktop only: the hero's controls don't
+   reach this far down on the shorter mobile hero. */
+@media (min-width: 768px) {
+  body.has-video-hero-controls .wa-widget {
+    bottom: 100px;
+  }
+}
+
+/* ---- visibility state machine — one attribute, three states ---- */
+.wa-widget[data-state="closed"] .wa-teaser-wrap,
+.wa-widget[data-state="closed"] .wa-card,
+.wa-widget[data-state="teaser"] .wa-card,
+.wa-widget[data-state="card"] .wa-teaser-wrap {
+  display: none;
+}
+
+/* ---- teaser bubble — auto-shows if the admin's "Show popup" is on ---- */
+.wa-teaser-wrap {
+  position: relative;
+}
+.wa-teaser {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 280px;
+  padding: 14px 16px;
+  border-radius: 16px 16px 4px 16px;
+  background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.02) 40%
+    ),
+    var(--wa-glass);
+  border: 1px solid var(--wa-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  animation: wa-pop-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+.wa-teaser-avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--wa-green), #128c4a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wa-teaser-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+.wa-teaser-body {
+  flex: 1;
+  min-width: 0;
+}
+.wa-teaser-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wa-teaser-name .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--wa-green);
+  box-shadow: 0 0 0 2px rgba(var(--wa-green-rgb), 0.25);
+}
+.wa-teaser-msg {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+.wa-teaser-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--wa-surface);
+  border: 1px solid var(--wa-border);
+  color: var(--wa-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+}
+
+/* ---- FAB button ---- */
+.wa-fab {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--wa-green), #128c4a);
+  box-shadow: 0 10px 30px rgba(var(--wa-green-rgb), 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+}
+.wa-fab svg {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.wa-fab-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--wa-green-rgb), 0.55);
+  animation: wa-ping 2.4s cubic-bezier(0.3, 0.6, 0.4, 1) infinite;
+  pointer-events: none;
+}
+@keyframes wa-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes wa-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wa-fab-ring {
+    animation: none;
+  }
+}
+
+/* ---- expanded chat card ---- */
+.wa-card {
+  width: min(320px, calc(100vw - 40px));
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--wa-surface);
+  border: 1px solid var(--wa-border);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  animation: wa-pop-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.wa-card-header {
+  position: relative;
+  padding: 20px 18px 36px;
+  background: linear-gradient(135deg, var(--wa-green), #0e7a3f);
+  overflow: hidden;
+}
+.wa-card-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 80% -20%,
+    rgba(255, 255, 255, 0.18),
+    transparent 60%
+  );
+}
+.wa-card-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.18);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+}
+.wa-card-identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.wa-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.wa-card-avatar svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+}
+.wa-card-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+}
+.wa-card-status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+.wa-card-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+.wa-card-body {
+  padding: 0 16px 16px;
+  margin-top: -22px;
+  position: relative;
+}
+.wa-card-bubble {
+  background: var(--wa-glass);
+  border: 1px solid var(--wa-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 4px 14px 14px 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.wa-card-time {
+  font-family: "Plex Mono", monospace;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 8px;
+  text-align: right;
+}
+.wa-card-input-wrap {
+  margin-top: 12px;
+}
+.wa-card-input {
+  width: 100%;
+  resize: none;
+  background: var(--wa-glass);
+  border: 1px solid var(--wa-border);
+  border-radius: 12px;
+  padding: 11px 13px;
+  font: 13px/1.5 "Plex Sans", sans-serif;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.wa-card-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+.wa-card-input:focus {
+  border-color: rgba(var(--wa-green-rgb), 0.55);
+  box-shadow: 0 0 0 3px rgba(var(--wa-green-rgb), 0.16);
+}
+.wa-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(95deg, var(--wa-green), #1ea952);
+  color: #04210f;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(var(--wa-green-rgb), 0.3);
+}
+.wa-card-cta svg {
+  width: 17px;
+  height: 17px;
+}
+.wa-card-foot {
+  text-align: center;
+  font-size: 11px;
+  color: var(--wa-muted);
+  margin-top: 10px;
+  font-family: "Plex Mono", monospace;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 480px) {
+  .wa-widget {
+    right: 14px;
+    bottom: 14px;
+  }
+  .wa-fab {
+    width: 54px;
+    height: 54px;
+  }
+  .wa-fab svg {
+    width: 25px;
+    height: 25px;
+  }
+}

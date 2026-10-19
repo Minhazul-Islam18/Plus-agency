@@ -245,6 +245,7 @@
                 left: 20px;
             }
         </style>
+        <link rel="stylesheet" href="{{ asset_v('assets/front/css/whatsapp-widget.css') }}">
     @endif
     @if (count($langs) == 0)
         <style media="screen">
@@ -303,7 +304,17 @@
 
 
 
-<body @if ($rtl == 1) dir="rtl" @endif>
+@php
+    // The video hero's own mute/pause controls float bottom-right of the
+    // (near-full-viewport-height) hero, the same corner the fixed
+    // WhatsApp widget always occupies — on this one page they'd otherwise
+    // sit directly on top of each other. $darkHeroVideo only exists on
+    // the homepage route (set in FrontendController::index()).
+    $hasVideoHeroControls = ($be->theme_version ?? null) == 'dark'
+        && ($bs->home_version ?? null) == 'video'
+        && !empty(($darkHeroVideo ?? null)?->video_file);
+@endphp
+<body @if ($rtl == 1) dir="rtl" @endif @if ($hasVideoHeroControls) class="has-video-hero-controls" @endif>
     @if (!empty($bs->gtm_container_id))
         {{-- GTM's noscript fallback can't be consent-gated — there's no
              cookie read possible without JS in the first place, and this
@@ -626,8 +637,64 @@
     <!--    footer section end   -->
 
 
-    {{-- WhatsApp Chat Button --}}
-    <div id="WAButton"></div>
+    {{-- WhatsApp Chat Button — custom widget, not the floatingWhatsApp
+         plugin (generic look, no theming). Same admin fields underneath:
+         whatsapp_number, whatsapp_header_title, whatsapp_popup_message,
+         whatsapp_popup (show-popup toggle). Approved design:
+         https://claude.ai/artifact/K6ehDRg6TeHyiSbS4naHZT --}}
+    @if ($bex?->is_whatsapp == 1)
+        @php
+            $waIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm5.6 14.3c-.3.8-1.5 1.5-2.4 1.6-.6.1-1.4.2-4.1-.9-3.5-1.4-5.7-5-5.9-5.3-.2-.3-1.4-1.9-1.4-3.6s.9-2.6 1.2-2.9c.3-.3.7-.5 1-.5h.7c.2 0 .5 0 .7.6l1 2.4c.1.2.2.4 0 .6l-.4.6c-.2.2-.4.4-.2.8.3.5 1.1 1.7 2.3 2.8 1.6 1.4 2.9 1.9 3.3 2.1.3.2.5.1.7-.1l1-1.1c.2-.3.5-.2.8-.1l2.1 1c.2.1.4.2.5.3.1.3.1 1-.2 1.7z"/></svg>';
+            $waHeaderTitle = convertUtf8($bex->whatsapp_header_title ?: $bs->website_title);
+            $waMessage = convertUtf8($bex->whatsapp_popup_message);
+            // wa.me needs digits only — same cleanup Member::getWhatsappLinkAttribute() already uses.
+            $waPhoneDigits = preg_replace('/\D/', '', (string) $bex->whatsapp_number);
+        @endphp
+        <div class="wa-widget" id="waWidget" data-state="closed" data-show-popup="{{ $bex->whatsapp_popup == 1 ? '1' : '0' }}" data-phone="{{ $waPhoneDigits }}">
+            <div class="wa-teaser-wrap">
+                <button class="wa-teaser-close" type="button" aria-label="{{ __('Dismiss') }}" id="waTeaserClose">✕</button>
+                <div class="wa-teaser" id="waTeaserBody">
+                    <span class="wa-teaser-avatar">{!! $waIcon !!}</span>
+                    <div class="wa-teaser-body">
+                        <div class="wa-teaser-name"><span class="dot"></span>{{ $waHeaderTitle }}</div>
+                        <div class="wa-teaser-msg">{!! nl2br(e($waMessage)) !!}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wa-card" id="waCard">
+                <div class="wa-card-header">
+                    <button class="wa-card-close" type="button" aria-label="{{ __('Close') }}" id="waCardClose">✕</button>
+                    <div class="wa-card-identity">
+                        <span class="wa-card-avatar">{!! $waIcon !!}</span>
+                        <div>
+                            <div class="wa-card-name">{{ $waHeaderTitle }}</div>
+                            <div class="wa-card-status"><span class="dot"></span>{{ __('Typically replies within minutes') }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="wa-card-body">
+                    <div class="wa-card-bubble">{!! nl2br(e($waMessage)) !!}</div>
+                    <div class="wa-card-time">{{ __('Just now') }}</div>
+
+                    <div class="wa-card-input-wrap">
+                        <textarea class="wa-card-input" rows="2" id="waTypedMsg" placeholder="{{ __('Type your message…') }}">{{ $waMessage }}</textarea>
+                    </div>
+
+                    <button class="wa-card-cta" type="button" id="waStartChat">
+                        {!! $waIcon !!}
+                        <span>{{ __('Start Chat') }}</span>
+                    </button>
+                    <div class="wa-card-foot">{{ __('Opens in WhatsApp with your message pre-filled') }}</div>
+                </div>
+            </div>
+
+            <button class="wa-fab" type="button" aria-label="{{ __('Open WhatsApp chat') }}" id="waFab">
+                <span class="wa-fab-ring"></span>
+                {!! $waIcon !!}
+            </button>
+        </div>
+    @endif
 
     <!--====== PRELOADER PART START ======-->
     @if ($bex?->preloader_status == 1)
@@ -793,22 +860,58 @@
         });
     </script>
 
-    {{-- whatsapp init code --}}
+    {{-- whatsapp widget behavior — state toggling + the Start Chat link.
+         Replaces the old floatingWhatsApp plugin init (see widget markup
+         above, near the footer). --}}
     @if ($bex?->is_whatsapp == 1)
         <script type="text/javascript">
-            var whatsapp_popup = {{ $bex?->whatsapp_popup }};
-            var whatsappImg = "{{ asset('assets/front/img/whatsapp.svg') }}";
-            $(function() {
-                $('#WAButton').floatingWhatsApp({
-                    phone: "{{ $bex?->whatsapp_number }}", //WhatsApp Business phone number
-                    headerTitle: "{{ $bex?->whatsapp_header_title }}", //Popup Title
-                    popupMessage: `{!! nl2br($bex?->whatsapp_popup_message) !!}`, //Popup Message
-                    showPopup: whatsapp_popup == 1 ? true : false, //Enables popup display
-                    buttonImage: '<img src="' + whatsappImg + '" />', //Button Image
-                    position: "right" //Position: left | right
+            (function () {
+                document.addEventListener('DOMContentLoaded', function () {
+                    var widget = document.getElementById('waWidget');
+                    if (!widget) return;
 
+                    var phone = widget.getAttribute('data-phone');
+                    var showPopup = widget.getAttribute('data-show-popup') === '1';
+                    var teaserBody = document.getElementById('waTeaserBody');
+                    var teaserClose = document.getElementById('waTeaserClose');
+                    var card = document.getElementById('waCard');
+                    var cardClose = document.getElementById('waCardClose');
+                    var fab = document.getElementById('waFab');
+                    var typedMsg = document.getElementById('waTypedMsg');
+                    var startChat = document.getElementById('waStartChat');
+
+                    function setState(state) {
+                        widget.setAttribute('data-state', state);
+                    }
+
+                    if (showPopup) {
+                        // Same "appear after a short delay, not instantly"
+                        // convention as the site's other popups (see
+                        // front.partials.popups / data-popup_delay).
+                        setTimeout(function () { setState('teaser'); }, 1800);
+                    }
+
+                    fab.addEventListener('click', function () {
+                        setState(widget.getAttribute('data-state') === 'card' ? 'closed' : 'card');
+                    });
+                    teaserBody.addEventListener('click', function () {
+                        setState('card');
+                    });
+                    teaserClose.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        setState('closed');
+                    });
+                    cardClose.addEventListener('click', function () {
+                        setState('closed');
+                    });
+
+                    startChat.addEventListener('click', function () {
+                        var text = typedMsg ? typedMsg.value.trim() : '';
+                        var url = 'https://wa.me/' + phone + (text ? '?text=' + encodeURIComponent(text) : '');
+                        window.open(url, '_blank', 'noopener');
+                    });
                 });
-            });
+            })();
         </script>
     @endif
     @yield('scripts')

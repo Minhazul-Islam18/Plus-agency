@@ -930,6 +930,30 @@ a.proceed-checkout-btn:hover {
 }
 .dark-hero-video-content .dark-hero-flip-line {
   font-size: clamp(32px, 4.6vw, 56px);
+  /* Exact title treatment from the approved mockup — a flat two-stop
+     accent gradient, no shine sweep (the static/slider hero's
+     4-stop/background-size:220%/darkHeroShine animation is deliberately
+     not reused here). */
+  background: linear-gradient(95deg, var(--accent), var(--accent-2));
+  background-size: auto;
+  animation: none;
+}
+
+/* Trust-logo marquee sits INSIDE the hero frame, stacked directly above
+   the text block (both bottom-packed by .dark-hero-inner's normal flow).
+   Tightened spacing (the base rule's 56/64px gaps assumed it was the
+   last element after a full-height panel) plus a soft bottom-weighted
+   tint so the grayscale logos stay legible over moving footage without
+   turning into another card. */
+.dark-hero--video .dark-hero-marquee {
+  margin: 0 0 20px;
+  padding: 16px 0 20px;
+  background: linear-gradient(
+    to top,
+    rgba(4, 6, 11, 0.4) 0%,
+    rgba(4, 6, 11, 0) 100%
+  );
+  border-radius: 16px;
 }
 
 /* Corner mute/pause controls — only rendered when a video file is

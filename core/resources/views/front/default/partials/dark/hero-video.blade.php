@@ -79,6 +79,30 @@
     </div>
 
     <div class="dark-hero-inner">
+        {{-- Partner trust-logos marquee — stacked directly above the text
+             block, both bottom-packed by normal flow. Kept inside the
+             hero frame (not a standalone band below it) per feedback. --}}
+        @if ($bs->partner_section == 1 && !empty($partners) && count($partners) > 0)
+            <div class="dark-hero-marquee">
+                <div class="dark-hero-marquee-label">{{ !empty($be->partner_marquee_label) ? convertUtf8($be->partner_marquee_label) : __('Trusted across sectors') }}</div>
+                <div class="dark-hero-marquee-track">
+                    @for ($i = 0; $i < 2; $i++)
+                        @foreach ($partners as $partner)
+                            @if (!empty($partner->url))
+                                <a href="{{ $partner->url }}" target="_blank" rel="noopener" class="dark-hero-marquee-item">
+                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                </a>
+                            @else
+                                <span class="dark-hero-marquee-item">
+                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                </span>
+                            @endif
+                        @endforeach
+                    @endfor
+                </div>
+            </div>
+        @endif
+
         {{-- No frosted-glass panel here on purpose — text sits straight on
              the footage, bottom-left, lower-third style. --}}
         <div class="dark-hero-video-content">
@@ -137,32 +161,6 @@
         </div>
     </div>
 </div>
-
-{{-- Partner trust-logos marquee — kept as a standalone band BELOW the
-     video frame rather than layered on top of it: the approved redesign
-     keeps the frame itself free of anything but the text block and the
-     two control clusters above, and a moving-logo strip over moving
-     footage would fight the footage for attention either way. --}}
-@if ($bs->partner_section == 1 && !empty($partners) && count($partners) > 0)
-    <div class="dark-hero-marquee">
-        <div class="dark-hero-marquee-label">{{ !empty($be->partner_marquee_label) ? convertUtf8($be->partner_marquee_label) : __('Trusted across sectors') }}</div>
-        <div class="dark-hero-marquee-track">
-            @for ($i = 0; $i < 2; $i++)
-                @foreach ($partners as $partner)
-                    @if (!empty($partner->url))
-                        <a href="{{ $partner->url }}" target="_blank" rel="noopener" class="dark-hero-marquee-item">
-                            <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
-                        </a>
-                    @else
-                        <span class="dark-hero-marquee-item">
-                            <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
-                        </span>
-                    @endif
-                @endforeach
-            @endfor
-        </div>
-    </div>
-@endif
 
 <script>
     (function () {

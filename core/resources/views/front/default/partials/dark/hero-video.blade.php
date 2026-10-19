@@ -11,15 +11,14 @@
 
     // titles: a repeater of {"text": "...", "accent"?: "..."} rows (admin:
     // Content Management -> Home Page Sections -> Hero Section -> Video
-    // Version -> Titles). Title is plain white by default — the gradient
-    // only highlights the exact substring named in that row's own accent
-    // field. No match (empty, typo, different casing/punctuation) just
-    // falls back to that row in plain white — never a rendering error,
-    // never gradient-across-the-whole-wrapped-title (which read as
-    // "moving" on long titles). Falls back to the Static dark hero's own
-    // titles, then the shared light-theme fields converted to the same
-    // row shape — neither carries an accent, so those rows just render
-    // plain.
+    // Version -> Titles). `text` renders plain white, `accent` (optional)
+    // is appended after it in the gradient — two parts of one line, not a
+    // substring to find inside `text` (that read as "find this exact
+    // phrase verbatim" to admins, who naturally typed the white part and
+    // the colored part as two separate pieces instead). Falls back to the
+    // Static dark hero's own titles, then the shared light-theme fields
+    // converted to the same row shape — neither carries an accent, so
+    // those rows just render as plain white text.
     $dhvTitleRows = $darkHeroVideo?->titles ?: ($darkHero?->titles ?: null);
     if (empty($dhvTitleRows)) {
         $dhvTitleRows = collect([$bs->hero_section_title])
@@ -39,12 +38,7 @@
         $title = convertUtf8($title);
         if ($accent !== '') {
             $accent = convertUtf8($accent);
-            $pos = mb_strpos($title, $accent);
-            if ($pos !== false) {
-                $before = mb_substr($title, 0, $pos);
-                $after = mb_substr($title, $pos + mb_strlen($accent));
-                return e($before) . '<span class="grad">' . e($accent) . '</span>' . e($after);
-            }
+            return e($title) . ' <span class="grad">' . e($accent) . '</span>';
         }
         return e($title);
     };

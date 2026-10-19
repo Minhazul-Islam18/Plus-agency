@@ -60,7 +60,7 @@
                     @if ($withAccent)
                         <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][accent]"
                             value="{{ $row['accent'] ?? '' }}"
-                            placeholder="Accent phrase (optional)">
+                            placeholder="+ colored part (optional)">
                     @endif
                 </div>
                 <button type="button" class="hero-titles-repeater-remove" data-repeater-remove title="Remove this title">
@@ -75,7 +75,7 @@
     <p class="text-muted mb-0 mt-2" style="font-size: 12.5px;">
         First one shows on load — add more and they cycle in automatically with a soft fade, a few seconds apart.
         @if ($withAccent)
-            Accent phrase must match a piece of its own title exactly (word-for-word) to highlight it in color — leave it empty for a plain white title.
+            The left box is the plain white part of that title; the right "Accent" box (optional) is appended after it in color — e.g. left: <em>"Digital builds for"</em>, right: <em>"growing teams"</em> renders as one line, white then colored. Leave the right box empty for a fully plain white title.
         @endif
     </p>
 </div>
@@ -110,7 +110,7 @@
 
                 var mainHtml = '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][text]" placeholder="Rotating title">';
                 if (withAccent) {
-                    mainHtml += '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][accent]" placeholder="Accent phrase (optional)">';
+                    mainHtml += '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][accent]" placeholder="+ colored part (optional)">';
                 }
                 row.innerHTML =
                     '<div class="hero-titles-repeater-row-main">' + mainHtml + '</div>' +

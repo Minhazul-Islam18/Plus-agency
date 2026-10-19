@@ -958,7 +958,7 @@ a.proceed-checkout-btn:hover {
    clearance for the controls/scroll-cue/partner-strip layers below. */
 .dark-hero-video-content {
   max-width: 750px;
-  padding-bottom: 132px;
+  padding-bottom: 160px;
 }
 @media (max-width: 767px) {
   .dark-hero-video-content {
@@ -1145,8 +1145,8 @@ a.proceed-checkout-btn:hover {
   bottom: 66px;
   transform: translateX(-50%);
   z-index: 6;
-  width: 52px;
-  height: 52px;
+  width: 76px;
+  height: 76px;
   pointer-events: none;
 }
 .dark-hero-video-scrollcue .orbit-ring {
@@ -1156,8 +1156,8 @@ a.proceed-checkout-btn:hover {
 }
 .dark-hero-video-scrollcue .orbit-ring text {
   font-family: "Plex Mono", monospace;
-  font-size: 7px;
-  letter-spacing: 1.8px;
+  font-size: 9px;
+  letter-spacing: 2px;
   fill: rgba(255, 255, 255, 0.65);
 }
 .dark-hero-video-scrollcue .orbit-arrow {
@@ -1168,8 +1168,8 @@ a.proceed-checkout-btn:hover {
   justify-content: center;
 }
 .dark-hero-video-scrollcue .orbit-arrow-chip {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1184,8 +1184,8 @@ a.proceed-checkout-btn:hover {
   pointer-events: auto;
 }
 .dark-hero-video-scrollcue .orbit-arrow-chip svg {
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   color: var(--accent);
 }
 @keyframes darkHeroOrbitSpin {

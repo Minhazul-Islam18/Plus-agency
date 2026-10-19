@@ -33,11 +33,10 @@
     $dhvVideoUrl = $dhvHasVideo ? asset('assets/front/img/hero-video/' . $darkHeroVideo->video_file) : '';
 
     // Admin-controlled scrim — same one-color/one-opacity convention as the
-    // hero slider's overlay (hero-slider.blade.php). Deliberately a
-    // BOTTOM-ANCHORED gradient, not a flat full-frame tint: the point of a
-    // background-video hero is that the footage stays visible, so only the
-    // lower band behind the text needs darkening. Approved design:
-    // https://claude.ai/artifact/APRGW9UXsfuHGUPQvaJtsa
+    // hero slider's overlay (hero-slider.blade.php). A SHORT, bottom-anchored
+    // gradient: only the lower ~34% of the frame darkens, the rest stays
+    // clear footage. Approved design:
+    // https://claude.ai/artifact/GxKvQr2Drv8WBTNtg6Dgn5
     $dhvOverlayHex = ltrim($darkHeroVideo?->overlay_color ?? '090d16', '#');
     $dhvOverlayOpacity = is_numeric($darkHeroVideo?->overlay_opacity ?? null) ? (float) $darkHeroVideo->overlay_opacity : 0.55;
     [$dhvR, $dhvG, $dhvB] = sscanf($dhvOverlayHex, '%02x%02x%02x') ?: [9, 13, 22];
@@ -50,10 +49,9 @@
     .dark-hero-video-overlay {
         background: linear-gradient(
             to top,
-            rgba({{ $dhvRgb }}, {{ 0.88 * $dhvOverlayOpacity }}) 0%,
-            rgba({{ $dhvRgb }}, {{ 0.55 * $dhvOverlayOpacity }}) 24%,
-            rgba({{ $dhvRgb }}, {{ 0.14 * $dhvOverlayOpacity }}) 48%,
-            transparent 64%
+            rgba({{ $dhvRgb }}, {{ 0.9 * $dhvOverlayOpacity }}) 0%,
+            rgba({{ $dhvRgb }}, {{ 0.55 * $dhvOverlayOpacity }}) 16%,
+            transparent 34%
         );
     }
 </style>
@@ -78,86 +76,92 @@
         <div class="dark-hero-video-overlay"></div>
     </div>
 
-    <div class="dark-hero-inner">
-        {{-- Partner trust-logos marquee — stacked directly above the text
-             block, both bottom-packed by normal flow. Kept inside the
-             hero frame (not a standalone band below it) per feedback. --}}
-        @if ($bs->partner_section == 1 && !empty($partners) && count($partners) > 0)
-            <div class="dark-hero-marquee">
-                <div class="dark-hero-marquee-label">{{ !empty($be->partner_marquee_label) ? convertUtf8($be->partner_marquee_label) : __('Trusted across sectors') }}</div>
-                <div class="dark-hero-marquee-track">
-                    @for ($i = 0; $i < 2; $i++)
-                        @foreach ($partners as $partner)
-                            @if (!empty($partner->url))
-                                <a href="{{ $partner->url }}" target="_blank" rel="noopener" class="dark-hero-marquee-item">
-                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
-                                </a>
-                            @else
-                                <span class="dark-hero-marquee-item">
-                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
-                                </span>
-                            @endif
-                        @endforeach
-                    @endfor
+    {{-- Partners — a ghosted, drifting strip pinned to the frame's very
+         bottom edge. Independent of the headline below; doesn't reflow if
+         the title wraps to two lines. --}}
+    @if ($bs->partner_section == 1 && !empty($partners) && count($partners) > 0)
+        <div class="dark-hero-video-partners">
+            <div class="container">
+                <span class="dark-hero-video-partners-tag">{{ !empty($be->partner_marquee_label) ? convertUtf8($be->partner_marquee_label) : __('Trusted across sectors') }}</span>
+                <div class="dark-hero-video-partners-track-wrap">
+                    <div class="dark-hero-video-partners-track">
+                        @for ($i = 0; $i < 2; $i++)
+                            @foreach ($partners as $partner)
+                                @if (!empty($partner->url))
+                                    <a href="{{ $partner->url }}" target="_blank" rel="noopener" class="dark-hero-video-partners-item">
+                                        <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                    </a>
+                                @else
+                                    <span class="dark-hero-video-partners-item">
+                                        <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                    </span>
+                                @endif
+                            @endforeach
+                        @endfor
+                    </div>
                 </div>
             </div>
-        @endif
-
-        {{-- No frosted-glass panel here on purpose — text sits straight on
-             the footage, bottom-left, lower-third style. --}}
-        <div class="dark-hero-video-content">
-            <span class="dark-hero-eyebrow">{{ convertUtf8($dhvEyebrow) }}</span>
-
-            <h1 class="dark-hero-flip" data-hero-flip>
-                @foreach ($dhvTitles as $key => $title)
-                    <span class="dark-hero-flip-line {{ $key == 0 ? 'is-active' : '' }}">{{ convertUtf8($title) }}</span>
-                @endforeach
-            </h1>
-
-            <p class="dark-hero-text">{{ convertUtf8($dhvText) }}</p>
-
-            @if (!empty($dhvButtonUrl) && !empty($dhvButtonText))
-                <a href="{{ $dhvButtonUrl }}" class="dark-hero-cta" target="_blank">
-                    <span>{{ convertUtf8($dhvButtonText) }}</span>
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            @endif
-
-            @if (!empty($dhvMetaLeft) || !empty($dhvMetaRight))
-                <div class="dark-hero-meta">
-                    @if (!empty($dhvMetaLeft))<span>{{ convertUtf8($dhvMetaLeft) }}</span>@endif
-                    @if (!empty($dhvMetaRight))<span>{{ convertUtf8($dhvMetaRight) }}</span>@endif
-                </div>
-            @endif
         </div>
+    @endif
 
-        @if ($dhvHasVideo)
-            <div class="dark-hero-video-controls">
-                <button type="button" class="dark-hero-video-ctrl" data-video-mute-toggle aria-label="Unmute video">
-                    <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-                    <svg class="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-                </button>
-                <button type="button" class="dark-hero-video-ctrl" data-video-play-toggle aria-label="Pause video">
-                    <svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                    <svg class="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                </button>
-            </div>
-        @endif
+    @if ($dhvHasVideo)
+        <div class="dark-hero-video-controls">
+            <button type="button" class="dark-hero-video-ctrl" data-video-mute-toggle aria-label="Unmute video">
+                <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+                <svg class="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+            </button>
+            <button type="button" class="dark-hero-video-ctrl" data-video-play-toggle aria-label="Pause video">
+                <svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                <svg class="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+        </div>
+    @endif
 
-        <div class="dark-hero-video-scrollcue" aria-hidden="true">
-            <svg class="orbit-ring" viewBox="0 0 84 84">
-                <defs>
-                    <path id="darkHeroOrbitPath" d="M 42,42 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
-                </defs>
-                <text>
-                    <textPath href="#darkHeroOrbitPath" startOffset="0%">SCROLL TO EXPLORE &#8226; SCROLL TO EXPLORE &#8226;</textPath>
-                </text>
-            </svg>
-            <span class="orbit-arrow">
-                <span class="orbit-arrow-chip">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="18 13 12 19 6 13"></polyline></svg>
-                </span>
+    <div class="dark-hero-video-scrollcue" aria-hidden="true">
+        <svg class="orbit-ring" viewBox="0 0 52 52">
+            <defs>
+                <path id="darkHeroOrbitPath" d="M 26,26 m -20,0 a 20,20 0 1,1 40,0 a 20,20 0 1,1 -40,0" />
+            </defs>
+            <text>
+                <textPath href="#darkHeroOrbitPath" startOffset="0%">SCROLL TO EXPLORE &#8226; SCROLL TO EXPLORE &#8226;</textPath>
+            </text>
+        </svg>
+        <span class="orbit-arrow">
+            <span class="orbit-arrow-chip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="18 13 12 19 6 13"></polyline></svg>
             </span>
+        </span>
+    </div>
+
+    <div class="dark-hero-inner">
+        <div class="container">
+            {{-- No frosted-glass panel here on purpose — text sits straight on
+                 the footage, bottom-left, lower-third style. --}}
+            <div class="dark-hero-video-content">
+                <span class="dark-hero-eyebrow">{{ convertUtf8($dhvEyebrow) }}</span>
+
+                <h1 class="dark-hero-flip" data-hero-flip>
+                    @foreach ($dhvTitles as $key => $title)
+                        <span class="dark-hero-flip-line {{ $key == 0 ? 'is-active' : '' }}">{{ convertUtf8($title) }}</span>
+                    @endforeach
+                </h1>
+
+                <p class="dark-hero-text">{{ convertUtf8($dhvText) }}</p>
+
+                @if (!empty($dhvButtonUrl) && !empty($dhvButtonText))
+                    <a href="{{ $dhvButtonUrl }}" class="dark-hero-cta" target="_blank">
+                        <span>{{ convertUtf8($dhvButtonText) }}</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                @endif
+
+                @if (!empty($dhvMetaLeft) || !empty($dhvMetaRight))
+                    <div class="dark-hero-meta">
+                        @if (!empty($dhvMetaLeft))<span>{{ convertUtf8($dhvMetaLeft) }}</span>@endif
+                        @if (!empty($dhvMetaRight))<span>{{ convertUtf8($dhvMetaRight) }}</span>@endif
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>

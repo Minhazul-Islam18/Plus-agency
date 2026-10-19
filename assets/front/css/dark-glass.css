@@ -962,7 +962,11 @@ a.proceed-checkout-btn:hover {
 }
 @media (max-width: 767px) {
   .dark-hero-video-content {
-    padding-bottom: 96px;
+    /* Scroll-cue/controls stay at the same bottom offset on mobile as
+       desktop (so they don't crowd the thin partner strip underneath
+       them), so the CTA needs MORE clearance here, not less — 96px
+       let the CTA sit right under the scroll-cue instead of above it. */
+    padding-bottom: 156px;
   }
 }
 
@@ -1206,6 +1210,14 @@ a.proceed-checkout-btn:hover {
   .dark-hero-video-ctrl svg {
     width: 14px;
     height: 14px;
+  }
+  .dark-hero-video-controls,
+  .dark-hero-video-scrollcue {
+    bottom: 58px;
+  }
+  .dark-hero-video-scrollcue {
+    width: 44px;
+    height: 44px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

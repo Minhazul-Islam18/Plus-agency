@@ -644,7 +644,14 @@
          https://claude.ai/artifact/K6ehDRg6TeHyiSbS4naHZT --}}
     @if ($bex?->is_whatsapp == 1)
         @php
-            $waIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm5.6 14.3c-.3.8-1.5 1.5-2.4 1.6-.6.1-1.4.2-4.1-.9-3.5-1.4-5.7-5-5.9-5.3-.2-.3-1.4-1.9-1.4-3.6s.9-2.6 1.2-2.9c.3-.3.7-.5 1-.5h.7c.2 0 .5 0 .7.6l1 2.4c.1.2.2.4 0 .6l-.4.6c-.2.2-.4.4-.2.8.3.5 1.1 1.7 2.3 2.8 1.6 1.4 2.9 1.9 3.3 2.1.3.2.5.1.7-.1l1-1.1c.2-.3.5-.2.8-.1l2.1 1c.2.1.4.2.5.3.1.3.1 1-.2 1.7z"/></svg>';
+            // Font Awesome's own WhatsApp glyph (already used elsewhere on
+            // this site — index1.blade.php's social links) instead of a
+            // hand-rolled SVG: that path drew the FULL logo (bubble + tail
+            // + phone), which then sat off-center inside this widget's own
+            // circular badges — two overlapping "bubble" shapes competing.
+            // A plain icon glyph is the right choice once you're already
+            // providing the circular background yourself.
+            $waIcon = '<i class="fab fa-whatsapp"></i>';
             $waHeaderTitle = convertUtf8($bex->whatsapp_header_title ?: $bs->website_title);
             $waMessage = convertUtf8($bex->whatsapp_popup_message);
             // wa.me needs digits only — same cleanup Member::getWhatsappLinkAttribute() already uses.

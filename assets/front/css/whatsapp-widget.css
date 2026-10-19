@@ -81,9 +81,8 @@
   align-items: center;
   justify-content: center;
 }
-.wa-teaser-avatar svg {
-  width: 18px;
-  height: 18px;
+.wa-teaser-avatar i {
+  font-size: 16px;
   color: #fff;
 }
 .wa-teaser-body {
@@ -146,9 +145,8 @@
   border: none;
   flex-shrink: 0;
 }
-.wa-fab svg {
-  width: 28px;
-  height: 28px;
+.wa-fab i {
+  font-size: 26px;
   color: #fff;
   position: relative;
   z-index: 2;
@@ -248,9 +246,8 @@
   justify-content: center;
   flex-shrink: 0;
 }
-.wa-card-avatar svg {
-  width: 22px;
-  height: 22px;
+.wa-card-avatar i {
+  font-size: 20px;
   color: #fff;
 }
 .wa-card-name {
@@ -335,9 +332,8 @@
   cursor: pointer;
   box-shadow: 0 14px 30px rgba(var(--wa-green-rgb), 0.3);
 }
-.wa-card-cta svg {
-  width: 17px;
-  height: 17px;
+.wa-card-cta i {
+  font-size: 16px;
 }
 .wa-card-foot {
   text-align: center;
@@ -357,8 +353,7 @@
     width: 54px;
     height: 54px;
   }
-  .wa-fab svg {
-    width: 25px;
-    height: 25px;
+  .wa-fab i {
+    font-size: 23px;
   }
 }

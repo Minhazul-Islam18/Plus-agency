@@ -870,9 +870,20 @@ a.proceed-checkout-btn:hover {
 
 /* Background-video hero variant — bg layer sits at z-index 0/1, well
    under .dark-hero-inner's existing z-index: 2, so stacking is explicit
-   either way regardless of DOM order. */
+   either way regardless of DOM order.
+
+   Deliberately NOT the static/slider hero's frosted-glass panel: that
+   panel (28px blur + tinted card) was burying the footage under itself.
+   This variant drops the card entirely — content sits straight on the
+   video, bottom-left, lower-third style, with only a bottom-anchored
+   gradient scrim (not a full-frame tint) behind it. Approved mockup:
+   https://claude.ai/artifact/APRGW9UXsfuHGUPQvaJtsa */
 .dark-hero--video {
   min-height: 680px;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 @media (max-width: 767px) {
   .dark-hero--video {
@@ -899,11 +910,162 @@ a.proceed-checkout-btn:hover {
 .dark-hero-video-el {
   z-index: 2;
 }
+/* Base box only — the actual gradient stops are computed from the
+   admin's overlay color/opacity and set inline by hero-video.blade.php,
+   same split as hero-slider's .dark-hslider-scrim. */
 .dark-hero-video-overlay {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
+}
+
+.dark-hero--video .dark-hero-inner {
+  position: relative;
+  z-index: 4;
+  padding: 0 clamp(20px, 4vw, 56px) clamp(90px, 10vw, 110px);
+}
+.dark-hero-video-content {
+  max-width: 640px;
+}
+.dark-hero-video-content .dark-hero-flip-line {
+  font-size: clamp(32px, 4.6vw, 56px);
+}
+
+/* Corner mute/pause controls — only rendered when a video file is
+   actually set (poster-only state has nothing to control). */
+.dark-hero-video-controls {
+  position: absolute;
+  right: clamp(18px, 3vw, 40px);
+  bottom: clamp(18px, 3vw, 40px);
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+}
+.dark-hero-video-ctrl {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(10, 13, 20, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.dark-hero-video-ctrl:hover {
+  background: rgba(10, 13, 20, 0.8);
+  transform: translateY(-1px);
+}
+.dark-hero-video-ctrl svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Branded "scroll to explore" cue — a slow-spinning circular word-ring
+   (SVG textPath) around a fixed, independently-bobbing arrow. Deliberately
+   not a stock mouse-wheel/line icon. */
+.dark-hero-video-scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(14px, 2.4vw, 26px);
+  transform: translateX(-50%);
+  z-index: 5;
+  width: 84px;
+  height: 84px;
+  pointer-events: none;
+}
+.dark-hero-video-scrollcue .orbit-ring {
+  width: 100%;
+  height: 100%;
+  animation: darkHeroOrbitSpin 13s linear infinite;
+}
+.dark-hero-video-scrollcue .orbit-ring text {
+  font-family: "Plex Mono", monospace;
+  font-size: 8.6px;
+  letter-spacing: 2.5px;
+  fill: rgba(255, 255, 255, 0.68);
+}
+.dark-hero-video-scrollcue .orbit-arrow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark-hero-video-scrollcue .orbit-arrow-chip {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle,
+    rgba(var(--accent-rgb), 0.22),
+    rgba(10, 13, 20, 0.4) 72%
+  );
+  border: 1px solid var(--glass-border);
+  animation: darkHeroOrbitBob 2.1s ease-in-out infinite;
+  pointer-events: auto;
+}
+.dark-hero-video-scrollcue .orbit-arrow-chip svg {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+@keyframes darkHeroOrbitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes darkHeroOrbitBob {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+@media (max-width: 767px) {
+  .dark-hero--video .dark-hero-inner {
+    padding-bottom: clamp(96px, 20vw, 120px);
+  }
+  .dark-hero-video-ctrl {
+    width: 36px;
+    height: 36px;
+  }
+  .dark-hero-video-ctrl svg {
+    width: 14px;
+    height: 14px;
+  }
+  .dark-hero-video-scrollcue {
+    width: 64px;
+    height: 64px;
+  }
+  .dark-hero-video-scrollcue .orbit-ring text {
+    font-size: 7px;
+    letter-spacing: 1.8px;
+  }
+  .dark-hero-video-scrollcue .orbit-arrow-chip {
+    width: 28px;
+    height: 28px;
+  }
+  .dark-hero-video-scrollcue .orbit-arrow-chip svg {
+    width: 11px;
+    height: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark-hero-video-scrollcue .orbit-ring,
+  .dark-hero-video-scrollcue .orbit-arrow-chip {
+    animation: none;
+  }
 }
 .dark-hero-mesh {
   position: absolute;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Blog;
+use App\Gallery;
 use App\Http\Controllers\Controller;
 use App\Language;
 use App\Page;
@@ -54,6 +55,8 @@ class SitemapController extends Controller
             'front.contact',
         ];
 
+        $defaultLangCode = optional($languages->firstWhere('is_default', 1))->code;
+
         foreach ($listingRoutes as $routeName) {
             if (!\Illuminate\Support\Facades\Route::has($routeName)) {
                 continue;
@@ -70,11 +73,26 @@ class SitemapController extends Controller
                     $routeName === 'front.index' ? Url::CHANGE_FREQUENCY_DAILY : Url::CHANGE_FREQUENCY_WEEKLY
                 );
 
+                $lastmod = $this->listingLastModificationDate($routeName, $lang);
+                if (!empty($lastmod)) {
+                    $tag->setLastModificationDate($lastmod);
+                }
+
                 foreach ($languages as $altLang) {
                     try {
                         $tag->addAlternate(route($routeName, ['locale' => $altLang->code]), $altLang->code);
                     } catch (\Throwable $e) {
                         // That language doesn't resolve this route — skip the alternate, keep the main URL.
+                    }
+                }
+
+                // Same x-default signal the <head> hreflang block already emits
+                // (front/default/layout.blade.php) — must never disagree with it.
+                if (!empty($defaultLangCode)) {
+                    try {
+                        $tag->addAlternate(route($routeName, ['locale' => $defaultLangCode]), 'x-default');
+                    } catch (\Throwable $e) {
+                        // no-op
                     }
                 }
 
@@ -91,6 +109,54 @@ class SitemapController extends Controller
         }
 
         return $sitemap;
+    }
+
+    /**
+     * Real freshness signal for a listing page — the most recent updated_at
+     * among the content it actually lists, never the current request time.
+     * A page with no backing content model (e.g. the static Contact page)
+     * gets no <lastmod> at all rather than a fabricated one.
+     */
+    private function listingLastModificationDate(string $routeName, Language $lang): ?\Illuminate\Support\Carbon
+    {
+        switch ($routeName) {
+            case 'front.index':
+                return collect([
+                    Blog::where('language_id', $lang->id)->where('status', 1)->max('updated_at'),
+                    Service::where('language_id', $lang->id)->where('status', 1)->max('updated_at'),
+                    Portfolio::where('language_id', $lang->id)->where('is_published', 1)->where('is_archived', 0)->max('updated_at'),
+                    Tender::where('language_id', $lang->id)->where('status', 1)->max('updated_at'),
+                ])->filter()->map(fn ($d) => \Illuminate\Support\Carbon::parse($d))->sortDesc()->first();
+
+            case 'front.blogs':
+                $d = Blog::where('language_id', $lang->id)->where('status', 1)->max('updated_at');
+                break;
+
+            case 'front.services':
+                $d = Service::where('language_id', $lang->id)->where('status', 1)->max('updated_at');
+                break;
+
+            case 'front.portfolios':
+                $d = Portfolio::where('language_id', $lang->id)->where('is_published', 1)->where('is_archived', 0)->max('updated_at');
+                break;
+
+            case 'tenders':
+                $d = Tender::where('language_id', $lang->id)->where('status', 1)->max('updated_at');
+                break;
+
+            case 'front.gallery':
+                $d = Gallery::where('language_id', $lang->id)->max('updated_at');
+                break;
+
+            // 'front.team' / 'front.faq': the members/faqs tables carry no
+            // created_at/updated_at columns at all — no real freshness
+            // signal exists, so no <lastmod> is emitted rather than a
+            // fabricated one.
+            default:
+                return null;
+        }
+
+        return !empty($d) ? \Illuminate\Support\Carbon::parse($d) : null;
     }
 
     private function addDetailUrls(Sitemap $sitemap, Language $lang, $items, string $routeName): void

@@ -2,17 +2,28 @@
     // Dedicated dark-theme hero settings (admin: Content Management -> Home Page Sections -> Dark Theme Hero),
     // falling back to the shared light-theme hero fields until the admin fills the new page in.
     $dhEyebrow = $darkHero?->eyebrow ?: __('Welcome');
-    $dhTitle = $darkHero?->title ?: $bs->hero_section_title;
-    $dhRotating = $darkHero?->rotating_titles ?: $bs->hero_rotating_titles;
     $dhText = $darkHero?->text ?: $bs->hero_section_text;
     $dhButtonText = $darkHero?->button_text ?: $bs->hero_section_button_text;
     $dhButtonUrl = $darkHero?->button_url ?: $bs->hero_section_button_url;
     $dhMetaLeft = $darkHero?->meta_left;
     $dhMetaRight = $darkHero?->meta_right;
 
-    $darkHeroTitles = collect([$dhTitle])
-        ->merge(preg_split('/\r\n|\r|\n/', (string) $dhRotating))
-        ->map(fn($t) => trim((string) $t))
+    // titles: a repeater of {"text": "..."} rows (admin: Content Management
+    // -> Home Page Sections -> Dark Theme Hero -> Titles), falling back to
+    // the shared light-theme title/rotating-title fields — converted into
+    // the same row shape — until the admin fills the new page in.
+    $dhTitleRows = $darkHero?->titles;
+    if (empty($dhTitleRows)) {
+        $dhTitleRows = collect([$bs->hero_section_title])
+            ->merge(preg_split('/\r\n|\r|\n/', (string) $bs->hero_rotating_titles))
+            ->map(fn($t) => trim((string) $t))
+            ->filter()
+            ->map(fn($t) => ['text' => $t])
+            ->values()
+            ->all();
+    }
+    $darkHeroTitles = collect($dhTitleRows)
+        ->map(fn($row) => trim((string) ($row['text'] ?? '')))
         ->filter()
         ->values();
 @endphp

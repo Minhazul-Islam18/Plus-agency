@@ -20,17 +20,15 @@ class CreateHeroVideoSettingsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('language_id');
             $table->string('eyebrow', 255)->nullable();
-            $table->string('title', 255)->nullable();
-            // Exact substring of `title` to highlight in the accent
-            // gradient — admin free text has no markup for "which word is
-            // the accent", so this is a separate field rather than guessing.
-            // Case-sensitive, must match verbatim or the whole line just
-            // renders plain (no gradient at all) — never a rendering error.
-            $table->string('title_accent', 255)->nullable();
-            $table->text('rotating_titles')->nullable()
-                ->comment('Extra headlines that flip-cycle after title, one per line');
-            $table->text('rotating_titles_accent')->nullable()
-                ->comment('Accent substring per rotating_titles line, same line order, one per line');
+            // One repeater row per flip-cycling headline — {"text": "...",
+            // "accent"?: "..."}. `accent` is the exact substring of `text`
+            // to highlight in the accent gradient (admin free text has no
+            // markup for "which word is the accent", so it's a sibling
+            // field per row rather than guessed) — case-sensitive, must
+            // match verbatim or that row just renders plain white, never a
+            // rendering error. First row shows initially, further rows
+            // cycle in after it.
+            $table->json('titles')->nullable();
             $table->string('text', 500)->nullable();
             $table->string('button_text', 255)->nullable();
             $table->string('button_url', 255)->nullable();

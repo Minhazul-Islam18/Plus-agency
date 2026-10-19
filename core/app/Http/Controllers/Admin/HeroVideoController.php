@@ -40,10 +40,9 @@ class HeroVideoController extends Controller
 
         $rules = [
             'eyebrow' => 'nullable',
-            'title' => 'nullable',
-            'title_accent' => 'nullable',
-            'rotating_titles' => 'nullable',
-            'rotating_titles_accent' => 'nullable',
+            'titles' => 'nullable|array',
+            'titles.*.text' => 'nullable|string',
+            'titles.*.accent' => 'nullable|string',
             'text' => 'nullable',
             'button_text' => 'nullable',
             'button_url' => 'nullable',
@@ -79,10 +78,7 @@ class HeroVideoController extends Controller
 
         $setting = HeroVideoSetting::firstOrNew(['language_id' => $langid]);
         $setting->eyebrow = $request->eyebrow;
-        $setting->title = $request->title;
-        $setting->title_accent = $request->title_accent;
-        $setting->rotating_titles = $request->rotating_titles;
-        $setting->rotating_titles_accent = $request->rotating_titles_accent;
+        $setting->titles = normalize_hero_titles($request->input('titles', []));
         $setting->text = $request->text;
         $setting->button_text = $request->button_text;
         $setting->button_url = $request->button_url;

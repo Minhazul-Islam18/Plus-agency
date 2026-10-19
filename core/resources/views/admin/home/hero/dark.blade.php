@@ -71,15 +71,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="">Title</label>
-                    <input type="text" class="form-control" name="title" value="{{$abs->title}}">
-                    <p id="errtitle" class="em text-danger mb-0"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Rotating Titles <small class="text-muted">(one per line — cycles with a flip animation after the Title above. Leave empty to show just the Title.)</small></label>
-                    <textarea class="form-control" name="rotating_titles" rows="3" placeholder="e.g.&#10;Trusted Partner For Growth&#10;Smart Strategy For Wealth">{{$abs->rotating_titles}}</textarea>
-                    <p id="errrotating_titles" class="em text-danger mb-0"></p>
+                    <label for="">Titles</label>
+                    @include('admin.partials.hero-titles-repeater', [
+                        'fieldName' => 'titles',
+                        'titles' => $abs->titles ?? [],
+                        'withAccent' => false,
+                    ])
+                    <p id="errtitles" class="em text-danger mb-0"></p>
                 </div>
 
                 <div class="form-group">

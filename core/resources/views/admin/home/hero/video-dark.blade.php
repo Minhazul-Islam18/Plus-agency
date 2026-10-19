@@ -161,27 +161,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="">Title</label>
-                    <input type="text" class="form-control" name="title" value="{{$video->title}}">
-                    <p id="errtitle" class="em text-danger mb-0"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Title — Accent Phrase <small class="text-muted">(optional — must match a piece of the Title above exactly, word-for-word, to highlight it in color. Leave empty for a plain white title.)</small></label>
-                    <input type="text" class="form-control" name="title_accent" value="{{$video->title_accent}}" placeholder="e.g. Trusted Partner">
-                    <p id="errtitle_accent" class="em text-danger mb-0"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Rotating Titles <small class="text-muted">(one per line — cycles with a soft fade after the Title above. Leave empty to show just the Title.)</small></label>
-                    <textarea class="form-control" name="rotating_titles" rows="3" placeholder="e.g.&#10;Trusted Partner For Growth&#10;Smart Strategy For Wealth">{{$video->rotating_titles}}</textarea>
-                    <p id="errrotating_titles" class="em text-danger mb-0"></p>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Rotating Titles — Accent Phrases <small class="text-muted">(optional — one per line, same order as the Rotating Titles above. Each line must match a piece of its own title exactly to highlight it. Leave a line empty to keep that title plain white.)</small></label>
-                    <textarea class="form-control" name="rotating_titles_accent" rows="3" placeholder="e.g.&#10;For Growth&#10;For Wealth">{{$video->rotating_titles_accent}}</textarea>
-                    <p id="errrotating_titles_accent" class="em text-danger mb-0"></p>
+                    <label for="">Titles</label>
+                    @include('admin.partials.hero-titles-repeater', [
+                        'fieldName' => 'titles',
+                        'titles' => $video->titles ?? [],
+                        'withAccent' => true,
+                    ])
+                    <p id="errtitles" class="em text-danger mb-0"></p>
                 </div>
 
                 <div class="form-group">

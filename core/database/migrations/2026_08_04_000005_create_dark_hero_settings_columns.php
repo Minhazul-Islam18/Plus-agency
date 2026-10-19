@@ -24,9 +24,12 @@ class CreateDarkHeroSettingsColumns extends Migration
             Schema::create('dark_hero_settings', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('language_id');
-                $table->string('title', 255)->nullable();
-                $table->text('rotating_titles')->nullable()
-                    ->comment('Extra headlines that flip-cycle after title, one per line');
+                // One repeater row per flip-cycling headline — {"text":
+                // "...", "accent"?: "..."} — first row shows initially,
+                // any further rows cycle in after it. Replaces the earlier
+                // separate title/rotating_titles columns (one combined
+                // admin field instead of two differently-shaped ones).
+                $table->json('titles')->nullable();
                 $table->string('text', 500)->nullable();
                 $table->string('button_text', 255)->nullable();
                 $table->string('button_url', 255)->nullable();

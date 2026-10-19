@@ -29,8 +29,8 @@ class DarkHeroController extends Controller
 
         $rules = [
             'eyebrow' => 'nullable',
-            'title' => 'nullable',
-            'rotating_titles' => 'nullable',
+            'titles' => 'nullable|array',
+            'titles.*.text' => 'nullable|string',
             'text' => 'nullable',
             'button_text' => 'nullable',
             'button_url' => 'nullable',
@@ -45,8 +45,7 @@ class DarkHeroController extends Controller
 
         $setting = DarkHeroSetting::firstOrNew(['language_id' => $langid]);
         $setting->eyebrow = $request->eyebrow;
-        $setting->title = $request->title;
-        $setting->rotating_titles = $request->rotating_titles;
+        $setting->titles = normalize_hero_titles($request->input('titles', []));
         $setting->text = $request->text;
         $setting->button_text = $request->button_text;
         $setting->button_url = $request->button_url;

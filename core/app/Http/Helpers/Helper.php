@@ -646,3 +646,29 @@ if (!function_exists('coupon')) {
         return session()->has('coupon') && !empty(session()->get('coupon')) ? round(session()->get('coupon'), 2) : 0.00;
     }
 }
+
+if (!function_exists('normalize_hero_titles')) {
+    /**
+     * Cleans up the raw `titles[N][text]`/`titles[N][accent]` repeater
+     * input (admin.partials.hero-titles-repeater) into the shape stored
+     * in the dark_hero_settings/hero_video_settings `titles` JSON column:
+     * a sequential array of ['text' => ..., 'accent' => ...|null], empty
+     * rows dropped, order preserved.
+     */
+    function normalize_hero_titles($rawTitles): array
+    {
+        if (!is_array($rawTitles)) {
+            return [];
+        }
+
+        return collect($rawTitles)
+            ->map(function ($row) {
+                $text = trim((string) ($row['text'] ?? ''));
+                $accent = trim((string) ($row['accent'] ?? ''));
+                return $text === '' ? null : ['text' => $text, 'accent' => $accent === '' ? null : $accent];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+}

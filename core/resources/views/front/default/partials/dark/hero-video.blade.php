@@ -5,26 +5,33 @@
     // in, matching dark/hero.blade.php's own fallback-to-light-theme-fields
     // convention one level up.
     $dhvEyebrow = $darkHeroVideo?->eyebrow ?: ($darkHero?->eyebrow ?: __('Welcome'));
-    $dhvTitle = $darkHeroVideo?->title ?: ($darkHero?->title ?: $bs->hero_section_title);
-    $dhvRotating = $darkHeroVideo?->rotating_titles ?: $darkHero?->rotating_titles;
     $dhvText = $darkHeroVideo?->text ?: ($darkHero?->text ?: $bs->hero_section_text);
     $dhvButtonText = $darkHeroVideo?->button_text ?: $darkHero?->button_text;
     $dhvButtonUrl = $darkHeroVideo?->button_url ?: $darkHero?->button_url;
 
-    // Title is plain white by default — the gradient only highlights the
-    // exact substring the admin names in the matching *_accent field (one
-    // per rotating-title line, same order). No match (empty field, typo,
-    // different casing/punctuation) just falls back to the whole line in
-    // plain white — never a rendering error, never gradient-across-the-
-    // whole-wrapped-title (which read as "moving" on long titles).
-    $dhvTitleLines = collect([$dhvTitle])
-        ->merge(preg_split('/\r\n|\r|\n/', (string) $dhvRotating))
-        ->values();
-    $dhvAccentLines = collect([$darkHeroVideo?->title_accent])
-        ->merge(preg_split('/\r\n|\r|\n/', (string) $darkHeroVideo?->rotating_titles_accent))
-        ->values();
-    $dhvTitlePairs = $dhvTitleLines
-        ->map(fn($title, $i) => [trim((string) $title), trim((string) ($dhvAccentLines[$i] ?? ''))])
+    // titles: a repeater of {"text": "...", "accent"?: "..."} rows (admin:
+    // Content Management -> Home Page Sections -> Hero Section -> Video
+    // Version -> Titles). Title is plain white by default — the gradient
+    // only highlights the exact substring named in that row's own accent
+    // field. No match (empty, typo, different casing/punctuation) just
+    // falls back to that row in plain white — never a rendering error,
+    // never gradient-across-the-whole-wrapped-title (which read as
+    // "moving" on long titles). Falls back to the Static dark hero's own
+    // titles, then the shared light-theme fields converted to the same
+    // row shape — neither carries an accent, so those rows just render
+    // plain.
+    $dhvTitleRows = $darkHeroVideo?->titles ?: ($darkHero?->titles ?: null);
+    if (empty($dhvTitleRows)) {
+        $dhvTitleRows = collect([$bs->hero_section_title])
+            ->merge(preg_split('/\r\n|\r|\n/', (string) $bs->hero_rotating_titles))
+            ->map(fn($t) => trim((string) $t))
+            ->filter()
+            ->map(fn($t) => ['text' => $t])
+            ->values()
+            ->all();
+    }
+    $dhvTitlePairs = collect($dhvTitleRows)
+        ->map(fn($row) => [trim((string) ($row['text'] ?? '')), trim((string) ($row['accent'] ?? ''))])
         ->filter(fn($pair) => $pair[0] !== '')
         ->values();
 

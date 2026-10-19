@@ -449,6 +449,40 @@
 
 
             <script>
+                // Server/webserver can hand back an error as a plain string,
+                // an array of strings (the normal per-file validation-error
+                // shape from UploadController@upload), a {message:...} /
+                // {error:{message:...}} object (Laravel's own JSON error
+                // shape, e.g. a 419/500 from a middleware failure, or a
+                // reverse-proxy 413 body), or raw HTML (a non-JSON error
+                // page). Never hand the raw value straight to .textContent —
+                // that's how an object renders as the literal "[object
+                // Object]" instead of the real reason.
+                function lfmExtractErrorText(response) {
+                    if (typeof response === 'string') {
+                        return response;
+                    }
+                    if (Array.isArray(response)) {
+                        return response.map(function (item) {
+                            return typeof item === 'string' ? item : JSON.stringify(item);
+                        }).join('\n');
+                    }
+                    if (response && typeof response === 'object') {
+                        if (typeof response.message === 'string') {
+                            return response.message;
+                        }
+                        if (response.error && typeof response.error.message === 'string') {
+                            return response.error.message;
+                        }
+                        try {
+                            return JSON.stringify(response);
+                        } catch (e) {
+                            return 'Upload failed.';
+                        }
+                    }
+                    return 'Upload failed.';
+                }
+
                 Dropzone.options.uploadForm = {
                     paramName: "upload[]", // The name that will be used to transfer the file
                     uploadMultiple: false,
@@ -456,13 +490,28 @@
                     timeout:0,
                     clickable: '#upload-button',
                     dictDefaultMessage: lang['message-drop'],
+                    // Replaces Dropzone's own default error() entirely (it has
+                    // a bug of its own — `typeof message !== "String"`, which
+                    // never matches since typeof never returns capital-S
+                    // "String" — so it never unwraps {error:{message}} either).
+                    // One function, real text, both call sites below.
+                    error: function (file, message) {
+                        var text = lfmExtractErrorText(message);
+                        if (file.previewElement) {
+                            file.previewElement.classList.add('dz-error');
+                            var nodes = file.previewElement.querySelectorAll('[data-dz-errormessage]');
+                            for (var i = 0; i < nodes.length; i++) {
+                                nodes[i].textContent = text;
+                            }
+                        }
+                    },
                     init: function() {
                         var _this = this; // For the closure
                         this.on('success', function(file, response) {
                             if (response == 'OK') {
                                 loadFolders();
                             } else {
-                                this.defaultOptions.error(file, response.join('\n'));
+                                this.options.error(file, response);
                             }
                         });
                     },

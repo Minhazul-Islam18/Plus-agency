@@ -4,7 +4,8 @@
    Never touched when theme_version != 'dark' (link is inside that @if). */
 
 body {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 15% 0%,
       rgba(var(--accent-rgb), 0.1),
       transparent 45%
@@ -67,7 +68,9 @@ ul.slicknav_nav {
   background: rgba(5, 16, 13, 0.72) !important;
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .dark-header-shell::after {
   content: "";
@@ -185,7 +188,8 @@ ul.slicknav_nav {
 .cart-total .payment-options,
 .gateway-instruction,
 p.gateway-desc {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.09),
       rgba(255, 255, 255, 0.02)
@@ -195,7 +199,9 @@ p.gateway-desc {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  transition: transform 0.25s ease, box-shadow 0.25s ease,
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
     border-color 0.25s ease;
 }
 .single-pricing-table:hover,
@@ -207,7 +213,8 @@ p.gateway-desc {
 .courses-grid-style .course-item:hover .course-content {
   transform: translateY(-4px);
   border-color: rgba(var(--accent-rgb), 0.45) !important;
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.45),
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(var(--accent-rgb), 0.15);
 }
 
@@ -232,7 +239,9 @@ textarea,
 .form_control {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 input:focus,
 select:focus,
@@ -258,7 +267,9 @@ a.proceed-checkout-btn {
   ) !important;
   border: none !important;
   box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.25);
-  transition: transform 0.15s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.25s ease;
 }
 input[type="submit"]:hover,
 button[type="submit"]:hover,
@@ -436,7 +447,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: rgba(255, 255, 255, 0.65);
   font-size: 13px;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease,
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease,
     border-color 0.25s ease;
 }
 .dark-footer-social a:hover {
@@ -483,7 +497,8 @@ a.proceed-checkout-btn:hover {
   line-height: 1.5;
   display: inline-block;
   padding-left: 0;
-  transition: color 0.25s ease,
+  transition:
+    color 0.25s ease,
     padding-left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 /* style.css's ul.footer-links li a::after (a permanent FA caret icon,
@@ -509,7 +524,9 @@ a.proceed-checkout-btn:hover {
   -webkit-mask-size: contain;
   mask-size: contain;
   transform: translateX(-6px);
-  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dark-footer-links-col .footer-links a:hover {
   text-decoration: none;
@@ -537,7 +554,9 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.03);
   padding: 5px 5px 5px 18px;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .dark-footer-pill-form:focus-within {
   border-color: rgba(var(--accent-rgb), 0.55);
@@ -666,11 +685,8 @@ a.proceed-checkout-btn:hover {
 .blog-overlay,
 .partner-overlay,
 .intro-section-overlay {
-  background: linear-gradient(
-      135deg,
-      rgba(4, 16, 13, 0.88),
-      rgba(4, 16, 13, 0.82)
-    ),
+  background:
+    linear-gradient(135deg, rgba(4, 16, 13, 0.88), rgba(4, 16, 13, 0.82)),
     linear-gradient(
       135deg,
       rgba(var(--accent-rgb), 0.14),
@@ -760,7 +776,9 @@ a.proceed-checkout-btn:hover {
   font-weight: 700;
   font-size: 14px;
   box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.25);
-  transition: transform 0.15s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.25s ease;
 }
 .glass-cta-btn:hover {
   transform: translateY(-2px);
@@ -776,7 +794,9 @@ a.proceed-checkout-btn:hover {
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
-  transition: color 0.2s, transform 0.2s;
+  transition:
+    color 0.2s,
+    transform 0.2s;
 }
 .glass-panel-link:hover {
   text-decoration: none;
@@ -788,7 +808,9 @@ a.proceed-checkout-btn:hover {
   border-radius: 30px !important;
   background: rgba(6, 20, 16, 0.85) !important;
   border: 1px solid var(--glass-border) !important;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .glass-pill:focus {
   border-color: rgba(var(--accent-rgb), 0.6) !important;
@@ -805,7 +827,9 @@ a.proceed-checkout-btn:hover {
   width: 44px;
   height: 44px;
   border-radius: 50% !important;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 .dark-glass-carousel .owl-nav button:hover {
   background: linear-gradient(
@@ -851,7 +875,8 @@ a.proceed-checkout-btn:hover {
   position: relative;
   overflow: hidden;
   padding: 132px 0 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.16),
       transparent 60%
@@ -932,7 +957,7 @@ a.proceed-checkout-btn:hover {
    aligns to) — this only constrains text width and reserves bottom
    clearance for the controls/scroll-cue/partner-strip layers below. */
 .dark-hero-video-content {
-  max-width: 600px;
+  max-width: 750px;
   padding-bottom: 132px;
 }
 @media (max-width: 767px) {
@@ -963,7 +988,8 @@ a.proceed-checkout-btn:hover {
   animation: none;
   transform: translateY(14px);
   filter: blur(6px) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
-  transition: opacity 1.1s cubic-bezier(0.22, 0.61, 0.36, 1),
+  transition:
+    opacity 1.1s cubic-bezier(0.22, 0.61, 0.36, 1),
     transform 1.3s cubic-bezier(0.22, 0.61, 0.36, 1),
     filter 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -1041,7 +1067,9 @@ a.proceed-checkout-btn:hover {
   width: auto;
   filter: grayscale(1) brightness(2.4);
   opacity: 0.32;
-  transition: opacity 0.2s ease, filter 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
 }
 .dark-hero-video-partners-item:hover img {
   opacity: 1;
@@ -1090,7 +1118,9 @@ a.proceed-checkout-btn:hover {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-hero-video-ctrl:hover {
   background: rgba(10, 13, 20, 0.8);
@@ -1236,7 +1266,8 @@ a.proceed-checkout-btn:hover {
   overflow: hidden;
   border-radius: 28px;
   padding: 72px clamp(28px, 5vw, 80px);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       155deg,
       rgba(255, 255, 255, 0.09),
       rgba(255, 255, 255, 0.02) 40%
@@ -1245,7 +1276,8 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(28px) saturate(150%);
   -webkit-backdrop-filter: blur(28px) saturate(150%);
-  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.45),
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 @media (max-width: 767px) {
@@ -1353,7 +1385,9 @@ a.proceed-checkout-btn:hover {
   transform: rotateX(90deg);
   transform-origin: 50% 100%;
   backface-visibility: hidden;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
   animation: darkHeroShine 7s linear infinite;
 }
 .dark-hero-flip-line.is-active {
@@ -1388,7 +1422,20 @@ a.proceed-checkout-btn:hover {
   font-size: 16.5px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.68);
-  margin: 0 0 28px;
+  margin: 26px 0 28px;
+  max-width: 500px;
+}
+/* Was in responsive.css, which loads BEFORE this file — a non-media rule
+   here always wins the cascade over a media-scoped rule there at equal
+   specificity, regardless of viewport, so the mobile override there
+   never actually applied. This is a dark-theme-only class; its mobile
+   override belongs here, not in the generic responsive.css. */
+@media only screen and (max-width: 480px) {
+  .dark-hero-text {
+    line-height: 1.4;
+    margin: 12px 0 14px;
+    max-width: fit-content;
+  }
 }
 
 /* Bold circular-arrow CTA — distinct from the standard glass-cta-btn used elsewhere */
@@ -1399,7 +1446,9 @@ a.proceed-checkout-btn:hover {
   border-radius: 100px;
   padding: 6px 6px 6px 24px;
   background: rgba(255, 255, 255, 0.03);
-  transition: border-color 0.25s ease, background 0.25s ease,
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
     transform 0.2s ease;
 }
 .dark-hero-cta:hover {
@@ -1499,7 +1548,9 @@ a.proceed-checkout-btn:hover {
   width: auto;
   filter: grayscale(1) brightness(2.2);
   opacity: 0.5;
-  transition: opacity 0.2s, filter 0.2s;
+  transition:
+    opacity 0.2s,
+    filter 0.2s;
 }
 .dark-hero-marquee-item:hover img {
   filter: none;
@@ -1754,7 +1805,9 @@ a.proceed-checkout-btn:hover {
   padding: 6px 6px 6px 24px;
   background: rgba(255, 255, 255, 0.03);
   text-decoration: none;
-  transition: border-color 0.25s ease, transform 0.2s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease;
 }
 .dark-intro-cta:hover {
   text-decoration: none;
@@ -1793,7 +1846,8 @@ a.proceed-checkout-btn:hover {
   aspect-ratio: 4 / 3.1;
   border: 1px solid var(--glass-border);
   background: #0c1420;
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5),
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .dark-intro-media-thumb {
@@ -1845,17 +1899,21 @@ a.proceed-checkout-btn:hover {
   justify-content: center;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.5),
+  box-shadow:
+    0 0 0 0 rgba(var(--accent-rgb), 0.5),
     0 14px 34px -8px rgba(var(--accent-rgb), 0.65);
   cursor: pointer;
   z-index: 2;
-  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3),
-    box-shadow 0.3s ease, background 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3),
+    box-shadow 0.3s ease,
+    background 0.3s ease;
   animation: darkIntroPlayBreathe 3.2s ease-in-out infinite;
 }
 .dark-intro-play-btn:hover {
   transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0.12),
+  box-shadow:
+    0 0 0 10px rgba(var(--accent-rgb), 0.12),
     0 18px 40px -6px rgba(var(--accent-rgb), 0.75);
 }
 .dark-intro-play-btn:hover svg {
@@ -1864,11 +1922,13 @@ a.proceed-checkout-btn:hover {
 @keyframes darkIntroPlayBreathe {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.45),
+    box-shadow:
+      0 0 0 0 rgba(var(--accent-rgb), 0.45),
       0 14px 34px -8px rgba(var(--accent-rgb), 0.65);
   }
   50% {
-    box-shadow: 0 0 0 14px rgba(var(--accent-rgb), 0),
+    box-shadow:
+      0 0 0 14px rgba(var(--accent-rgb), 0),
       0 14px 34px -8px rgba(var(--accent-rgb), 0.65);
   }
 }
@@ -1941,15 +2001,20 @@ a.proceed-checkout-btn:hover {
   backdrop-filter: blur(6px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-  cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2252%22%20height%3D%2252%22%20viewBox%3D%220%200%2052%2052%22%3E%0A%20%20%3Ccircle%20cx%3D%2226%22%20cy%3D%2226%22%20r%3D%2224%22%20fill%3D%22%230c1420%22%20fill-opacity%3D%220.78%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.55%22%20stroke-width%3D%221.5%22/%3E%0A%20%20%3Cpath%20d%3D%22M18%2018l16%2016M34%2018L18%2034%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E")
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
+  cursor:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2252%22%20height%3D%2252%22%20viewBox%3D%220%200%2052%2052%22%3E%0A%20%20%3Ccircle%20cx%3D%2226%22%20cy%3D%2226%22%20r%3D%2224%22%20fill%3D%22%230c1420%22%20fill-opacity%3D%220.78%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.55%22%20stroke-width%3D%221.5%22/%3E%0A%20%20%3Cpath%20d%3D%22M18%2018l16%2016M34%2018L18%2034%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E")
       26 26,
     pointer;
 }
 .dark-video-lightbox.is-open {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.3s ease, visibility 0s;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s;
 }
 .dark-video-lightbox-inner {
   position: relative;
@@ -2051,7 +2116,9 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
 }
 .dark-approach-nav svg {
   width: 16px;
@@ -2113,7 +2180,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   font-size: 20px;
   color: rgba(255, 255, 255, 0.65);
-  transition: background 0.4s ease, border-color 0.4s ease, transform 0.4s ease,
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    transform 0.4s ease,
     color 0.4s ease;
   z-index: 1;
 }
@@ -2133,7 +2203,10 @@ a.proceed-checkout-btn:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+  transition:
+    background 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease;
 }
 .dark-approach-line {
   width: 1px;
@@ -2194,7 +2267,8 @@ a.proceed-checkout-btn:hover {
    beats .glass-panel's single-class specificity, so this wins over its
    !important without needing to touch the shared rule. */
 .dark-cta-content.glass-panel {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.09),
       rgba(255, 255, 255, 0.02)
@@ -2204,10 +2278,8 @@ a.proceed-checkout-btn:hover {
 .dark-cta-grid-texture {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 56px 56px;
   -webkit-mask-image: radial-gradient(
@@ -2288,7 +2360,9 @@ a.proceed-checkout-btn:hover {
   border-radius: 100px;
   padding: 8px 8px 8px 30px;
   background: rgba(255, 255, 255, 0.04);
-  transition: border-color 0.25s ease, transform 0.2s ease,
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease,
     background 0.25s ease;
   text-decoration: none;
 }
@@ -2450,7 +2524,11 @@ a.proceed-checkout-btn:hover {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .dark-svc-card:hover {
   transform: translateY(-6px);
@@ -2483,14 +2561,20 @@ a.proceed-checkout-btn:hover {
      corners. */
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(var(--accent-2-rgb), 0.45);
-  box-shadow: 0 10px 22px -10px rgba(var(--accent-rgb), 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 10px 22px -10px rgba(var(--accent-rgb), 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   padding: 15px;
   margin-bottom: 24px;
-  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3), box-shadow 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3),
+    box-shadow 0.3s ease;
 }
 .dark-svc-card:hover .dark-svc-card-icon {
   transform: scale(1.08) rotate(-6deg);
-  box-shadow: 0 14px 28px -10px rgba(var(--accent-rgb), 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 14px 28px -10px rgba(var(--accent-rgb), 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 /* Same expanding-ring pulse as the Testimonials company-logo badge
    (.testi-company-logo) — the flat gradient circle read as barely there
@@ -2566,7 +2650,9 @@ a.proceed-checkout-btn:hover {
   color: var(--accent-2, var(--accent)) !important;
   background: transparent !important;
   text-decoration: none;
-  transition: gap 0.25s ease, color 0.25s ease;
+  transition:
+    gap 0.25s ease,
+    color 0.25s ease;
 }
 .dark-svc-card-link:hover {
   text-decoration: none;
@@ -2608,7 +2694,9 @@ a.proceed-checkout-btn:hover {
   font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.25s ease, transform 0.2s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease;
 }
 .dark-svc-load-more-btn:hover {
   border-color: rgba(var(--accent-rgb), 0.55);
@@ -2708,7 +2796,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-case-nav button svg {
   width: 18px;
@@ -2769,7 +2860,9 @@ a.proceed-checkout-btn:hover {
   height: 100%;
   object-fit: cover;
   transform: scale(1.03);
-  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  transition:
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.5s ease;
   filter: saturate(0.85) brightness(0.85);
 }
 .dark-case-card:hover .dark-case-img {
@@ -2858,7 +2951,8 @@ a.proceed-checkout-btn:hover {
   justify-content: center;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: background 0.3s ease,
+  transition:
+    background 0.3s ease,
     transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
 .dark-case-link .arrow svg {
@@ -2888,8 +2982,12 @@ a.proceed-checkout-btn:hover {
     transparent 55%,
     rgba(var(--accent-2-rgb), 0.6)
   );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -2945,7 +3043,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-tender-nav button svg {
   width: 18px;
@@ -2989,7 +3090,9 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.35s ease, border-color 0.35s ease,
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
     box-shadow 0.4s ease;
 }
 .dark-tender-card:hover {
@@ -3005,7 +3108,8 @@ a.proceed-checkout-btn:hover {
   background-position: center;
 }
 .dark-tender-thumb.no-image {
-  background: repeating-linear-gradient(
+  background:
+    repeating-linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.05) 0 2px,
       transparent 2px 14px
@@ -3155,8 +3259,10 @@ a.proceed-checkout-btn:hover {
   justify-content: center;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--glass-border);
-  transition: background 0.3s ease,
-    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3), border-color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3),
+    border-color 0.3s ease;
   flex-shrink: 0;
 }
 .dark-tender-cta svg {
@@ -3217,7 +3323,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-team-nav button svg {
   width: 18px;
@@ -3256,8 +3365,10 @@ a.proceed-checkout-btn:hover {
   aspect-ratio: 3 / 4;
   border: 1px solid var(--glass-border);
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.35);
-  transition: transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1),
-    border-color 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
 }
 .dark-team-member:hover {
   transform: translateY(-8px);
@@ -3271,7 +3382,9 @@ a.proceed-checkout-btn:hover {
   height: 100%;
   object-fit: cover;
   filter: saturate(0.7) brightness(0.88);
-  transition: filter 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    filter 0.5s ease,
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dark-team-member:hover .team-img {
   filter: saturate(1) brightness(1);
@@ -3349,8 +3462,11 @@ a.proceed-checkout-btn:hover {
   color: #fff !important;
   transform: translateX(20px);
   opacity: 0;
-  transition: background 0.25s ease, border-color 0.25s ease,
-    transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1), opacity 0.35s ease;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.4s cubic-bezier(0.22, 1.2, 0.36, 1),
+    opacity 0.35s ease;
 }
 .dark-team-member:hover .team-social a {
   transform: translateX(0);
@@ -3455,7 +3571,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-blog-nav button svg {
   width: 18px;
@@ -3499,7 +3618,9 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.35s ease, border-color 0.35s ease,
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
     box-shadow 0.4s ease;
 }
 .dark-blog-card:hover {
@@ -3613,7 +3734,9 @@ a.proceed-checkout-btn:hover {
   color: var(--accent-2, var(--accent)) !important;
   background: transparent !important;
   text-decoration: none;
-  transition: gap 0.25s ease, color 0.25s ease;
+  transition:
+    gap 0.25s ease,
+    color 0.25s ease;
 }
 .dark-blog-card:hover .glass-panel-link {
   gap: 13px;
@@ -3657,7 +3780,10 @@ a.proceed-checkout-btn:hover {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-testi-nav button svg {
   width: 18px;
@@ -3698,7 +3824,9 @@ a.proceed-checkout-btn:hover {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  transition: transform 0.35s ease, border-color 0.35s ease,
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
     box-shadow 0.4s ease;
 }
 .dark-testimonial-card:hover {
@@ -3868,7 +3996,9 @@ a.proceed-checkout-btn:hover {
 }
 a.testi-company-logo {
   cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease;
 }
 a.testi-company-logo:hover {
   transform: scale(1.08);
@@ -3914,10 +4044,8 @@ a.testi-company-logo:hover::after {
 .dark-statistics-bg-texture {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px
-    ),
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 64px 64px;
   -webkit-mask-image: radial-gradient(
@@ -3960,8 +4088,11 @@ a.testi-company-logo:hover::after {
   border: 1px solid var(--glass-border);
   text-align: center;
   overflow: hidden;
-  transition: transform 0.55s cubic-bezier(0.22, 1.4, 0.36, 1),
-    border-color 0.4s ease, box-shadow 0.5s ease, background 0.4s ease;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1.4, 0.36, 1),
+    border-color 0.4s ease,
+    box-shadow 0.5s ease,
+    background 0.4s ease;
 }
 .dark-stat-card:hover {
   transform: translateY(-9px) scale(1.015);
@@ -3982,8 +4113,12 @@ a.testi-company-logo:hover::after {
     transparent 60%,
     rgba(var(--accent-2-rgb), 0.5)
   );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -4006,7 +4141,8 @@ a.testi-company-logo:hover::after {
   filter: blur(10px);
   opacity: 0;
   transform: scale(0.85);
-  transition: opacity 0.5s ease,
+  transition:
+    opacity 0.5s ease,
     transform 0.55s cubic-bezier(0.22, 1.4, 0.36, 1);
   pointer-events: none;
   z-index: 0;
@@ -4125,7 +4261,9 @@ a.testi-company-logo:hover::after {
   max-width: 100%;
   filter: grayscale(1) brightness(1.6);
   opacity: 0.7;
-  transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 .dark-partner-item:hover img {
   filter: none;
@@ -4183,7 +4321,8 @@ a.testi-company-logo:hover::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 8% 0%,
       rgba(var(--accent-rgb), 0.16),
       transparent 50%
@@ -4374,7 +4513,8 @@ a.testi-company-logo:hover::after {
    modifier class, not the bare .dark-svcp-section other pages (services,
    blog, portfolio-details...) also render with. */
 .dark-custom-page-section {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.14),
       transparent 60%
@@ -4524,7 +4664,8 @@ a.testi-company-logo:hover::after {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
-  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1),
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1),
     border-color 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -4618,7 +4759,9 @@ a.testi-company-logo:hover::after {
   color: var(--accent-2);
   background: transparent;
   text-decoration: none;
-  transition: gap 0.25s ease, color 0.25s ease;
+  transition:
+    gap 0.25s ease,
+    color 0.25s ease;
   align-self: flex-start;
 }
 .dark-svcp-link:hover {
@@ -4713,7 +4856,10 @@ a.testi-company-logo:hover::after {
   text-decoration: none;
   font-family: "Plex Mono", monospace;
   font-size: 13px;
-  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
 }
 .dark-svcp-pagination a:hover {
   text-decoration: none;
@@ -4808,7 +4954,9 @@ a.testi-company-logo:hover::after {
   color: rgba(255, 255, 255, 0.65);
   font-size: 13.5px;
   line-height: 1.4;
-  transition: color 0.2s ease, padding-left 0.2s ease;
+  transition:
+    color 0.2s ease,
+    padding-left 0.2s ease;
 }
 .dark-svcp-cat-list a:hover {
   text-decoration: none;
@@ -4821,7 +4969,9 @@ a.testi-company-logo:hover::after {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.35);
   flex-shrink: 0;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-svcp-cat-list a:hover::after {
   color: var(--accent-2);
@@ -4902,7 +5052,8 @@ a.testi-company-logo:hover::after {
    common-main.js's $(window).on('load', () => $("#preloader").fadeOut())
    ===================================================================== */
 .dark-preloader {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 50% 40%,
       rgba(var(--accent-rgb), 0.12),
       transparent 55%
@@ -5031,7 +5182,10 @@ a.testi-company-logo:hover::after {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.65) !important;
   font-weight: 500 !important;
-  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
     transform 0.25s ease;
 }
 .gallery-area-v1 .filter-nav .filter-btn li:hover,
@@ -5173,8 +5327,11 @@ a.testi-company-logo:hover::after {
   border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.06);
   color: var(--accent-2);
-  transition: transform 0.35s cubic-bezier(0.22, 1.2, 0.36, 1),
-    background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 .dark-faq-section .card-header .btn-link[aria-expanded="true"]::after,
 .dark-faq-section a.card-header[aria-expanded="true"]::after {
@@ -5319,7 +5476,9 @@ a.testi-company-logo:hover::after {
   stroke: rgba(255, 255, 255, 0.35);
   stroke-width: 1.4;
   fill: none;
-  transition: stroke 0.25s ease, fill 0.25s ease,
+  transition:
+    stroke 0.25s ease,
+    fill 0.25s ease,
     transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .dark-score-dial:hover svg {
@@ -5428,7 +5587,9 @@ button.dark-sheet-submit[type="submit"] {
   cursor: pointer;
   height: auto !important;
   width: auto !important;
-  transition: border-color 0.25s ease, transform 0.2s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease;
 }
 button.dark-sheet-submit[type="submit"]:hover {
   border-color: rgba(var(--accent-rgb), 0.55) !important;
@@ -5581,7 +5742,9 @@ button.dark-sheet-submit[type="submit"]:active {
   text-transform: uppercase;
   color: var(--accent-2);
   text-decoration: none;
-  transition: gap 0.25s ease, color 0.25s ease;
+  transition:
+    gap 0.25s ease,
+    color 0.25s ease;
 }
 .dark-blogp-link:hover {
   text-decoration: none;
@@ -5613,7 +5776,8 @@ button.dark-sheet-submit[type="submit"]:active {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1),
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1),
     border-color 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -5862,7 +6026,9 @@ button.dark-sheet-submit[type="submit"]:active {
   justify-content: center;
   text-decoration: none;
   color: rgba(255, 255, 255, 0.65);
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 .dark-byline-share a:hover {
   text-decoration: none;
@@ -5974,7 +6140,9 @@ button.dark-sheet-submit[type="submit"]:active {
   border: 1px solid var(--glass-border);
   color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 .dark-article-tags a:hover {
   text-decoration: none;
@@ -6040,7 +6208,9 @@ button.dark-sheet-submit[type="submit"]:active {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.75);
   font-size: 13px;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 .dark-pf-cat-name {
   flex: 1 1 auto;
@@ -6060,14 +6230,18 @@ button.dark-sheet-submit[type="submit"]:active {
   font-size: 11.5px;
   font-weight: 600;
   text-align: center;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 .dark-pf-cat-chevron {
   flex: none;
   display: flex;
   color: rgba(255, 255, 255, 0.3);
   font-size: 11px;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-pf-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron,
 .dark-svc-list-section .dark-svcp-cat-list a:hover .dark-pf-cat-chevron,
@@ -6078,7 +6252,11 @@ button.dark-sheet-submit[type="submit"]:active {
 .dark-pf-section .dark-svcp-cat-list li.is-active a,
 .dark-svc-list-section .dark-svcp-cat-list li.is-active a,
 .dark-blogp-section .dark-svcp-cat-list li.is-active a {
-  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  background: linear-gradient(
+    135deg,
+    var(--accent, #25d06f),
+    var(--accent-2, #2dd4bf)
+  );
   color: #08130d;
 }
 .dark-pf-section .dark-svcp-cat-list li.is-active .dark-pf-cat-icon,
@@ -6217,7 +6395,9 @@ button.dark-sheet-submit[type="submit"]:active {
   height: 100%;
   object-fit: cover;
   filter: saturate(0.75) brightness(0.8);
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  transition:
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.5s ease;
 }
 .dark-pf-card:hover img {
   transform: scale(1.08);
@@ -6320,7 +6500,9 @@ button.dark-sheet-submit[type="submit"]:active {
   text-transform: uppercase;
   color: var(--accent-2);
   text-decoration: none;
-  transition: height 0.35s ease, gap 0.25s ease;
+  transition:
+    height 0.35s ease,
+    gap 0.25s ease;
 }
 .dark-pf-card:hover .dark-pf-link {
   height: 16px;
@@ -6522,7 +6704,9 @@ button.dark-sheet-submit[type="submit"]:active {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease,
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
     transform 0.2s ease;
 }
 .dark-pd-gallery-nav svg {
@@ -6627,7 +6811,10 @@ button.dark-sheet-submit[type="submit"]:active {
   padding: 0;
   background: rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  transition: width 0.25s ease, border-radius 0.25s ease, background 0.25s ease;
+  transition:
+    width 0.25s ease,
+    border-radius 0.25s ease,
+    background 0.25s ease;
 }
 .dark-pd-gallery-dots button:hover {
   background: rgba(255, 255, 255, 0.6);
@@ -6689,12 +6876,16 @@ button.dark-sheet-submit[type="submit"]:active {
   -webkit-backdrop-filter: blur(8px);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
 }
 .dark-img-lightbox.is-open {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.3s ease, visibility 0s;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s;
 }
 .dark-img-lightbox-stage {
   position: relative;
@@ -6777,7 +6968,9 @@ button.dark-sheet-submit[type="submit"]:active {
   border: 1px solid var(--glass-border);
   color: #fff;
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
 }
 .dark-img-lightbox-nav svg {
   width: 20px;
@@ -6981,7 +7174,9 @@ button.dark-sheet-submit[type="submit"]:active {
   object-fit: contain;
   filter: grayscale(1) brightness(1.6);
   opacity: 0.75;
-  transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 .dark-pd-side-partner-logo:hover {
   filter: none;
@@ -6994,8 +7189,20 @@ button.dark-sheet-submit[type="submit"]:active {
    Sized down from the hero's version to fit a narrow sidebar column. */
 .dark-pd-side-partner-marquee-viewport {
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
 }
 .dark-pd-side-partner-marquee {
   display: flex;
@@ -7093,7 +7300,8 @@ button.dark-sheet-submit[type="submit"]:active {
   font-weight: 600;
   text-decoration: none;
   margin-bottom: 24px;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 .dark-pd-demo-btn:hover {
@@ -7237,7 +7445,9 @@ button.dark-sheet-submit[type="submit"]:active {
   font-family: "Plex Sans", sans-serif;
   font-size: 14px !important;
   outline: none;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 .dark-cf-field textarea {
   min-height: 130px;
@@ -7274,7 +7484,8 @@ button.dark-cf-submit[type="submit"] {
   text-transform: uppercase;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 button.dark-cf-submit[type="submit"]:hover {
@@ -7383,8 +7594,11 @@ button.dark-cf-submit[type="submit"]:hover {
   border: 1px solid var(--glass-border) !important;
   color: var(--accent-2) !important;
   box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.45);
-  transition: transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
-    box-shadow 0.3s ease, opacity 0.3s ease, border-color 0.3s ease,
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.3s ease,
+    opacity 0.3s ease,
+    border-color 0.3s ease,
     color 0.3s ease !important;
 }
 .back-to-top i {
@@ -7544,7 +7758,8 @@ button.dark-cookie-consent__agree {
   text-transform: uppercase;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 button.dark-cookie-consent__agree:hover {
@@ -7570,7 +7785,10 @@ button.dark-cookie-consent__deny {
   text-transform: uppercase;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
 }
 button.dark-cookie-consent__deny:hover {
   border-color: rgba(255, 122, 112, 0.6) !important;
@@ -7642,7 +7860,9 @@ button.dark-cookie-consent__deny:hover {
   inset: 0;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 1s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 1s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .dark-hslider-slide.is-active {
   opacity: 1;
@@ -7670,7 +7890,8 @@ button.dark-cookie-consent__deny:hover {
 .dark-hslider-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       90deg,
       rgba(9, 13, 22, 0.92) 0%,
       rgba(9, 13, 22, 0.6) 45%,
@@ -7705,7 +7926,8 @@ button.dark-cookie-consent__deny:hover {
   margin-bottom: 22px;
   opacity: 0;
   transform: translateY(14px);
-  transition: opacity 0.6s ease 0.35s,
+  transition:
+    opacity 0.6s ease 0.35s,
     transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s;
 }
 .dark-hslider-counter .line {
@@ -7728,7 +7950,8 @@ button.dark-cookie-consent__deny:hover {
   max-width: 680px;
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s ease 0.45s,
+  transition:
+    opacity 0.7s ease 0.45s,
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.45s;
 }
 .dark-hslider-slide.is-active .dark-hslider-title {
@@ -7752,8 +7975,10 @@ button.dark-cookie-consent__deny:hover {
   text-decoration: none;
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.7s ease 0.65s,
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.65s, box-shadow 0.25s ease;
+  transition:
+    opacity 0.7s ease 0.65s,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.65s,
+    box-shadow 0.25s ease;
 }
 .dark-hslider-slide.is-active .dark-hslider-cta {
   opacity: 1;
@@ -7856,7 +8081,9 @@ button.dark-cookie-consent__deny:hover {
   justify-content: center;
   cursor: pointer;
   color: #fff;
-  transition: border-color 0.25s ease, background 0.25s ease,
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
     transform 0.2s ease;
 }
 .dark-hslider-arrow:hover {
@@ -8008,7 +8235,10 @@ button.dark-cookie-consent__deny:hover {
   justify-content: center;
   cursor: pointer;
   color: #fff;
-  transition: border-color 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    opacity 0.25s ease;
 }
 .dark-tp-spotlight-arrow:hover {
   border-color: rgba(var(--accent-2-rgb), 0.5);
@@ -8161,7 +8391,9 @@ button.dark-cookie-consent__deny:hover {
   border-radius: 50%;
   background: #fff;
   border: none;
-  box-shadow: 0 0 0 3px #090d16, 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 3px #090d16,
+    0 4px 10px rgba(0, 0, 0, 0.4);
   transform: translate(-50%, -50%);
   cursor: pointer;
   outline: none;
@@ -8325,7 +8557,9 @@ button.dark-cookie-consent__deny:hover {
   position: relative;
 }
 #darkTpResults {
-  transition: opacity 0.25s ease, filter 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    filter 0.25s ease;
 }
 .dark-tp-results-wrap.is-loading #darkTpResults {
   opacity: 0.35;
@@ -8471,7 +8705,8 @@ button.dark-cookie-consent__deny:hover {
 .dark-tender-details .tender-thumb-box {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: repeating-linear-gradient(
+  background:
+    repeating-linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.05) 0 2px,
       transparent 2px 14px
@@ -8676,7 +8911,9 @@ button.dark-cookie-consent__deny:hover {
   border: 1px solid var(--glass-border) !important;
   color: rgba(255, 255, 255, 0.85) !important;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
   text-decoration: none;
 }
 .dark-tender-details .module-badge:hover {
@@ -9060,7 +9297,8 @@ button.dark-cookie-consent__deny:hover {
   text-transform: uppercase;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 .dark-tender-details .main-btn:hover {
@@ -9581,7 +9819,8 @@ button.dark-cookie-consent__deny:hover {
 .dark-fmf {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.14),
       transparent 60%
@@ -9874,7 +10113,8 @@ button.dark-cookie-consent__deny:hover {
 .dark-fmf-err {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.14),
       transparent 60%
@@ -10226,7 +10466,10 @@ button.dark-cookie-consent__deny:hover {
   font-family: "Plex Mono", monospace;
   font-size: 12.5px;
   text-decoration: none !important;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease;
 }
 .dark-fmf-contact-chip svg {
@@ -10248,7 +10491,9 @@ button.dark-cookie-consent__deny:hover {
   padding: 6px 6px 6px 22px;
   background: rgba(255, 255, 255, 0.03);
   text-decoration: none !important;
-  transition: border-color 0.25s ease, transform 0.2s ease;
+  transition:
+    border-color 0.25s ease,
+    transform 0.2s ease;
 }
 .dark-fmf-contact-cta:hover {
   border-color: rgba(var(--accent-rgb), 0.55);
@@ -10291,7 +10536,8 @@ button.dark-cookie-consent__deny:hover {
 .dark-pc {
   position: relative;
   overflow: hidden;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.14),
       transparent 60%
@@ -10481,7 +10727,8 @@ button.dark-cookie-consent__deny:hover {
    ANNOUNCEMENT POPUP (type 7) — dark glass reskin, real magnific-popup/syotimer markup untouched
    ════════════════════════════════════════════════════════════ */
 .dark-popup .popup-six .popup_main-content {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.07),
       rgba(255, 255, 255, 0.02)
@@ -10597,7 +10844,8 @@ button.dark-cookie-consent__deny:hover {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 600;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 .dark-popup
@@ -10659,7 +10907,9 @@ body.dark-popup-lock {
   background: rgba(3, 6, 12, 0);
   backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
-  transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  transition:
+    background 0.4s ease,
+    backdrop-filter 0.4s ease;
 }
 .popup-wrapper.dark-popup.is-open {
   background: rgba(3, 6, 12, 0.72);
@@ -10675,7 +10925,8 @@ body.dark-popup-lock {
   overflow: auto;
   opacity: 0;
   transform: translateY(24px) scale(0.97);
-  transition: opacity 0.45s cubic-bezier(0.19, 1.15, 0.32, 1),
+  transition:
+    opacity 0.45s cubic-bezier(0.19, 1.15, 0.32, 1),
     transform 0.45s cubic-bezier(0.19, 1.15, 0.32, 1);
 }
 .popup-wrapper.dark-popup.is-open .dark-popup-box {
@@ -10699,7 +10950,9 @@ body.dark-popup-lock {
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-popup-close:hover {
   background: rgba(255, 255, 255, 0.12);
@@ -10801,7 +11054,8 @@ body.dark-popup-lock {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 600;
-  transition: transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
     box-shadow 0.25s ease;
 }
 .dark-popup .popup-one .popup_main-content .popup-main-btn:hover,
@@ -10849,7 +11103,8 @@ body.dark-popup-lock {
 .dark-popup .popup-three .popup_main-content,
 .dark-popup .popup-four .popup_main-content,
 .dark-popup .popup-six .popup_main-content {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.07),
       rgba(255, 255, 255, 0.02)
@@ -11053,9 +11308,12 @@ body.dark-oc-lock {
   gap: 5px !important;
   padding: 0 !important;
   z-index: 20 !important;
-  transition: background 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.35s ease, transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
-    gap 0.3s cubic-bezier(0.22, 1.2, 0.36, 1), box-shadow 0.35s ease;
+  transition:
+    background 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    transform 0.25s cubic-bezier(0.22, 1.2, 0.36, 1),
+    gap 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.35s ease;
 }
 .dark-oc-toggle::before {
   content: "";
@@ -11102,8 +11360,10 @@ body.dark-oc-lock {
   height: 2px !important;
   border-radius: 2px;
   background: #fff !important;
-  transition: transform 0.4s cubic-bezier(0.22, 1.4, 0.36, 1),
-    opacity 0.25s ease, width 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1.4, 0.36, 1),
+    opacity 0.25s ease,
+    width 0.3s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.35s ease;
 }
 .dark-oc-toggle span {
@@ -11149,7 +11409,10 @@ body.dark-oc-lock {
   -webkit-backdrop-filter: blur(0px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease, background 0.4s ease, backdrop-filter 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    background 0.4s ease,
+    backdrop-filter 0.4s ease;
 }
 .dark-oc-backdrop.is-open {
   opacity: 1;
@@ -11204,7 +11467,9 @@ body.dark-oc-lock {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-oc-close:hover {
   background: rgba(255, 255, 255, 0.12);
@@ -11349,8 +11614,10 @@ body.dark-oc-lock {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
-    background 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 .dark-oc-caret svg {
   width: 9px;
@@ -11518,7 +11785,8 @@ body.dark-oc-lock {
   position: relative;
   overflow: hidden;
   padding: 90px 0 100px;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse 900px 600px at 12% -10%,
       rgba(var(--accent-rgb), 0.16),
       transparent 60%
@@ -11543,7 +11811,8 @@ body.dark-oc-lock {
   height: 84px;
   margin: 0 auto 26px;
   border-radius: 50%;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.08),
       rgba(255, 255, 255, 0.02)
@@ -11648,7 +11917,8 @@ body.dark-oc-lock {
   border-radius: 22px;
   border: 1px solid var(--glass-border);
   overflow: hidden;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       160deg,
       rgba(255, 255, 255, 0.06),
       rgba(255, 255, 255, 0.015)
@@ -11740,7 +12010,10 @@ body.dark-oc-lock {
   padding: 12px 22px;
   border-radius: 100px;
   border: 1px solid var(--glass-border);
-  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-sv-back:hover {
   border-color: rgba(var(--accent-2-rgb), 0.4);
@@ -11786,7 +12059,8 @@ body.dark-oc-lock {
   color: #05100d;
 }
 .dark-team-profile-modal .team-modal-banner {
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(var(--accent-rgb), 0.55) 0%,
       rgba(var(--accent-2-rgb), 0.45) 100%
@@ -11796,7 +12070,9 @@ body.dark-oc-lock {
 }
 .dark-team-profile-modal .team-modal-avatar-wrap {
   background: #0a1914;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--glass-border);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--glass-border);
 }
 .dark-team-profile-modal .team-modal-scroll {
   background: transparent;
@@ -11949,7 +12225,9 @@ body.dark-oc-lock {
   object-fit: contain;
   filter: grayscale(1) brightness(1.6);
   opacity: 0.75;
-  transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 .dark-pic-partner-logo:hover {
   filter: none;
@@ -12072,7 +12350,10 @@ body.dark-oc-lock {
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
   border-radius: 14px;
   padding: 16px 16px 18px;
-  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease,
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease,
     box-shadow 0.3s ease;
 }
 .dark-pic-block:hover {
@@ -12298,7 +12579,9 @@ body.dark-oc-lock {
   aspect-ratio: 4 / 3;
   cursor: zoom-in;
   opacity: 0.85;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .dark-pd-gallery-grid-item:hover {
   opacity: 1;
@@ -12460,7 +12743,9 @@ body.dark-oc-lock {
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 }
 .dark-pd-read-more:hover {
   border-color: rgba(255, 255, 255, 0.32);
@@ -12514,7 +12799,10 @@ body.dark-oc-lock {
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 .dark-pd-similar-nav button svg {
   width: 17px;
@@ -12570,8 +12858,11 @@ body.dark-oc-lock {
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.14));
   border-radius: 14px;
   overflow: hidden;
-  transition: transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1),
-    border-color 0.38s ease, background 0.38s ease, box-shadow 0.38s ease;
+  transition:
+    transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.38s ease,
+    background 0.38s ease,
+    box-shadow 0.38s ease;
 }
 /* Thin accent line that draws in left-to-right on hover, on top of
    everything else in the card (z-index above the image/scrim). */
@@ -12600,7 +12891,8 @@ body.dark-oc-lock {
 .dark-pd-similar-card:hover {
   transform: translateY(-7px);
   background: rgba(15, 21, 36, 0.7);
-  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55),
+  box-shadow:
+    0 18px 40px -18px rgba(0, 0, 0, 0.55),
     0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
 .dark-pd-similar-card:hover::before {
@@ -12618,9 +12910,17 @@ body.dark-oc-lock {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  background: linear-gradient(
+    135deg,
+    var(--accent, #25d06f),
+    var(--accent-2, #2dd4bf)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
@@ -12679,13 +12979,19 @@ body.dark-oc-lock {
   font-weight: 600;
   letter-spacing: 0.05em;
   color: #08130d;
-  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  background: linear-gradient(
+    135deg,
+    var(--accent, #25d06f),
+    var(--accent-2, #2dd4bf)
+  );
   padding: 4px 9px 5px;
   border-radius: 0 0 6px 6px;
   z-index: 2;
   overflow: hidden;
   transform-origin: top left;
-  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.3s ease;
 }
 /* "Shine sweep" — a light streak sweeps across the ribbon as it pops
    slightly bigger, like a foil/premium badge catching light. A plain
@@ -12700,7 +13006,12 @@ body.dark-oc-lock {
   left: -60%;
   width: 40%;
   height: 100%;
-  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  background: linear-gradient(
+    115deg,
+    transparent,
+    rgba(255, 255, 255, 0.75),
+    transparent
+  );
   transform: skewX(-20deg);
 }
 .dark-pd-similar-card:hover .dark-pd-similar-year {
@@ -12858,7 +13169,11 @@ body.dark-oc-lock {
   transition: transform 0.35s ease;
 }
 .dark-pd-similar-card:hover .dark-pd-similar-cta {
-  background: linear-gradient(135deg, var(--accent, #25d06f), var(--accent-2, #2dd4bf));
+  background: linear-gradient(
+    135deg,
+    var(--accent, #25d06f),
+    var(--accent-2, #2dd4bf)
+  );
   border-color: transparent;
   color: #08130d;
   transform: translateX(2px);
@@ -12917,9 +13232,27 @@ body.dark-oc-lock {
   filter: blur(24px);
   background: radial-gradient(
     ellipse 78% 62% at 30% 50%,
-    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.72)) 0%,
-    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.4)) 42%,
-    rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.14)) 68%,
+    rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.72
+        )
+      )
+      0%,
+    rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.4
+        )
+      )
+      42%,
+    rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.14
+        )
+      )
+      68%,
     transparent 88%
   );
 }
@@ -12957,17 +13290,77 @@ body.dark-oc-lock {
 .dark-pd-hero-desc {
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.55),
-    0 0 4px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
-    0 0 8px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
-    0 0 14px rgba(var(--pd-hero-overlay-color), var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))),
-    0 0 24px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.85)),
-    0 0 42px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.68)),
-    0 0 70px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.52)),
-    0 0 110px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.38)),
-    0 0 170px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.26)),
-    0 0 250px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.17)),
-    0 0 360px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.1)),
-    0 0 500px rgba(var(--pd-hero-overlay-color), calc(var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.05));
+    0 0 4px
+      rgba(
+        var(--pd-hero-overlay-color),
+        var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))
+      ),
+    0 0 8px
+      rgba(
+        var(--pd-hero-overlay-color),
+        var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))
+      ),
+    0 0 14px
+      rgba(
+        var(--pd-hero-overlay-color),
+        var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength))
+      ),
+    0 0 24px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.85
+        )
+      ),
+    0 0 42px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.68
+        )
+      ),
+    0 0 70px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.52
+        )
+      ),
+    0 0 110px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.38
+        )
+      ),
+    0 0 170px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.26
+        )
+      ),
+    0 0 250px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.17
+        )
+      ),
+    0 0 360px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.1
+        )
+      ),
+    0 0 500px
+      rgba(
+        var(--pd-hero-overlay-color),
+        calc(
+          var(--pd-hero-bloom-strength, var(--pd-hero-overlay-strength)) * 0.05
+        )
+      );
 }
 .dark-pd-hero-overlay > * {
   margin-bottom: 8px;
@@ -13368,7 +13761,9 @@ body.dark-oc-lock {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   counter-increment: faqx;
-  transition: border-color 0.25s ease, background 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
 .faqx-item:hover {
   border-color: rgba(var(--accent-rgb), 0.3);
@@ -13434,7 +13829,9 @@ body.dark-oc-lock {
   margin: -1px 0 0 -8px;
   border-radius: 2px;
   background: var(--accent-2);
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
 }
 .faqx-ico::after {
   transform: rotate(90deg);
@@ -13501,7 +13898,11 @@ body.dark-oc-lock {
   margin-bottom: 24px;
   padding: 26px 22px 12px;
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(var(--accent-2-rgb), 0.07), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(
+    180deg,
+    rgba(var(--accent-2-rgb), 0.07),
+    rgba(255, 255, 255, 0.02)
+  );
   border: 1px solid rgba(var(--accent-2-rgb), 0.3);
   box-shadow: 0 0 40px rgba(var(--accent-2-rgb), 0.06) inset;
 }
@@ -13629,7 +14030,11 @@ body.dark-oc-lock {
   margin-top: 44px;
   padding: 32px 38px;
   border-radius: 26px;
-  background: linear-gradient(120deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-2-rgb), 0.14));
+  background: linear-gradient(
+    120deg,
+    rgba(var(--accent-rgb), 0.12),
+    rgba(var(--accent-2-rgb), 0.14)
+  );
   border: 1px solid rgba(var(--accent-2-rgb), 0.3);
 }
 .faqx-banner-ico {
@@ -13681,7 +14086,10 @@ body.dark-oc-lock {
   font-size: 15px;
   font-weight: 600;
   text-decoration: none !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 .faqx-btn svg {
   width: 19px;

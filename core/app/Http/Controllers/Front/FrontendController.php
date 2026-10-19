@@ -78,6 +78,7 @@ class FrontendController extends Controller
 
         if ($version == 'dark') {
             $data['darkHero'] = DarkHeroSetting::where('language_id', $lang_id)->first();
+            $data['darkHeroVideo'] = \App\HeroVideoSetting::where('language_id', $lang_id)->first();
         }
 
         // if home page page builder is disabled

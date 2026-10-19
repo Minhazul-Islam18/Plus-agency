@@ -78,11 +78,12 @@
                                     <div class="form-group">
                                         <label for="">Select a Home Version</label>
                                         <select name="home_version" class="form-control">
-                                            <option value="" disabled {{ !in_array($bs->home_version, ['static', 'slider']) ? 'selected' : '' }}>Select a Home Version</option>
+                                            <option value="" disabled {{ !in_array($bs->home_version, ['static', 'slider', 'video']) ? 'selected' : '' }}>Select a Home Version</option>
                                             <option value="static" {{$bs->home_version == 'static' ? 'selected' : ''}}>Static (signature hero)</option>
                                             <option value="slider" {{$bs->home_version == 'slider' ? 'selected' : ''}}>Slider</option>
+                                            <option value="video" {{$bs->home_version == 'video' ? 'selected' : ''}}>Video (background video)</option>
                                         </select>
-                                        <p class="text-warning mb-0">Dark theme's <strong>Slider</strong> pulls from the same <strong>Sliders</strong> content below (image, title, text, button) — the other Home Version options are light-theme only.</p>
+                                        <p class="text-warning mb-0">Dark theme's <strong>Slider</strong> pulls from <strong>Sliders</strong> below; <strong>Video</strong> pulls from its own <strong>Hero Section &rarr; Video Version</strong> page. The other Home Version options are light-theme only.</p>
                                     </div>
                                 </div>
                                 @endif

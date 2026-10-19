@@ -444,6 +444,9 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::get('/darkhero', 'Admin\DarkHeroController@index')->name('admin.darkhero.index');
         Route::post('/darkhero/{langid}/update', 'Admin\DarkHeroController@update')->name('admin.darkhero.update');
 
+        Route::get('/darkherovideo', 'Admin\HeroVideoController@index')->name('admin.darkherovideo.index');
+        Route::post('/darkherovideo/{langid}/update', 'Admin\HeroVideoController@update')->name('admin.darkherovideo.update');
+
 
         // Admin Feature Routes
         Route::get('/features', 'Admin\FeatureController@index')->name('admin.feature.index');

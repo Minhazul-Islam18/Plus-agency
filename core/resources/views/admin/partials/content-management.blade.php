@@ -203,6 +203,7 @@
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') selected
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') selected
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') selected
+                        @elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') selected
                         @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) selected @endif">
                             <a data-toggle="collapse" href="#herosection">
                                 <span class="sub-item">Hero Section</span>
@@ -213,6 +214,7 @@
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
                         @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
+                        @elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') show
                         @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show @endif"
                                 id="herosection">
                                 <ul class="nav nav-collapse subnav">
@@ -243,7 +245,14 @@
                                             <span class="sub-item">Slider Version</span>
                                         </a>
                                     </li>
-                                    @if ($be->theme_version != 'dark')
+                                    @if ($be->theme_version == 'dark')
+                                        <li class="@if (request()->path() == config('app.admin_prefix','admin').'/darkherovideo') active @endif">
+                                            <a
+                                                href="{{ route('admin.darkherovideo.index') . '?language=' . $default->code }}">
+                                                <span class="sub-item">Video Version</span>
+                                            </a>
+                                        </li>
+                                    @else
                                         <li class="@if (request()->path() == config('app.admin_prefix','admin').'/herosection/video') active @endif">
                                             <a
                                                 href="{{ route('admin.herosection.video') . '?language=' . $default->code }}">

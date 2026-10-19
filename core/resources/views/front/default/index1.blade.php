@@ -15,6 +15,8 @@
     @if ($be->theme_version == 'dark')
         @if ($bs->home_version == 'slider')
             @includeif('front.default.partials.dark.hero-slider')
+        @elseif ($bs->home_version == 'video')
+            @includeif('front.default.partials.dark.hero-video')
         @else
             @includeif('front.default.partials.dark.hero')
         @endif

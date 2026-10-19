@@ -21,13 +21,19 @@ class CreateHeroVideoSettingsTable extends Migration
             $table->unsignedBigInteger('language_id');
             $table->string('eyebrow', 255)->nullable();
             $table->string('title', 255)->nullable();
+            // Exact substring of `title` to highlight in the accent
+            // gradient — admin free text has no markup for "which word is
+            // the accent", so this is a separate field rather than guessing.
+            // Case-sensitive, must match verbatim or the whole line just
+            // renders plain (no gradient at all) — never a rendering error.
+            $table->string('title_accent', 255)->nullable();
             $table->text('rotating_titles')->nullable()
                 ->comment('Extra headlines that flip-cycle after title, one per line');
+            $table->text('rotating_titles_accent')->nullable()
+                ->comment('Accent substring per rotating_titles line, same line order, one per line');
             $table->string('text', 500)->nullable();
             $table->string('button_text', 255)->nullable();
             $table->string('button_url', 255)->nullable();
-            $table->string('meta_left', 255)->nullable();
-            $table->string('meta_right', 255)->nullable();
             // Bare filenames, same convention as every other admin upload
             // (sliders/, pages/, etc.) — video under FRONT_IMG_PATH's own
             // 'hero-video/' subdir, poster alongside it.

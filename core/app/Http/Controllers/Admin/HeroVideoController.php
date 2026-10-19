@@ -41,12 +41,12 @@ class HeroVideoController extends Controller
         $rules = [
             'eyebrow' => 'nullable',
             'title' => 'nullable',
+            'title_accent' => 'nullable',
             'rotating_titles' => 'nullable',
+            'rotating_titles_accent' => 'nullable',
             'text' => 'nullable',
             'button_text' => 'nullable',
             'button_url' => 'nullable',
-            'meta_left' => 'nullable',
-            'meta_right' => 'nullable',
             'overlay_color' => 'required',
             'overlay_opacity' => 'required|numeric|max:1|min:0',
             'disable_on_mobile' => 'nullable',
@@ -80,12 +80,12 @@ class HeroVideoController extends Controller
         $setting = HeroVideoSetting::firstOrNew(['language_id' => $langid]);
         $setting->eyebrow = $request->eyebrow;
         $setting->title = $request->title;
+        $setting->title_accent = $request->title_accent;
         $setting->rotating_titles = $request->rotating_titles;
+        $setting->rotating_titles_accent = $request->rotating_titles_accent;
         $setting->text = $request->text;
         $setting->button_text = $request->button_text;
         $setting->button_url = $request->button_url;
-        $setting->meta_left = $request->meta_left;
-        $setting->meta_right = $request->meta_right;
         $setting->overlay_color = $request->overlay_color;
         $setting->overlay_opacity = $request->overlay_opacity;
         $setting->disable_on_mobile = $request->boolean('disable_on_mobile');

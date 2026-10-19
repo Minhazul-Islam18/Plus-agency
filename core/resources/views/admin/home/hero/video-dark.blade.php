@@ -167,9 +167,21 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="">Rotating Titles <small class="text-muted">(one per line — cycles with a flip animation after the Title above. Leave empty to show just the Title.)</small></label>
+                    <label for="">Title — Accent Phrase <small class="text-muted">(optional — must match a piece of the Title above exactly, word-for-word, to highlight it in color. Leave empty for a plain white title.)</small></label>
+                    <input type="text" class="form-control" name="title_accent" value="{{$video->title_accent}}" placeholder="e.g. Trusted Partner">
+                    <p id="errtitle_accent" class="em text-danger mb-0"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Rotating Titles <small class="text-muted">(one per line — cycles with a soft fade after the Title above. Leave empty to show just the Title.)</small></label>
                     <textarea class="form-control" name="rotating_titles" rows="3" placeholder="e.g.&#10;Trusted Partner For Growth&#10;Smart Strategy For Wealth">{{$video->rotating_titles}}</textarea>
                     <p id="errrotating_titles" class="em text-danger mb-0"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Rotating Titles — Accent Phrases <small class="text-muted">(optional — one per line, same order as the Rotating Titles above. Each line must match a piece of its own title exactly to highlight it. Leave a line empty to keep that title plain white.)</small></label>
+                    <textarea class="form-control" name="rotating_titles_accent" rows="3" placeholder="e.g.&#10;For Growth&#10;For Wealth">{{$video->rotating_titles_accent}}</textarea>
+                    <p id="errrotating_titles_accent" class="em text-danger mb-0"></p>
                 </div>
 
                 <div class="form-group">
@@ -195,22 +207,6 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="">Meta Line — Left <small class="text-muted">(small detail shown under the button, e.g. a location)</small></label>
-                            <input type="text" class="form-control" name="meta_left" value="{{$video->meta_left}}" placeholder="e.g. Ouagadougou, Burkina Faso">
-                            <p id="errmeta_left" class="em text-danger mb-0"></p>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="">Meta Line — Right <small class="text-muted">(e.g. an established year)</small></label>
-                            <input type="text" class="form-control" name="meta_right" value="{{$video->meta_right}}" placeholder="e.g. Est. 2019">
-                            <p id="errmeta_right" class="em text-danger mb-0"></p>
-                        </div>
-                    </div>
-                </div>
               </form>
 
             </div>

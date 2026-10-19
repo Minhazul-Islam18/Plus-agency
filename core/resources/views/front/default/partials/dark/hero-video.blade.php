@@ -10,14 +10,37 @@
     $dhvText = $darkHeroVideo?->text ?: ($darkHero?->text ?: $bs->hero_section_text);
     $dhvButtonText = $darkHeroVideo?->button_text ?: $darkHero?->button_text;
     $dhvButtonUrl = $darkHeroVideo?->button_url ?: $darkHero?->button_url;
-    $dhvMetaLeft = $darkHeroVideo?->meta_left ?: $darkHero?->meta_left;
-    $dhvMetaRight = $darkHeroVideo?->meta_right ?: $darkHero?->meta_right;
 
-    $dhvTitles = collect([$dhvTitle])
+    // Title is plain white by default — the gradient only highlights the
+    // exact substring the admin names in the matching *_accent field (one
+    // per rotating-title line, same order). No match (empty field, typo,
+    // different casing/punctuation) just falls back to the whole line in
+    // plain white — never a rendering error, never gradient-across-the-
+    // whole-wrapped-title (which read as "moving" on long titles).
+    $dhvTitleLines = collect([$dhvTitle])
         ->merge(preg_split('/\r\n|\r|\n/', (string) $dhvRotating))
-        ->map(fn($t) => trim((string) $t))
-        ->filter()
         ->values();
+    $dhvAccentLines = collect([$darkHeroVideo?->title_accent])
+        ->merge(preg_split('/\r\n|\r|\n/', (string) $darkHeroVideo?->rotating_titles_accent))
+        ->values();
+    $dhvTitlePairs = $dhvTitleLines
+        ->map(fn($title, $i) => [trim((string) $title), trim((string) ($dhvAccentLines[$i] ?? ''))])
+        ->filter(fn($pair) => $pair[0] !== '')
+        ->values();
+
+    $dhvHighlightTitle = function ($title, $accent) {
+        $title = convertUtf8($title);
+        if ($accent !== '') {
+            $accent = convertUtf8($accent);
+            $pos = mb_strpos($title, $accent);
+            if ($pos !== false) {
+                $before = mb_substr($title, 0, $pos);
+                $after = mb_substr($title, $pos + mb_strlen($accent));
+                return e($before) . '<span class="grad">' . e($accent) . '</span>' . e($after);
+            }
+        }
+        return e($title);
+    };
 
     $dhvHasVideo = !empty($darkHeroVideo?->video_file);
     $dhvHasPoster = !empty($darkHeroVideo?->poster_image);
@@ -141,25 +164,22 @@
                 <span class="dark-hero-eyebrow">{{ convertUtf8($dhvEyebrow) }}</span>
 
                 <h1 class="dark-hero-flip" data-hero-flip>
-                    @foreach ($dhvTitles as $key => $title)
-                        <span class="dark-hero-flip-line {{ $key == 0 ? 'is-active' : '' }}">{{ convertUtf8($title) }}</span>
+                    @foreach ($dhvTitlePairs as $key => $pair)
+                        <span class="dark-hero-flip-line {{ $key == 0 ? 'is-active' : '' }}">{!! $dhvHighlightTitle($pair[0], $pair[1]) !!}</span>
                     @endforeach
                 </h1>
 
                 <p class="dark-hero-text">{{ convertUtf8($dhvText) }}</p>
 
+                {{-- No meta row here on purpose — the approved design ends
+                     at the CTA, nothing below it. (meta_left/meta_right
+                     exist on this model for parity with the other hero
+                     variants, but this variant doesn't render them.) --}}
                 @if (!empty($dhvButtonUrl) && !empty($dhvButtonText))
                     <a href="{{ $dhvButtonUrl }}" class="dark-hero-cta" target="_blank">
                         <span>{{ convertUtf8($dhvButtonText) }}</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
-                @endif
-
-                @if (!empty($dhvMetaLeft) || !empty($dhvMetaRight))
-                    <div class="dark-hero-meta">
-                        @if (!empty($dhvMetaLeft))<span>{{ convertUtf8($dhvMetaLeft) }}</span>@endif
-                        @if (!empty($dhvMetaRight))<span>{{ convertUtf8($dhvMetaRight) }}</span>@endif
-                    </div>
                 @endif
             </div>
         </div>

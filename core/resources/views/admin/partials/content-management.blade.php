@@ -5,6 +5,7 @@
 @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') active
+@elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') active
 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') active
 @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) active
@@ -73,6 +74,7 @@
     @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
+    @elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
     @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
     @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show
@@ -141,6 +143,7 @@
             @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') selected
+            @elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') selected
             @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') selected
             @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) selected
@@ -173,6 +176,7 @@
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/servicesection') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/static') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/darkhero') show
+                @elseif(request()->path() == config('app.admin_prefix','admin').'/darkherovideo') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/video') show
                 @elseif(request()->path() == config('app.admin_prefix','admin').'/herosection/sliders') show
                 @elseif(request()->is(config('app.admin_prefix','admin').'/herosection/slider/*/edit')) show

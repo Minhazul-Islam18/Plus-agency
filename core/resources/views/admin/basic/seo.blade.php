@@ -127,22 +127,22 @@
                         <label>Global Meta Title</label>
                         <span class="seo-counter" data-counter-for="global-title">0 / 60</span>
                       </div>
-                      <input type="text" class="form-control seo-title-input" data-field="title" name="meta_title" value="{{ $bs->meta_title }}" placeholder="Appended after the site name in <title>">
+                      <input type="text" class="form-control seo-title-input" data-field="title" name="meta_title" value="{{ $seoBs->meta_title }}" placeholder="Appended after the site name in <title>">
                     </div>
                     <div class="seo-field">
                       <label>Global Meta Keywords</label>
-                      <input type="text" class="form-control" name="meta_keywords" value="{{ $bs->meta_keywords }}" placeholder="Enter meta keywords" data-role="tagsinput">
+                      <input type="text" class="form-control" name="meta_keywords" value="{{ $seoBs->meta_keywords }}" placeholder="Enter meta keywords" data-role="tagsinput">
                     </div>
                     <div class="seo-field">
                       <div class="seo-field-row">
                         <label>Global Meta Description</label>
                         <span class="seo-counter" data-counter-for="global-desc">0 / 160</span>
                       </div>
-                      <textarea class="form-control seo-desc-input" data-field="description" name="meta_description" rows="3" placeholder="Enter meta description">{{ $bs->meta_description }}</textarea>
+                      <textarea class="form-control seo-desc-input" data-field="description" name="meta_description" rows="3" placeholder="Enter meta description">{{ $seoBs->meta_description }}</textarea>
                     </div>
-                    @include('admin.partials.og-image-picker', ['ogSerial' => 15, 'ogFieldName' => 'default_social_image', 'ogCurrentUrl' => !empty($bs->default_social_image) ? asset('assets/front/img/' . $bs->default_social_image) : null, 'ogHelperText' => 'Used for Open Graph/Twitter previews on any page with no image of its own (e.g. the homepage) and no page-type image override below. Shared across every language.'])
+                    @include('admin.partials.og-image-picker', ['ogSerial' => 15, 'ogFieldName' => 'default_social_image', 'ogCurrentUrl' => !empty($seoBs->default_social_image) ? asset('assets/front/img/' . $seoBs->default_social_image) : null, 'ogHelperText' => 'Used for Open Graph/Twitter previews on any page with no image of its own (e.g. the homepage) and no page-type image override below. Shared across every language.'])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'global', 'path' => '/'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'global', 'path' => '/', 'ogSerial' => 15, 'ogCurrentUrl' => !empty($seoBs->default_social_image) ? asset('assets/front/img/' . $seoBs->default_social_image) : null])
                 </div>
               </div>
 
@@ -174,7 +174,7 @@
                     </div>
                     @include('admin.partials.og-image-picker', ['ogSerial' => 10, 'ogFieldName' => 'home_og_image', 'ogCurrentUrl' => !empty($abe->home_og_image) ? asset('assets/front/img/' . $abe->home_og_image) : null])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'home', 'path' => '/'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'home', 'path' => '/', 'ogSerial' => 10, 'ogCurrentUrl' => !empty($abe->home_og_image) ? asset('assets/front/img/' . $abe->home_og_image) : null])
                 </div>
               </div>
 
@@ -206,7 +206,7 @@
                     </div>
                     @include('admin.partials.og-image-picker', ['ogSerial' => 13, 'ogFieldName' => 'blogs_og_image', 'ogCurrentUrl' => !empty($abe->blogs_og_image) ? asset('assets/front/img/' . $abe->blogs_og_image) : null])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'blogs', 'path' => '/blogs'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'blogs', 'path' => '/blogs', 'ogSerial' => 13, 'ogCurrentUrl' => !empty($abe->blogs_og_image) ? asset('assets/front/img/' . $abe->blogs_og_image) : null])
                 </div>
               </div>
 
@@ -238,7 +238,7 @@
                     </div>
                     @include('admin.partials.og-image-picker', ['ogSerial' => 12, 'ogFieldName' => 'portfolios_og_image', 'ogCurrentUrl' => !empty($abe->portfolios_og_image) ? asset('assets/front/img/' . $abe->portfolios_og_image) : null])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'portfolios', 'path' => '/portfolios'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'portfolios', 'path' => '/portfolios', 'ogSerial' => 12, 'ogCurrentUrl' => !empty($abe->portfolios_og_image) ? asset('assets/front/img/' . $abe->portfolios_og_image) : null])
                 </div>
               </div>
 
@@ -270,7 +270,7 @@
                     </div>
                     @include('admin.partials.og-image-picker', ['ogSerial' => 11, 'ogFieldName' => 'services_og_image', 'ogCurrentUrl' => !empty($abe->services_og_image) ? asset('assets/front/img/' . $abe->services_og_image) : null])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'services', 'path' => '/services'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'services', 'path' => '/services', 'ogSerial' => 11, 'ogCurrentUrl' => !empty($abe->services_og_image) ? asset('assets/front/img/' . $abe->services_og_image) : null])
                 </div>
               </div>
 
@@ -287,22 +287,22 @@
                         <label>Meta Title for Tenders Page</label>
                         <span class="seo-counter" data-counter-for="tenders-title">0 / 60</span>
                       </div>
-                      <input type="text" class="form-control seo-title-input" data-field="title" name="tender_meta_title" value="{{$bex->tender_meta_title}}" placeholder="Leave blank to use the Global Fallback">
+                      <input type="text" class="form-control seo-title-input" data-field="title" name="tender_meta_title" value="{{$seoBex->tender_meta_title}}" placeholder="Leave blank to use the Global Fallback">
                     </div>
                     <div class="seo-field">
                       <label>Meta Keywords for Tenders Page</label>
-                      <input type="text" class="form-control" name="tender_meta_keywords" value="{{$bex->tender_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
+                      <input type="text" class="form-control" name="tender_meta_keywords" value="{{$seoBex->tender_meta_keywords}}" placeholder="Enter meta keywords" data-role="tagsinput">
                     </div>
                     <div class="seo-field">
                       <div class="seo-field-row">
                         <label>Meta Description for Tenders Page</label>
                         <span class="seo-counter" data-counter-for="tenders-desc">0 / 160</span>
                       </div>
-                      <textarea class="form-control seo-desc-input" data-field="description" name="tender_meta_description" rows="3" placeholder="Enter meta description">{{$bex->tender_meta_description}}</textarea>
+                      <textarea class="form-control seo-desc-input" data-field="description" name="tender_meta_description" rows="3" placeholder="Enter meta description">{{$seoBex->tender_meta_description}}</textarea>
                     </div>
-                    @include('admin.partials.og-image-picker', ['ogSerial' => 14, 'ogFieldName' => 'tender_og_image', 'ogCurrentUrl' => !empty($bex->tender_og_image) ? asset('assets/front/img/' . $bex->tender_og_image) : null])
+                    @include('admin.partials.og-image-picker', ['ogSerial' => 14, 'ogFieldName' => 'tender_og_image', 'ogCurrentUrl' => !empty($seoBex->tender_og_image) ? asset('assets/front/img/' . $seoBex->tender_og_image) : null])
                   </div>
-                  @include('admin.partials._seo-preview-card', ['tab' => 'tenders', 'path' => '/tenders'])
+                  @include('admin.partials._seo-preview-card', ['tab' => 'tenders', 'path' => '/tenders', 'ogSerial' => 14, 'ogCurrentUrl' => !empty($seoBex->tender_og_image) ? asset('assets/front/img/' . $seoBex->tender_og_image) : null])
                 </div>
               </div>
 
@@ -450,7 +450,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var siteName = @json($bs->website_title ?? config('app.name'));
+    var siteName = @json($seoBs->website_title ?? config('app.name'));
 
     // ---- Tab switching ----
     var btns = document.querySelectorAll('[data-tab-btn]');
@@ -544,6 +544,20 @@
     });
 
     refreshAll();
+
+    // ---- Mirror the LFM picker's thumbnail into this tab's Social Share
+    // preview card. LFM only ever updates #thumbPreview{serial} img's src
+    // (resources/views/vendor/laravel-filemanager/index.blade.php) — it has
+    // no idea the preview card's image exists, so watch for that directly.
+    document.querySelectorAll('.seo-social-image[data-og-serial]').forEach(function (box) {
+      var serial = box.getAttribute('data-og-serial');
+      var thumbImg = document.querySelector('#thumbPreview' + serial + ' img');
+      var boxImg = box.querySelector('img');
+      if (!thumbImg || !boxImg) return;
+      new MutationObserver(function () {
+        boxImg.src = thumbImg.src;
+      }).observe(thumbImg, { attributes: true, attributeFilter: ['src'] });
+    });
   });
 </script>
 

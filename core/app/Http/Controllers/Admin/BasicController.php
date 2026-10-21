@@ -386,13 +386,13 @@ class BasicController extends Controller
         $lang = Language::where('code', $request->language)->firstOrFail();
         $data['lang_id'] = $lang->id;
         $data['abe'] = $lang->basic_extended;
-        // Explicitly scoped to the language picked in this page's own
-        // dropdown — overrides the globally-injected $bs/$bex (which
-        // reflect the admin session's current URL locale, not necessarily
-        // the one selected here) so the Tenders/global fields below always
-        // show the right language's values.
-        $data['bs'] = $lang->basic_setting;
-        $data['bex'] = $lang->basic_extra;
+        // Named seoBs/seoBex (not bs/bex) on purpose: AppServiceProvider's
+        // view()->composer('*', ...) injects its own $bs/$bex, keyed off the
+        // admin's current URL locale, into EVERY view at render time — after
+        // this controller's data is set, so a same-named key here would get
+        // silently overwritten by that global one instead of overriding it.
+        $data['seoBs'] = $lang->basic_setting;
+        $data['seoBex'] = $lang->basic_extra;
 
         return view('admin.basic.seo', $data);
     }

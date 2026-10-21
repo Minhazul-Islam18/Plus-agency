@@ -6,7 +6,12 @@
     description inputs (and the Global tab's, for the fallback chain).
 
     Required: $tab (string, matches the panel's data-tab-panel), $path (string, front-end path shown in the SERP url line)
+    Optional: $ogSerial (int, matches the og-image-picker above it on the same panel — lets the script mirror that picker's live LFM selection into this card), $ogCurrentUrl (string|null, image shown on first load before any picking happens)
 --}}
+@php
+    $ogSerial = $ogSerial ?? null;
+    $ogCurrentUrl = $ogCurrentUrl ?? null;
+@endphp
 <div class="seo-preview-card">
     <div class="seo-preview-label">Google search preview</div>
     <div class="seo-serp-mock">
@@ -25,8 +30,8 @@
 
     <div class="seo-preview-label">Social share preview</div>
     <div class="seo-social-mock">
-        <div class="seo-social-image">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B0AEA5" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <div class="seo-social-image" data-og-serial="{{ $ogSerial }}">
+            <img src="{{ $ogCurrentUrl ?: asset('assets/admin/img/noimage.jpg') }}" alt="" style="width:100%;height:100%;object-fit:cover;">
         </div>
         <div class="seo-social-body">
             <div class="seo-social-domain">icagroupe.com</div>

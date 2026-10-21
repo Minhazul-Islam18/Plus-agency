@@ -315,16 +315,9 @@
                 <div class="seo-other-grid">
                   @foreach ([
                       'team' => 'Team Page',
-                      'calendar' => 'Event Calendar Page',
                       'gallery' => 'Gallery Page',
                       'faq' => 'FAQ Page',
                       'contact' => 'Contact Page',
-                      'quote' => 'Quote Page',
-                      'cart' => 'Cart Page',
-                      'checkout' => 'Checkout Page',
-                      'login' => 'Login Page',
-                      'register' => 'Register Page',
-                      'forgot' => 'Forgot Password Page',
                   ] as $key => $label)
                     <div class="seo-other-card">
                       <div class="seo-other-card-title">{{ $label }}</div>

@@ -475,8 +475,6 @@ class BasicController extends Controller
         }
         $be->team_meta_keywords = $request->team_meta_keywords;
         $be->team_meta_description = $request->team_meta_description;
-        $be->calendar_meta_keywords = $request->calendar_meta_keywords;
-        $be->calendar_meta_description = $request->calendar_meta_description;
         $be->gallery_meta_keywords = $request->gallery_meta_keywords;
         $be->gallery_meta_description = $request->gallery_meta_description;
         $be->faq_meta_keywords = $request->faq_meta_keywords;
@@ -485,18 +483,6 @@ class BasicController extends Controller
         $be->blogs_meta_description = $request->blogs_meta_description;
         $be->contact_meta_keywords = $request->contact_meta_keywords;
         $be->contact_meta_description = $request->contact_meta_description;
-        $be->quote_meta_keywords = $request->quote_meta_keywords;
-        $be->quote_meta_description = $request->quote_meta_description;
-        $be->cart_meta_keywords = $request->cart_meta_keywords;
-        $be->cart_meta_description = $request->cart_meta_description;
-        $be->checkout_meta_keywords = $request->checkout_meta_keywords;
-        $be->checkout_meta_description = $request->checkout_meta_description;
-        $be->login_meta_keywords = $request->login_meta_keywords;
-        $be->login_meta_description = $request->login_meta_description;
-        $be->register_meta_keywords = $request->register_meta_keywords;
-        $be->register_meta_description = $request->register_meta_description;
-        $be->forgot_meta_keywords = $request->forgot_meta_keywords;
-        $be->forgot_meta_description = $request->forgot_meta_description;
         $be->save();
 
         Session::flash('success', 'SEO informations updated successfully!');

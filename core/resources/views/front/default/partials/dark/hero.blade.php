@@ -76,11 +76,11 @@
                         @foreach ($partners as $partner)
                             @if (!empty($partner->url))
                                 <a href="{{ $partner->url }}" target="_blank" rel="noopener" class="dark-hero-marquee-item">
-                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="" loading="lazy" decode="async">
                                 </a>
                             @else
                                 <span class="dark-hero-marquee-item">
-                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="">
+                                    <img src="{{ asset('assets/front/img/partners/' . $partner->image) }}" alt="" loading="lazy" decode="async">
                                 </span>
                             @endif
                         @endforeach

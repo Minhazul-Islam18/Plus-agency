@@ -433,13 +433,14 @@
     });
 
 
+    // Already inside document.ready (see top of file) — no need to wait for
+    // window 'load' just to toggle a class. (Note: `.loader-container`
+    // matches no element on this site today — this site's real preloader is
+    // `#preloader`, handled in common-main.js — kept here only in case a
+    // theme variant adds it back.)
+    $(".loader-container").addClass('loader-fadeout');
+
     jQuery(window).on('load', function() {
-        // preloader fadeout onload
-        $(".loader-container").addClass('loader-fadeout');
-
-        // preloader fadeout onload
-        $(".loader-container").addClass('loader-fadeout');
-
         // isotope initialize
         $('.grid').isotope({
             // set itemSelector so .grid-sizer is not used in layout

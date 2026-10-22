@@ -245,7 +245,10 @@
                 left: 20px;
             }
         </style>
-        <link rel="stylesheet" href="{{ asset_v('assets/front/css/whatsapp-widget.css') }}">
+        {{-- Isolated floating widget, not part of page layout — safe to load
+             non-render-blocking same as the color overlays above. --}}
+        <link rel="preload" as="style" href="{{ asset_v('assets/front/css/whatsapp-widget.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="{{ asset_v('assets/front/css/whatsapp-widget.css') }}"></noscript>
     @endif
     @if (count($langs) == 0)
         <style media="screen">
@@ -278,12 +281,18 @@
     @if ($be->theme_version == 'dark')
         <!-- dark version css -->
         <link rel="stylesheet" href="{{ asset_v('assets/front/css/dark.css') }}">
+        {{-- Same as commonBaseColorHref/baseColorHref above: pure CSS-variable
+             files, not layout — safe to preload+swap. --}}
+        @php
+            $darkBaseColorHref = url('/') . '/assets/front/css/dark-base-color.php?color=' . $bs->base_color;
+            $darkGlassVarsHref = url('/') . '/assets/front/css/dark-glass-vars.php?color=' . $bs->base_color . '&color2=' . $bs->secondary_base_color;
+        @endphp
         <!-- dark version base color change -->
-        <link href="{{ url('/') }}/assets/front/css/dark-base-color.php?color={{ $bs->base_color }}"
-            rel="stylesheet">
+        <link rel="preload" as="style" href="{{ $darkBaseColorHref }}" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="{{ $darkBaseColorHref }}"></noscript>
         <!-- dark glass theme: centralized CSS vars driven by admin base/secondary color -->
-        <link href="{{ url('/') }}/assets/front/css/dark-glass-vars.php?color={{ $bs->base_color }}&color2={{ $bs->secondary_base_color }}"
-            rel="stylesheet">
+        <link rel="preload" as="style" href="{{ $darkGlassVarsHref }}" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="{{ $darkGlassVarsHref }}"></noscript>
         <link rel="stylesheet" href="{{ asset_v('assets/front/css/dark-glass.css') }}">
     @endif
 
@@ -292,9 +301,6 @@
         <link rel="stylesheet" href="{{ asset_v('assets/front/css/rtl.css') }}">
         <link rel="stylesheet" href="{{ asset_v('assets/front/css/pb-rtl.css') }}">
     @endif
-    <!-- jquery js -->
-    <script src="{{ asset('assets/front/js/jquery-3.3.1.min.js') }}"></script>
-
     <!-- Start of Facebook Pixel Code -->
     @if ($be->is_facebook_pexel == 1)
         {!! $be->facebook_pexel_script !!}
@@ -754,6 +760,12 @@
         var vap_pub_key = "{{ env('VAPID_PUBLIC_KEY') }}";
         var rtl = {{ $rtl }};
     </script>
+    {{-- Moved out of <head>: nothing above this point in <body> touches
+         jQuery (checked), and every script that needs it is sync-loaded
+         right after this in the same document order, so load order is
+         unchanged — this just stops it blocking first paint. --}}
+    <!-- jquery js -->
+    <script src="{{ asset('assets/front/js/jquery-3.3.1.min.js') }}"></script>
     <!-- popper js -->
     <script src="{{ asset('assets/front/js/popper.min.js') }}"></script>
     <!-- bootstrap js -->

@@ -465,6 +465,7 @@ function loadItems(page) {
 
           template.find('.square').append(image);
           template.find('.item_name').text(item.name);
+          template.find('.file_size').text(item.size || '');
           template.find('time').text((new Date(item.time * 1000)).toLocaleString());
 
           $('#content').append(template);

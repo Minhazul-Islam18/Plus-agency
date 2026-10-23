@@ -10,7 +10,14 @@ class ConvertUploadedLfmImage
     public function handle(ImageWasUploaded $event)
     {
         $path = $event->path();
-        ImageConverter::handle($path);
+        // The upload modal's checkbox always sends this (default checked) —
+        // its absence means the request came from somewhere that doesn't
+        // know about it (summernote, an API client), so fall back to the
+        // site-wide setting rather than silently skipping conversion.
+        $override = request()->has('optimize_convert')
+            ? request()->boolean('optimize_convert')
+            : null;
+        ImageConverter::handle($path, $override);
 
         // unisharp/laravel-filemanager v2.12.1's LfmPath::upload() recomputes
         // the event path AFTER generateThumbnail() runs, but that method sets
@@ -23,7 +30,7 @@ class ConvertUploadedLfmImage
         if (preg_match('#/thumbs/([^/]+)$#', $path, $m)) {
             $mainPath = preg_replace('#/thumbs/[^/]+$#', '/' . $m[1], $path);
             if ($mainPath !== $path) {
-                ImageConverter::handle($mainPath);
+                ImageConverter::handle($mainPath, $override);
             }
         }
     }

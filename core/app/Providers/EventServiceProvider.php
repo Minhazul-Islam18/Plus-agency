@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use UniSharp\LaravelFilemanager\Events\ImageWasUploaded;
+use UniSharp\LaravelFilemanager\Events\FileWasUploaded;
 use App\Services\ImageConverter;
 
 class EventServiceProvider extends ServiceProvider
@@ -24,6 +25,12 @@ class EventServiceProvider extends ServiceProvider
         // ImageConverter internally no-ops for non-raster/skip-listed types.
         ImageWasUploaded::class => [
             \App\Listeners\ConvertUploadedLfmImage::class,
+        ],
+        // FileWasUploaded fires for every upload (image or not) — the
+        // listener itself no-ops on non-images via copy_resized_image()'s
+        // own getimagesize() guard, same pattern as ImageConverter above.
+        FileWasUploaded::class => [
+            \App\Listeners\ResizeUploadedLfmFile::class,
         ],
     ];
 

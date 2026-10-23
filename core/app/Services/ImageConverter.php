@@ -17,8 +17,13 @@ class ImageConverter
      * Compress + convert a just-uploaded LFM file in place, per the admin's
      * Image Optimization setting. Rewrites the file under a new extension,
      * deletes the original, and rebuilds its LFM thumbnail to match.
+     *
+     * @param bool|null $enabledOverride  Per-upload on/off from the LFM
+     *                                    upload modal's checkbox — null
+     *                                    (default) falls back to the
+     *                                    site-wide BasicExtra setting.
      */
-    public static function handle(string $absolutePath): void
+    public static function handle(string $absolutePath, ?bool $enabledOverride = null): void
     {
         if (!is_file($absolutePath) || !extension_loaded('imagick')) {
             return;
@@ -30,7 +35,8 @@ class ImageConverter
         }
 
         $bex = BasicExtra::first();
-        if (!$bex || !$bex->image_convert_enabled) {
+        $enabled = $enabledOverride ?? (bool) ($bex->image_convert_enabled ?? false);
+        if (!$bex || !$enabled) {
             return;
         }
 

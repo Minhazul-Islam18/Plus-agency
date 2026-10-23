@@ -34,6 +34,23 @@
         }
     </style>
     @endif
+    {{-- File size: the stock item-template only ever had name + time, size
+         was never part of this package's Vue-compiled UI. Grid view stays
+         thumbnail-only like time already does — list view is where size
+         actually matters (PDFs/docs/zips default to list, per config/lfm.php
+         folder_categories). --}}
+    <style>
+        .file_size {
+            margin-top: 2px;
+            font-size: .85rem;
+        }
+        .grid .file_size {
+            display: none;
+        }
+        .file_size:empty {
+            display: none;
+        }
+    </style>
     {{-- Use the line below instead of the above if you need to cache the css. --}}
     {{-- <link rel="stylesheet" href="{{ asset('/assets/lfm/css/lfm.css') }}"> --}}
 
@@ -113,6 +130,7 @@
 
                 <div class="info">
                     <div class="item_name text-truncate"></div>
+                    <span class="file_size text-muted font-weight-light text-truncate"></span>
                     <time class="text-muted font-weight-light text-truncate"></time>
                 </div>
             </a>
@@ -141,6 +159,45 @@
                         <input type='hidden' name='type' id='type' value='{{ request("type") }}'>
                         <input type='hidden' name='_token' value='{{csrf_token()}}'>
                     </form>
+                    @php
+                        $lfmBex = \App\BasicExtra::first();
+                        $lfmConvertFormat = strtoupper($lfmBex->image_convert_format ?? 'webp');
+                        $lfmConvertQuality = $lfmBex->image_convert_quality ?? 80;
+                        $lfmConvertGloballyOn = ($lfmBex->image_convert_enabled ?? 0) == 1;
+                        $lfmResizeGloballyOn = ($lfmBex->image_resize_enabled ?? 1) == 1;
+                        $lfmResizeMaxWidth = $lfmBex->image_resize_max_width ?? 1920;
+                        $lfmResizeMaxHeight = $lfmBex->image_resize_max_height ?? 1920;
+                    @endphp
+                    {{-- Only on the real standalone file manager (?page=file-manager) —
+                         every picker modal opened from a specific admin form (Logo,
+                         Partner, Tender, Preloader...) already shows its OWN
+                         field-sized resize toggle right under its "Choose Image"
+                         button. Showing this generic one too there is a confusing
+                         duplicate. The generic resize/convert still runs here with
+                         its default (site-wide) settings either way — it's just not
+                         shown — and is harmless noise at worst, since the
+                         field-specific resize that follows on save always ends up
+                         the tighter, binding constraint. --}}
+                    @if (!empty(request()->input('page')) && request()->input('page') == 'file-manager')
+                        <div class="mt-3 mb-2">
+                            @include('admin.partials._image-optimize-toggle', [
+                                'field' => 'resize',
+                                'label' => 'Resize oversized images',
+                                'icon' => 'fa-compress-arrows-alt',
+                                'checked' => $lfmResizeGloballyOn,
+                                'maxWidth' => $lfmResizeMaxWidth,
+                                'maxHeight' => $lfmResizeMaxHeight,
+                            ])
+                            @include('admin.partials._image-optimize-toggle', [
+                                'field' => 'convert',
+                                'label' => 'Compress & convert format',
+                                'icon' => 'fa-file-image',
+                                'checked' => $lfmConvertGloballyOn,
+                                'notice' => "Converts to {$lfmConvertFormat} at {$lfmConvertQuality}% quality (site-wide default is "
+                                    . ($lfmConvertGloballyOn ? 'ON' : 'OFF') . ' — change it on Basic Info settings). Animated GIFs and SVGs are never converted.',
+                            ])
+                        </div>
+                    @endif
                     <p class="text-warning mb-0 mt-3">** Maximum File Size 10 MB [Make sure max upload size in your server config is >= 10MB]</p>
                     <p class="text-warning mb-0">** png, jpg, jpeg, svg, gif, webp, avif, pdf, zip, txt, mp4 files are allowed</p>
                 </div>
@@ -507,6 +564,24 @@
                     },
                     init: function() {
                         var _this = this; // For the closure
+                        // The toggle switches live outside the <form> Dropzone
+                        // submits (informational UI, not native form fields)
+                        // — read their hidden-input values at send time and
+                        // append them to the actual upload request. They only
+                        // render on the standalone file manager (?page=file-
+                        // manager) — when opened as a picker modal from another
+                        // form, neither element exists, so nothing is sent for
+                        // either param and the backend listeners correctly fall
+                        // back to the site-wide Basic Info setting instead.
+                        // Sending a hardcoded '1' here when the element is
+                        // missing would force resize/convert ON even if the
+                        // admin turned the global setting OFF.
+                        this.on('sending', function(file, xhr, formData) {
+                            var resizeEl = document.getElementById('optimize_resize');
+                            var convertEl = document.getElementById('optimize_convert');
+                            if (resizeEl) formData.append('optimize_resize', resizeEl.value);
+                            if (convertEl) formData.append('optimize_convert', convertEl.value);
+                        });
                         this.on('success', function(file, response) {
                             if (response == 'OK') {
                                 loadFolders();

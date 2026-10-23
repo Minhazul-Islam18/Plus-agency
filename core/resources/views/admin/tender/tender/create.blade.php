@@ -85,6 +85,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
                 <p class="text-warning mb-0"><small>Recommended size: 800x400px (2:1 landscape). The image is cropped to fit this ratio.</small></p>
                 <p class="em text-danger mb-0" id="errtender_image"></p>
+                @include('admin.partials._image-optimize-toggle', ['field' => 'tender_image', 'maxWidth' => 1000, 'maxHeight' => 600])
               </div>
 
               {{-- Country & Tender ID --}}
@@ -315,6 +316,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                 <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
                 <p class="text-warning mb-0"><small>Recommended size: 700x800px (7:8 portrait). The image is cropped to fit this ratio.</small></p>
                 <p class="em text-danger mb-0" id="errexpert_image"></p>
+                @include('admin.partials._image-optimize-toggle', ['field' => 'expert_image', 'maxWidth' => 300, 'maxHeight' => 300])
               </div>
 
               <div class="form-group">

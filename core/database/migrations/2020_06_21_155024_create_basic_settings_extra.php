@@ -28,6 +28,16 @@ class CreateBasicSettingsExtra extends Migration
         $table->string('image_convert_format', 10)->default('webp');
         $table->unsignedTinyInteger('image_convert_quality')->default(80);
 
+        // Auto-resize oversized LFM uploads (the generic file-manager path —
+        // admin forms with their own display-size bound, like Logo/Partner/
+        // Tender, call copy_resized_image() directly and aren't governed by
+        // this). Editable at admin/basicinfo; read by
+        // ResizeUploadedLfmFile as the default when a given upload's own
+        // per-request toggle is absent.
+        $table->tinyInteger('image_resize_enabled')->default(1);
+        $table->unsignedInteger('image_resize_max_width')->default(1920);
+        $table->unsignedInteger('image_resize_max_height')->default(1920);
+
         // LFM upload size caps (MB), read live by AppServiceProvider::boot()
         // to override config/lfm.php's static defaults. Editable at
         // admin/basicinfo instead of requiring a code deploy.
@@ -52,6 +62,14 @@ class CreateBasicSettingsExtra extends Migration
       Schema::table('basic_settings_extra', function (Blueprint $table) {
         $table->string('cloudflare_zone_id')->nullable();
         $table->string('cloudflare_api_token')->nullable();
+      });
+    }
+
+    if (Schema::hasTable('basic_settings_extra') && !Schema::hasColumn('basic_settings_extra', 'image_resize_enabled')) {
+      Schema::table('basic_settings_extra', function (Blueprint $table) {
+        $table->tinyInteger('image_resize_enabled')->default(1);
+        $table->unsignedInteger('image_resize_max_width')->default(1920);
+        $table->unsignedInteger('image_resize_max_height')->default(1920);
       });
     }
   }

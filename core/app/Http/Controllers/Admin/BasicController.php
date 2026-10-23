@@ -29,6 +29,9 @@ class BasicController extends Controller
             'image_convert_enabled' => 'required|in:0,1',
             'image_convert_format' => 'required|in:webp,avif',
             'image_convert_quality' => 'required|integer|min:1|max:100',
+            'image_resize_enabled' => 'required|in:0,1',
+            'image_resize_max_width' => 'required|integer|min:50|max:10000',
+            'image_resize_max_height' => 'required|integer|min:50|max:10000',
         ]);
 
         $bexs = BasicExtra::all();
@@ -36,6 +39,9 @@ class BasicController extends Controller
             $bex->image_convert_enabled = $request->image_convert_enabled;
             $bex->image_convert_format = $request->image_convert_format;
             $bex->image_convert_quality = $request->image_convert_quality;
+            $bex->image_resize_enabled = $request->image_resize_enabled;
+            $bex->image_resize_max_width = $request->image_resize_max_width;
+            $bex->image_resize_max_height = $request->image_resize_max_height;
             $bex->save();
         }
 
@@ -151,10 +157,13 @@ class BasicController extends Controller
             $bss = BasicSetting::all();
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
+            $optimize = $request->boolean('optimize_logo', true);
             foreach ($bss as $key => $bs) {
                 @unlink(FRONT_IMG_PATH . $bs->logo);
                 $filename = uniqid() . '.' . $extLogo;
-                @copy($logo, FRONT_IMG_PATH . $filename);
+                $dest = FRONT_IMG_PATH . $filename;
+                // Recommended 300x80 — 600x160 covers 2x retina headers.
+                $optimize ? copy_resized_image($logo, $dest, 600, 160) : @copy($logo, $dest);
 
                 $bs->logo = $filename;
                 $bs->save();
@@ -165,10 +174,12 @@ class BasicController extends Controller
 
             $bss = BasicSetting::all();
 
+            $optimize = $request->boolean('optimize_email_logo', true);
             foreach ($bss as $key => $bs) {
                 @unlink(FRONT_IMG_PATH . $bs->email_logo);
                 $filename = uniqid() . '.' . $extEmailLogo;
-                @copy($emailLogo, FRONT_IMG_PATH . $filename);
+                $dest = FRONT_IMG_PATH . $filename;
+                $optimize ? copy_resized_image($emailLogo, $dest, 600, 160) : @copy($emailLogo, $dest);
 
                 $bs->email_logo = $filename;
                 $bs->save();
@@ -180,10 +191,13 @@ class BasicController extends Controller
             $bss = BasicSetting::all();
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
+            $optimize = $request->boolean('optimize_favicon', true);
             foreach ($bss as $key => $bs) {
                 @unlink(FRONT_IMG_PATH . $bs->favicon);
                 $filename = uniqid() . '.' . $extFav;
-                @copy($favicon, FRONT_IMG_PATH . $filename);
+                $dest = FRONT_IMG_PATH . $filename;
+                // Recommended 40x40 — 128x128 gives real retina/apple-touch-icon headroom.
+                $optimize ? copy_resized_image($favicon, $dest, 128, 128) : @copy($favicon, $dest);
 
                 $bs->favicon = $filename;
                 $bs->save();
@@ -195,10 +209,14 @@ class BasicController extends Controller
             $bss = BasicSetting::all();
             // only remove the the previous image, if it is not the same as default image or the first image is being updated
 
+            $optimize = $request->boolean('optimize_breadcrumb', true);
             foreach ($bss as $key => $bs) {
                 @unlink(FRONT_IMG_PATH . $bs->breadcrumb);
                 $filename = uniqid() . '.' . $extBread;
-                @copy($breadcrumb, FRONT_IMG_PATH . $filename);
+                $dest = FRONT_IMG_PATH . $filename;
+                // 1920x350 is already the actual full-bleed banner size, not
+                // just a crop-safe minimum — no retina multiplier needed.
+                $optimize ? copy_resized_image($breadcrumb, $dest, 1920, 350) : @copy($breadcrumb, $dest);
 
                 $bs->breadcrumb = $filename;
                 $bs->save();
@@ -288,7 +306,14 @@ class BasicController extends Controller
 
         if ($request->filled('preloader')) {
             $filename = uniqid() . '.' . $extPreloader;
-            @copy($preloader, FRONT_IMG_PATH . $filename);
+            $dest = FRONT_IMG_PATH . $filename;
+            if ($request->boolean('optimize_preloader', true)) {
+                // Displayed at 44x44 — 120x120 covers ~2.7x retina. Animated
+                // GIFs keep their animation (see copy_resized_image()).
+                copy_resized_image($preloader, $dest, 120, 120);
+            } else {
+                @copy($preloader, $dest);
+            }
         }
 
         $bexs = BasicExtra::all();

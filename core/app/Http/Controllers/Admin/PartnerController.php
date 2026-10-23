@@ -76,7 +76,15 @@ class PartnerController extends Controller
 
         if ($request->filled('image')) {
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
+            $dest = FRONT_IMG_PATH . self::IMG_SUBDIR . $filename;
+            if ($request->boolean('optimize_image', true)) {
+                // Logos render at ~28px tall in the hero marquee — 400x150
+                // covers up to ~5x retina with real headroom to spare,
+                // instead of serving whatever resolution the admin uploaded.
+                copy_resized_image($image, $dest, 400, 150);
+            } else {
+                @copy($image, $dest);
+            }
             $partner->image = $filename;
         }
 
@@ -122,7 +130,12 @@ class PartnerController extends Controller
         if ($request->filled('image')) {
             @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $partner->image);
             $filename = uniqid() . '.' . $extImage;
-            @copy($image, FRONT_IMG_PATH . self::IMG_SUBDIR . $filename);
+            $dest = FRONT_IMG_PATH . self::IMG_SUBDIR . $filename;
+            if ($request->boolean('optimize_image', true)) {
+                copy_resized_image($image, $dest, 400, 150);
+            } else {
+                @copy($image, $dest);
+            }
             $partner->image = $filename;
         }
 

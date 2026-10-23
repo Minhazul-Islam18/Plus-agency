@@ -346,6 +346,7 @@ $selLang = \App\Language::where('code', request()->input('language'))->first();
                     <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
                     <p class="text-warning mb-0"><small>Recommended size: 300x150px (landscape, transparent background). Displayed at natural size, not cropped.</small></p>
                     <p class="em text-danger mb-0" id="errimage"></p>
+                    @include('admin.partials._image-optimize-toggle', ['field' => 'image', 'maxWidth' => 400, 'maxHeight' => 150])
 
                 </div>
                 <div class="form-group">

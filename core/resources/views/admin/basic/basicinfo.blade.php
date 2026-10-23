@@ -273,6 +273,49 @@
                 </div>
               </div>
             </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Auto Resize</label>
+                  <div class="selectgroup w-100">
+                    <label class="selectgroup-item">
+                      <input type="radio" name="image_resize_enabled" value="1"
+                        class="selectgroup-input" {{ $abx->image_resize_enabled == 1 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">Active</span>
+                    </label>
+                    <label class="selectgroup-item">
+                      <input type="radio" name="image_resize_enabled" value="0"
+                        class="selectgroup-input" {{ $abx->image_resize_enabled == 0 ? 'checked' : '' }}>
+                      <span class="selectgroup-button">Deactive</span>
+                    </label>
+                  </div>
+                  @if ($errors->has('image_resize_enabled'))
+                    <p class="mb-0 text-danger">{{ $errors->first('image_resize_enabled') }}</p>
+                  @endif
+                  <small class="text-muted">Shrinks oversized File Manager uploads to fit the bounds below (aspect ratio kept). Admin forms with their own recommended size (Logo, Partners, Tenders, etc.) use that size instead of this one.</small>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Max Width (px)</label>
+                  <input type="number" class="form-control" name="image_resize_max_width" min="50" max="10000"
+                    value="{{ $abx->image_resize_max_width ?? 1920 }}">
+                  @if ($errors->has('image_resize_max_width'))
+                    <p class="mb-0 text-danger">{{ $errors->first('image_resize_max_width') }}</p>
+                  @endif
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label>Max Height (px)</label>
+                  <input type="number" class="form-control" name="image_resize_max_height" min="50" max="10000"
+                    value="{{ $abx->image_resize_max_height ?? 1920 }}">
+                  @if ($errors->has('image_resize_max_height'))
+                    <p class="mb-0 text-danger">{{ $errors->first('image_resize_max_height') }}</p>
+                  @endif
+                </div>
+              </div>
+            </div>
           </div>
           <div class="card-footer">
             <div class="form">

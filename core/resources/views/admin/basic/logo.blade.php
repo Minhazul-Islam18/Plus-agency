@@ -58,6 +58,7 @@
                                 @if ($errors->has('logo'))
                                 <p class="text-danger mb-0">{{$errors->first('logo')}}</p>
                                 @endif
+                                @include('admin.partials._image-optimize-toggle', ['field' => 'logo', 'maxWidth' => 600, 'maxHeight' => 160])
 
                                 <!-- Logo LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -90,6 +91,7 @@
                                 @if ($errors->has('email_logo'))
                                 <p class="text-danger mb-0">{{$errors->first('email_logo')}}</p>
                                 @endif
+                                @include('admin.partials._image-optimize-toggle', ['field' => 'email_logo', 'maxWidth' => 600, 'maxHeight' => 160])
 
                                 <!-- Email Logo LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal4" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -124,6 +126,7 @@
                                 @if ($errors->has('favicon'))
                                 <p class="text-danger mb-0">{{$errors->first('favicon')}}</p>
                                 @endif
+                                @include('admin.partials._image-optimize-toggle', ['field' => 'favicon', 'maxWidth' => 128, 'maxHeight' => 128])
 
                                 <!-- favicon LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -158,6 +161,7 @@
                                 @if ($errors->has('breadcrumb'))
                                 <p class="text-danger mb-0">{{$errors->first('breadcrumb')}}</p>
                                 @endif
+                                @include('admin.partials._image-optimize-toggle', ['field' => 'breadcrumb', 'maxWidth' => 1920, 'maxHeight' => 350])
 
                                 <!-- breadcrumb LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal3" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">

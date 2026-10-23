@@ -361,7 +361,12 @@ class TenderController extends Controller
             $filename = uniqid() . '.' . $extImage;
             $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
-            @copy($image, $dir . $filename);
+            if ($request->boolean('optimize_tender_image', true)) {
+                // Card thumbnail, 16:9 — 1000x600 covers a wide desktop card at 2x retina.
+                copy_resized_image($image, $dir . $filename, 1000, 600);
+            } else {
+                @copy($image, $dir . $filename);
+            }
             $tender->tender_image = $filename;
         }
 
@@ -369,7 +374,11 @@ class TenderController extends Controller
             $filename = uniqid() . '.' . $extExpImage;
             $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
-            @copy($expImage, $dir . $filename);
+            if ($request->boolean('optimize_expert_image', true)) {
+                copy_resized_image($expImage, $dir . $filename, 300, 300);
+            } else {
+                @copy($expImage, $dir . $filename);
+            }
             $tender->expert_image = $filename;
         } elseif ($request->expert_source === 'member') {
             $member = Member::find($request->expert_member_id);
@@ -378,7 +387,7 @@ class TenderController extends Controller
                 $filename = uniqid() . '.' . $srcExt;
                 $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
                 @mkdir($dir, 0775, true);
-                @copy(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename);
+                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 300, 300);
                 $tender->expert_image = $filename;
             }
         }
@@ -406,7 +415,13 @@ class TenderController extends Controller
             $ogFilename = uniqid() . '.' . $extOgImage;
             $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
-            @copy($request->og_image, $dir . $ogFilename);
+            if ($request->boolean('optimize_og_image', true)) {
+                // 1200x630 is the standard social-share card size — don't
+                // shrink below what Facebook/LinkedIn/Twitter expect.
+                copy_resized_image($request->og_image, $dir . $ogFilename, 1200, 630);
+            } else {
+                @copy($request->og_image, $dir . $ogFilename);
+            }
             $tender->og_image = $ogFilename;
         }
 
@@ -554,7 +569,11 @@ class TenderController extends Controller
             $filename = uniqid() . '.' . $extImage;
             $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
-            @copy($image, $dir . $filename);
+            if ($request->boolean('optimize_tender_image', true)) {
+                copy_resized_image($image, $dir . $filename, 1000, 600);
+            } else {
+                @copy($image, $dir . $filename);
+            }
             $tender->tender_image = $filename;
         }
 
@@ -562,7 +581,11 @@ class TenderController extends Controller
             $filename = uniqid() . '.' . $extExpImage;
             $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
-            @copy($expImage, $dir . $filename);
+            if ($request->boolean('optimize_expert_image', true)) {
+                copy_resized_image($expImage, $dir . $filename, 300, 300);
+            } else {
+                @copy($expImage, $dir . $filename);
+            }
             $tender->expert_image = $filename;
         } elseif ($request->expert_source === 'member' && (int) $request->expert_member_id !== (int) $tender->expert_member_id) {
             $member = Member::find($request->expert_member_id);
@@ -571,7 +594,7 @@ class TenderController extends Controller
                 $filename = uniqid() . '.' . $srcExt;
                 $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
                 @mkdir($dir, 0775, true);
-                @copy(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename);
+                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 300, 300);
                 $tender->expert_image = $filename;
             }
         }
@@ -602,7 +625,11 @@ class TenderController extends Controller
             if (!empty($tender->og_image)) {
                 @unlink($dir . $tender->og_image);
             }
-            @copy($request->og_image, $dir . $ogFilename);
+            if ($request->boolean('optimize_og_image', true)) {
+                copy_resized_image($request->og_image, $dir . $ogFilename, 1200, 630);
+            } else {
+                @copy($request->og_image, $dir . $ogFilename);
+            }
             $tender->og_image = $ogFilename;
         }
 

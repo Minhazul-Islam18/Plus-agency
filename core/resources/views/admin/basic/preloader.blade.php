@@ -68,6 +68,7 @@
                         @if ($errors->has('preloader'))
                         <p class="text-danger mb-0">{{$errors->first('preloader')}}</p>
                         @endif
+                        @include('admin.partials._image-optimize-toggle', ['field' => 'preloader', 'maxWidth' => 120, 'maxHeight' => 120])
 
                         <!-- preloader LFM Modal -->
                         <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">

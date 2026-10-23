@@ -107,6 +107,153 @@ if (! function_exists('allowed_image_extensions_label')) {
 }
 
 
+if (! function_exists('copy_resized_image')) {
+    /**
+     * Copy an LFM-picked image to its final asset destination, downscaling
+     * it first if it's bigger than the given display bounds. Every failure
+     * mode (SVG, undecodable file, missing GD/Imagick format support) falls
+     * back to a plain copy() rather than erroring the admin's save — a
+     * resize that can't happen should never be worse than today's behavior.
+     */
+    function copy_resized_image(string $source, string $dest, int $maxWidth, int $maxHeight, int $quality = 82): bool
+    {
+        // Captured up front, before anything is written — $source and $dest
+        // are allowed to be the SAME path (in-place resize, e.g. the LFM
+        // upload listener), so this must not be re-read after $dest has
+        // potentially already been overwritten.
+        $originalSize = @filesize($source);
+
+        $ext = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        if ($ext === 'svg' || !is_file($source) || $originalSize === false) {
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        $info = @getimagesize($source);
+        if (!$info || ($info[0] <= $maxWidth && $info[1] <= $maxHeight)) {
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        [$width, $height, $type] = $info;
+
+        // Every encode path below writes to its own temp file first, never
+        // directly to $dest — that's what makes $source === $dest safe, and
+        // what lets the "never end up bigger than the original" check below
+        // compare against a real, untouched original size.
+        $tmp = $dest . '.resize-tmp-' . bin2hex(random_bytes(4));
+
+        // Animated GIF: GD's imagegif() only ever keeps the first frame —
+        // resizing through GD would silently kill the animation. Imagick
+        // resizes every frame and re-exports the animation intact.
+        if ($type === IMAGETYPE_GIF && is_animated_gif($source)) {
+            try {
+                $img = new \Imagick($source);
+                $img = $img->coalesceImages();
+                foreach ($img as $frame) {
+                    $frame->resizeImage($maxWidth, $maxHeight, \Imagick::FILTER_LANCZOS, 1, true);
+                }
+                $img = $img->deconstructImages();
+                $ok = $img->writeImages($tmp, true);
+                $img->destroy();
+            } catch (\Throwable $e) {
+                $ok = false;
+            }
+
+            return finish_resized_image($tmp, $source, $dest, $originalSize, $ok);
+        }
+
+        $createFn = [
+            IMAGETYPE_JPEG => 'imagecreatefromjpeg',
+            IMAGETYPE_PNG  => 'imagecreatefrompng',
+            IMAGETYPE_GIF  => 'imagecreatefromgif',
+            IMAGETYPE_WEBP => 'imagecreatefromwebp',
+            IMAGETYPE_AVIF => 'imagecreatefromavif',
+        ][$type] ?? null;
+
+        if (!$createFn || !function_exists($createFn)) {
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        $src = @$createFn($source);
+        if (!$src) {
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        $ratio = min($maxWidth / $width, $maxHeight / $height);
+        $newWidth = max(1, (int) round($width * $ratio));
+        $newHeight = max(1, (int) round($height * $ratio));
+
+        $dst = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+        imagefilledrectangle($dst, 0, 0, $newWidth, $newHeight, $transparent);
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        $ok = match ($type) {
+            IMAGETYPE_JPEG => imagejpeg($dst, $tmp, $quality),
+            // PNG's second arg is a compression LEVEL (0-9), not a quality
+            // trade-off — PNG is lossless either way, so max compression is
+            // always correct (it only costs CPU time, never visual quality).
+            // Mapping it from $quality like JPEG was backwards: it produced
+            // a LOW compression level, which made small flat-color logos
+            // bigger after resizing than the original, not smaller.
+            IMAGETYPE_PNG  => imagepng($dst, $tmp, 9),
+            IMAGETYPE_GIF  => imagegif($dst, $tmp),
+            IMAGETYPE_WEBP => imagewebp($dst, $tmp, $quality),
+            IMAGETYPE_AVIF => imageavif($dst, $tmp, $quality),
+            default        => false,
+        };
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return finish_resized_image($tmp, $source, $dest, $originalSize, $ok);
+    }
+}
+
+if (! function_exists('finish_resized_image')) {
+    /**
+     * Shared tail end of copy_resized_image(): $tmp holds the resize
+     * attempt's output (if $ok). Keep it only if it's smaller than the
+     * original — resampling can make already-optimized flat-color graphics
+     * bigger despite fewer pixels (confirmed on real files) — otherwise
+     * fall back to the untouched original. Always ends with exactly one of
+     * $tmp/$dest/$source present at $dest, never both, regardless of
+     * whether $source === $dest.
+     */
+    function finish_resized_image(string $tmp, string $source, string $dest, int|false $originalSize, bool $ok): bool
+    {
+        if (!$ok || !is_file($tmp)) {
+            @unlink($tmp);
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        if ($originalSize !== false && filesize($tmp) >= $originalSize) {
+            @unlink($tmp);
+            return $source === $dest ? true : @copy($source, $dest);
+        }
+
+        if ($source === $dest) {
+            @unlink($source);
+        }
+
+        return rename($tmp, $dest);
+    }
+}
+
+if (! function_exists('is_animated_gif')) {
+    function is_animated_gif(string $path): bool
+    {
+        $contents = @file_get_contents($path);
+        if ($contents === false) {
+            return false;
+        }
+
+        return substr_count($contents, "\x00\x21\xF9\x04") > 1;
+    }
+}
+
+
 if (! function_exists('max_upload_size_label')) {
     /**
      * e.g. "20 MB" — the real, admin-configurable LFM upload limit (see

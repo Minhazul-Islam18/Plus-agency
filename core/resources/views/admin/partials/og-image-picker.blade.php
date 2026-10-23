@@ -30,7 +30,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    <iframe src="{{ url('laravel-filemanager') }}?serial={{ $ogSerial }}"
+                    <iframe src="{{ url('laravel-filemanager') }}?serial={{ $ogSerial }}&rw=1200&rh=630&rl=Social+Share+Image"
                         style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                 </div>
             </div>

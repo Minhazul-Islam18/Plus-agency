@@ -161,7 +161,7 @@
                                                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-body p-0">
-                                                            <iframe src="{{ url('laravel-filemanager') }}?serial=1"
+                                                            <iframe src="{{ url('laravel-filemanager') }}?serial=1&rw=1200&rh=930&rl=Intro+Image"
                                                                 style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                                         </div>
                                                     </div>

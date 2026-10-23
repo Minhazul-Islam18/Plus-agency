@@ -84,7 +84,7 @@
                         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div class="modal-content">
                                 <div class="modal-body p-0">
-                                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                    <iframe src="{{url('laravel-filemanager')}}?serial=1&rw=600&rh=800&rl=Testimonial+Image" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                 </div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div class="modal-content">
                                 <div class="modal-body p-0">
-                                    <iframe src="{{url('laravel-filemanager')}}?serial=2" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                    <iframe src="{{url('laravel-filemanager')}}?serial=2&rw=200&rh=200&rl=Company+Logo" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                 </div>
                             </div>
                         </div>

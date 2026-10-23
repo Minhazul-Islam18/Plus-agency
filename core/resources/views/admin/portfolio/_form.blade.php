@@ -596,7 +596,7 @@
                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-body p-0">
-                                <iframe src="{{ url('laravel-filemanager') }}?serial=1&callback=lfmNoop"
+                                <iframe src="{{ url('laravel-filemanager') }}?serial=1&rw=1200&rh=1500&rl=Portfolio+Image&callback=lfmNoop"
                                     style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
                             </div>
                         </div>
@@ -627,7 +627,7 @@
                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-body p-0">
-                                <iframe src="{{ url('laravel-filemanager') }}?serial=4&callback=lfmNoop"
+                                <iframe src="{{ url('laravel-filemanager') }}?serial=4&rw=300&rh=100&rl=Client+Logo&callback=lfmNoop"
                                     style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
                             </div>
                         </div>
@@ -656,7 +656,7 @@
                         <div class="modal-content">
                             <div class="modal-body p-0">
                                 <iframe id="lfmIframe2"
-                                    src="{{ url('laravel-filemanager') }}?serial=2&callback=lfmNoop{{ $isEdit ? '&portfolio=' . $portfolio->id : '' }}"
+                                    src="{{ url('laravel-filemanager') }}?serial=2&rw=1600&rh=900&rl=Portfolio+Slider&callback=lfmNoop{{ $isEdit ? '&portfolio=' . $portfolio->id : '' }}"
                                     style="width:100%;height:500px;overflow:hidden;border:none;"></iframe>
                             </div>
                         </div>

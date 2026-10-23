@@ -14,10 +14,6 @@
       $seoSiteName         string|null  — site name, shown in the SERP/social preview
       $seoTitleSelector    string       — CSS selector for this page's own "title" input (default '[name="title"]')
       $seoDescSelector     string       — CSS selector for this page's own "meta_description" textarea (default '[name="meta_description"]')
-      $seoOgOptimized      bool         — true only where the controller saving og_image actually calls
-                                          copy_resized_image() on it (checks $request->boolean('optimize_og_image')).
-                                          Only pass true once that's wired — otherwise this shows an "it'll be
-                                          resized" promise the controller never keeps. Default false.
 --}}
 @php
     $seoMetaTitle = $seoMetaTitle ?? '';
@@ -27,7 +23,6 @@
     $seoSiteName = $seoSiteName ?? config('app.name');
     $seoTitleSelector = $seoTitleSelector ?? '[name="title"]';
     $seoDescSelector = $seoDescSelector ?? '[name="meta_description"]';
-    $seoOgOptimized = $seoOgOptimized ?? false;
     $seoBoxId = 'seoMetaBox' . $seoSerial;
 @endphp
 
@@ -54,16 +49,13 @@
         <button id="chooseImage{{ $seoSerial }}" class="choose-image btn btn-primary" type="button"
             data-multiple="false" data-toggle="modal" data-target="#lfmModal{{ $seoSerial }}">Choose Image</button>
         <p class="text-warning mb-0"><small>Recommended size: 1200x630px. Falls back to the main image above when left unset.</small></p>
-        @if ($seoOgOptimized)
-            @include('admin.partials._image-optimize-toggle', ['field' => 'og_image', 'maxWidth' => 1200, 'maxHeight' => 630])
-        @endif
 
         <div class="modal fade lfm-modal" id="lfmModal{{ $seoSerial }}" tabindex="-1" role="dialog" aria-hidden="true">
             <i class="fas fa-times-circle"></i>
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-body p-0">
-                        <iframe src="{{ url('laravel-filemanager') }}?serial={{ $seoSerial }}"
+                        <iframe src="{{ url('laravel-filemanager') }}?serial={{ $seoSerial }}&rw=1200&rh=630&rl=Social+Share+Image"
                             style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                     </div>
                 </div>

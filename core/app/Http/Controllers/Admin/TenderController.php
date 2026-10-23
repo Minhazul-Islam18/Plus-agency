@@ -362,8 +362,8 @@ class TenderController extends Controller
             $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
             if ($request->boolean('optimize_tender_image', true)) {
-                // Card thumbnail, 16:9 — 1000x600 covers a wide desktop card at 2x retina.
-                copy_resized_image($image, $dir . $filename, 1000, 600);
+                // 2:1 landscape, matches the crop ratio the page itself promises — 800x400 is that ratio at 2x retina.
+                copy_resized_image($image, $dir . $filename, 800, 400);
             } else {
                 @copy($image, $dir . $filename);
             }
@@ -375,7 +375,8 @@ class TenderController extends Controller
             $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
             if ($request->boolean('optimize_expert_image', true)) {
-                copy_resized_image($expImage, $dir . $filename, 300, 300);
+                // 7:8 portrait, matches the crop ratio the page itself promises — 700x800 is that ratio at ~1x.
+                copy_resized_image($expImage, $dir . $filename, 700, 800);
             } else {
                 @copy($expImage, $dir . $filename);
             }
@@ -387,7 +388,7 @@ class TenderController extends Controller
                 $filename = uniqid() . '.' . $srcExt;
                 $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
                 @mkdir($dir, 0775, true);
-                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 300, 300);
+                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 700, 800);
                 $tender->expert_image = $filename;
             }
         }
@@ -570,7 +571,8 @@ class TenderController extends Controller
             $dir = FRONT_IMG_PATH . self::TENDER_SUBDIR;
             @mkdir($dir, 0775, true);
             if ($request->boolean('optimize_tender_image', true)) {
-                copy_resized_image($image, $dir . $filename, 1000, 600);
+                // 2:1 landscape, matches the crop ratio the page itself promises — 800x400 is that ratio at 2x retina.
+                copy_resized_image($image, $dir . $filename, 800, 400);
             } else {
                 @copy($image, $dir . $filename);
             }
@@ -582,7 +584,8 @@ class TenderController extends Controller
             $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
             @mkdir($dir, 0775, true);
             if ($request->boolean('optimize_expert_image', true)) {
-                copy_resized_image($expImage, $dir . $filename, 300, 300);
+                // 7:8 portrait, matches the crop ratio the page itself promises — 700x800 is that ratio at ~1x.
+                copy_resized_image($expImage, $dir . $filename, 700, 800);
             } else {
                 @copy($expImage, $dir . $filename);
             }
@@ -594,7 +597,7 @@ class TenderController extends Controller
                 $filename = uniqid() . '.' . $srcExt;
                 $dir = FRONT_IMG_PATH . self::EXPERT_SUBDIR;
                 @mkdir($dir, 0775, true);
-                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 300, 300);
+                copy_resized_image(FRONT_IMG_PATH . 'members/' . $member->image, $dir . $filename, 700, 800);
                 $tender->expert_image = $filename;
             }
         }

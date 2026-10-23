@@ -308,9 +308,9 @@ class BasicController extends Controller
             $filename = uniqid() . '.' . $extPreloader;
             $dest = FRONT_IMG_PATH . $filename;
             if ($request->boolean('optimize_preloader', true)) {
-                // Displayed at 44x44 — 120x120 covers ~2.7x retina. Animated
+                // Matches the size the page itself promises (200x200). Animated
                 // GIFs keep their animation (see copy_resized_image()).
-                copy_resized_image($preloader, $dest, 120, 120);
+                copy_resized_image($preloader, $dest, 200, 200);
             } else {
                 @copy($preloader, $dest);
             }

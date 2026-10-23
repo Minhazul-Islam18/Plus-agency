@@ -78,10 +78,8 @@ class PartnerController extends Controller
             $filename = uniqid() . '.' . $extImage;
             $dest = FRONT_IMG_PATH . self::IMG_SUBDIR . $filename;
             if ($request->boolean('optimize_image', true)) {
-                // Logos render at ~28px tall in the hero marquee — 400x150
-                // covers up to ~5x retina with real headroom to spare,
-                // instead of serving whatever resolution the admin uploaded.
-                copy_resized_image($image, $dest, 400, 150);
+                // 2:1 landscape, matches the ratio the page itself promises (300x150) — 600x300 is that ratio at 2x retina.
+                copy_resized_image($image, $dest, 600, 300);
             } else {
                 @copy($image, $dest);
             }
@@ -132,7 +130,7 @@ class PartnerController extends Controller
             $filename = uniqid() . '.' . $extImage;
             $dest = FRONT_IMG_PATH . self::IMG_SUBDIR . $filename;
             if ($request->boolean('optimize_image', true)) {
-                copy_resized_image($image, $dest, 400, 150);
+                copy_resized_image($image, $dest, 600, 300);
             } else {
                 @copy($image, $dest);
             }

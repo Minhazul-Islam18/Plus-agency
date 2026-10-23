@@ -23,13 +23,14 @@ class ResizeUploadedLfmFile
             return;
         }
 
-        // Generic cap for the standalone file manager / any LFM picker that
-        // isn't one of the specific admin forms with their own display-size-
-        // aware bound (those call copy_resized_image() directly in their
-        // own controller instead, e.g. Logo/Partner/Tender). Editable at
-        // admin/basicinfo.
-        $maxWidth = $bex->image_resize_max_width ?? 1920;
-        $maxHeight = $bex->image_resize_max_height ?? 1920;
+        // The opening picker modal passes its own field's recommended size
+        // (optimize_resize_width/height — e.g. Logo's 600x160) when it has
+        // one, so the upload is resized to the size that field actually
+        // needs. Falls back to the generic site-wide bound (editable at
+        // admin/basicinfo) for the standalone file manager and any picker
+        // that doesn't have a field-specific size.
+        $maxWidth = (int) (request()->input('optimize_resize_width') ?: ($bex->image_resize_max_width ?? 1920));
+        $maxHeight = (int) (request()->input('optimize_resize_height') ?: ($bex->image_resize_max_height ?? 1920));
 
         $path = $event->path();
         copy_resized_image($path, $path, $maxWidth, $maxHeight);

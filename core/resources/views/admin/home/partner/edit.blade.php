@@ -79,7 +79,6 @@
                     <p class="text-warning mb-0">{{ allowed_image_extensions_label() }} images are allowed</p>
                     <p class="text-warning mb-0"><small>Recommended size: 300x150px (landscape, transparent background). Displayed at natural size, not cropped.</small></p>
                     <p class="em text-danger mb-0" id="errimage"></p>
-                    @include('admin.partials._image-optimize-toggle', ['field' => 'image', 'maxWidth' => 400, 'maxHeight' => 150])
 
                     <!-- Image LFM Modal -->
                     <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -87,7 +86,7 @@
                         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div class="modal-content">
                                 <div class="modal-body p-0">
-                                    <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                    <iframe src="{{url('laravel-filemanager')}}?serial=1&rw=600&rh=300&rl=Partner+Logo" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                 </div>
                             </div>
                         </div>

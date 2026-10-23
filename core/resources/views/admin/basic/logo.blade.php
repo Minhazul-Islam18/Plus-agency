@@ -58,7 +58,6 @@
                                 @if ($errors->has('logo'))
                                 <p class="text-danger mb-0">{{$errors->first('logo')}}</p>
                                 @endif
-                                @include('admin.partials._image-optimize-toggle', ['field' => 'logo', 'maxWidth' => 600, 'maxHeight' => 160])
 
                                 <!-- Logo LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -66,7 +65,7 @@
                                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                         <div class="modal-content">
                                             <div class="modal-body p-0">
-                                                <iframe src="{{url('laravel-filemanager')}}?serial=1" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                                <iframe src="{{url('laravel-filemanager')}}?serial=1&rw=600&rh=160&rl=Logo" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -91,7 +90,6 @@
                                 @if ($errors->has('email_logo'))
                                 <p class="text-danger mb-0">{{$errors->first('email_logo')}}</p>
                                 @endif
-                                @include('admin.partials._image-optimize-toggle', ['field' => 'email_logo', 'maxWidth' => 600, 'maxHeight' => 160])
 
                                 <!-- Email Logo LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal4" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -99,7 +97,7 @@
                                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                         <div class="modal-content">
                                             <div class="modal-body p-0">
-                                                <iframe src="{{url('laravel-filemanager')}}?serial=4" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                                <iframe src="{{url('laravel-filemanager')}}?serial=4&rw=600&rh=160&rl=Email+Logo" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -126,7 +124,6 @@
                                 @if ($errors->has('favicon'))
                                 <p class="text-danger mb-0">{{$errors->first('favicon')}}</p>
                                 @endif
-                                @include('admin.partials._image-optimize-toggle', ['field' => 'favicon', 'maxWidth' => 128, 'maxHeight' => 128])
 
                                 <!-- favicon LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal2" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -134,7 +131,7 @@
                                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                         <div class="modal-content">
                                             <div class="modal-body p-0">
-                                                <iframe src="{{url('laravel-filemanager')}}?serial=2" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                                <iframe src="{{url('laravel-filemanager')}}?serial=2&rw=128&rh=128&rl=Favicon" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -161,7 +158,6 @@
                                 @if ($errors->has('breadcrumb'))
                                 <p class="text-danger mb-0">{{$errors->first('breadcrumb')}}</p>
                                 @endif
-                                @include('admin.partials._image-optimize-toggle', ['field' => 'breadcrumb', 'maxWidth' => 1920, 'maxHeight' => 350])
 
                                 <!-- breadcrumb LFM Modal -->
                                 <div class="modal fade lfm-modal" id="lfmModal3" tabindex="-1" role="dialog" aria-labelledby="lfmModalTitle" aria-hidden="true">
@@ -169,7 +165,7 @@
                                     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                         <div class="modal-content">
                                             <div class="modal-body p-0">
-                                                <iframe src="{{url('laravel-filemanager')}}?serial=3" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
+                                                <iframe src="{{url('laravel-filemanager')}}?serial=3&rw=1920&rh=350&rl=Breadcrumb" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
                                             </div>
                                         </div>
                                     </div>

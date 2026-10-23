@@ -124,6 +124,26 @@ return [
 
     'should_validate_mime'     => true,
 
+    // LFM's compiled frontend bundle never reads item.size (confirmed — zero
+    // references to it anywhere in vendor/unisharp's public/js), even though
+    // LfmItem::size() exists server-side and item_columns is how you opt an
+    // attribute into the JSON this config feeds our own overridden
+    // assets/lfm/js/script.js. Without 'size' here, the frontend has nothing
+    // to render no matter what the template does.
+    'item_columns'             => ['name', 'size', 'url', 'time', 'icon', 'is_file', 'is_image', 'thumb_url'],
+
+    // LFM's own extensionIsNotExcutable() check only catches 'php'/'html'
+    // literally, anything starting with 'php' (so php/php3-7, but NOT
+    // phar — "phar" doesn't start with "php"), and anything containing
+    // "html" (catches phtml/shtml). This closes the actual gap left open:
+    // .phar passes every LFM check as-is (confirmed — a GIF-magic-byte-
+    // prefixed .phar sails through mimeTypeIsValid() as image/gif) and
+    // this server's Apache config executes .phar as PHP, same as .php.
+    // Uploads live at a predictable, directly web-accessible path, so an
+    // unblocked executable extension here is upload-to-RCE, not just a
+    // policy violation.
+    'disallowed_extensions'    => ['phar', 'pht', 'pgif', 'phps', 'inc'],
+
     // behavior on files with identical name
     // setting it to true cause old file replace with new one
     // setting it to false show `error-file-exist` error and stop upload

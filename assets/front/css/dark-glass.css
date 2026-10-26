@@ -955,12 +955,13 @@ a.proceed-checkout-btn:hover {
   position: absolute;
   inset: 0;
   z-index: 2;
+  overflow: hidden;
 }
 .dark-hero-video-yt-mount iframe {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   border: none;
   pointer-events: none;
 }

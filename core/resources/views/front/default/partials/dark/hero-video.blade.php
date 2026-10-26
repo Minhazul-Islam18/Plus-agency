@@ -247,6 +247,27 @@
                 return false;
             }
 
+            // YouTube's embed always letterboxes the video at its native
+            // aspect ratio inside the iframe box — unlike the local <video>
+            // element, it has no object-fit:cover equivalent. This is the
+            // standard workaround: oversize the iframe (object-fit:cover's
+            // math, done by hand) so the video itself fills dhvMount, then
+            // crop the excess with overflow:hidden on the mount. Assumes a
+            // 16:9 source (the same ratio recommended for Local file video).
+            function sizeYoutubeIframe(iframe) {
+                var w = ytMount.clientWidth;
+                var h = ytMount.clientHeight;
+                if (!w || !h) return;
+                var ratio = 16 / 9;
+                if (w / h > ratio) {
+                    iframe.style.width = w + 'px';
+                    iframe.style.height = (w / ratio) + 'px';
+                } else {
+                    iframe.style.height = h + 'px';
+                    iframe.style.width = (h * ratio) + 'px';
+                }
+            }
+
             function activateYoutube() {
                 if (ytMount.dataset.activated) return;
                 ytMount.dataset.activated = '1';
@@ -263,6 +284,10 @@
                 iframe.allow = 'autoplay; encrypted-media';
                 iframe.title = '';
                 ytMount.appendChild(iframe);
+                sizeYoutubeIframe(iframe);
+                window.addEventListener('resize', function () {
+                    sizeYoutubeIframe(iframe);
+                });
             }
 
             // Starts right away, not deferred until window 'load' — the local

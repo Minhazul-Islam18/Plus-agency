@@ -61,7 +61,7 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://maxcdn.bootstrapcdn.com https://fonts.googleapis.com",
             "font-src 'self' data: https://fonts.gstatic.com https://maxcdn.bootstrapcdn.com",
             "img-src 'self' data: https:",
-            "frame-src 'self' https://maps.google.com https://www.google.com https://checkout.razorpay.com",
+            "frame-src 'self' https://maps.google.com https://www.google.com https://checkout.razorpay.com https://www.youtube.com",
             "connect-src 'self' https://checkout.razorpay.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://graph.facebook.com",
             "base-uri 'self'",
             "form-action 'self' https://checkout.razorpay.com",

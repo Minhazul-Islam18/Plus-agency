@@ -946,6 +946,25 @@ a.proceed-checkout-btn:hover {
   pointer-events: none;
 }
 
+/* YouTube source: empty until the activation script (bottom of
+   hero-video.blade.php) runs, strictly after window 'load' — the iframe is
+   built and dropped in here client-side, nothing from youtube.com loads
+   before that. Autoplays muted + looped in the background, same as the
+   local <video> source — no click, no play-button overlay. */
+.dark-hero-video-yt-mount {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.dark-hero-video-yt-mount iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none;
+}
+
 .dark-hero--video .dark-hero-inner {
   position: relative;
   z-index: 4;

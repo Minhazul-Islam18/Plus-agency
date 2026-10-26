@@ -812,10 +812,39 @@ if (!function_exists('normalize_hero_titles')) {
             ->map(function ($row) {
                 $text = trim((string) ($row['text'] ?? ''));
                 $accent = trim((string) ($row['accent'] ?? ''));
-                return $text === '' ? null : ['text' => $text, 'accent' => $accent === '' ? null : $accent];
+                // accent_color only arrives in the request when the admin
+                // checked "Custom color" (see hero-titles-repeater partial —
+                // the color input is disabled, so unchecked rows never
+                // submit one at all). No accent text means nothing to color,
+                // so a stray accent_color with no accent is dropped too.
+                $accentColor = trim((string) ($row['accent_color'] ?? ''));
+                $accentColor = ($accent !== '' && preg_match('/^#[0-9a-fA-F]{6}$/', $accentColor)) ? $accentColor : null;
+                return $text === '' ? null : ['text' => $text, 'accent' => $accent === '' ? null : $accent, 'accent_color' => $accentColor];
             })
             ->filter()
             ->values()
             ->all();
+    }
+}
+
+if (!function_exists('extract_youtube_id')) {
+    /**
+     * Pulls the 11-char video ID out of any of the URL shapes admins
+     * actually paste: watch?v=, youtu.be/, /shorts/, /embed/ — with or
+     * without extra query params (&t=, ?si=, etc) or a trailing slash.
+     * Returns null for anything that doesn't look like a real YouTube URL
+     * (caller treats that as "no video", never a rendering error).
+     */
+    function extract_youtube_id(?string $url): ?string
+    {
+        if (empty($url)) {
+            return null;
+        }
+
+        if (preg_match('/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+            return $m[1];
+        }
+
+        return null;
     }
 }

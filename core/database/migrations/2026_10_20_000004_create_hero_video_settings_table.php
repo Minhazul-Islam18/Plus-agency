@@ -35,7 +35,13 @@ class CreateHeroVideoSettingsTable extends Migration
             // Bare filenames, same convention as every other admin upload
             // (sliders/, pages/, etc.) — video under FRONT_IMG_PATH's own
             // 'hero-video/' subdir, poster alongside it.
+            // 'local' (default, existing uploaded MP4) or 'youtube' — the
+            // YouTube player is never requested until the visitor clicks the
+            // poster (see hero-video.blade.php), so adding the option never
+            // costs an upfront request on 'local' pages.
+            $table->string('video_source', 20)->default('local');
             $table->string('video_file', 255)->nullable();
+            $table->string('youtube_url', 500)->nullable();
             $table->string('poster_image', 255)->nullable();
             $table->string('overlay_color', 20)->nullable();
             $table->decimal('overlay_opacity', 8, 2)->nullable();
@@ -44,6 +50,10 @@ class CreateHeroVideoSettingsTable extends Migration
             // blocked anyway. Poster-only on mobile unless explicitly opted
             // out of.
             $table->boolean('disable_on_mobile')->default(1);
+            // The small orbiting "SCROLL TO EXPLORE" prompt bottom-center —
+            // was hardcoded in the partial, admin had no way to change or
+            // translate it. Null falls back to that same default string.
+            $table->string('scroll_text', 100)->nullable();
             $table->timestamps();
 
             $table->unique('language_id');

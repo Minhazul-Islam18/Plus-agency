@@ -49,9 +49,20 @@ class HeroVideoController extends Controller
             'overlay_color' => 'required',
             'overlay_opacity' => 'required|numeric|max:1|min:0',
             'disable_on_mobile' => 'nullable',
+            'scroll_text' => 'nullable|string|max:100',
+            'video_source' => 'required|in:local,youtube',
         ];
 
-        if ($request->filled('video_file')) {
+        if ($request->input('video_source') === 'youtube') {
+            $rules['youtube_url'] = [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!extract_youtube_id($value)) {
+                        return $fail('Enter a valid YouTube video URL (watch, youtu.be, or /shorts/ link).');
+                    }
+                }
+            ];
+        } elseif ($request->filled('video_file')) {
             $rules['video_file'] = [
                 function ($attribute, $value, $fail) use ($extVideo, $allowedVideoExts) {
                     if (!in_array(strtolower($extVideo), $allowedVideoExts)) {
@@ -85,6 +96,9 @@ class HeroVideoController extends Controller
         $setting->overlay_color = $request->overlay_color;
         $setting->overlay_opacity = $request->overlay_opacity;
         $setting->disable_on_mobile = $request->boolean('disable_on_mobile');
+        $setting->scroll_text = $request->scroll_text;
+        $setting->video_source = $request->video_source;
+        $setting->youtube_url = $request->video_source === 'youtube' ? $request->youtube_url : null;
 
         if ($request->filled('video_file')) {
             if ($setting->video_file) {

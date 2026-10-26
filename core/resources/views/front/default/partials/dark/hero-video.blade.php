@@ -1,15 +1,14 @@
 @php
     // Dedicated dark-theme video hero settings (admin: Content Management ->
-    // Home Page Sections -> Hero Section -> Video Version). Falls back to
-    // the dark Static hero's own text fields if this page was never filled
-    // in, matching dark/hero.blade.php's own fallback-to-light-theme-fields
-    // convention one level up.
-    $dhvEyebrow = $darkHeroVideo?->eyebrow ?: ($darkHero?->eyebrow ?: __('Welcome'));
+    // Home Page Sections -> Hero Section -> Video Version). Text falls back
+    // to the dark Static hero's own fields if this page was never filled in,
+    // matching dark/hero.blade.php's own fallback-to-light-theme-fields
+    // convention one level up. Eyebrow and the button (below) do NOT fall
+    // back — both are opt-in per section, same reasoning: an admin leaving
+    // the Video Hero's own field blank expects it to just not show, not
+    // silently inherit the Static Hero's or a generic default.
+    $dhvEyebrow = $darkHeroVideo?->eyebrow;
     $dhvText = $darkHeroVideo?->text ?: ($darkHero?->text ?: $bs->hero_section_text);
-    // No fallback to the Static hero's button here (unlike eyebrow/text/
-    // titles above) — the CTA is opt-in per section. Falling back made an
-    // admin's deliberately-empty Video Hero button silently show the
-    // Static Hero's button instead.
     $dhvButtonText = $darkHeroVideo?->button_text;
     $dhvButtonUrl = $darkHeroVideo?->button_url;
 
@@ -196,7 +195,9 @@
             {{-- No frosted-glass panel here on purpose — text sits straight on
                  the footage, bottom-left, lower-third style. --}}
             <div class="dark-hero-video-content">
-                <span class="dark-hero-eyebrow">{{ convertUtf8($dhvEyebrow) }}</span>
+                @if (!empty($dhvEyebrow))
+                    <span class="dark-hero-eyebrow">{{ convertUtf8($dhvEyebrow) }}</span>
+                @endif
 
                 <h1 class="dark-hero-flip" data-hero-flip>
                     @foreach ($dhvTitlePairs as $key => $pair)

@@ -53,6 +53,12 @@ class DarkHeroController extends Controller
         $setting->meta_right = $request->meta_right;
         $setting->save();
 
+        // Same fix as HeroVideoController@update: this model isn't part of
+        // the home_listing_blocks cache bucket, but the homepage HTML is
+        // still served from LiteSpeed's public HTTP cache — without this,
+        // edits here stay invisible on the live site until that cache expires.
+        \App\Providers\AppServiceProvider::purgeLiteSpeedCache();
+
         Session::flash('success', 'Dark theme hero updated successfully!');
         return 'success';
     }

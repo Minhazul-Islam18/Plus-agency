@@ -108,6 +108,15 @@ class HeroVideoController extends Controller
 
         $setting->save();
 
+        // Unlike Portfolio/Testimonial/etc (InvalidatesHomeListingCache trait),
+        // this model isn't part of the home_listing_blocks cache bucket — it's
+        // fetched fresh every request in FrontendController@index. But the
+        // homepage HTML itself is still served from LiteSpeed's public HTTP
+        // cache (SetPublicCacheHeaders), so without this, an edit here (eyebrow,
+        // titles, overlay color/opacity, button) stays invisible on the live
+        // site until that cache naturally expires.
+        \App\Providers\AppServiceProvider::purgeLiteSpeedCache();
+
         // Mirrors DarkHeroController::update() exactly: the view's form
         // uses id="ajaxForm", which custom.js's global AJAX interceptor
         // catches — a bare "success" string here is what that JS expects,

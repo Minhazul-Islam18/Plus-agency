@@ -180,15 +180,31 @@
         <meta name="twitter:image" content="{{ asset('assets/front/img/' . $__ogImagePath) }}">
     @endif
 
+    @php
+        $__orgAddress = trim(explode(PHP_EOL, (string) ($bex->contact_addresses ?? ''))[0] ?? '');
+        $__orgPhone = trim(explode(',', (string) ($bex->contact_numbers ?? ''))[0] ?? '');
+        $__orgEmail = trim(explode(',', (string) ($bex->contact_mails ?? ''))[0] ?? '');
+    @endphp
     <script type="application/ld+json">
-        {!! json_encode([
+        {!! json_encode(array_filter([
             '@@context' => 'https://schema.org',
             '@type' => 'Organization',
             'name' => $bs->website_title,
             'url' => url('/'),
             'logo' => !empty($bs->favicon) ? asset('assets/front/img/' . $bs->favicon) : null,
             'sameAs' => $socials->pluck('url')->filter()->values(),
-        ], JSON_UNESCAPED_SLASHES) !!}
+            'email' => $__orgEmail ?: null,
+            'contactPoint' => $__orgPhone ? [
+                '@@type' => 'ContactPoint',
+                'telephone' => $__orgPhone,
+                'contactType' => 'customer service',
+                'email' => $__orgEmail ?: null,
+            ] : null,
+            'address' => $__orgAddress ? [
+                '@@type' => 'PostalAddress',
+                'streetAddress' => $__orgAddress,
+            ] : null,
+        ]), JSON_UNESCAPED_SLASHES) !!}
     </script>
 
     @php
@@ -208,6 +224,8 @@
             ], JSON_UNESCAPED_SLASHES) !!}
         </script>
     @endif
+
+    @yield('ld-json-extra')
 
     @if (!empty($bs->google_site_verification))
         <meta name="google-site-verification" content="{{ $bs->google_site_verification }}">

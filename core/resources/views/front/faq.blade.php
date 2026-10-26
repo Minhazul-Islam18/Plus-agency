@@ -11,6 +11,23 @@
 @section('breadcrumb-subtitle', convertUtf8($bs->faq_subtitle))
 @section('breadcrumb-link', __('FAQS'))
 
+@section('ld-json-extra')
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $faqs->map(fn ($qa) => [
+                '@@type' => 'Question',
+                'name' => strip_tags(convertUtf8($qa->question)),
+                'acceptedAnswer' => [
+                    '@@type' => 'Answer',
+                    'text' => strip_tags(convertUtf8($qa->answer)),
+                ],
+            ])->values(),
+        ], JSON_UNESCAPED_SLASHES) !!}
+    </script>
+@endsection
+
 @if (!empty($bs->faq_breadcrumb_bg))
     @section('breadcrumb-bg', asset('assets/front/img/' . $bs->faq_breadcrumb_bg))
 @endif

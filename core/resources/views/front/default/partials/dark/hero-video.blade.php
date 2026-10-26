@@ -6,8 +6,12 @@
     // convention one level up.
     $dhvEyebrow = $darkHeroVideo?->eyebrow ?: ($darkHero?->eyebrow ?: __('Welcome'));
     $dhvText = $darkHeroVideo?->text ?: ($darkHero?->text ?: $bs->hero_section_text);
-    $dhvButtonText = $darkHeroVideo?->button_text ?: $darkHero?->button_text;
-    $dhvButtonUrl = $darkHeroVideo?->button_url ?: $darkHero?->button_url;
+    // No fallback to the Static hero's button here (unlike eyebrow/text/
+    // titles above) — the CTA is opt-in per section. Falling back made an
+    // admin's deliberately-empty Video Hero button silently show the
+    // Static Hero's button instead.
+    $dhvButtonText = $darkHeroVideo?->button_text;
+    $dhvButtonUrl = $darkHeroVideo?->button_url;
 
     // titles: a repeater of {"text": "...", "accent"?: "..."} rows (admin:
     // Content Management -> Home Page Sections -> Hero Section -> Video

@@ -1,14 +1,11 @@
 @php
     // Dedicated dark-theme video hero settings (admin: Content Management ->
-    // Home Page Sections -> Hero Section -> Video Version). Text falls back
-    // to the dark Static hero's own fields if this page was never filled in,
-    // matching dark/hero.blade.php's own fallback-to-light-theme-fields
-    // convention one level up. Eyebrow and the button (below) do NOT fall
-    // back — both are opt-in per section, same reasoning: an admin leaving
-    // the Video Hero's own field blank expects it to just not show, not
-    // silently inherit the Static Hero's or a generic default.
+    // Home Page Sections -> Hero Section -> Video Version). Eyebrow, Text,
+    // and the button (below) do NOT fall back to the Static hero or a
+    // generic default — all opt-in per section. An admin leaving one of
+    // this page's own fields blank expects it to just not show.
     $dhvEyebrow = $darkHeroVideo?->eyebrow;
-    $dhvText = $darkHeroVideo?->text ?: ($darkHero?->text ?: $bs->hero_section_text);
+    $dhvText = $darkHeroVideo?->text;
     $dhvButtonText = $darkHeroVideo?->button_text;
     $dhvButtonUrl = $darkHeroVideo?->button_url;
 
@@ -41,10 +38,11 @@
         $title = convertUtf8($title);
         if ($accent !== '') {
             $accent = convertUtf8($accent);
-            // A custom color (admin-picked, "Custom color" checkbox) renders
-            // as a flat inline color instead of the default brand gradient
-            // the .grad class applies.
-            $style = $accentColor !== '' ? ' style="background:none;-webkit-text-fill-color:' . e($accentColor) . ';color:' . e($accentColor) . ';"' : '';
+            // A custom color (admin-picked) renders as a flat inline color
+            // instead of the default brand gradient the .grad class applies.
+            // Stored bare ("RRGGBB", same convention as overlay_color) — '#'
+            // added here for CSS.
+            $style = $accentColor !== '' ? ' style="background:none;-webkit-text-fill-color:#' . e($accentColor) . ';color:#' . e($accentColor) . ';"' : '';
             return e($title) . ' <span class="grad"' . $style . '>' . e($accent) . '</span>';
         }
         return e($title);
@@ -205,7 +203,9 @@
                     @endforeach
                 </h1>
 
-                <p class="dark-hero-text">{{ convertUtf8($dhvText) }}</p>
+                @if (!empty($dhvText))
+                    <p class="dark-hero-text">{{ convertUtf8($dhvText) }}</p>
+                @endif
 
                 {{-- No meta row here on purpose — the approved design ends
                      at the CTA, nothing below it. (meta_left/meta_right

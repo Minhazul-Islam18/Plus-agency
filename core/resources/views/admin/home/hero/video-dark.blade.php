@@ -168,14 +168,18 @@
 
                         {{-- Video file (local) --}}
                         <div class="form-group" data-video-source-panel="local">
-                            <label for="">Background Video (MP4) **</label>
+                            <label for="">Background Video (MP4)</label>
                             @if (!empty($video->video_file))
                                 <p class="mb-2"><a href="{{ asset('assets/front/img/hero-video/' . $video->video_file) }}" target="_blank">Current video file &rarr;</a></p>
                             @endif
                             <input id="fileInput1" type="hidden" name="video_file">
+                            <input id="deleteVideoFile" type="hidden" name="delete_video_file" value="0">
                             <button id="chooseImage1" class="choose-image btn btn-primary" type="button"
                                 data-multiple="false" data-toggle="modal" data-target="#lfmModal1">Choose Video</button>
-                            <p class="text-warning mb-0"><small>MP4 only.</small></p>
+                            @if (!empty($video->video_file))
+                                <button id="removeVideoFileBtn" class="btn btn-outline-danger" type="button">Remove Video</button>
+                            @endif
+                            <p class="text-warning mb-0"><small>MP4 only. Optional — with no video set (or after removing one), the Poster Image shows on its own.</small></p>
                             <p class="text-warning mb-0"><small>Recommended size: 1920x1080px (16:9 landscape), same frame as the Poster Image.</small></p>
                             <p id="errvideo_file" class="em text-danger mb-0"></p>
 
@@ -194,9 +198,10 @@
 
                         {{-- YouTube URL --}}
                         <div class="form-group" data-video-source-panel="youtube">
-                            <label for="">YouTube URL **</label>
+                            <label for="">YouTube URL</label>
                             <input type="text" class="form-control ltr" name="youtube_url" value="{{ $video->youtube_url }}" placeholder="https://www.youtube.com/watch?v=...">
                             <p class="text-warning mb-0"><small>Accepts a watch, youtu.be, or /shorts/ link. Plays muted and looped in the background automatically, same as a Local file video — nothing is fetched from YouTube until the page has finished loading.</small></p>
+                            <p class="text-warning mb-0"><small>Optional — with no URL set, the Poster Image shows on its own.</small></p>
                             <p id="erryoutube_url" class="em text-danger mb-0"></p>
                         </div>
 
@@ -353,6 +358,31 @@
               el.addEventListener('change', sync);
           });
           sync();
+
+          var removeBtn = document.getElementById('removeVideoFileBtn');
+          if (removeBtn) {
+              removeBtn.addEventListener('click', function () {
+                  swal({
+                      title: 'Remove the uploaded video?',
+                      text: 'The Poster Image will show on its own until a new video is chosen.',
+                      icon: 'warning',
+                      buttons: {
+                          cancel: { text: 'Cancel', visible: true, closeModal: true },
+                          confirm: { text: 'Yes, remove it', closeModal: true }
+                      },
+                      dangerMode: true,
+                  }).then(function (willDelete) {
+                      if (willDelete) {
+                          document.getElementById('deleteVideoFile').value = '1';
+                          document.getElementById('fileInput1').value = '';
+                          // jQuery submit(), not the native DOM method — #ajaxForm
+                          // is caught by custom.js's global AJAX interceptor, which
+                          // is bound via jQuery and expects a jQuery-triggered submit.
+                          $('#ajaxForm').submit();
+                      }
+                  });
+              });
+          }
       })();
   </script>
 

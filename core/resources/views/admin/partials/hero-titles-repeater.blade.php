@@ -47,27 +47,9 @@
         opacity: 0.35;
         cursor: not-allowed;
     }
-    .hero-titles-repeater-color {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12.5px;
-        color: #aab0c0;
-        white-space: nowrap;
-    }
-    .hero-titles-repeater-color input[type="color"] {
-        width: 34px;
-        height: 34px;
-        padding: 2px;
-        border-radius: 6px;
-        border: 1px solid #ffffff2a;
-        background: transparent;
-        cursor: pointer;
-    }
-    .hero-titles-repeater-color input[type="color"]:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
+    .hero-titles-repeater-row-main input.hero-titles-accent-color {
+        flex: 0 0 110px;
+        text-align: center;
     }
 </style>
 
@@ -83,13 +65,10 @@
                         <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][accent]"
                             value="{{ $row['accent'] ?? '' }}"
                             placeholder="+ colored part (optional)">
-                        <label class="hero-titles-repeater-color">
-                            <input type="checkbox" data-accent-color-toggle {{ !empty($row['accent_color'] ?? null) ? 'checked' : '' }}>
-                            Custom color
-                            <input type="color" name="{{ $fieldName }}[{{ $i }}][accent_color]"
-                                value="{{ $row['accent_color'] ?? '#6366f1' }}"
-                                {{ empty($row['accent_color'] ?? null) ? 'disabled' : '' }}>
-                        </label>
+                        <input type="text" class="form-control jscolor hero-titles-accent-color" name="{{ $fieldName }}[{{ $i }}][accent_color]"
+                            value="{{ $row['accent_color'] ?? '' }}"
+                            data-jscolor="{required:false}"
+                            placeholder="default">
                     @endif
                 </div>
                 <button type="button" class="hero-titles-repeater-remove" data-repeater-remove title="Remove this title">
@@ -104,7 +83,7 @@
     <p class="text-muted mb-0 mt-2" style="font-size: 12.5px;">
         First one shows on load — add more and they cycle in automatically with a soft fade, a few seconds apart.
         @if ($withAccent)
-            The left box is the plain white part of that title; the right "Accent" box (optional) is appended after it in color — e.g. left: <em>"Digital builds for"</em>, right: <em>"growing teams"</em> renders as one line, white then colored. Leave the right box empty for a fully plain white title. Check "Custom color" to pick your own color for the accent part — leave it unchecked to use the default brand gradient.
+            The left box is the plain white part of that title; the middle "Accent" box (optional) is appended after it in color — e.g. left: <em>"Digital builds for"</em>, middle: <em>"growing teams"</em> renders as one line, white then colored. Leave the middle box empty for a fully plain white title. The color swatch on the right sets the accent's color — click it to pick one (the hex code fills in automatically) or leave it empty to use the default brand gradient.
         @endif
     </p>
 </div>
@@ -140,16 +119,19 @@
                 var mainHtml = '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][text]" placeholder="Rotating title">';
                 if (withAccent) {
                     mainHtml += '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][accent]" placeholder="+ colored part (optional)">' +
-                        '<label class="hero-titles-repeater-color">' +
-                        '<input type="checkbox" data-accent-color-toggle> Custom color' +
-                        '<input type="color" name="' + fieldName + '[' + nextIndex + '][accent_color]" value="#6366f1" disabled>' +
-                        '</label>';
+                        '<input type="text" class="form-control hero-titles-accent-color" name="' + fieldName + '[' + nextIndex + '][accent_color]" placeholder="default">';
                 }
                 row.innerHTML =
                     '<div class="hero-titles-repeater-row-main">' + mainHtml + '</div>' +
                     '<button type="button" class="hero-titles-repeater-remove" data-repeater-remove title="Remove this title"><i class="fas fa-trash"></i></button>';
 
                 list.appendChild(row);
+                // jscolor only auto-installs on page-load inputs with the
+                // .jscolor class (scans once on DOMReady, no MutationObserver)
+                // — a row added later needs its picker instantiated by hand.
+                if (withAccent && window.jscolor) {
+                    new jscolor(row.querySelector('.hero-titles-accent-color'), { required: false });
+                }
                 nextIndex++;
                 updateRemoveButtons();
             }
@@ -161,16 +143,6 @@
                 if (!btn || btn.disabled) return;
                 btn.closest('[data-repeater-row]').remove();
                 updateRemoveButtons();
-            });
-
-            // Unchecked -> color input disabled -> browser excludes it from
-            // the POST entirely, so an untouched row keeps rendering the
-            // default brand gradient (accent_color stays null server-side).
-            list.addEventListener('change', function (e) {
-                var toggle = e.target.closest('[data-accent-color-toggle]');
-                if (!toggle) return;
-                var colorInput = toggle.closest('.hero-titles-repeater-color').querySelector('input[type="color"]');
-                colorInput.disabled = !toggle.checked;
             });
 
             updateRemoveButtons();

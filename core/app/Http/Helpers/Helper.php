@@ -812,13 +812,13 @@ if (!function_exists('normalize_hero_titles')) {
             ->map(function ($row) {
                 $text = trim((string) ($row['text'] ?? ''));
                 $accent = trim((string) ($row['accent'] ?? ''));
-                // accent_color only arrives in the request when the admin
-                // checked "Custom color" (see hero-titles-repeater partial —
-                // the color input is disabled, so unchecked rows never
-                // submit one at all). No accent text means nothing to color,
+                // accent_color is a jscolor text field (hero-titles-repeater
+                // partial) — same bare "RRGGBB", no leading '#', convention
+                // as overlay_color elsewhere in this admin. Left empty =
+                // no custom color. No accent text means nothing to color,
                 // so a stray accent_color with no accent is dropped too.
-                $accentColor = trim((string) ($row['accent_color'] ?? ''));
-                $accentColor = ($accent !== '' && preg_match('/^#[0-9a-fA-F]{6}$/', $accentColor)) ? $accentColor : null;
+                $accentColor = ltrim(trim((string) ($row['accent_color'] ?? '')), '#');
+                $accentColor = ($accent !== '' && preg_match('/^[0-9a-fA-F]{6}$/', $accentColor)) ? $accentColor : null;
                 return $text === '' ? null : ['text' => $text, 'accent' => $accent === '' ? null : $accent, 'accent_color' => $accentColor];
             })
             ->filter()

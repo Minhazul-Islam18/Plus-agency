@@ -33,9 +33,9 @@ class HeroVideoController extends Controller
         $allowedVideoExts = ['mp4'];
         $allowedImageExts = allowed_image_extensions();
 
-        $video = $request->video_file;
+        $video = (string) $request->video_file;
         $extVideo = pathinfo($video, PATHINFO_EXTENSION);
-        $poster = $request->poster_image;
+        $poster = (string) $request->poster_image;
         $extPoster = pathinfo($poster, PATHINFO_EXTENSION);
 
         $rules = [
@@ -53,9 +53,12 @@ class HeroVideoController extends Controller
             'video_source' => 'required|in:local,youtube',
         ];
 
-        if ($request->input('video_source') === 'youtube') {
+        // Both sources are optional — a blank YouTube URL or no local video
+        // file (or one just removed via Remove Video) is a valid saved
+        // state: the Poster Image shows on its own, nothing else. Only
+        // validate format/extension when something was actually provided.
+        if ($request->input('video_source') === 'youtube' && $request->filled('youtube_url')) {
             $rules['youtube_url'] = [
-                'required',
                 function ($attribute, $value, $fail) {
                     if (!extract_youtube_id($value)) {
                         return $fail('Enter a valid YouTube video URL (watch, youtu.be, or /shorts/ link).');
@@ -99,6 +102,20 @@ class HeroVideoController extends Controller
         $setting->scroll_text = $request->scroll_text;
         $setting->video_source = $request->video_source;
         $setting->youtube_url = $request->video_source === 'youtube' ? $request->youtube_url : null;
+
+        // Symmetric with youtube_url above: switching the source away from
+        // Local also clears out any previously uploaded video file (DB value
+        // and the file itself), the same as explicitly clicking Remove Video
+        // — otherwise it just sits there orphaned, unused and untracked by
+        // either source's own UI.
+        $wantsDeleteVideoFile = $request->input('delete_video_file') == '1'
+            || $request->video_source !== 'local';
+        if ($wantsDeleteVideoFile && empty($request->video_file)) {
+            if ($setting->video_file) {
+                @unlink(FRONT_IMG_PATH . self::IMG_SUBDIR . $setting->video_file);
+            }
+            $setting->video_file = null;
+        }
 
         if ($request->filled('video_file')) {
             if ($setting->video_file) {

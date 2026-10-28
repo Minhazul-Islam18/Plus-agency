@@ -36,6 +36,12 @@
             $style = $accentColor !== '' ? ' style="background:none;-webkit-text-fill-color:#' . e($accentColor) . ';color:#' . e($accentColor) . ';"' : '';
             return e($title) . ' <span class="grad"' . $style . '>' . e($accent) . '</span>';
         }
+        // No "Colored part" to apply the picked color to — color the whole
+        // title line instead of discarding it (there's nothing else for a
+        // chosen color to mean here).
+        if ($accentColor !== '') {
+            return '<span style="color:#' . e($accentColor) . ';">' . e($title) . '</span>';
+        }
         return e($title);
     };
 

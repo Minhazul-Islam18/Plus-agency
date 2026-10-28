@@ -111,7 +111,7 @@
     <p class="text-muted mb-0 mt-2" style="font-size: 12.5px;">
         First one shows on load — add more and they cycle in automatically with a soft fade, a few seconds apart.
         @if ($withAccent)
-            "Title text" is the plain white part of that title; "Colored part" (optional) is appended after it in color — e.g. title: <em>"Digital builds for"</em>, colored part: <em>"growing teams"</em> renders as one line, white then colored. Leave "Colored part" empty for a fully plain white title. "Color" only ever sets the color of "Colored part" — click it to pick one (the hex fills in on its own) or leave it empty to use the default brand gradient. Never type a color code into "Colored part" itself — it would show up as literal text on the site.
+            "Title text" is the plain white part of that title; "Colored part" (optional) is appended after it in color — e.g. title: <em>"Digital builds for"</em>, colored part: <em>"growing teams"</em> renders as one line, white then colored. Leave "Colored part" empty for a fully plain white title. "Color" sets the color of "Colored part" when one is filled in, or the color of the whole title when it isn't — click it to pick one (the hex fills in on its own) or leave it empty to use the default brand gradient on "Colored part". Never type a color code into "Colored part" itself — it would show up as literal text on the site.
         @endif
     </p>
 </div>

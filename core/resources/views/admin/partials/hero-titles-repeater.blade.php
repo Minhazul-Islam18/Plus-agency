@@ -14,18 +14,34 @@
 <style>
     .hero-titles-repeater-row {
         display: flex;
-        align-items: flex-start;
+        align-items: flex-end;
         gap: 10px;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
     }
     .hero-titles-repeater-row-main {
         flex: 1;
         display: flex;
         gap: 10px;
     }
-    .hero-titles-repeater-row-main input {
+    .hero-titles-repeater-field {
         flex: 1;
         min-width: 0;
+    }
+    .hero-titles-repeater-field input {
+        width: 100%;
+    }
+    {{-- Persistent caption above each box, always visible (unlike a
+         placeholder, which disappears the moment the box has a value) —
+         exactly what was missing before: nothing marked which of the three
+         look-alike boxes was "type words here" vs "pick a color here",
+         so a hex code typed into the wrong one rendered as literal text
+         on the live site. --}}
+    .hero-titles-repeater-field-label {
+        display: block;
+        font-size: 11px;
+        color: #aab0c0;
+        margin-bottom: 4px;
+        white-space: nowrap;
     }
     .hero-titles-repeater-remove {
         flex-shrink: 0;
@@ -47,9 +63,12 @@
         opacity: 0.35;
         cursor: not-allowed;
     }
-    .hero-titles-repeater-row-main input.hero-titles-accent-color {
-        flex: 0 0 110px;
+    .hero-titles-repeater-field.hero-titles-repeater-field-color {
+        flex: 0 0 90px;
+    }
+    .hero-titles-accent-color {
         text-align: center;
+        cursor: pointer;
     }
 </style>
 
@@ -58,17 +77,26 @@
         @foreach ($titlesRepeaterRows as $i => $row)
             <div class="hero-titles-repeater-row" data-repeater-row>
                 <div class="hero-titles-repeater-row-main">
-                    <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][text]"
-                        value="{{ $row['text'] ?? '' }}"
-                        placeholder="{{ $i == 0 ? 'Main title' : 'Rotating title' }}">
+                    <div class="hero-titles-repeater-field">
+                        <span class="hero-titles-repeater-field-label">Title text</span>
+                        <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][text]"
+                            value="{{ $row['text'] ?? '' }}"
+                            placeholder="{{ $i == 0 ? 'Main title' : 'Rotating title' }}">
+                    </div>
                     @if ($withAccent)
-                        <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][accent]"
-                            value="{{ $row['accent'] ?? '' }}"
-                            placeholder="+ colored part (optional)">
-                        <input type="text" class="form-control jscolor hero-titles-accent-color" name="{{ $fieldName }}[{{ $i }}][accent_color]"
-                            value="{{ $row['accent_color'] ?? '' }}"
-                            data-jscolor="{required:false}"
-                            placeholder="default">
+                        <div class="hero-titles-repeater-field">
+                            <span class="hero-titles-repeater-field-label">Colored part (optional)</span>
+                            <input type="text" class="form-control" name="{{ $fieldName }}[{{ $i }}][accent]"
+                                value="{{ $row['accent'] ?? '' }}"
+                                placeholder="Words to color">
+                        </div>
+                        <div class="hero-titles-repeater-field hero-titles-repeater-field-color">
+                            <span class="hero-titles-repeater-field-label">Color</span>
+                            <input type="text" class="form-control jscolor hero-titles-accent-color" name="{{ $fieldName }}[{{ $i }}][accent_color]"
+                                value="{{ $row['accent_color'] ?? '' }}"
+                                data-jscolor="{required:false}"
+                                placeholder="default">
+                        </div>
                     @endif
                 </div>
                 <button type="button" class="hero-titles-repeater-remove" data-repeater-remove title="Remove this title">
@@ -83,7 +111,7 @@
     <p class="text-muted mb-0 mt-2" style="font-size: 12.5px;">
         First one shows on load — add more and they cycle in automatically with a soft fade, a few seconds apart.
         @if ($withAccent)
-            The left box is the plain white part of that title; the middle "Accent" box (optional) is appended after it in color — e.g. left: <em>"Digital builds for"</em>, middle: <em>"growing teams"</em> renders as one line, white then colored. Leave the middle box empty for a fully plain white title. The color swatch on the right sets the accent's color — click it to pick one (the hex code fills in automatically) or leave it empty to use the default brand gradient.
+            "Title text" is the plain white part of that title; "Colored part" (optional) is appended after it in color — e.g. title: <em>"Digital builds for"</em>, colored part: <em>"growing teams"</em> renders as one line, white then colored. Leave "Colored part" empty for a fully plain white title. "Color" only ever sets the color of "Colored part" — click it to pick one (the hex fills in on its own) or leave it empty to use the default brand gradient. Never type a color code into "Colored part" itself — it would show up as literal text on the site.
         @endif
     </p>
 </div>
@@ -116,10 +144,19 @@
                 row.className = 'hero-titles-repeater-row';
                 row.setAttribute('data-repeater-row', '');
 
-                var mainHtml = '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][text]" placeholder="Rotating title">';
+                var mainHtml = '<div class="hero-titles-repeater-field">' +
+                    '<span class="hero-titles-repeater-field-label">Title text</span>' +
+                    '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][text]" placeholder="Rotating title">' +
+                    '</div>';
                 if (withAccent) {
-                    mainHtml += '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][accent]" placeholder="+ colored part (optional)">' +
-                        '<input type="text" class="form-control hero-titles-accent-color" name="' + fieldName + '[' + nextIndex + '][accent_color]" placeholder="default">';
+                    mainHtml += '<div class="hero-titles-repeater-field">' +
+                        '<span class="hero-titles-repeater-field-label">Colored part (optional)</span>' +
+                        '<input type="text" class="form-control" name="' + fieldName + '[' + nextIndex + '][accent]" placeholder="Words to color">' +
+                        '</div>' +
+                        '<div class="hero-titles-repeater-field hero-titles-repeater-field-color">' +
+                        '<span class="hero-titles-repeater-field-label">Color</span>' +
+                        '<input type="text" class="form-control hero-titles-accent-color" name="' + fieldName + '[' + nextIndex + '][accent_color]" placeholder="default">' +
+                        '</div>';
                 }
                 row.innerHTML =
                     '<div class="hero-titles-repeater-row-main">' + mainHtml + '</div>' +

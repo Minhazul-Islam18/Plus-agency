@@ -15,20 +15,11 @@
     // is appended after it in the gradient — two parts of one line, not a
     // substring to find inside `text` (that read as "find this exact
     // phrase verbatim" to admins, who naturally typed the white part and
-    // the colored part as two separate pieces instead). Falls back to the
-    // Static dark hero's own titles, then the shared light-theme fields
-    // converted to the same row shape — neither carries an accent, so
-    // those rows just render as plain white text.
-    $dhvTitleRows = $darkHeroVideo?->titles ?: ($darkHero?->titles ?: null);
-    if (empty($dhvTitleRows)) {
-        $dhvTitleRows = collect([$bs->hero_section_title])
-            ->merge(preg_split('/\r\n|\r|\n/', (string) $bs->hero_rotating_titles))
-            ->map(fn($t) => trim((string) $t))
-            ->filter()
-            ->map(fn($t) => ['text' => $t])
-            ->values()
-            ->all();
-    }
+    // the colored part as two separate pieces instead). No fallback to the
+    // Static hero's or the site-wide Basic Settings titles — same opt-in
+    // reasoning as eyebrow/text/button above: an admin emptying every row
+    // here expects an empty heading, not the site-wide default text.
+    $dhvTitleRows = $darkHeroVideo?->titles ?: [];
     $dhvTitlePairs = collect($dhvTitleRows)
         ->map(fn($row) => [trim((string) ($row['text'] ?? '')), trim((string) ($row['accent'] ?? '')), trim((string) ($row['accent_color'] ?? ''))])
         ->filter(fn($pair) => $pair[0] !== '')

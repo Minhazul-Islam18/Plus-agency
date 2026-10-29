@@ -180,7 +180,8 @@
                                 <button id="removeVideoFileBtn" class="btn btn-outline-danger" type="button">Remove Video</button>
                             @endif
                             <p class="text-warning mb-0"><small>MP4 only. Optional — with no video set (or after removing one), the Poster Image shows on its own.</small></p>
-                            <p class="text-warning mb-0"><small>Recommended size: 1920x1080px (16:9 landscape), same frame as the Poster Image.</small></p>
+                            <p class="text-warning mb-0"><small>Recommended size: 1920x950px (~2:1, wider than 16:9) — same frame as the Poster Image.</small></p>
+                            <p class="text-warning mb-0"><small>The frame itself is shorter than the screen (88% of its height), so it's wider than a plain 16:9 clip. A true 16:9 video gets ~6% cropped off both the top and bottom on most screens to fill it — exporting at ~2:1 instead avoids that. Keep the important part of the footage centered either way, not close to any edge.</small></p>
                             <p id="errvideo_file" class="em text-danger mb-0"></p>
 
                             <div class="modal fade lfm-modal" id="lfmModal1" tabindex="-1" role="dialog" aria-hidden="true">
@@ -216,7 +217,8 @@
                             </div>
                             <input id="fileInput2" type="hidden" name="poster_image">
                             <p class="text-warning mb-0 mt-2"><small>{{ allowed_image_extensions_label() }} images are allowed. Shown instantly, and used instead of the video on mobile (see below).</small></p>
-                            <p class="text-warning mb-0"><small>Recommended size: 1920x1080px (full-bleed background, same as the static Hero Image).</small></p>
+                            <p class="text-warning mb-0"><small>Recommended size: 1920x950px (~2:1, wider than 16:9) — full-bleed background.</small></p>
+                            <p class="text-warning mb-0"><small>The frame itself is shorter than the screen (88% of its height), so it's wider than a plain 16:9 photo. A true 16:9 image gets ~6% cropped off both the top and bottom on most screens to fill it — exporting at ~2:1 instead avoids that. Keep the important part of the image centered either way, not close to any edge.</small></p>
                             <p class="text-warning mb-0" data-video-source-panel="youtube"><small>Optional for YouTube — leave empty to use YouTube's own thumbnail automatically.</small></p>
                             <p id="errposter_image" class="em text-danger mb-0"></p>
 

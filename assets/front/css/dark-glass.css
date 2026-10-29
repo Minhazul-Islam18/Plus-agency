@@ -971,6 +971,14 @@ a.proceed-checkout-btn:hover {
   z-index: 4;
   margin-top: auto;
   width: 100%;
+  /* This box's own bottom padding (.dark-hero-video-content below) reaches
+     down into the partner strip's area (z-index 3, under this one) — without
+     this, that empty padding swallows clicks meant for the partner logos
+     underneath it. Only the CTA link actually needs to stay clickable. */
+  pointer-events: none;
+}
+.dark-hero--video .dark-hero-cta {
+  pointer-events: auto;
 }
 /* Horizontal gutter comes from the Bootstrap .container this sits
    inside (same 1140px/15px-gutter width every other section already
@@ -1046,6 +1054,12 @@ a.proceed-checkout-btn:hover {
   bottom: 18px;
   z-index: 3;
   pointer-events: none;
+  /* Own compositing layer + layout/paint containment — the title flip
+     above animates a blur() filter every ~3.8s, which is expensive and
+     otherwise repaints this whole stacking context, visibly stuttering
+     the drifting logos in sync with it. */
+  contain: layout paint;
+  isolation: isolate;
 }
 .dark-hero-video-partners .container {
   display: flex;
@@ -1058,7 +1072,7 @@ a.proceed-checkout-btn:hover {
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--accent);
   white-space: nowrap;
   border-right: 1px solid var(--glass-border);
   padding-right: 24px;
@@ -1077,6 +1091,8 @@ a.proceed-checkout-btn:hover {
   gap: 48px;
   width: max-content;
   animation: darkHeroPartnersDrift 50s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .dark-hero-video-partners:hover .dark-hero-video-partners-track {
   animation-play-state: paused;
@@ -1090,7 +1106,7 @@ a.proceed-checkout-btn:hover {
   max-height: 26px;
   width: auto;
   filter: grayscale(1) brightness(2.4);
-  opacity: 0.32;
+  opacity: 1;
   transition:
     opacity 0.2s ease,
     filter 0.2s ease;
@@ -1178,7 +1194,7 @@ a.proceed-checkout-btn:hover {
   font-family: "Plex Mono", monospace;
   font-size: 9px;
   letter-spacing: 2px;
-  fill: rgba(255, 255, 255, 0.65);
+  fill: var(--accent);
 }
 .dark-hero-video-scrollcue .orbit-arrow {
   position: absolute;

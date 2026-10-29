@@ -96,7 +96,10 @@ function initPush() {
     }
   }).then((permissionResult) => {
     if (permissionResult !== "granted") {
-      throw new Error("We weren't granted permission.");
+      // Not granting push permission is an expected, common choice, not an
+      // error — throwing here left an unhandled promise rejection logged
+      // to the console on every page load for anyone who hasn't granted it.
+      return;
     }
     subscribeUser();
   });

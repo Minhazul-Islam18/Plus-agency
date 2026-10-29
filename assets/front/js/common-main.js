@@ -223,7 +223,7 @@ function storePushSubscription(pushSubscription) {
       ],
     }));
 
-  $("a.see-more").on("click", function (e) {
+  $(".see-more").on("click", function (e) {
     e.preventDefault();
     $(this).prev("span").addClass("d-inline");
     $(this).hide();

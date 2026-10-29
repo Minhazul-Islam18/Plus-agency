@@ -210,7 +210,7 @@
                                                 @if (strlen($service->summary) > 120)
                                                     {{ mb_substr($service->summary, 0, 120, 'utf-8') }}<span
                                                         style="display: none;">{{ mb_substr($service->summary, 120, null, 'utf-8') }}</span>
-                                                    <a href="#" class="see-more">{{ __('see more') }}...</a>
+                                                    <button type="button" class="see-more">{{ __('see more') }}...</button>
                                                 @else
                                                     {{ $service->summary }}
                                                 @endif
@@ -267,7 +267,7 @@
                                                 @if (strlen($scategory->short_text) > 112)
                                                     {{ mb_substr($scategory->short_text, 0, 112, 'utf-8') }}<span
                                                         style="display: none;">{{ mb_substr($scategory->short_text, 112, null, 'utf-8') }}</span>
-                                                    <a href="#" class="see-more">{{ __('see more') }}...</a>
+                                                    <button type="button" class="see-more">{{ __('see more') }}...</button>
                                                 @else
                                                     {{ $scategory->short_text }}
                                                 @endif
@@ -322,7 +322,7 @@
                                                 @if (strlen($point->short_text) > 150)
                                                     {{ mb_substr($point->short_text, 0, 150, 'utf-8') }}<span
                                                         style="display: none;">{{ mb_substr($point->short_text, 150, null, 'utf-8') }}</span>
-                                                    <a href="#" class="see-more">{{ __('see more') }}...</a>
+                                                    <button type="button" class="see-more">{{ __('see more') }}...</button>
                                                 @else
                                                     {{ $point->short_text }}
                                                 @endif

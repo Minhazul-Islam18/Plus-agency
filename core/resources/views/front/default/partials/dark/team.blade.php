@@ -35,16 +35,16 @@
                         <span class="team-view-hint" aria-label="{{ __('View Profile') }}"><i class="fas fa-plus"></i></span>
                         <div class="team-social">
                             @if (!empty($member->facebook))
-                                <a href="{{ $member->facebook }}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                                <a href="{{ $member->facebook }}" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                             @endif
                             @if (!empty($member->twitter))
-                                <a href="{{ $member->twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
+                                <a href="{{ $member->twitter }}" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
                             @endif
                             @if (!empty($member->linkedin))
-                                <a href="{{ $member->linkedin }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="{{ $member->linkedin }}" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                             @endif
                             @if (!empty($member->whatsapp_link))
-                                <a href="{{ $member->whatsapp_link }}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                                <a href="{{ $member->whatsapp_link }}" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                             @endif
                         </div>
                         <div class="team-info">

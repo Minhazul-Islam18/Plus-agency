@@ -4,7 +4,7 @@
         <div class="dark-footer-about">
             <div class="footer-logo-wrapper">
                 <a href="{{ route('front.index') }}">
-                    <img class="dark-footer-logo lazy" data-src="{{ asset('assets/front/img/' . $bs->footer_logo) }}" alt="">
+                    <img class="dark-footer-logo lazy" data-src="{{ asset('assets/front/img/' . $bs->footer_logo) }}" alt="{{ $bs->website_title }}">
                 </a>
             </div>
             <p class="footer-txt">
@@ -19,7 +19,7 @@
             @if (!empty($socials) && $socials->count())
                 <div class="dark-footer-social">
                     @foreach ($socials as $key => $social)
-                        <a href="{{ $social->url }}" target="_blank"><i class="{{ $social->icon }}"></i></a>
+                        <a href="{{ $social->url }}" target="_blank" aria-label="{{ social_icon_label($social->icon) }}"><i class="{{ $social->icon }}"></i></a>
                     @endforeach
                 </div>
             @endif

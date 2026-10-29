@@ -850,3 +850,26 @@ if (!function_exists('extract_youtube_id')) {
         return null;
     }
 }
+
+if (!function_exists('social_icon_label')) {
+    /**
+     * The $social->icon column is a raw FontAwesome class string (e.g.
+     * "fab fa-facebook-f") — the icon-only <a> that wraps it has no text,
+     * so screen readers announce nothing ("links have no visible name").
+     * Pulls a human label out of the fa-* class instead of adding a new
+     * admin field for something the icon already encodes.
+     */
+    function social_icon_label(?string $iconClass): string
+    {
+        if (empty($iconClass) || !preg_match('/\bfa-([a-z0-9-]+)/i', $iconClass, $m)) {
+            return __('Social link');
+        }
+
+        $slug = strtolower($m[1]);
+        // Brand icons often end in a bare-letter variant suffix
+        // (facebook-f, linkedin-in, google-plus-g) that reads oddly.
+        $slug = preg_replace('/-(f|g|in|square|alt)$/', '', $slug);
+
+        return ucwords(str_replace('-', ' ', $slug));
+    }
+}

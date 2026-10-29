@@ -9163,3 +9163,17 @@ body.pf-oc-lock {
     transition: none;
   }
 }
+
+/* A JS-only reveal toggle, not a navigation link — a <button> now, styled
+   inline like the <a> it replaced so the summary text doesn't visibly
+   change. */
+.see-more {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

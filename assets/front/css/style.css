@@ -415,15 +415,21 @@ input[type="submit"]:hover {
   margin-left: 6px;
   position: relative;
 }
-a.language-btn {
+.language-btn {
   position: relative;
   text-decoration: none;
   padding-right: 15px;
+  padding-left: 0;
   text-align: left;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
   -webkit-transition: 0.5s;
   transition: 0.5s;
 }
-a.language-btn:hover {
+.language-btn:hover {
   color: #25d06f;
 }
 .language-btn::after {
@@ -3571,7 +3577,7 @@ a#cartIcon span.length {
 .megamenu-cats ul li a::before {
   display: none;
 }
-.mega-tab h3.category a {
+.mega-tab p.category a {
   padding: 0;
   text-align: left;
   font-size: 16px;
@@ -3579,8 +3585,8 @@ a#cartIcon span.length {
   margin: 16px 0 13px 0;
 }
 
-.mega-tab h3.category a::before,
-.mega-tab h3.category a::after {
+.mega-tab p.category a::before,
+.mega-tab p.category a::after {
   display: none;
 }
 .mega-dropdown-content .thumb a {

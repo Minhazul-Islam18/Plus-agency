@@ -169,9 +169,13 @@
                             }
                         @endphp
                         <div class="mega-tab" id="megaTab{{$link["type"]}}{{$mCatId}}">
-                            <h3 class="category">
+                            {{-- A nav-menu label, not document content — a real
+                                 heading tag here breaks the page's h1→h2→h3
+                                 heading order (this renders before the h1 hero
+                                 in the DOM). --}}
+                            <p class="category">
                                 <a href="{{$catUrl}}">{{$mcat->name}}</a>
-                            </h3>
+                            </p>
                             <div class="row">
                                 @foreach ($mItemIds as $mItemId)
                                     @php

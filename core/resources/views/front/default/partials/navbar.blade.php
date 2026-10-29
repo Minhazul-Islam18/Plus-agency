@@ -6,7 +6,7 @@
         <div class="col-lg-2 col-6">
             <div class="logo-wrapper">
                 <a href="{{ route('front.index') }}"><img class="lazy"
-                        data-src="{{ asset('assets/front/img/' . $bs->logo) }}" alt=""></a>
+                        data-src="{{ asset('assets/front/img/' . $bs->logo) }}" alt="{{ $bs->website_title }}"></a>
             </div>
         </div>
         <div class="col-lg-10 col-6 {{ $rtl == 1 ? 'text-left' : 'text-right' }} position-static">
@@ -27,9 +27,18 @@
                             <li><a href="{{ $href }}" target="{{ $link['target'] }}">{{ $link['text'] }}</a>
                             </li>
                         @else
+                            @php
+                                // A grouping-only parent (no own page) still needs
+                                // a real, crawlable destination — falls back to
+                                // its first child's link instead of "#", which
+                                // search engines can't follow.
+                                $dropdownHref = $href !== '#'
+                                    ? $href
+                                    : (!empty($link['children'][0]) ? getHref($link['children'][0]) : $href);
+                            @endphp
                             <li class="dropdown">
                                 {{-- - Level1 links which has dropdown menus - --}}
-                                <a class="dropdown-btn" href="{{ $href }}"
+                                <a class="dropdown-btn" href="{{ $dropdownHref }}"
                                     target="{{ $link['target'] }}">{{ $link['text'] }}</a>
 
                                 <ul class="dropdown-lists">
@@ -123,15 +132,15 @@
                     @if (count($socials) > 0)
                         <div class="dark-oc-foot-socials">
                             @foreach ($socials as $social)
-                                <a target="_blank" href="{{ $social->url }}"><i class="{{ $social->icon }}"></i></a>
+                                <a target="_blank" href="{{ $social->url }}" aria-label="{{ social_icon_label($social->icon) }}"><i class="{{ $social->icon }}"></i></a>
                             @endforeach
                         </div>
                     @endif
 
                     @if (!empty($currentLang) && count($langs) > 1)
                         <div class="language dark-oc-foot-lang">
-                            <a class="language-btn" href="#"><i class="flaticon-worldwide"></i>
-                                {{ convertUtf8($currentLang->name) }}</a>
+                            <button type="button" class="language-btn"><i class="flaticon-worldwide"></i>
+                                {{ convertUtf8($currentLang->name) }}</button>
                             <ul class="language-dropdown">
                                 @foreach ($langs as $lang)
                                     <li><a href="{{ route('changeLanguage', $lang->code) }}">{{ convertUtf8($lang->name) }}</a>

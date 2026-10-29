@@ -1745,7 +1745,7 @@ a.proceed-checkout-btn:hover {
   transform: translateY(-4px) rotate(-4deg);
 }
 
-.dark-feature-cell h3 {
+.dark-feature-cell p.feature-cell-title {
   position: relative;
   font-family: "Plex Sans", sans-serif;
   font-weight: 600;

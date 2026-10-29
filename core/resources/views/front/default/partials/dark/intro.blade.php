@@ -27,7 +27,11 @@
                             <span class="dark-feature-cell-icon" style="background: linear-gradient(155deg, #{{ $feature->color }}, var(--accent-2));">
                                 <i class="{{ $feature->icon }}"></i>
                             </span>
-                            <h3>{{ convertUtf8($feature->title) }}</h3>
+                            {{-- A caption on a card, not a document section —
+                                 this strip renders right after the hero h1
+                                 with no h2 before it, so a real heading tag
+                                 here broke heading order. --}}
+                            <p class="feature-cell-title">{{ convertUtf8($feature->title) }}</p>
                             <span class="dark-feature-cell-line"></span>
                         </div>
                     @endforeach

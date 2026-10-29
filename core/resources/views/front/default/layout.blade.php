@@ -366,15 +366,15 @@
                     <div class="col-lg-6 {{ $rtl == 1 ? 'text-left' : 'text-right' }}">
                         <ul class="social-links">
                             @foreach ($socials as $key => $social)
-                                <li><a target="_blank" href="{{ $social->url }}"><i
+                                <li><a target="_blank" href="{{ $social->url }}" aria-label="{{ social_icon_label($social->icon) }}"><i
                                             class="{{ $social->icon }}"></i></a></li>
                             @endforeach
                         </ul>
 
                         @if (!empty($currentLang) && count($langs) > 1)
                             <div class="language">
-                                <a class="language-btn" href="#"><i class="flaticon-worldwide"></i>
-                                    {{ convertUtf8($currentLang->name) }}</a>
+                                <button type="button" class="language-btn"><i class="flaticon-worldwide"></i>
+                                    {{ convertUtf8($currentLang->name) }}</button>
                                 <ul class="language-dropdown">
                                     @foreach ($langs as $key => $lang)
                                         <li><a
@@ -408,15 +408,15 @@
                     <div class="col-lg-6 {{ $rtl == 1 ? 'text-left' : 'text-right' }}">
                         <ul class="social-links">
                             @foreach ($socials as $key => $social)
-                                <li><a target="_blank" href="{{ $social->url }}"><i
+                                <li><a target="_blank" href="{{ $social->url }}" aria-label="{{ social_icon_label($social->icon) }}"><i
                                             class="{{ $social->icon }}"></i></a></li>
                             @endforeach
                         </ul>
 
                         @if (!empty($currentLang) && count($langs) > 1)
                             <div class="language">
-                                <a class="language-btn" href="#"><i class="flaticon-worldwide"></i>
-                                    {{ convertUtf8($currentLang->name) }}</a>
+                                <button type="button" class="language-btn"><i class="flaticon-worldwide"></i>
+                                    {{ convertUtf8($currentLang->name) }}</button>
                                 <ul class="language-dropdown">
                                     @foreach ($langs as $key => $lang)
                                         <li><a
@@ -439,6 +439,7 @@
     @endif
     <!--   header area end   -->
 
+    <main>
 
     @if (!request()->routeIs('front.index') && !request()->routeIs('front.packageorder.confirmation') && !request()->routeIs('front.unsubscribe.token') && !($hideBreadcrumb ?? false))
         <!--   breadcrumb area start   -->
@@ -495,6 +496,7 @@
 
     @yield('content')
 
+    </main>
 
     <!--    footer section start   -->
     <footer class="footer-section @if ($be->theme_version == 'dark') dark-footer-shell @endif">
@@ -509,7 +511,7 @@
                             <div class="footer-logo-wrapper">
                                 <a href="{{ route('front.index') }}">
                                     <img class="lazy" data-src="{{ asset('assets/front/img/' . $bs->footer_logo) }}"
-                                        alt="">
+                                        alt="{{ $bs->website_title }}">
                                 </a>
                             </div>
                             <p class="footer-txt">

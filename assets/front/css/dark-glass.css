@@ -1077,7 +1077,7 @@ a.proceed-checkout-btn:hover {
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-2);
   white-space: nowrap;
   border-right: 1px solid var(--glass-border);
   padding-right: 24px;
@@ -1198,7 +1198,7 @@ a.proceed-checkout-btn:hover {
   font-family: "Plex Mono", monospace;
   font-size: 9px;
   letter-spacing: 2px;
-  fill: var(--accent);
+  fill: var(--accent-2);
 }
 .dark-hero-video-scrollcue .orbit-arrow {
   position: absolute;

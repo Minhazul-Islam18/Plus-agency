@@ -1,5 +1,17 @@
 @extends('admin.layout')
 
+@section('styles')
+<style>
+  .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+  .switch .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; transition: .4s; border-radius: 50%; }
+  .switch input:checked + .slider { background-color: #1572E8; }
+  .switch input:focus + .slider { box-shadow: 0 0 1px #1572E8; }
+  .switch input:checked + .slider:before { transform: translateX(26px); }
+</style>
+@endsection
+
 @section('content')
 <div class="page-header">
     <h4 class="page-title">Sliders</h4>
@@ -103,6 +115,13 @@
                                         <img src="{{asset('assets/front/img/sliders/'.$slider->image)}}" alt="" style="width:100%;">
                                     </div>
                                     <div class="card-footer text-center">
+                                        <div class="mb-2">
+                                            <label class="switch mb-0 align-middle">
+                                                <input type="checkbox" class="status-toggle" data-id="{{ $slider->id }}" {{ $slider->status == 1 ? 'checked' : '' }}>
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <small class="ml-1 status-label">{{ $slider->status == 1 ? 'On' : 'Off' }}</small>
+                                        </div>
                                         <a class="btn btn-secondary btn-sm mr-2" href="{{route('admin.slider.edit', $slider->id) . '?language=' . request()->input('language')}}">
                                             <span class="btn-label">
                                                 <i class="fas fa-edit"></i>
@@ -271,6 +290,18 @@
     @section('scripts')
     <script>
         $(document).ready(function() {
+
+            $(document).on('change', '.status-toggle', function() {
+                var $t = $(this), on = $t.is(':checked');
+                $.post('{{ route('admin.slider.status') }}', {
+                    _token: '{{ csrf_token() }}',
+                    id: $t.data('id'),
+                    status: on ? 1 : 0
+                }, function() {
+                    $t.closest('.card-footer').find('.status-label').text(on ? 'On' : 'Off');
+                    $.notify({ message: 'Status updated successfully.', icon: 'fa fa-check' }, { type: 'success', placement: { from: 'top', align: 'right' }, time: 1000, delay: 2000 });
+                }).fail(function() { $t.prop('checked', !on); });
+            });
 
             // make input fields RTL
             $("select[name='language_id']").on('change', function() {

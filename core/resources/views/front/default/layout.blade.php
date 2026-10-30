@@ -129,7 +129,7 @@
     <meta name="keywords" content="{{ $__metaKeywords }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $bs->website_title }} {{ $__titleSuffix }}</title>
+    <title>{{ html_entity_decode($bs->website_title . ' ' . $__titleSuffix, ENT_QUOTES) }}</title>
 
     @php
         // Dynamic Page-model catch-all (front.dynamicPage) has independent,

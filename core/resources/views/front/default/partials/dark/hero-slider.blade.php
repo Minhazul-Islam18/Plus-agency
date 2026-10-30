@@ -48,10 +48,13 @@
                     <div class="dark-hslider-content">
                         <div>
                             <span class="dark-hslider-counter"><span class="line"></span>{{ convertUtf8($slide->title) }}</span>
-                            <h1 class="dark-hslider-title">{{ convertUtf8($slide->text) }}</h1>
+                            {{-- One h1 per page (first slide only); an empty slide text renders no heading at all. --}}
+                            @if (!empty(trim((string) $slide->text)))
+                                <{{ $key == 0 ? 'h1' : 'h2' }} class="dark-hslider-title">{{ convertUtf8($slide->text) }}</{{ $key == 0 ? 'h1' : 'h2' }}>
+                            @endif
                             @if (!empty($slide->button_url) && !empty($slide->button_text))
                                 <a href="{{ $slide->button_url }}" class="dark-hslider-cta">
-                                    {{ convertUtf8($slide->button_text) }}
+                                    {{ convertUtf8($slide->button_text) }}@if (!empty($slide->title))<span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"> — {{ convertUtf8($slide->title) }}</span>@endif
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                                 </a>
                             @endif

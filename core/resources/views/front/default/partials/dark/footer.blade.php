@@ -59,7 +59,7 @@
                  cacheable pages deliberately skip the session middleware
                  that @csrf would need. Rate-limited instead (throttle:5,10). --}}
             <form class="dark-footer-pill-form" id="footerSubscribeForm" action="{{ route('front.subscribe') }}" method="post">
-                <input type="email" name="email" value="" placeholder="{{ __('Enter Email Address') }}">
+                <input type="email" name="email" value="" placeholder="{{ __('Enter Email Address') }}" aria-label="{{ __('Enter Email Address') }}">
                 <button type="submit" aria-label="{{ __('Subscribe') }}"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
             </form>
             <p id="erremail" class="text-danger mb-0 err-email"></p>

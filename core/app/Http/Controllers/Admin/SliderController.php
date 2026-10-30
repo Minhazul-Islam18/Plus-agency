@@ -167,6 +167,15 @@ class SliderController extends Controller
         return "success";
     }
 
+    public function status(Request $request)
+    {
+        $slider = Slider::findOrFail($request->id);
+        $slider->status = $request->status ? 1 : 0;
+        $slider->save();
+
+        return response()->json(['status' => $slider->status]);
+    }
+
     public function delete(Request $request)
     {
 

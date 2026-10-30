@@ -22,6 +22,7 @@ class CreateSlidersTable extends Migration
             $table->string('button_url', 255)->nullable();
             $table->string('image', 255)->nullable();
             $table->integer('serial_number')->default(0);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

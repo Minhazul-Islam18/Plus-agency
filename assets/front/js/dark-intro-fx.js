@@ -18,7 +18,7 @@
             var id = extractYouTubeId(playBtn.getAttribute('data-youtube-url') || '');
             if (!id) return;
             var iframe = document.createElement('iframe');
-            iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+            iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
             iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
             iframe.setAttribute('allowfullscreen', '');
             frameHolder.innerHTML = '';

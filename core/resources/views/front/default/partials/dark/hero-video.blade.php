@@ -275,7 +275,7 @@
                 // browser's autoplay policy — same reason the local <video>
                 // element is muted. loop=1 needs playlist=<same id> to
                 // actually loop a single video (a YouTube embed quirk).
-                iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(id) +
+                iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
                     '?autoplay=1&mute=1&loop=1&playlist=' + encodeURIComponent(id) +
                     '&controls=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1';
                 iframe.allow = 'autoplay; encrypted-media';

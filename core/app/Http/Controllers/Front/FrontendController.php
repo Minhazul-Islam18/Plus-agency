@@ -72,7 +72,7 @@ class FrontendController extends Controller
         // Tender card price formatting (same variable name as Front\TenderController).
         $data['bse'] = $bex;
 
-        $data['sliders'] = Slider::where('language_id', $lang_id)->orderBy('serial_number', 'ASC')->get();
+        $data['sliders'] = Slider::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
         $data['features'] = Feature::where('language_id', $lang_id)->where('status', 1)->orderBy('serial_number', 'ASC')->get();
         $version = $be?->theme_version;
 

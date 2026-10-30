@@ -906,6 +906,13 @@ a.proceed-checkout-btn:hover {
    each can move without reflowing the others. */
 .dark-hero--video {
   min-height: 88vh;
+  /* The fixed topbar + navbar (~150px) sit above this block, and the
+     partner strip is pinned to its bottom edge — so 88vh alone pushed the
+     strip below the fold on common desktop viewports (Chrome's toolbars
+     shrink the viewport further). Cap so the whole block, strip included,
+     ends inside the first screen. */
+  min-height: min(88vh, calc(100vh - 150px));
+  min-height: min(88vh, calc(100svh - 150px));
   padding-top: 0;
   display: flex;
   flex-direction: column;
@@ -1054,11 +1061,9 @@ a.proceed-checkout-btn:hover {
   bottom: 18px;
   z-index: 3;
   pointer-events: none;
-  /* Own compositing layer + layout/paint containment — the title flip
-     above animates a blur() filter every ~3.8s, which is expensive and
-     otherwise repaints this whole stacking context, visibly stuttering
-     the drifting logos in sync with it. */
-  contain: layout paint;
+  /* Own stacking context so the title flip's blur() filter above doesn't
+     repaint it. (contain: layout paint was here too, but it made the strip
+     vanish in Chrome — Firefox rendered it fine.) */
   isolation: isolate;
 }
 .dark-hero-video-partners .container {
@@ -1092,7 +1097,6 @@ a.proceed-checkout-btn:hover {
   width: max-content;
   animation: darkHeroPartnersDrift 50s linear infinite;
   will-change: transform;
-  backface-visibility: hidden;
 }
 .dark-hero-video-partners:hover .dark-hero-video-partners-track {
   animation-play-state: paused;

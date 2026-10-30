@@ -79,3 +79,6 @@ core/auth.json
 
 # PHPUnit coverage report (generated)
 /core/coverage.xml
+
+# Uploaded media (admin uploads, not source)
+/assets/front/img/

@@ -690,9 +690,12 @@
                                         <small>{{ $blogDate }}</small>
                                     </p>
 
-                                    <h4 class="blog-title"><a
+                                    {{-- Under this section's own h2 — h3 keeps the
+                                         document outline sequential instead of
+                                         skipping a level. --}}
+                                    <h3 class="blog-title"><a
                                             href="{{ route('front.blogdetails', $blog->slug) }}">{{ strlen($blog->title) > 40 ? mb_substr($blog->title, 0, 40, 'utf-8') . '...' : $blog->title }}</a>
-                                    </h4>
+                                    </h3>
 
 
                                     <p class="blog-summary">{!! strlen(strip_tags($blog->content)) > 100

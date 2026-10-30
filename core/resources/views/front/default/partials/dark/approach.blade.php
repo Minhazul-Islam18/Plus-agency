@@ -37,7 +37,10 @@
                                         @endif
                                     </div>
                                     <div class="dark-approach-text">
-                                        <h4>{{ convertUtf8($point->title) }}</h4>
+                                        {{-- Under this section's own h2 — h3 keeps the
+                                             document outline sequential instead of
+                                             skipping a level. --}}
+                                        <h3>{{ convertUtf8($point->title) }}</h3>
                                         <p>{{ convertUtf8($point->short_text) }}</p>
                                     </div>
                                 </li>

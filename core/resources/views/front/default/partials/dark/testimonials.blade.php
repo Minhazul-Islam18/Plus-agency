@@ -46,7 +46,10 @@
                             @endif
                         @endif
                         <div class="dark-testimonial-quote-icon">{{ __('Testimonial') }} <b>{{ sprintf('N°%02d', $key + 1) }}</b></div>
-                        <h6 class="name">{{ convertUtf8($testimonial->name) }}</h6>
+                        {{-- A name label on a card, not document content —
+                             a real heading tag here skipped from this
+                             section's own h2 straight to h6. --}}
+                        <p class="name">{{ convertUtf8($testimonial->name) }}</p>
                         <p class="rank">{{ convertUtf8($testimonial->rank) }}</p>
                         <p class="comment">
                             @php $testiComment = convertUtf8($testimonial->comment); @endphp

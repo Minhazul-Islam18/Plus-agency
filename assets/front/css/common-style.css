@@ -7282,7 +7282,7 @@ section.single-causes-section {
 .popup-wrapper {
     display: none;
 }
-.popup_main-content h1 {
+.popup_main-content h2 {
     font-size: 54px;
 }
 .bg_cover {
@@ -7326,11 +7326,11 @@ section.single-causes-section {
   border-radius: 10px;
   padding: 90px 55px;
 }
-.popup-one .popup_main-content h1,
+.popup-one .popup_main-content h2,
 .popup-one .popup_main-content p{
   color: #fff;
 }
-.popup-one .popup_main-content h1{
+.popup-one .popup_main-content h2{
   margin-bottom: 20px;
 }
 .popup-one .popup_main-content p{
@@ -7369,11 +7369,11 @@ section.single-causes-section {
   border-radius: 10px;
   padding: 90px 55px;
 }
-.popup-two .popup_main-content h1,
+.popup-two .popup_main-content h2,
 .popup-two .popup_main-content p{
   color: #fff;
 }
-.popup-two .popup_main-content h1{
+.popup-two .popup_main-content h2{
   margin-bottom: 20px;
 }
 .popup-two .popup_main-content p{
@@ -7425,7 +7425,7 @@ section.single-causes-section {
   padding: 30px 15px;
   text-align: center;
 }
-.popup-three .popup_main-content .right-content h1{
+.popup-three .popup_main-content .right-content h2{
   font-weight: 400;
   margin-bottom: 20px;
 }
@@ -7460,7 +7460,7 @@ section.single-causes-section {
   padding: 30px 30px;
   text-align: center;
 }
-.popup-four .popup_main-content .right-content h1{
+.popup-four .popup_main-content .right-content h2{
   font-weight: 400;
   margin-bottom: 20px;
 }
@@ -7501,7 +7501,7 @@ section.single-causes-section {
   text-align: center;
   padding: 75px;
 }
-.popup-five .popup_main-content h1{
+.popup-five .popup_main-content h2{
   font-size: 55px;
   line-height: 65px;
   font-weight: 400;
@@ -7510,7 +7510,7 @@ section.single-causes-section {
     margin: 0 auto 20px;
     max-width: 600px;
 }
-.popup-five .popup_main-content h4{
+.popup-five .popup_main-content h3{
   color: #fff;
   font-size: 25px;
   font-weight: 35px;
@@ -7550,14 +7550,14 @@ section.single-causes-section {
   text-align: center;
   margin-left: 50%;
 }
-.popup-six .popup_main-content .right-content  h1{
+.popup-six .popup_main-content .right-content  h2{
   font-size: 55px;
   font-weight: 400;
   line-height: 65px;
   color: #fff;
   margin-bottom: 25px;
 }
-.popup-six .popup_main-content h4{
+.popup-six .popup_main-content h3{
   color: #fff;
   font-size: 25px;
   line-height: 35px;
@@ -7611,11 +7611,11 @@ section.single-causes-section {
 
 /*Medium Device*/
 @media only screen and (min-width: 768px) and (max-width : 991px){
-  .popup-one .popup_main-content h1,
-  .popup-three .popup_main-content .right-content h1,
-  .popup-four .popup_main-content .right-content h1,
-  .popup-five .popup_main-content  h1,
-  .popup-six .popup_main-content .right-content h1{
+  .popup-one .popup_main-content h2,
+  .popup-three .popup_main-content .right-content h2,
+  .popup-four .popup_main-content .right-content h2,
+  .popup-five .popup_main-content  h2,
+  .popup-six .popup_main-content .right-content h2{
       font-size: 40px;
       line-height: 50px;
   }
@@ -7678,12 +7678,12 @@ section.single-causes-section {
   .popup-four .popup_main-content .subscribe-form .form_control{
       font-size: 15px;
   }
-  .popup-two .popup_main-content h1,
-  .popup-one .popup_main-content h1,
-  .popup-three .popup_main-content .right-content h1,
-  .popup-four .popup_main-content .right-content h1,
-  .popup-five .popup_main-content h1,
-  .popup-six .popup_main-content .right-content h1{
+  .popup-two .popup_main-content h2,
+  .popup-one .popup_main-content h2,
+  .popup-three .popup_main-content .right-content h2,
+  .popup-four .popup_main-content .right-content h2,
+  .popup-five .popup_main-content h2,
+  .popup-six .popup_main-content .right-content h2{
       font-size: 30px;
       line-height: 40px;
   }

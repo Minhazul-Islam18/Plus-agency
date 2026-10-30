@@ -27,7 +27,7 @@
                 @endif
                 <div class="popup_main-content">
                     @if ($isDark)<span class="dark-popup-eyebrow">{{ __('Announcement') }}</span>@endif
-                    <h1>{{$popup->title}}</h1>
+                    <h2>{{$popup->title}}</h2>
                     <p>{{$popup->text}}</p>
 
                     @if (!empty($popup->button_url) && !empty($popup->button_text))
@@ -47,7 +47,7 @@
                 @endif
                 <div class="popup_main-content">
                     @if ($isDark)<span class="dark-popup-eyebrow">{{ __('Newsletter') }}</span>@endif
-                    <h1>{{$popup->title}}</h1>
+                    <h2>{{$popup->title}}</h2>
                     <p>{{$popup->text}}</p>
                     <div class="subscribe-form">
                         <form id="subscribeForm" action="{{route('front.subscribe')}}" method="POST">
@@ -77,7 +77,7 @@
                     <div class="left-bg bg_cover lazy" data-bg="{{asset('assets/front/img/popups/' . $popup->image)}}"></div>
                     <div class="right-content">
                         @if ($isDark)<span class="dark-popup-eyebrow">{{ __('Announcement') }}</span>@endif
-                        <h1>{{$popup->title}}</h1>
+                        <h2>{{$popup->title}}</h2>
                         <p>{{$popup->text}}</p>
 
                         @if (!empty($popup->button_url) && !empty($popup->button_text))
@@ -100,7 +100,7 @@
                     <div class="left-bg bg_cover lazy" data-bg="{{asset('assets/front/img/popups/' . $popup->image)}}"></div>
                     <div class="right-content">
                         @if ($isDark)<span class="dark-popup-eyebrow">{{ __('Newsletter') }}</span>@endif
-                        <h1>{{$popup->title}}</h1>
+                        <h2>{{$popup->title}}</h2>
                         <p>{{$popup->text}}</p>
                         <div class="subscribe-form">
                             <form id="subscribeForm" action="{{route('front.subscribe')}}" method="POST">
@@ -129,8 +129,8 @@
                 @endif
                 <div class="popup_main-content">
                     @if ($isDark)<span class="dark-popup-eyebrow">{{ __('Live Opportunity') }}</span>@endif
-                    <h1>{{$popup->title}}</h1>
-                    <h4>{{$popup->text}}</h4>
+                    <h2>{{$popup->title}}</h2>
+                    <h3>{{$popup->text}}</h3>
                     <div class="offer-timer" data-end_date="{!! $popup->end_date !!}" data-end_time="{!! $popup->end_time !!}"></div>
                     @if (!empty($popup->button_url) && !empty($popup->button_text))
                         <a href="{{$popup->button_url}}" class="popup-main-btn" style="background-color: #{{$popup->button_color}};">{{$popup->button_text}}</a>
@@ -153,8 +153,8 @@
                         @if ($isDark)
                             <span class="dark-popup-eyebrow">{{ __('Live Opportunity') }}</span>
                         @endif
-                        <h1>{{$popup->title}}</h1>
-                        <h4>{{$popup->text}}</h4>
+                        <h2>{{$popup->title}}</h2>
+                        <h3>{{$popup->text}}</h3>
                         <div class="offer-timer" data-end_date="{!! $popup->end_date !!}" data-end_time="{!! $popup->end_time !!}"></div>
                         @if (!empty($popup->button_url) && !empty($popup->button_text))
                             <a href="{{$popup->button_url}}" class="popup-main-btn" style="background-color: #{{$popup->button_color}};">{{$popup->button_text}}</a>

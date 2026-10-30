@@ -2265,7 +2265,7 @@ a.proceed-checkout-btn:hover {
 .dark-approach-text {
   padding-top: 8px;
 }
-.dark-approach-text h4 {
+.dark-approach-text h3 {
   font-family: "Fraunces", Georgia, serif;
   font-weight: 600;
   font-size: 21px;
@@ -10829,7 +10829,7 @@ button.dark-cookie-consent__deny:hover {
   background: var(--accent-2);
   box-shadow: 0 0 10px rgba(var(--accent-2-rgb), 0.8);
 }
-.dark-popup .popup-six .popup_main-content .right-content h1 {
+.dark-popup .popup-six .popup_main-content .right-content h2 {
   font-family: "Fraunces", Georgia, serif !important;
   font-weight: 900 !important;
   font-size: 27px !important;
@@ -10838,7 +10838,7 @@ button.dark-cookie-consent__deny:hover {
   margin: 0 0 12px !important;
   text-align: left !important;
 }
-.dark-popup .popup-six .popup_main-content .right-content h4 {
+.dark-popup .popup-six .popup_main-content .right-content h3 {
   font-family: "Plex Sans", sans-serif !important;
   font-size: 14.5px !important;
   font-weight: 400 !important;
@@ -10919,7 +10919,7 @@ button.dark-cookie-consent__deny:hover {
 }
 
 @media (max-width: 767px) {
-  .dark-popup .popup-six .popup_main-content .right-content h1 {
+  .dark-popup .popup-six .popup_main-content .right-content h2 {
     font-size: 22px !important;
   }
   .dark-popup .syotimer-cell__value {
@@ -11071,8 +11071,8 @@ body.dark-popup-lock {
   padding: 70px 55px !important;
   border-radius: 0 !important;
 }
-.dark-popup .popup-one .popup_main-content h1,
-.dark-popup .popup-two .popup_main-content h1 {
+.dark-popup .popup-one .popup_main-content h2,
+.dark-popup .popup-two .popup_main-content h2 {
   font-family: "Fraunces", Georgia, serif !important;
   font-weight: 900 !important;
   color: #fff !important;
@@ -11187,8 +11187,8 @@ body.dark-popup-lock {
   padding: 56px 46px !important;
   text-align: left !important;
 }
-.dark-popup .popup-three .popup_main-content .right-content h1,
-.dark-popup .popup-four .popup_main-content .right-content h1 {
+.dark-popup .popup-three .popup_main-content .right-content h2,
+.dark-popup .popup-four .popup_main-content .right-content h2 {
   font-family: "Fraunces", Georgia, serif !important;
   font-weight: 900 !important;
   font-size: 27px !important;
@@ -11260,7 +11260,7 @@ body.dark-popup-lock {
   padding: 64px 55px !important;
   text-align: center !important;
 }
-.dark-popup .popup-five .popup_main-content h1 {
+.dark-popup .popup-five .popup_main-content h2 {
   font-family: "Fraunces", Georgia, serif !important;
   font-weight: 900 !important;
   color: #fff !important;
@@ -11268,7 +11268,7 @@ body.dark-popup-lock {
   line-height: 1.25 !important;
   margin-bottom: 10px !important;
 }
-.dark-popup .popup-five .popup_main-content h4 {
+.dark-popup .popup-five .popup_main-content h3 {
   font-family: "Plex Sans", sans-serif !important;
   font-weight: 400 !important;
   color: rgba(255, 255, 255, 0.55) !important;
@@ -11310,9 +11310,9 @@ body.dark-popup-lock {
   .dark-popup .popup-five .popup_main-content {
     padding: 40px 26px !important;
   }
-  .dark-popup .popup-one .popup_main-content h1,
-  .dark-popup .popup-two .popup_main-content h1,
-  .dark-popup .popup-five .popup_main-content h1 {
+  .dark-popup .popup-one .popup_main-content h2,
+  .dark-popup .popup-two .popup_main-content h2,
+  .dark-popup .popup-five .popup_main-content h2 {
     font-size: 24px !important;
   }
   .dark-popup .popup-three .popup_main-content .left-bg,
@@ -11323,8 +11323,8 @@ body.dark-popup-lock {
   .dark-popup .popup-four .popup_main-content .right-content {
     padding: 40px 26px !important;
   }
-  .dark-popup .popup-three .popup_main-content .right-content h1,
-  .dark-popup .popup-four .popup_main-content .right-content h1 {
+  .dark-popup .popup-three .popup_main-content .right-content h2,
+  .dark-popup .popup-four .popup_main-content .right-content h2 {
     font-size: 22px !important;
   }
 }

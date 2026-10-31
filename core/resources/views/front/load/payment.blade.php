@@ -185,7 +185,7 @@
 @if($payment == 'offline')
 
   <div>
-    <p class="gateway-desc">{!! nl2br(e($gateway->short_description)) !!}</p>
+    @include('front.partials.gateway-desc', ['desc' => $gateway->short_description])
   </div>
 
   <div class="gateway-instruction">

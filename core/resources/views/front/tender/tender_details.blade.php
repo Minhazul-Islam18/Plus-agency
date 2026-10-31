@@ -1936,7 +1936,7 @@ $preFlag = $preCountry['flag'] ?? '';
                                     <div class="gateway-details row mt-3" id="tab-{{ $ogw->id }}"
                                         style="display:none;">
                                         <div class="col-12">
-                                            <p class="gateway-desc">{!! nl2br(e($ogw->short_description)) !!}</p>
+                                            @include('front.partials.gateway-desc', ['desc' => $ogw->short_description])
                                         </div>
                                         <div class="col-12">
                                             <div

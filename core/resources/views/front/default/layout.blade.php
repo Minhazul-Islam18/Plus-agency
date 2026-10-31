@@ -883,6 +883,21 @@
             $toggle.text(expanded ? @json(__('Show more')) : @json(__('Show less')));
         });
 
+        {{-- Offline gateway short description — same short/full swap + Show more/Show less. --}}
+        $(document).on('click keydown', '.gateway-desc-toggle', function(e) {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            var $toggle = $(this);
+            var $p = $toggle.closest('p');
+            var $short = $p.find('.gateway-desc-short');
+            var $full = $p.find('.gateway-desc-full');
+            var expanded = $full.is(':visible');
+
+            $short.toggle(expanded);
+            $full.toggle(!expanded);
+            $toggle.text(expanded ? @json(__('Show more')) : @json(__('Show less')));
+        });
+
         {{-- Testimonial card comment — same short/full swap + Show more/Show less
              style as the footer toggles, instead of a hard CSS ellipsis clamp. --}}
         $(document).on('click', '.testi-comment-toggle', function(e) {

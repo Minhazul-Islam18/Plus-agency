@@ -734,6 +734,7 @@ class TenderController extends Controller
             ])
             ->when($orderNum, fn($q) => $q->where('order_number', $orderNum))
             ->when($regNo, fn($q) => $q->where('company_registration_no', TenderPurchase::normalizeRegNo($regNo)))
+            ->with('offlineGateway')
             ->when($langCode, function ($q) use ($langCode) {
                 $language = Language::where('code', $langCode)->first();
                 if ($language) {
@@ -787,31 +788,52 @@ class TenderController extends Controller
         // path) is by definition an admin manual validation — recorded below
         // so the receipt can say so instead of showing a stale gateway name.
         if ($completing) {
-            // Proof now comes from LFM (a URL to an already-uploaded file),
-            // not a raw multipart upload — same "copy from LFM's URL into our
-            // own storage" pattern as the invoice branding images on
-            // admin/tender/settings.
+            // The buyer's own uploaded receipt IS the proof — the admin reviews
+            // it and confirms; nothing is uploaded here. An evidence copy is
+            // taken so the audit trail survives even if the original is later
+            // removed. Orders with no buyer receipt (e.g. an abandoned online
+            // payment confirmed outside the app) need a written note instead.
             $request->validate([
-                'proof' => 'required|string',
-            ], [
-                'proof.required' => 'A payment proof (image or file) is required to mark this order as paid.',
+                'note' => 'nullable|string|max:500',
             ]);
+            $note = trim((string) $request->input('note'));
 
-            $url      = $request->input('proof');
-            $ext      = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
-            $filename = uniqid('proof_') . '.' . ($ext ?: 'dat');
-            $dir      = 'assets/front/tender_proofs/';
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0775, true);
+            $evidenceFile = null;
+            if (!empty($purchase->receipt)) {
+                $src = 'assets/front/receipt/' . $purchase->receipt;
+                $dir = 'assets/front/tender_proofs/';
+                if (!is_file($src)) {
+                    Session::flash('error', 'The buyer\'s uploaded receipt file is missing from the server — ask them to resubmit, or reject this receipt.');
+                    return back();
+                }
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0775, true);
+                }
+                $evidenceFile = uniqid('proof_') . '.' . (strtolower(pathinfo($src, PATHINFO_EXTENSION)) ?: 'dat');
+                if (!@copy($src, $dir . $evidenceFile)) {
+                    Session::flash('error', 'Could not save the proof copy — the order was NOT marked as paid. Please try again.');
+                    return back();
+                }
+                $purchase->admin_proof = $evidenceFile;
+            } elseif ($note === '') {
+                Session::flash('error', 'This order has no uploaded receipt — a note describing how the payment was verified is required.');
+                return back();
+            } else {
+                $purchase->admin_proof = null;
             }
-            @copy($url, $dir . $filename);
-            $purchase->admin_proof = $filename;
+            $purchase->validation_note = $note !== '' ? $note : null;
 
-            // The buyer's original payment_method still held whatever
-            // gateway their earlier failed/abandoned attempt used (or
-            // whichever offline gateway they picked at checkout) — neither
-            // is how this order actually got marked paid.
-            $purchase->payment_method = 'Manual';
+            // An offline-checkout order keeps the gateway the buyer actually
+            // used. Anything else (an abandoned/failed online payment confirmed
+            // outside the app) is recorded as manual so reports don't call it
+            // an online gateway payment.
+            if (empty($purchase->offline_gateway_id) && $purchase->gateway_type !== 'offline') {
+                $purchase->payment_method = 'Manual';
+                $purchase->gateway_type   = 'manual';
+            }
+
+            $purchase->rejection_reason = null;
+            $purchase->rejected_at      = null;
 
             $admin = Auth::guard('admin')->user();
             $purchase->validated_by_admin_id   = $admin->id ?? null;
@@ -819,15 +841,9 @@ class TenderController extends Controller
             $purchase->validated_by_admin_name = $admin ? trim($admin->first_name . ' ' . $admin->last_name) : null;
 
             // Find My Files' "Payment Reference" recovery method looks the
-            // order up by whereNotNull('payment_reference') — a manually
-            // completed order has no real gateway reference to put here
-            // (that's the whole point of this flow), so without this,
-            // payment_reference stays null forever and that recovery method
-            // can never find this order at all. The order number is already
-            // unique and known to the buyer (it's on every email/receipt),
-            // so it doubles as a usable reference here. Never overwrite an
-            // admin-entered reference (purchaseUpdateReference) if one's
-            // already set.
+            // order up by whereNotNull('payment_reference'), so a manually
+            // completed order with none falls back to its order number.
+            // Never overwrite a reference already set (buyer's or admin's).
             if (empty($purchase->payment_reference)) {
                 $purchase->payment_reference = $purchase->order_number;
             }
@@ -894,23 +910,28 @@ class TenderController extends Controller
                 'amount'               => $moduleTotal,
                 'currency_code'        => $purchase->currency_code,
                 'proof_path'           => $purchase->admin_proof,
-                'proof_original_name'  => $completing ? basename(parse_url($url, PHP_URL_PATH)) : null,
-                'proof_size'           => $completing && isset($dir, $filename) && file_exists($dir . $filename) ? filesize($dir . $filename) : null,
+                'proof_original_name'  => $completing ? $purchase->receipt : null,
+                'proof_size'           => $completing && !empty($evidenceFile) && is_file($dir . $evidenceFile) ? filesize($dir . $evidenceFile) : null,
                 'admin_id'             => Auth::guard('admin')->id(),
                 'admin_name'           => trim((Auth::guard('admin')->user()->first_name ?? '') . ' ' . (Auth::guard('admin')->user()->last_name ?? '')),
-                'reason'               => $reversing ? $purchase->reversal_reason : null,
+                'reason'               => $reversing ? $purchase->reversal_reason : ($purchase->validation_note ?: null),
             ]);
         }
 
+        $mailFailed = null;
         if ($completing) {
-            $this->sendPurchaseApprovedEmail($purchase);
+            $mailFailed = !$this->sendPurchaseApprovedEmail($purchase) ? 'the approval / download-link email' : null;
         }
 
         if ($reversing) {
-            $this->sendPaymentReversedEmail($purchase);
+            $mailFailed = !$this->sendPaymentReversedEmail($purchase) ? 'the reversal email' : null;
         }
 
-        Session::flash('success', 'Payment status changed successfully!');
+        if ($mailFailed) {
+            Session::flash('warning', 'Payment status changed, but ' . $mailFailed . ' could NOT be sent to ' . $purchase->email . ' — check the SMTP settings, then send the link manually.');
+        } else {
+            Session::flash('success', 'Payment status changed successfully!' . ($completing ? ' The buyer was emailed their download link and invoice.' : ''));
+        }
         return back();
     }
 
@@ -920,7 +941,23 @@ class TenderController extends Controller
      * TenderPaymentHelper::handleFailedPayment) so the buyer can pay again
      * through any available gateway without re-entering their details.
      */
-    private function sendPaymentReversedEmail(TenderPurchase $purchase): void
+    private function sendPaymentReversedEmail(TenderPurchase $purchase): bool
+    {
+        return $this->sendResumeEmail($purchase, 'tender_payment_reversed', 'tenderPaymentReversed');
+    }
+
+    /**
+     * Emailed when an admin refuses an uploaded receipt. Carries the reason
+     * and a resume link so the buyer can submit a corrected receipt.
+     */
+    private function sendReceiptRejectedEmail(TenderPurchase $purchase): bool
+    {
+        return $this->sendResumeEmail($purchase, 'tender_receipt_rejected', 'tenderReceiptRejected', [
+            'rejection_reason' => $purchase->rejection_reason,
+        ]);
+    }
+
+    private function sendResumeEmail(TenderPurchase $purchase, string $template, string $type, array $extra = []): bool
     {
         try {
             $rawToken = hash_hmac('sha256', implode('|', [
@@ -937,7 +974,7 @@ class TenderController extends Controller
             $language = $purchase->tender->language ?? Language::where('is_default', 1)->first();
             $bs       = $language->basic_setting;
 
-            (new KreativMailer)->mailFromAdmin([
+            (new KreativMailer)->mailFromAdmin(array_merge([
                 'toMail'        => $purchase->email,
                 'toName'        => $purchase->first_name,
                 'customer_name' => $purchase->first_name,
@@ -945,15 +982,77 @@ class TenderController extends Controller
                 'order_number'  => $purchase->order_number,
                 'resume_url'    => route('tender.purchase.resume', ['token' => $rawToken]),
                 'website_title' => $bs->website_title,
-                'templateType'  => 'tender_payment_reversed',
-                'type'          => 'tenderPaymentReversed',
-            ]);
+                'templateType'  => $template,
+                'type'          => $type,
+            ], $extra));
+            return true;
         } catch (\Exception $e) {
-            Log::error('[Tender] Payment-reversed email failed', [
+            Log::error('[Tender] ' . $template . ' email failed', [
                 'order' => $purchase->order_number,
                 'error' => $e->getMessage(),
             ]);
+            return false;
         }
+    }
+
+    /**
+     * Refuse an offline order's uploaded receipt (Pending → Rejected). The
+     * reason is mandatory and emailed to the buyer with a resume link.
+     */
+    public function purchaseReject(Request $request)
+    {
+        $purchase = TenderPurchase::findOrFail($request->purchase_id);
+
+        if (!Auth::guard('admin')->user()->hasPermission('Manual Payment Completion')) {
+            Session::flash('error', 'You don\'t have permission to validate payments. Contact an administrator.');
+            return back();
+        }
+
+        if ($purchase->payment_status !== 'Pending') {
+            Session::flash('error', 'Only a Pending order can be rejected.');
+            return back();
+        }
+
+        if (empty($purchase->offline_gateway_id) && $purchase->gateway_type !== 'offline') {
+            Session::flash('error', 'Only offline (bank / manual) orders can be rejected — this order is not one.');
+            return back();
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ], [
+            'reason.required' => 'A reason is required so the buyer knows what to fix.',
+        ]);
+
+        $purchase->payment_status   = 'Rejected';
+        $purchase->rejection_reason = trim($request->input('reason'));
+        $purchase->rejected_at      = now();
+        $purchase->save();
+
+        \App\TenderAuditLog::record('payment_rejected', $purchase,
+            'Receipt rejected: ' . $purchase->rejection_reason,
+            ['from' => 'Pending', 'to' => 'Rejected', 'reason' => $purchase->rejection_reason]);
+
+        $admin = Auth::guard('admin')->user();
+        \App\TenderPaymentEvidence::create([
+            'tender_purchase_id'  => $purchase->id,
+            'order_number'        => $purchase->order_number,
+            'action'              => 'rejected',
+            'amount'              => collect(json_decode($purchase->purchased_modules, true) ?: [])->sum('cost'),
+            'currency_code'       => $purchase->currency_code,
+            'proof_path'          => null,
+            'proof_original_name' => $purchase->receipt,
+            'admin_id'            => $admin->id ?? null,
+            'admin_name'          => trim(($admin->first_name ?? '') . ' ' . ($admin->last_name ?? '')),
+            'reason'              => $purchase->rejection_reason,
+        ]);
+
+        if ($this->sendReceiptRejectedEmail($purchase)) {
+            Session::flash('success', 'Receipt rejected and the buyer has been emailed.');
+        } else {
+            Session::flash('warning', 'Receipt rejected, but the email to ' . $purchase->email . ' could NOT be sent — check the SMTP settings and tell the buyer directly.');
+        }
+        return back();
     }
 
     public function purchaseUpdateReference(Request $request)
@@ -1099,7 +1198,7 @@ class TenderController extends Controller
         return back();
     }
 
-    private function sendPurchaseApprovedEmail(TenderPurchase $purchase): void
+    private function sendPurchaseApprovedEmail(TenderPurchase $purchase): bool
     {
         $language = Language::where('is_default', 1)->first();
         $be       = $language->basic_extended;
@@ -1167,11 +1266,13 @@ class TenderController extends Controller
                 'attachment'     => $invoicePath,
                 'attachmentName' => $purchase->order_number . '_invoice.pdf',
             ]);
+            return true;
         } catch (\Exception $e) {
             Log::error('[Tender] Approval email failed', [
                 'order' => $purchase->order_number,
                 'error' => $e->getMessage(),
             ]);
+            return false;
         }
     }
 

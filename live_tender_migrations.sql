@@ -48,6 +48,15 @@ CALL _addcol('tender_purchases', 'suspended_at',      "`suspended_at` TIMESTAMP 
 CALL _addcol('tender_purchases', 'payment_reference', "`payment_reference` VARCHAR(100) NULL");
 CALL _addcol('tender_purchases', 'invoice',           "`invoice` VARCHAR(255) NULL");
 
+-- ---- tender_purchases: offline-payment validation ---------------------
+-- offline_gateway_id: stable link to the gateway the buyer chose at checkout
+-- (payment_method now holds its NAME). rejection_*: receipt refused by an
+-- admin. validation_note: note recorded when validating.
+CALL _addcol('tender_purchases', 'offline_gateway_id', "`offline_gateway_id` BIGINT UNSIGNED NULL");
+CALL _addcol('tender_purchases', 'rejection_reason',   "`rejection_reason` VARCHAR(500) NULL");
+CALL _addcol('tender_purchases', 'rejected_at',        "`rejected_at` TIMESTAMP NULL");
+CALL _addcol('tender_purchases', 'validation_note',    "`validation_note` VARCHAR(500) NULL");
+
 -- ---- basic_settings_extra: tender toggles + watermark + encryption ---
 CALL _addcol('basic_settings_extra', 'is_tender',                         "`is_tender` TINYINT NOT NULL DEFAULT 1");
 CALL _addcol('basic_settings_extra', 'tender_breadcrumb_bg',              "`tender_breadcrumb_bg` VARCHAR(255) NULL");
@@ -120,6 +129,36 @@ CREATE TABLE IF NOT EXISTS `tender_audit_logs` (
   KEY `tender_audit_logs_tender_purchase_id_index` (`tender_purchase_id`),
   KEY `tender_audit_logs_order_number_index` (`order_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---- indexes / backfill / email template for offline validation -------
+CALL _addidx('tender_purchases', 'idx_tpurchases_offline_gw', '`offline_gateway_id`');
+
+-- Offline orders used to store the gateway's numeric id in payment_method.
+UPDATE `tender_purchases` p
+JOIN `offline_gateways` g ON g.id = CAST(p.payment_method AS UNSIGNED)
+SET p.offline_gateway_id = g.id, p.payment_method = g.name
+WHERE p.gateway_type = 'offline' AND p.payment_method REGEXP '^[0-9]+$' AND p.offline_gateway_id IS NULL;
+
+-- Orders an admin completed outside any gateway flow were left as 'online'.
+UPDATE `tender_purchases` SET gateway_type = 'manual'
+WHERE payment_method = 'Manual' AND (gateway_type IS NULL OR gateway_type <> 'offline');
+
+-- "Receipt not accepted" email, cloned from the payment-reversed template.
+INSERT INTO `email_templates` (`email_type`, `email_subject`, `email_body`)
+SELECT 'tender_receipt_rejected',
+       'Payment Receipt Not Accepted — Order {order_number}',
+       REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(email_body,
+         'Validation Reversed', 'Receipt Not Accepted'),
+         'Your payment validation has been reversed.', 'We could not accept your payment receipt.'),
+         'The administrative validation of your payment for', 'Your payment receipt for'),
+         ' has been reversed, and your download access has been revoked. This does not necessarily mean anything is wrong on your end — use the button below to resume payment at any time using any available payment method.',
+         ' could not be validated.<br><br><strong style="color:#b91c1c;">Reason:</strong> {rejection_reason}<br><br>Please use the button below to submit a corrected receipt or choose another payment method.'),
+         'Your payment validation was reversed — you can resume payment at any time.', 'Your payment receipt could not be validated — see the reason inside.'),
+         'Resume Payment', 'Submit a New Receipt'),
+         'Questions about this reversal?', 'Questions about this decision?')
+FROM `email_templates`
+WHERE `email_type` = 'tender_payment_reversed'
+  AND NOT EXISTS (SELECT 1 FROM (SELECT 1 FROM `email_templates` WHERE `email_type` = 'tender_receipt_rejected') x);
 
 -- ---- cleanup --------------------------------------------------------
 DROP PROCEDURE IF EXISTS _addcol;

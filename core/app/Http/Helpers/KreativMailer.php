@@ -70,6 +70,9 @@ class KreativMailer {
         if (array_key_exists('download_url', $data)) {
             $body = preg_replace("/{download_url}/", $data['download_url'], $body);
         }
+        if (array_key_exists('rejection_reason', $data)) {
+            $body = str_replace('{rejection_reason}', e($data['rejection_reason']), $body);
+        }
         if (array_key_exists('resume_url', $data)) {
             $body = preg_replace("/{resume_url}/", $data['resume_url'], $body);
         }

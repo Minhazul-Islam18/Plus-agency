@@ -185,6 +185,20 @@ return new class extends Migration
                 // only cleared if this order is reversed again.
                 $table->string('reversal_reason', 500)->nullable();
 
+                // Offline checkout: which offline_gateways row the buyer chose
+                // (payment_method holds its NAME for display/filtering; this id
+                // is the stable link that survives a rename or validation).
+                $table->unsignedBigInteger('offline_gateway_id')->nullable()->index();
+
+                // Receipt reviewed and refused by an admin (payment_status =
+                // 'Rejected'); the reason is emailed to the buyer.
+                $table->string('rejection_reason', 500)->nullable();
+                $table->timestamp('rejected_at')->nullable();
+
+                // Optional admin note recorded when validating; required when
+                // the order has no buyer-uploaded receipt to review.
+                $table->string('validation_note', 500)->nullable();
+
                 $table->timestamps();
             });
         }

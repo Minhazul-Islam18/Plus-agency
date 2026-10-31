@@ -340,6 +340,19 @@ class TenderController extends Controller
             return back()->with('error', __('This tender is not currently available.'));
         }
 
+        // This endpoint is the OFFLINE checkout only (online gateways post to
+        // their own controllers). The buyer-supplied `gateway` must be a real,
+        // currently-enabled offline gateway — never trust the id/type as sent.
+        $offlineGateway = OfflineGateway::where('id', (int) $request->gateway)
+            ->where('course_checkout_status', 1)
+            ->first();
+        if (!$offlineGateway) {
+            return back()->with('error', __('The selected payment method is not available. Please choose another one.'))->withInput();
+        }
+        if ($offlineGateway->is_receipt == 1 && !$request->hasFile('receipt')) {
+            return back()->with('error', __('Please upload your payment receipt to continue.'))->withInput();
+        }
+
         $bse = BasicExtra::first();
 
         $purchase                = new TenderPurchase;
@@ -356,8 +369,9 @@ class TenderController extends Controller
         $purchase->company_address = $request->company_address ?? null;
         $purchase->company_registration_no = TenderPurchase::normalizeRegNo($request->company_registration_no);
         $purchase->currency_code   = $bse->base_currency_text;
-        $purchase->payment_method = $request->gateway;
-        $purchase->gateway_type  = $request->gateway_type ?? 'offline';
+        $purchase->payment_method = $offlineGateway->name;
+        $purchase->offline_gateway_id = $offlineGateway->id;
+        $purchase->gateway_type  = 'offline';
         $purchase->payment_status = 'Pending';
 
         if ($request->hasFile('receipt')) {

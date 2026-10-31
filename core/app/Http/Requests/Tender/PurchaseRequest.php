@@ -85,7 +85,6 @@ class PurchaseRequest extends FormRequest
             'company_name'          => 'nullable|string|max:200',
             'company_address'       => 'nullable|string|max:1000',
             'payment_reference'     => 'nullable|string|max:100',
-            'gateway_type'          => 'nullable|string|max:50',
 
             // At least one module must be chosen: the buyer pays per module, so an
             // empty selection has nothing to charge for.

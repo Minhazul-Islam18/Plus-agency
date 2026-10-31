@@ -37,6 +37,10 @@ class TenderPurchase extends Model
         'validated_by_admin_id',
         'validated_by_admin_name',
         'reversal_reason',
+        'offline_gateway_id',
+        'rejection_reason',
+        'rejected_at',
+        'validation_note',
         'payment_reference',
         'access_status',
         'suspend_reason',
@@ -46,12 +50,18 @@ class TenderPurchase extends Model
     protected $casts = [
         'paid_at'                 => 'datetime',
         'suspended_at'            => 'datetime',
+        'rejected_at'             => 'datetime',
         'resume_token_issued_at'  => 'datetime',
     ];
 
     public function tender()
     {
         return $this->hasOne('App\Tender', 'id', 'tender_id');
+    }
+
+    public function offlineGateway()
+    {
+        return $this->belongsTo('App\OfflineGateway', 'offline_gateway_id');
     }
 
     /**

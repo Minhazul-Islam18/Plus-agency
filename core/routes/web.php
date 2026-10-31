@@ -802,6 +802,7 @@ Route::group(['prefix' => config('app.admin_prefix', 'admin'), 'middleware' => [
         Route::post('/tender/status', 'Admin\TenderController@status')->name('admin.tender.status');
         Route::get('/tender/purchase-log', 'Admin\TenderController@purchaseLog')->name('admin.tender.purchaseLog');
         Route::post('/tender/purchase/payment-status', 'Admin\TenderController@purchasePaymentStatus')->name('admin.tender.purchasePaymentStatus');
+        Route::post('/tender/purchase/reject', 'Admin\TenderController@purchaseReject')->name('admin.tender.purchaseReject');
         Route::post('/tender/purchase/update-reference', 'Admin\TenderController@purchaseUpdateReference')->name('admin.tender.purchaseUpdateReference');
         // Authorized Devices page
         Route::get('/tender/devices', 'Admin\TenderDeviceController@index')->name('admin.tender.devices');

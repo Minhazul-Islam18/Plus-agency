@@ -19,7 +19,7 @@
 
                 <div class="form-group">
                     <label for="">Short Description</label>
-                    <textarea id="inshort_description" class="form-control" name="short_description" rows="3" cols="80" placeholder="Enter short description"></textarea>
+                    <textarea id="inshort_description" class="form-control" name="short_description" rows="6" style="min-height:140px;resize:vertical" cols="80" placeholder="Enter short description"></textarea>
                     <p id="eerrshort_description" class="mb-0 text-danger em"></p>
                  </div>
 

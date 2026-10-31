@@ -428,6 +428,7 @@ a.proceed-checkout-btn:hover {
   text-decoration: underline;
   cursor: pointer;
 }
+.gateway-desc .gateway-desc-toggle,
 .dark-footer-about .footer-text-toggle {
   color: var(--accent-2, var(--accent)) !important;
 }

@@ -229,6 +229,15 @@ class GatewayController extends Controller
         $data['ogateways'] = OfflineGateway::where('language_id', $lang_id)->orderBy('id', 'DESC')->paginate(10);
         $data['lang_id'] = $lang_id;
 
+        // Offline checkout records the chosen gateway in offline_gateway_id,
+        // which stays put through validation/rejection.
+        $data['usage'] = \DB::table('tender_purchases')
+            ->whereIn('offline_gateway_id', $data['ogateways']->pluck('id'))
+            ->selectRaw("offline_gateway_id, COUNT(*) as total, SUM(payment_status = 'Pending') as pending, SUM(payment_status = 'Completed') as completed, MAX(created_at) as last_used")
+            ->groupBy('offline_gateway_id')
+            ->get()
+            ->keyBy('offline_gateway_id');
+
         return view('admin.gateways.offline.index', $data);
     }
 
@@ -292,6 +301,10 @@ class GatewayController extends Controller
             $og->course_checkout_status = $request->course_checkout_status;
         }
         $og->save();
+
+        if ($request->ajax()) {
+            return response()->json(['status' => $og->course_checkout_status]);
+        }
 
         Session::flash('success', 'Gateway status changed successfully!');
         return back();

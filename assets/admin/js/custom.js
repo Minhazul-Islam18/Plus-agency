@@ -296,6 +296,10 @@ $(function ($) {
   $(".summernote").each(function (i) {
     let theight;
     let $summernote = $(this);
+    // Keep the template's own id reachable: the Edit-button prepopulate
+    // handler below looks the editor up as #in<field>, which the uniqid()
+    // overwrite would otherwise orphan (instructions never filled in).
+    if ($summernote.attr('id')) $summernote.attr('data-orig-id', $summernote.attr('id'));
     $summernote.attr('id', uniqid());
     if ($(this).data('height')) {
       theight = $(this).data('height');
@@ -583,7 +587,10 @@ $(function ($) {
     delete datas['toggle'];
     
     for (let x in datas) {
-      if ($("#in" + x).hasClass('summernote')) {
+      let $sn = $('.summernote[data-orig-id="in' + x + '"]');
+      if ($sn.length) {
+        $sn.summernote('code', datas[x]);
+      } else if ($("#in" + x).hasClass('summernote')) {
         $("#in" + x).summernote('code', datas[x]);
       } else if ($("#in" + x).data('role') == 'tagsinput') {
         if (datas[x].length > 0) {

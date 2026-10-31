@@ -525,7 +525,10 @@
                                  would be misleading to show as how this was paid. --}}
                             <tr>
                                 <td class="od-label">Payment Method</td>
-                                <td class="od-value">Manual Payment Validation</td>
+                                {{-- An offline-checkout order keeps the gateway the buyer
+                                     actually used; only orders confirmed outside any
+                                     gateway flow show the generic label. --}}
+                                <td class="od-value">{{ (!empty($order->offline_gateway_id) && !empty($order->payment_method) && $order->payment_method !== 'Manual') ? $order->payment_method . ' (validated by admin)' : 'Manual Payment Validation' }}</td>
                             </tr>
                             <tr>
                                 <td class="od-label">Validated via</td>

@@ -110,8 +110,11 @@
                                                     <td style="width: 130px;">
                                                         @if (strtolower($purchase->payment_status) == 'completed')
                                                             <span class="badge badge-success">Completed</span>
+                                                        @elseif (strtolower($purchase->payment_status) == 'rejected')
+                                                            <span class="badge badge-danger" data-toggle="tooltip"
+                                                                title="{{ $purchase->rejection_reason }}">Rejected</span>
                                                         @else
-                                                            <span class="badge badge-danger">Pending</span>
+                                                            <span class="badge badge-warning">Pending</span>
                                                         @endif
                                                     </td>
                                                     <td style="width: 90px;">
@@ -283,18 +286,36 @@
                     });
                 });
             }
-            function bindProofFilenameLabel($) {
-                // LFM writes the picked file straight into #fileInput{serial}
-                // itself (see markpaid-modal.blade.php) — no callback fires,
-                // so the only reliable moment to react is when its own modal
-                // finishes closing (file picked, or cancelled via the X).
-                $(document).on('hidden.bs.modal', '[id^="lfmModal"]', function() {
-                    var serial = this.id.replace('lfmModal', '');
-                    var url = $('#fileInput' + serial).val();
-                    var $label = $('#proofFileName' + serial);
-                    if (!url || !$label.length) return;
-                    var name = decodeURIComponent(url.split('/').pop().split('?')[0]);
-                    $label.html('<span class="text-success"><i class="fas fa-check-circle mr-1"></i>' + name + '</span>');
+            function bindRejectReason($) {
+                // Mandatory reason — it is emailed to the buyer so they know
+                // what to fix before resubmitting.
+                $(document).on('click', '.rejectbtn', function(e) {
+                    e.preventDefault();
+                    var form = $(this).closest('.rejectform');
+                    $(document).off('focusin.bs.modal');
+                    swal({
+                        title: 'Reject this receipt?',
+                        text: 'The buyer is emailed this reason with a link to submit a corrected receipt.',
+                        content: {
+                            element: 'input',
+                            attributes: { placeholder: 'Reason shown to the buyer (required)', type: 'text' }
+                        },
+                        buttons: {
+                            confirm: { text: 'Reject receipt', className: 'btn btn-danger' },
+                            cancel: { visible: true, className: 'btn btn-secondary' }
+                        }
+                    }).then(function(reason) {
+                        if (reason === null) { swal.close(); return; }
+                        if (!reason.trim()) {
+                            $.notify({ message: 'A reason is required to reject a receipt.' }, {
+                                type: 'danger', placement: { from: 'top', align: 'right' }
+                            });
+                            return;
+                        }
+                        form.find('input[name="reason"]').val(reason.trim());
+                        $(".request-loader").addClass("show");
+                        form.get(0).submit();
+                    });
                 });
             }
             function bindRevertReason($) {
@@ -341,14 +362,14 @@
             }
             if (window.jQuery) {
                 bindModalStacking(window.jQuery);
-                bindProofFilenameLabel(window.jQuery);
                 bindRevertReason(window.jQuery);
+                bindRejectReason(window.jQuery);
             } else {
                 window.addEventListener('load', function() {
                     if (window.jQuery) {
                         bindModalStacking(window.jQuery);
-                        bindProofFilenameLabel(window.jQuery);
                         bindRevertReason(window.jQuery);
+                        bindRejectReason(window.jQuery);
                     }
                 });
             }

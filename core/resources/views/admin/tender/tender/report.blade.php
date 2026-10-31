@@ -69,6 +69,7 @@
                   <option value="">All</option>
                   <option value="Pending"   {{ request()->input('payment_status') == 'Pending'   ? 'selected' : '' }}>Pending</option>
                   <option value="Completed" {{ request()->input('payment_status') == 'Completed' ? 'selected' : '' }}>Completed</option>
+                  <option value="Rejected"  {{ request()->input('payment_status') == 'Rejected'  ? 'selected' : '' }}>Rejected</option>
                 </select>
               </div>
 
@@ -127,7 +128,7 @@
                     </td>
                     <td>{{ $enroll->payment_method }}</td>
                     <td>
-                      <span class="{{ strtolower($enroll->payment_status) == 'completed' ? 'badge badge-success' : 'badge badge-warning' }}">
+                      <span class="{{ strtolower($enroll->payment_status) == 'completed' ? 'badge badge-success' : (strtolower($enroll->payment_status) == 'rejected' ? 'badge badge-danger' : 'badge badge-warning') }}">
                         {{ $enroll->payment_status }}
                       </span>
                     </td>

@@ -134,7 +134,30 @@
 
                     <div class="row">
                         <div class="col-lg-5"><strong>Payment Method:</strong></div>
-                        <div class="col-lg-7">{{ convertUtf8($purchase->payment_method) }}</div>
+                        <div class="col-lg-7">
+                            {{ convertUtf8($purchase->payment_method) ?: '-' }}
+                            @if ($purchase->payment_method === 'Manual' && !empty($purchase->receipt) && empty($purchase->offline_gateway_id))
+                                <small class="d-block text-muted">Offline gateway wasn't recorded for this older order (validated before gateway tracking).</small>
+                            @endif
+                            @if ($purchase->gateway_type)
+                                <span class="badge badge-light border ml-1">{{ ucfirst($purchase->gateway_type) }}</span>
+                            @endif
+                            @if ($purchase->offlineGateway)
+                                @php $dGw = $purchase->offlineGateway; @endphp
+                                <small class="d-block text-muted mt-1">
+                                    Receipt {{ $dGw->is_receipt == 1 ? 'required' : 'not required' }} by this gateway
+                                    @if (!empty($dGw->short_description)) &middot; {{ convertUtf8($dGw->short_description) }} @endif
+                                </small>
+                                @if (!empty(trim(strip_tags((string) $dGw->instructions))))
+                                    <a href="#gwInstr{{ $purchase->id }}" data-toggle="collapse" style="font-size:12px;">Instructions the buyer saw</a>
+                                    <div class="collapse" id="gwInstr{{ $purchase->id }}">
+                                        <div class="border rounded p-2 mt-1" style="max-height:200px;overflow:auto;font-size:13px;">
+                                            {!! clean(replaceBaseUrl($dGw->instructions)) !!}
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
                     </div>
                     <hr>
 
@@ -182,12 +205,27 @@
                                     </form>
                                 @endif
                             @else
-                                <span class="badge badge-warning mr-2">Pending</span>
+                                @if (strtolower($purchase->payment_status) === 'rejected')
+                                    <span class="badge badge-danger mr-2">Rejected</span>
+                                @else
+                                    <span class="badge badge-warning mr-2">Pending</span>
+                                @endif
                                 @if (\Illuminate\Support\Facades\Auth::guard('admin')->user()->hasPermission('Manual Payment Completion'))
                                     <button type="button" class="btn btn-success btn-sm"
                                         data-toggle="modal" data-target="#markPaidModal{{ $purchase->id }}">
-                                        <i class="fas fa-check mr-1"></i> Mark as Paid
+                                        <i class="fas fa-check mr-1"></i> {{ strtolower($purchase->payment_status) === 'rejected' ? 'Validate Anyway' : 'Validate Payment' }}
                                     </button>
+                                    @if (strtolower($purchase->payment_status) === 'pending' && ($purchase->offline_gateway_id || $purchase->gateway_type === 'offline'))
+                                        <form action="{{ route('admin.tender.purchaseReject') }}" method="POST"
+                                            class="d-inline-block ml-1 rejectform">
+                                            @csrf
+                                            <input type="hidden" name="purchase_id" value="{{ $purchase->id }}">
+                                            <input type="hidden" name="reason">
+                                            <button type="button" class="rejectbtn btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-times mr-1"></i> Reject Receipt
+                                            </button>
+                                        </form>
+                                    @endif
                                 @else
                                     <span class="text-muted" style="font-size: 12px;" data-toggle="tooltip"
                                         title="You don't have permission to manually complete a payment.">
@@ -198,6 +236,23 @@
                         </div>
                     </div>
                     <hr>
+
+                    @if (strtolower($purchase->payment_status) === 'rejected' && !empty($purchase->rejection_reason))
+                        <div class="row">
+                            <div class="col-lg-5"><strong>Receipt Rejection Reason:</strong></div>
+                            <div class="col-lg-7">{{ $purchase->rejection_reason }}
+                                @if ($purchase->rejected_at)<small class="d-block text-muted">{{ $purchase->rejected_at->format('d M Y, H:i') }}</small>@endif
+                            </div>
+                        </div>
+                        <hr>
+                    @endif
+                    @if (!empty($purchase->validation_note))
+                        <div class="row">
+                            <div class="col-lg-5"><strong>Validation Note:</strong></div>
+                            <div class="col-lg-7">{{ $purchase->validation_note }}</div>
+                        </div>
+                        <hr>
+                    @endif
 
                     @if (!empty($purchase->reversal_reason))
                         <div class="row">

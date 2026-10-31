@@ -1175,6 +1175,63 @@
                 padding: 10px 0;
             }
         }
+
+        /* Receipt upload dropzone (offline payment) */
+        .receipt-drop { position: relative; }
+        .receipt-drop input[type=file] {
+            position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;
+        }
+        .receipt-drop label.receipt-drop-zone {
+            display: flex; flex-direction: row; align-items: center; gap: 14px; margin: 0; font-size: inherit;
+            padding: 18px 20px; border: 2px dashed #cbd5e1; border-radius: 12px;
+            background: #f8fafc; cursor: pointer; text-align: left;
+            transition: border-color .18s, background .18s, box-shadow .18s;
+        }
+        .receipt-drop label.receipt-drop-zone:hover, .receipt-drop label.receipt-drop-zone.is-over, .receipt-drop input:focus-visible ~ .receipt-drop-zone {
+            border-color: var(--main-color, #3498db); background: #f0f7ff;
+        }
+        .receipt-drop input:focus-visible ~ .receipt-drop-zone { box-shadow: 0 0 0 3px rgba(52, 152, 219, .25); }
+        .receipt-drop-icon {
+            flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px; display: inline-flex;
+            align-items: center; justify-content: center; color: #fff;
+            background: linear-gradient(135deg, #4aa4f8, #2c7be5);
+        }
+        .receipt-drop-title { display: block; font-weight: 600; font-size: 15px; color: #0f172a; }
+        .receipt-drop-sub { display: block; font-size: 12.5px; color: #64748b; margin-top: 2px; }
+        .receipt-drop-file {
+            display: none; align-items: center; gap: 12px; padding: 12px 14px;
+            border: 1.5px solid #22c55e; border-radius: 12px; background: #f0fdf4;
+        }
+        .receipt-drop.has-file label.receipt-drop-zone { display: none; }
+        .receipt-drop.has-file .receipt-drop-file { display: flex; }
+        .receipt-drop-thumb {
+            flex: 0 0 52px; width: 52px; height: 52px; border-radius: 8px; object-fit: cover;
+            background: #e2e8f0; display: inline-flex; align-items: center; justify-content: center;
+            color: #475569; overflow: hidden;
+        }
+        .receipt-drop-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .receipt-drop-meta { flex: 1; min-width: 0; }
+        .receipt-drop-name { display: block; font-weight: 600; font-size: 14px; color: #0f172a; word-break: break-all; }
+        .receipt-drop-size { display: block; font-size: 12px; color: #64748b; }
+        .receipt-drop-remove {
+            border: 0; background: transparent; color: #dc2626; padding: 0;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+        }
+        .receipt-drop-remove:hover { background: #fee2e2; }
+        .receipt-drop-error { display: none; margin: 8px 0 0; font-size: 13px; color: #dc2626; }
+        .receipt-drop.has-error .receipt-drop-zone { border-color: #dc2626; background: #fef2f2; }
+        .receipt-drop.has-error .receipt-drop-error { display: block; }
+        .dark-tender-details .receipt-drop label.receipt-drop-zone { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.28); }
+        .dark-tender-details .receipt-drop label.receipt-drop-zone:hover,
+        .dark-tender-details .receipt-drop label.receipt-drop-zone.is-over { background: rgba(255,255,255,.08); border-color: var(--accent, var(--main-color, #3498db)); }
+        .dark-tender-details .receipt-drop-title,
+        .dark-tender-details .receipt-drop-name { color: #f1f5f9; }
+        .dark-tender-details .receipt-drop-sub,
+        .dark-tender-details .receipt-drop-size { color: #94a3b8; }
+        .dark-tender-details .receipt-drop-file { background: rgba(34,197,94,.1); }
+        .dark-tender-details .receipt-drop-thumb { background: rgba(255,255,255,.1); color: #cbd5e1; }
+        .dark-tender-details .receipt-drop.has-error label.receipt-drop-zone { background: rgba(220,38,38,.12); }
     </style>
 @endsection
 
@@ -1889,10 +1946,27 @@ $preFlag = $preCountry['flag'] ?? '';
                                         </div>
                                         @if ($ogw->is_receipt == 1)
                                             <div class="col-12 mb-3">
-                                                <label class="d-block">{{ __('Receipt') }} **</label>
-                                                <input type="file" name="receipt">
-                                                <p class="mb-0 text-warning">**
-                                                    {{ __('Receipt image must be .jpg / .jpeg / .png') }}</p>
+                                                <label class="d-block" for="receiptInput{{ $ogw->id }}">{{ __('Payment receipt') }} **</label>
+                                                <div class="receipt-drop" data-max-mb="5">
+                                                    <input type="file" name="receipt" id="receiptInput{{ $ogw->id }}"
+                                                        accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" disabled>
+                                                    <label for="receiptInput{{ $ogw->id }}" class="receipt-drop-zone mb-0">
+                                                        <span class="receipt-drop-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9.5a4.5 4.5 0 0 1-.5 8.5"/><path d="M12 12v9"/><path d="m8.5 15.5 3.5-3.5 3.5 3.5"/></svg></span>
+                                                        <span>
+                                                            <span class="receipt-drop-title">{{ __('Drop your receipt here, or click to browse') }}</span>
+                                                            <span class="receipt-drop-sub">{{ __('JPG, PNG, WEBP or PDF — max 5 MB') }}</span>
+                                                        </span>
+                                                    </label>
+                                                    <div class="receipt-drop-file">
+                                                        <span class="receipt-drop-thumb"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg></span>
+                                                        <span class="receipt-drop-meta">
+                                                            <span class="receipt-drop-name"></span>
+                                                            <span class="receipt-drop-size"></span>
+                                                        </span>
+                                                        <button type="button" class="receipt-drop-remove" aria-label="{{ __('Remove file') }}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+                                                    </div>
+                                                    <p class="receipt-drop-error" role="alert"></p>
+                                                </div>
                                             </div>
                                         @endif
                                     </div>
@@ -2575,11 +2649,78 @@ $preFlag = $preCountry['flag'] ?? '';
                 $('#paymentGateway').val(gw);
                 $('.payment-warning').stop(true, true).hide();
                 $('.gateway-details').hide();
+                // Hidden gateway panels each hold their own receipt input; only
+                // the visible one may submit, or a later empty input wins.
+                $('.gateway-details input[type=file]').prop('disabled', true);
                 updateFormAction(gw, type);
                 if (type === 'offline') {
-                    $('#tab-' + gw).show();
+                    $('#tab-' + gw).show().find('input[type=file]').prop('disabled', false);
                 }
             });
+
+            // ── Receipt dropzone ──
+            (function() {
+                var okExt = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+                var msgType = @json(__('Please choose a JPG, PNG, WEBP or PDF file.'));
+                var msgSize = @json(__('This file is larger than 5 MB.'));
+
+                function fmt(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+
+                function setFile($d, file) {
+                    var input = $d.find('input[type=file]')[0];
+                    var ext = (file.name.split('.').pop() || '').toLowerCase();
+                    var err = '';
+                    if (okExt.indexOf(ext) === -1) err = msgType;
+                    else if (file.size > ($d.data('max-mb') || 5) * 1048576) err = msgSize;
+                    if (err) {
+                        input.value = '';
+                        $d.removeClass('has-file').addClass('has-error').find('.receipt-drop-error').text(err);
+                        return;
+                    }
+                    if (input.files[0] !== file) {
+                        try { var dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; } catch (e) {}
+                    }
+                    $d.removeClass('has-error').addClass('has-file');
+                    $d.find('.receipt-drop-name').text(file.name);
+                    $d.find('.receipt-drop-size').text(fmt(file.size));
+                    var $thumb = $d.find('.receipt-drop-thumb').empty();
+                    if (file.type.indexOf('image/') === 0) {
+                        var url = URL.createObjectURL(file);
+                        $('<img>', { src: url, alt: '' }).on('load', function() { URL.revokeObjectURL(url); }).appendTo($thumb);
+                    } else {
+                        $thumb.html('<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>');
+                    }
+                }
+
+                $(document).on('change', '.receipt-drop input[type=file]', function() {
+                    var f = this.files[0], $d = $(this).closest('.receipt-drop');
+                    if (f) { setFile($d, f); }
+                });
+                $(document).on('click', '.receipt-drop-remove', function() {
+                    var $d = $(this).closest('.receipt-drop');
+                    $d.find('input[type=file]').val('');
+                    $d.removeClass('has-file has-error');
+                });
+                $(document).on('dragover dragenter', '.receipt-drop-zone', function(e) {
+                    e.preventDefault(); $(this).addClass('is-over');
+                });
+                $(document).on('dragleave dragend drop', '.receipt-drop-zone', function() { $(this).removeClass('is-over'); });
+                $(document).on('drop', '.receipt-drop-zone', function(e) {
+                    e.preventDefault();
+                    var f = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files[0];
+                    if (f) { setFile($(this).closest('.receipt-drop'), f); }
+                });
+                // Required receipt: block submit with an inline message, not a silent server round-trip.
+                $(document).on('submit', '#paymentGatewayForm', function(e) {
+                    var $input = $('.gateway-details:visible input[type=file]');
+                    if ($input.length && !$input[0].files.length) {
+                        e.preventDefault();
+                        var $d = $input.closest('.receipt-drop');
+                        $d.addClass('has-error').find('.receipt-drop-error').text(@json(__('Please upload your payment receipt to continue.')));
+                        $('html, body').animate({ scrollTop: $d.offset().top - 160 }, 300);
+                    }
+                });
+            })();
 
             // Keyboard accessibility for the cards
             $(document).on('keydown', '.pay-method-card', function(e) {

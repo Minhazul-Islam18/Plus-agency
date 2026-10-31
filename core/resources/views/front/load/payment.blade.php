@@ -185,11 +185,11 @@
 @if($payment == 'offline')
 
   <div>
-    <p class="gateway-desc">{{$gateway->short_description}}</p>
+    <p class="gateway-desc">{!! nl2br(e($gateway->short_description)) !!}</p>
   </div>
 
   <div class="gateway-instruction">
-    <p>{!! replaceBaseUrl($gateway->instructions) !!}</p>
+    {!! replaceBaseUrl($gateway->instructions) !!}
   </div>
 
   @if ($gateway->is_receipt == 1)

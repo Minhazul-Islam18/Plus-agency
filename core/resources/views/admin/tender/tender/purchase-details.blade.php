@@ -146,7 +146,6 @@
                                 @php $dGw = $purchase->offlineGateway; @endphp
                                 <small class="d-block text-muted mt-1">
                                     Receipt {{ $dGw->is_receipt == 1 ? 'required' : 'not required' }} by this gateway
-                                    @if (!empty($dGw->short_description)) &middot; {{ convertUtf8($dGw->short_description) }} @endif
                                 </small>
                                 @if (!empty(trim(strip_tags((string) $dGw->instructions))))
                                     <a href="#gwInstr{{ $purchase->id }}" data-toggle="collapse" style="font-size:12px;">Instructions the buyer saw</a>

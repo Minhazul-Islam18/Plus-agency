@@ -24,7 +24,7 @@ class TenderPaymentEvidenceController extends Controller
         // Action History; this only controls what the list displays.
         $latestIds = TenderPaymentEvidence::selectRaw('MAX(id) as id')->groupBy('order_number');
 
-        return TenderPaymentEvidence::with('purchase.tender', 'admin')
+        return TenderPaymentEvidence::with('purchase.tender', 'admin:id,email')
             ->whereIn('id', $latestIds)
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {

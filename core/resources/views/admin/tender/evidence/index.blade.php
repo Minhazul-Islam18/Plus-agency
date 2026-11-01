@@ -121,79 +121,116 @@
                                                 @php
                                                     $purchase = $row->purchase;
                                                     $ext = strtolower(pathinfo($row->proof_original_name ?? $row->proof_path ?? '', PATHINFO_EXTENSION));
+                                                    $uName = $purchase ? trim($purchase->first_name . ' ' . $purchase->last_name) : '';
+                                                    $aName = (string) $row->admin_name;
                                                 @endphp
                                                 <tr>
-                                                    <td>{{ $row->order_number }}</td>
+                                                    <td><span class="pe-order">{{ $row->order_number }}</span></td>
                                                     <td>
                                                         @if ($purchase)
-                                                            {{ trim($purchase->first_name . ' ' . $purchase->last_name) }}
-                                                            <br>
-                                                            <small class="text-muted">{{ $purchase->email }}</small>
+                                                            <div class="pe-person">
+                                                                <span class="pe-avatar">{{ mb_strtoupper(mb_substr($uName ?: '?', 0, 1, 'utf-8'), 'utf-8') }}</span>
+                                                                <span class="pe-person-text">
+                                                                    <span class="pe-strong">{{ $uName }}</span>
+                                                                    <a href="mailto:{{ $purchase->email }}" class="pe-sub">{{ $purchase->email }}</a>
+                                                                </span>
+                                                            </div>
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif
                                                     </td>
                                                     <td>
                                                         @if ($purchase && $purchase->tender)
-                                                            <a href="{{ route('admin.tender.edit', $purchase->tender->id) }}">
+                                                            <a href="{{ route('admin.tender.edit', $purchase->tender->id) }}" class="pe-code">
                                                                 {{ $purchase->tender->tender_code }}
                                                             </a>
-                                                            <br>
                                                             @php $tTitle = convertUtf8($purchase->tender->title); @endphp
                                                             @if (mb_strlen($tTitle, 'utf-8') > 30)
-                                                                <small>
+                                                                <span class="pe-sub pe-title">
                                                                     <span class="tender-title-short">{{ mb_substr($tTitle, 0, 30, 'utf-8') }}&hellip;</span><span class="tender-title-full d-none">{{ $tTitle }}</span>
-                                                                </small>
-                                                                <br>
-                                                                <a href="javascript:void(0)" class="tender-title-toggle" style="font-size: 11px; white-space: nowrap;">Show more</a>
+                                                                    <a href="javascript:void(0)" class="tender-title-toggle">Show more</a>
+                                                                </span>
                                                             @else
-                                                                <small>{{ $tTitle }}</small>
+                                                                <span class="pe-sub pe-title">{{ $tTitle }}</span>
                                                             @endif
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif
                                                     </td>
-                                                    <td>{{ number_format($row->amount, 2) }} {{ $row->currency_code }}</td>
-                                                    <td>{{ optional($row->created_at)->format('d M Y, H:i') }}</td>
+                                                    <td>
+                                                        <span class="pe-amount">{{ number_format($row->amount, 2) }}</span>
+                                                        <span class="pe-cur">{{ $row->currency_code }}</span>
+                                                    </td>
+                                                    <td>
+                                                        @if ($row->created_at)
+                                                            <span class="pe-strong pe-nowrap">{{ $row->created_at->format('d M Y') }}</span>
+                                                            <span class="pe-sub"><i class="far fa-clock"></i> {{ $row->created_at->format('H:i') }}</span>
+                                                        @endif
+                                                    </td>
                                                     <td>
                                                         @if ($row->proof_path)
                                                             @php
                                                                 $fname = $row->proof_original_name ?: $row->proof_path;
                                                                 $fnameDisplay = $fname;
-                                                                if (mb_strlen($fname, 'utf-8') > 28) {
+                                                                if (mb_strlen($fname, 'utf-8') > 24) {
                                                                     // Shorten from the middle, not the end — the
                                                                     // extension (and any distinguishing suffix) at
                                                                     // the tail stays visible, unlike a plain "...".
-                                                                    $fnameDisplay = mb_substr($fname, 0, 14, 'utf-8') . '…' . mb_substr($fname, -10, null, 'utf-8');
+                                                                    $fnameDisplay = mb_substr($fname, 0, 12, 'utf-8') . '…' . mb_substr($fname, -8, null, 'utf-8');
                                                                 }
+                                                                // Original names can lack an extension — fall back to the stored file's.
+                                                                $fext = $ext ?: strtolower(pathinfo($row->proof_path, PATHINFO_EXTENSION));
+                                                                $isImg = in_array($fext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'], true);
+                                                                $proofUrl = asset('assets/front/tender_proofs/' . $row->proof_path);
                                                             @endphp
-                                                            <i class="fas {{ $ext == 'pdf' ? 'fa-file-pdf text-danger' : 'fa-file-image text-success' }} mr-1"></i>
-                                                            <a href="{{ asset('assets/front/tender_proofs/' . $row->proof_path) }}"
-                                                                target="_blank" title="{{ $fname }}">{{ $fnameDisplay }}</a>
-                                                            @if ($row->proof_size)
-                                                                <small class="text-muted">({{ round($row->proof_size / 1024, 1) }} KB)</small>
-                                                            @endif
+                                                            <a href="{{ $proofUrl }}" target="_blank" title="{{ $fname }}" class="pe-file">
+                                                                <span class="pe-file-tile {{ $fext == 'pdf' ? 'is-pdf' : '' }}">
+                                                                    <span class="pe-file-ext">{{ strtoupper($fext ?: 'FILE') }}</span>
+                                                                    @if ($isImg)
+                                                                        <img src="{{ $proofUrl }}" alt="" loading="lazy"
+                                                                            onerror="this.remove()">
+                                                                    @endif
+                                                                </span>
+                                                                <span class="pe-file-meta">
+                                                                    <span class="pe-file-name">{{ $fnameDisplay }}</span>
+                                                                    <span class="pe-sub">
+                                                                        {{ strtoupper($fext ?: 'file') }}@if ($row->proof_size) &middot; {{ $row->proof_size >= 1048576 ? round($row->proof_size / 1048576, 1) . ' MB' : round($row->proof_size / 1024, 1) . ' KB' }}@endif
+                                                                    </span>
+                                                                </span>
+                                                                <i class="fas fa-external-link-alt pe-file-open"></i>
+                                                            </a>
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif
                                                     </td>
                                                     <td>
                                                         @if ($row->action == 'validated')
-                                                            <span class="badge badge-success">Validated</span>
+                                                            <span class="badge badge-success"><i class="fas fa-check-circle"></i> Validated</span>
+                                                        @elseif ($row->action == 'rejected')
+                                                            <span class="badge badge-danger"><i class="fas fa-ban"></i> Rejected</span>
                                                         @else
-                                                            <span class="badge badge-danger">Canceled</span>
+                                                            <span class="badge badge-danger"><i class="fas fa-undo-alt"></i> Canceled</span>
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        @if ($row->action == 'validated')
-                                                            {{ $row->admin_name ?: '-' }}
+                                                        @if ($row->action == 'validated' && $aName !== '')
+                                                            <div class="pe-person">
+                                                                <span class="pe-avatar pe-avatar-admin">{{ mb_strtoupper(mb_substr($aName, 0, 1, 'utf-8'), 'utf-8') }}</span>
+                                                                <span class="pe-person-text">
+                                                                    <span class="pe-strong">{{ $aName }}</span>
+                                                                    @if (optional($row->admin)->email)
+                                                                        <a href="mailto:{{ $row->admin->email }}" class="pe-sub">{{ $row->admin->email }}</a>
+                                                                    @endif
+                                                                </span>
+                                                            </div>
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        @if ($row->action == 'canceled')
-                                                            {{ optional($row->created_at)->format('d M Y, H:i') }}
+                                                        @if ($row->action == 'canceled' && $row->created_at)
+                                                            <span class="pe-strong pe-nowrap">{{ $row->created_at->format('d M Y') }}</span>
+                                                            <span class="pe-sub"><i class="far fa-clock"></i> {{ $row->created_at->format('H:i') }}</span>
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif
@@ -226,6 +263,64 @@
             word-break: break-word;
             white-space: normal;
         }
+        /* Cell content only — the table, rows and headers keep the admin's default look. */
+        .pe-strong { display: block; font-weight: 600; line-height: 1.3; }
+        .pe-sub { display: block; font-size: 12px; opacity: .65; line-height: 1.35; overflow-wrap: anywhere; }
+        a.pe-sub { opacity: 1; overflow-wrap: normal; word-break: break-all; }
+        .pe-nowrap { white-space: nowrap; }
+        .pe-sub i { font-size: 11px; margin-right: 3px; }
+        .pe-title { word-break: break-word; margin-top: 2px; }
+        .pe-title .tender-title-toggle { font-size: 11px; white-space: nowrap; margin-left: 4px; }
+        .pe-order {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: rgba(91, 141, 239, .16);
+            color: #5b8def;
+            font-family: SFMono-Regular, Menlo, Consolas, monospace;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: .03em;
+            white-space: nowrap;
+        }
+        .pe-person { display: flex; align-items: center; gap: 10px; min-width: 230px; }
+        .pe-person-text { min-width: 0; flex: 1; }
+        .pe-avatar {
+            flex: 0 0 32px;
+            width: 32px; height: 32px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5b8def, #1b4fd8);
+            color: #fff; font-weight: 700; font-size: 13px;
+        }
+        .pe-avatar-admin { background: linear-gradient(135deg, #34c38f, #0f8a5f); }
+        .pe-code { display: block; font-weight: 700; white-space: nowrap; }
+        .pe-amount { font-weight: 700; white-space: nowrap; }
+        .pe-cur { display: block; font-size: 11px; opacity: .6; letter-spacing: .04em; }
+        .pe-file {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 6px 12px 6px 6px;
+            border: 1px solid rgba(181, 181, 181, .22); border-radius: 10px;
+            background: rgba(255, 255, 255, .04);
+            min-width: 190px; max-width: 250px;
+            transition: border-color .15s, background .15s;
+        }
+        .pe-file:hover { border-color: #5b8def; background: rgba(91, 141, 239, .1); text-decoration: none; }
+        .pe-file-tile {
+            position: relative; flex: 0 0 42px; width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; overflow: hidden;
+            background: rgba(63, 185, 80, .16); color: #3FB950;
+        }
+        .pe-file-tile.is-pdf { background: rgba(255, 88, 88, .16); color: #ff6b6b; }
+        .pe-file-ext { font-size: 10px; font-weight: 800; letter-spacing: .05em; }
+        .pe-file-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .pe-file-meta { min-width: 0; flex: 1; }
+        .pe-file-name { display: block; font-weight: 600; font-size: 12.5px; white-space: nowrap; line-height: 1.3; }
+        .pe-file .pe-sub { white-space: nowrap; margin-top: 1px; }
+        .pe-file-open { font-size: 11px; opacity: .45; }
+        .pe-file:hover .pe-file-open { opacity: 1; color: #5b8def; }
+        .badge i { margin-right: 3px; }
     </style>
     <script>
         document.addEventListener('click', function(e) {

@@ -63,7 +63,7 @@
                         <div class="col-md-8">
                             @if ($purchase)
                                 {{ trim($purchase->first_name . ' ' . $purchase->last_name) }}
-                                <br><small class="text-muted">{{ $purchase->email }}</small>
+                                <br><small class="text-muted"><a href="mailto:{{ $purchase->email }}">{{ $purchase->email }}</a></small>
                             @else
                                 -
                             @endif
@@ -104,7 +104,7 @@
                             @if ($validatedEvent)
                                 {{ $validatedEvent->admin_name }}
                                 @if (optional($validatedEvent->admin)->email)
-                                    <small class="text-muted">({{ $validatedEvent->admin->email }})</small>
+                                    <small class="text-muted">(<a href="mailto:{{ $validatedEvent->admin->email }}">{{ $validatedEvent->admin->email }}</a>)</small>
                                 @endif
                             @else
                                 -
@@ -133,7 +133,12 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4 text-muted">Validated By</div>
-                        <div class="col-md-8">{{ $validatedEvent->admin_name ?? '-' }}</div>
+                        <div class="col-md-8">
+                            {{ $validatedEvent->admin_name ?? '-' }}
+                            @if (optional(optional($validatedEvent)->admin)->email)
+                                <small class="d-block text-muted"><a href="mailto:{{ $validatedEvent->admin->email }}">{{ $validatedEvent->admin->email }}</a></small>
+                            @endif
+                        </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4 text-muted">Validation Date</div>

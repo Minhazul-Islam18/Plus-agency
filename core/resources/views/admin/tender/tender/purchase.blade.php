@@ -149,8 +149,8 @@
                                                         </div>
                                                     </td>
                                                     <td style="width: 90px;">
-                                                        <a href="#" class="btn btn-primary btn-sm" data-toggle="modal"
-                                                            data-target="#detailsModal{{ $purchase->id }}">
+                                                        <a href="#" class="btn btn-primary btn-sm js-purchase-details"
+                                                            data-id="{{ $purchase->id }}">
                                                             Details
                                                         </a>
                                                     </td>
@@ -176,7 +176,7 @@
                                                             </form>
 
                                                             {{-- Quick blacklist this company (keyed on its registration no.) --}}
-                                                            @if (\App\TenderBlacklist::matches($purchase->company_registration_no))
+                                                            @if (isset($blacklisted[\App\TenderPurchase::normalizeRegNo($purchase->company_registration_no)]))
                                                                 <a href="{{ route('admin.tender.blacklist') }}"
                                                                     class="btn btn-secondary btn-sm m-0"
                                                                     data-toggle="tooltip" title="Already blacklisted — manage on the Blacklist page">
@@ -216,23 +216,30 @@
                                     </table>
                                 </div>
 
-                                {{-- Per-row modals rendered OUTSIDE the table on purpose: a
-                                     <form> whose start tag appears as a direct child of
-                                     <table> (not inside a <td>) hits a special HTML5
-                                     parsing rule that inserts the <form> then immediately
-                                     pops it off the open-elements stack — its own children
-                                     (hidden inputs, submit button) never end up nested
-                                     inside it in the parsed DOM, so `.closest('.revertform')`
-                                     silently finds nothing and the JS submit throws. Keeping
-                                     these includes here (after </table>) avoids that
-                                     entirely instead of relying on browsers to "recover"
-                                     from invalid table content. --}}
-                                @foreach ($purchases as $purchase)
-                                    @includeIf('admin.tender.tender.receipt')
-                                    @includeIf('admin.tender.tender.purchase-details')
-                                    @includeIf('admin.tender.tender.markpaid-modal')
-                                    @includeIf('admin.tender.tender.proof-modal')
-                                @endforeach
+                                {{-- One shared Details modal, filled over AJAX on click
+                                     (purchaseDetails()). It sits OUTSIDE the table on purpose:
+                                     a <form> that is a direct child of <table> is dropped by
+                                     the HTML5 parser, which breaks `.closest('.revertform')`.
+                                     The Validate / Proof modals the details open are injected
+                                     into #purchaseExtraModals as siblings (not nested) so the
+                                     modal-stacking script below keeps working. --}}
+                                <div class="modal fade" id="purchaseDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Receipt details <small class="text-muted" id="purchaseDetailsOrder"></small></h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body" id="purchaseDetailsBody"></div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="purchaseExtraModals"></div>
                             @endif
                         </div>
                     </div>
@@ -253,7 +260,72 @@
         </div>
     </div>
 
+    @php
+        // Mirrors the real Details layout: label (col-5) / value (col-7) rows
+        // separated by <hr>, in the same order. Label bars are near full
+        // width like the bold labels; value bars vary; the payment-status
+        // row gets pill-sized bars like its badge + button.
+        $pdRows = [
+            [78, 62], [92, 38], [40, 45], [38, 40], [52, 70], [54, 46], [36, 30], [28, 34],
+            [58, 55], [88, 40], [64, 78], [30, 12], [66, 48], [70, 'pill'], [62, 52], [48, 32],
+        ];
+    @endphp
+    <template id="purchaseDetailsSkeleton">
+        <div class="container pd-skeleton" role="status" aria-live="polite" aria-label="Loading details">
+            @foreach ($pdRows as [$lw, $vw])
+                <div class="row">
+                    <div class="col-lg-5"><span class="pd-sk" style="width: {{ $lw }}%"></span></div>
+                    <div class="col-lg-7">
+                        @if ($vw === 'pill')
+                            <span class="pd-sk pd-sk-pill"></span><span class="pd-sk pd-sk-btn"></span>
+                        @else
+                            <span class="pd-sk" style="width: {{ $vw }}%"></span>
+                        @endif
+                    </div>
+                </div>
+                <hr>
+            @endforeach
+        </div>
+    </template>
+
     <style>
+        .pd-skeleton .pd-sk {
+            position: relative;
+            display: block;
+            height: 14px;
+            margin: 3px 0;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #e9edf2;
+        }
+        .pd-skeleton .pd-sk::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .85), transparent);
+            animation: pd-shimmer 1.2s ease-in-out infinite;
+        }
+        .pd-skeleton .pd-sk-pill,
+        .pd-skeleton .pd-sk-btn {
+            display: inline-block;
+            height: 22px;
+            margin: 0;
+            vertical-align: middle;
+        }
+        .pd-skeleton .pd-sk-pill { width: 72px; border-radius: 12px; margin-right: 8px; }
+        .pd-skeleton .pd-sk-btn { width: 130px; border-radius: 4px; }
+        @keyframes pd-shimmer {
+            to { transform: translateX(100%); }
+        }
+        /* Reduced motion: no sweep, but still a gentle pulse so it reads as "loading". */
+        @media (prefers-reduced-motion: reduce) {
+            .pd-skeleton .pd-sk::after { display: none; }
+            .pd-skeleton .pd-sk { animation: pd-pulse 1.6s ease-in-out infinite; }
+        }
+        @keyframes pd-pulse {
+            50% { opacity: .45; }
+        }
         .tender-title-full {
             word-break: break-word;
             white-space: normal;
@@ -360,13 +432,59 @@
                     });
                 });
             }
+            function bindPurchaseDetails($) {
+                var urlTpl = @json(route('admin.tender.purchaseDetails', ['id' => '__ID__']));
+                var $modal = $('#purchaseDetailsModal');
+                var $body = $('#purchaseDetailsBody');
+                var $extras = $('#purchaseExtraModals');
+                var xhr = null;
+
+                function showSkeleton() {
+                    $body.html(document.getElementById('purchaseDetailsSkeleton').innerHTML);
+                    $('#purchaseDetailsOrder').text('');
+                }
+
+                function load(id) {
+                    if (xhr) { xhr.abort(); }
+                    showSkeleton();
+                    $extras.empty();
+                    var req = xhr = $.ajax({ url: urlTpl.replace('__ID__', id), dataType: 'json' });
+                    req.done(function(res) {
+                        $('#purchaseDetailsOrder').text('— ' + res.order_number);
+                        $body.html(res.details);
+                        $extras.html(res.extras);
+                        $body.find('[data-toggle="tooltip"]').tooltip();
+                    }).fail(function(jq, status) {
+                        if (status === 'abort') { return; }
+                        $body.html('<div class="text-center py-5"><p class="text-danger mb-3">Could not load the details.</p>' +
+                            '<button type="button" class="btn btn-outline-primary btn-sm js-purchase-details-retry" data-id="' + id + '">Try again</button></div>');
+                    });
+                }
+
+                $(document).on('click', '.js-purchase-details', function(e) {
+                    e.preventDefault();
+                    $modal.modal('show');
+                    load($(this).data('id'));
+                });
+                $(document).on('click', '.js-purchase-details-retry', function() {
+                    load($(this).data('id'));
+                });
+                // Drop the previous order's content so the next open never flashes it.
+                $modal.on('hidden.bs.modal', function() {
+                    if (xhr) { xhr.abort(); }
+                    $body.empty();
+                    $extras.empty();
+                });
+            }
             if (window.jQuery) {
+                bindPurchaseDetails(window.jQuery);
                 bindModalStacking(window.jQuery);
                 bindRevertReason(window.jQuery);
                 bindRejectReason(window.jQuery);
             } else {
                 window.addEventListener('load', function() {
                     if (window.jQuery) {
+                        bindPurchaseDetails(window.jQuery);
                         bindModalStacking(window.jQuery);
                         bindRevertReason(window.jQuery);
                         bindRejectReason(window.jQuery);

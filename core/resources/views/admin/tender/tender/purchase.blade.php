@@ -326,6 +326,119 @@
         @keyframes pd-pulse {
             50% { opacity: .45; }
         }
+        /* ---- Validate Payment modal (dark panel) ---- */
+        .vp-modal .modal-content {
+            background: radial-gradient(120% 80% at 100% 0%, #14264a 0%, #0b1426 55%, #09101f 100%);
+            color: #e6ecf7;
+            border: 1px solid rgba(120, 150, 220, .25);
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+        }
+        .vp-modal .modal-header, .vp-modal .modal-footer { border-color: rgba(255, 255, 255, .08); }
+        .vp-modal .modal-title { color: #fff; font-weight: 600; }
+        .vp-modal .modal-title i { color: #4d8dff; margin-right: 8px; }
+        .vp-modal .close { color: #fff; opacity: .8; text-shadow: none; }
+        .vp-card {
+            border: 1.5px solid rgba(77, 141, 255, .45);
+            border-radius: 14px;
+            background: rgba(17, 33, 66, .55);
+            overflow: hidden;
+        }
+        .vp-card-head {
+            padding: 12px 18px;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(77, 141, 255, .12);
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+        }
+        .vp-card-head i { color: #4d8dff; margin-right: 10px; }
+        .vp-card-head-lg { font-size: 17px; }
+        .vp-kv {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 12px 18px;
+        }
+        .vp-kv + .vp-kv { border-top: 1px solid rgba(255, 255, 255, .08); }
+        .vp-k { color: #cdd7ea; }
+        .vp-k i { color: #6ea3ff; width: 22px; margin-right: 8px; text-align: center; }
+        .vp-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 14px; border-radius: 999px; font-weight: 600; font-size: 13px;
+        }
+        .vp-pill-method { background: rgba(88, 80, 200, .35); color: #fff; border: 1px solid rgba(140, 130, 255, .35); }
+        .vp-pill-method b {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: #ffd400; color: #111; font-size: 10px;
+        }
+        .vp-pill-yes { background: rgba(16, 160, 100, .3); color: #7dffc0; border: 1px solid rgba(60, 220, 150, .4); }
+        .vp-pill-no { background: rgba(160, 160, 160, .2); color: #cfd6e4; border: 1px solid rgba(255, 255, 255, .2); }
+        .vp-receipt-title { color: #fff; font-weight: 600; margin: 4px 0 10px; }
+        .vp-receipt-title i { color: #4d8dff; margin-right: 10px; }
+        .vp-receipt {
+            display: block; border: 2px solid rgba(255, 255, 255, .85); border-radius: 10px;
+            overflow: hidden; background: #0b1426; max-height: 230px;
+        }
+        .vp-receipt img { display: block; width: 100%; max-height: 226px; object-fit: cover; object-position: top; }
+        .vp-receipt-file {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            height: 150px; color: #cfe0ff; text-decoration: none; border-style: dashed;
+        }
+        .vp-receipt-file i { font-size: 34px; color: #6ea3ff; }
+        .vp-receipt-file:hover { color: #fff; }
+        .vp-receipt-missing { color: #ffb4b4; border-color: rgba(255, 120, 120, .6); }
+        .vp-receipt-missing i { color: #ff8a8a; }
+        .vp-rows { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+        .vp-row {
+            display: flex; align-items: stretch;
+            border: 1px solid rgba(255, 255, 255, .22); border-radius: 12px;
+            background: rgba(255, 255, 255, .03);
+        }
+        .vp-row-k {
+            flex: 0 0 46%; display: flex; align-items: center; gap: 12px;
+            padding: 9px 14px; font-weight: 600; color: #fff;
+            border-right: 1px solid rgba(255, 255, 255, .22);
+        }
+        .vp-row-k i { color: #4d8dff; width: 22px; text-align: center; font-size: 16px; }
+        .vp-row-v { flex: 1; display: flex; align-items: center; padding: 9px 16px; color: #dfe7f5; word-break: break-word; }
+        .vp-instr { padding: 14px 18px; max-height: 220px; overflow: auto; color: #dfe7f5; font-size: 14px; }
+        .vp-instr * { color: inherit !important; background: transparent !important; }
+        .vp-strip {
+            display: grid; grid-template-columns: 1fr 0.8fr 1.5fr;
+            border: 1px solid rgba(255, 255, 255, .14); border-radius: 14px;
+            background: rgba(17, 33, 66, .45);
+        }
+        .vp-strip-cell { display: flex; gap: 14px; padding: 16px 18px; }
+        .vp-strip-cell + .vp-strip-cell { border-left: 1px solid rgba(255, 255, 255, .14); }
+        .vp-strip-ico { color: #6ea3ff; font-size: 24px; margin-top: 2px; }
+        .vp-strip-title { display: block; color: #fff; font-weight: 600; margin-bottom: 4px; }
+        .vp-strip-sub { color: #cdd7ea; font-size: 13px; margin-bottom: 4px; }
+        .vp-strip-val { color: #e6ecf7; word-break: break-word; }
+        .vp-strip-amount { font-weight: 700; font-size: 16px; color: #fff; }
+        .vp-req { color: #ff6b6b; }
+        .vp-note {
+            width: 100%; resize: vertical; min-height: 54px; padding: 8px 10px;
+            color: #fff; background: rgba(0, 0, 0, .25);
+            border: 1px solid rgba(255, 255, 255, .18); border-radius: 8px; font-size: 13px;
+        }
+        .vp-note::placeholder { color: rgba(255, 255, 255, .5); }
+        .vp-note:focus { outline: 0; border-color: #4d8dff; box-shadow: 0 0 0 2px rgba(77, 141, 255, .25); }
+        .vp-btn-cancel {
+            color: #fff; background: transparent; border: 1.5px solid rgba(255, 255, 255, .55);
+            border-radius: 8px; padding: 9px 26px; font-weight: 600;
+        }
+        .vp-btn-cancel:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+        .vp-btn-confirm {
+            color: #fff; border: 0; border-radius: 8px; padding: 9px 26px; font-weight: 600;
+            background: linear-gradient(180deg, #1fb34a, #0f8a35);
+            box-shadow: 0 6px 18px rgba(20, 170, 70, .35);
+        }
+        .vp-btn-confirm:hover { color: #fff; filter: brightness(1.1); }
+        @media (max-width: 767px) {
+            .vp-strip { grid-template-columns: 1fr; }
+            .vp-strip-cell + .vp-strip-cell { border-left: 0; border-top: 1px solid rgba(255, 255, 255, .14); }
+            .vp-row { flex-direction: column; }
+            .vp-row-k { flex-basis: auto; border-right: 0; border-bottom: 1px solid rgba(255, 255, 255, .22); }
+        }
         .tender-title-full {
             word-break: break-word;
             white-space: normal;
@@ -432,6 +545,33 @@
                     });
                 });
             }
+            function bindValidateConfirm($) {
+                // Final confirmation before an approval goes out — it emails the
+                // buyer their download link and invoice. The form is injected via
+                // AJAX, hence the delegated handler.
+                $(document).on('submit', '.vp-form', function(e) {
+                    var form = this;
+                    if (form.dataset.confirmed === '1') { return; }
+                    e.preventDefault();
+                    if (!form.checkValidity()) { form.reportValidity(); return; }
+                    $(document).off('focusin.bs.modal');
+                    swal({
+                        title: 'Confirm payment?',
+                        text: 'Are you sure you want to validate this payment? This confirms a payment of ' +
+                            form.dataset.amount + ' and emails the buyer their download link and invoice.',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: { visible: true, text: 'Cancel', className: 'btn btn-secondary' },
+                            confirm: { text: 'Yes, confirm payment', className: 'btn btn-success' }
+                        }
+                    }).then(function(ok) {
+                        if (!ok) { return; }
+                        form.dataset.confirmed = '1';
+                        $('.request-loader').addClass('show');
+                        form.submit();
+                    });
+                });
+            }
             function bindPurchaseDetails($) {
                 var urlTpl = @json(route('admin.tender.purchaseDetails', ['id' => '__ID__']));
                 var $modal = $('#purchaseDetailsModal');
@@ -478,6 +618,7 @@
             }
             if (window.jQuery) {
                 bindPurchaseDetails(window.jQuery);
+                bindValidateConfirm(window.jQuery);
                 bindModalStacking(window.jQuery);
                 bindRevertReason(window.jQuery);
                 bindRejectReason(window.jQuery);
@@ -485,6 +626,7 @@
                 window.addEventListener('load', function() {
                     if (window.jQuery) {
                         bindPurchaseDetails(window.jQuery);
+                        bindValidateConfirm(window.jQuery);
                         bindModalStacking(window.jQuery);
                         bindRevertReason(window.jQuery);
                         bindRejectReason(window.jQuery);

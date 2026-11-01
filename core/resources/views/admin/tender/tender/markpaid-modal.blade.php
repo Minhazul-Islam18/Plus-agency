@@ -62,10 +62,10 @@
                     </div>
                     <hr>
                     <div class="form-group mb-0">
-                        <label>Note {{ empty($purchase->receipt) ? '**' : '(optional)' }}</label>
+                        <label>Reason for approval **</label>
                         <textarea name="note" class="form-control" rows="2" maxlength="500"
-                            placeholder="{{ empty($purchase->receipt) ? 'Required — how was this payment verified?' : 'e.g. matched against bank statement line 14' }}"
-                            {{ empty($purchase->receipt) ? 'required' : '' }}></textarea>
+                            placeholder="Required — e.g. matched against bank statement line 14"
+                            required minlength="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

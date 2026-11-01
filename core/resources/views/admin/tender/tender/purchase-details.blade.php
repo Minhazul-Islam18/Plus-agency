@@ -210,12 +210,16 @@
                                 @else
                                     <span class="badge badge-warning mr-2">Pending</span>
                                 @endif
-                                @if (\Illuminate\Support\Facades\Auth::guard('admin')->user()->hasPermission('Manual Payment Completion'))
+                                @if (strtolower($purchase->payment_status) === 'rejected')
+                                    <span class="text-muted" style="font-size: 12px;">
+                                        Closed — kept for the record. A new receipt from the buyer creates a new order.
+                                    </span>
+                                @elseif (\Illuminate\Support\Facades\Auth::guard('admin')->user()->hasPermission('Manual Payment Completion'))
                                     <button type="button" class="btn btn-success btn-sm"
                                         data-toggle="modal" data-target="#markPaidModal{{ $purchase->id }}">
-                                        <i class="fas fa-check mr-1"></i> {{ strtolower($purchase->payment_status) === 'rejected' ? 'Validate Anyway' : 'Validate Payment' }}
+                                        <i class="fas fa-check mr-1"></i> Validate Payment
                                     </button>
-                                    @if (strtolower($purchase->payment_status) === 'pending' && ($purchase->offline_gateway_id || $purchase->gateway_type === 'offline'))
+                                    @if ($purchase->offline_gateway_id || $purchase->gateway_type === 'offline')
                                         <form action="{{ route('admin.tender.purchaseReject') }}" method="POST"
                                             class="d-inline-block ml-1 rejectform">
                                             @csrf

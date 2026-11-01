@@ -756,6 +756,15 @@ class TenderController extends Controller
         $completing      = $request->payment_status === 'Completed' && $previousStatus !== 'Completed';
         $reversing       = $request->payment_status !== 'Completed' && $previousStatus === 'Completed';
 
+        // A rejected receipt is a closed order: it stays on record with its
+        // reason, but can't be approved or changed again. The buyer's
+        // corrected receipt arrives as a brand-new order — approving the old
+        // one too would hand them two approved orders for one purchase.
+        if ($previousStatus === 'Rejected') {
+            Session::flash('error', 'This order\'s receipt was rejected, so it can no longer be approved or changed. If the buyer has submitted a new receipt, validate that new order instead.');
+            return back();
+        }
+
         // Reversal only makes sense for a validation an admin actually made —
         // it flips a DB flag and revokes access, it doesn't refund anything.
         // A real gateway payment (validated_by_admin_id empty — it reached
@@ -794,9 +803,16 @@ class TenderController extends Controller
             // removed. Orders with no buyer receipt (e.g. an abandoned online
             // payment confirmed outside the app) need a written note instead.
             $request->validate([
-                'note' => 'nullable|string|max:500',
+                'note' => 'required|string|min:3|max:500',
+            ], [
+                'note.required' => 'A reason for approving this payment is required.',
+                'note.min'      => 'A reason for approving this payment is required.',
             ]);
             $note = trim((string) $request->input('note'));
+            if ($note === '') {
+                Session::flash('error', 'A reason for approving this payment is required.');
+                return back();
+            }
 
             $evidenceFile = null;
             if (!empty($purchase->receipt)) {
@@ -815,9 +831,6 @@ class TenderController extends Controller
                     return back();
                 }
                 $purchase->admin_proof = $evidenceFile;
-            } elseif ($note === '') {
-                Session::flash('error', 'This order has no uploaded receipt — a note describing how the payment was verified is required.');
-                return back();
             } else {
                 $purchase->admin_proof = null;
             }

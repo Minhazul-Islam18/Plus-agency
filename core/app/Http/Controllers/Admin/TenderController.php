@@ -728,25 +728,52 @@ class TenderController extends Controller
         $langCode = $request->language;
         $regNo    = $request->registration_no;
 
-        $purchases = TenderPurchase::with([
-                'tender',
-                'tender.tenderModules' => fn($q) => $q->where('status', 1)->orderBy('id'),
+        // The list only needs the columns the table row prints — the full
+        // record (buyer contact data, modules, devices, gateway…) is fetched
+        // on demand when a row's Details modal is opened (purchaseDetails()).
+        $purchases = TenderPurchase::query()
+            ->select([
+                'id', 'order_number', 'tender_id', 'first_name', 'last_name',
+                'payment_status', 'rejection_reason', 'access_status', 'suspend_reason',
+                'invoice', 'company_registration_no',
             ])
+            ->with('tender:id,title')
             ->when($orderNum, fn($q) => $q->where('order_number', $orderNum))
             ->when($regNo, fn($q) => $q->where('company_registration_no', TenderPurchase::normalizeRegNo($regNo)))
-            ->with('offlineGateway')
-            ->when($langCode, function ($q) use ($langCode) {
-                $language = Language::where('code', $langCode)->first();
-                if ($language) {
-                    $tenderIds = Tender::where('language_id', $language->id)->pluck('id');
-                    $q->whereIn('tender_id', $tenderIds);
-                }
-            })
+            ->when($langCode, fn($q) => $q->whereIn(
+                'tender_id',
+                Tender::select('id')->whereIn('language_id', Language::select('id')->where('code', $langCode))
+            ))
             ->orderBy('id', 'DESC')
             ->paginate(10)
             ->appends($request->query());
 
-        return view('admin.tender.tender.purchase', compact('purchases', 'orderNum', 'langCode', 'regNo'));
+        // One query for the whole page instead of one blacklist lookup per row.
+        $regNos = $purchases->getCollection()
+            ->map(fn($p) => TenderPurchase::normalizeRegNo($p->company_registration_no))
+            ->filter()->unique()->values();
+        $blacklisted = $regNos->isEmpty()
+            ? []
+            : array_flip(\App\TenderBlacklist::whereIn('company_registration_no', $regNos)->pluck('company_registration_no')->all());
+
+        return view('admin.tender.tender.purchase', compact('purchases', 'orderNum', 'langCode', 'regNo', 'blacklisted'));
+    }
+
+    /**
+     * Lazy-loaded content of the purchase Details modal (plus the Validate /
+     * Proof modals it opens), so the list page doesn't render — or query for —
+     * every row's full details up front.
+     */
+    public function purchaseDetails($id)
+    {
+        $purchase = TenderPurchase::with(['tender:id,title', 'offlineGateway'])->findOrFail($id);
+
+        return response()->json([
+            'order_number' => $purchase->order_number,
+            'details'      => view('admin.tender.tender.purchase-details', compact('purchase'))->render(),
+            'extras'       => view('admin.tender.tender.markpaid-modal', compact('purchase'))->render()
+                            . view('admin.tender.tender.proof-modal', compact('purchase'))->render(),
+        ]);
     }
 
     public function purchasePaymentStatus(Request $request)

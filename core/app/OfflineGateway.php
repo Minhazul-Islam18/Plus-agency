@@ -87,6 +87,10 @@ class OfflineGateway extends Model
             if (preg_match('/^(.{2,80}?)\s*[:：]\s*(.+)$/u', $line, $m)
                 && !preg_match('~^https?$~i', $m[1]) && strpos($m[2], '//') !== 0) {
                 $rows[] = [$m[1], $m[2]];
+            } elseif ($rows) {
+                // A value the editor wrapped onto the next line (long addresses):
+                // continue the previous row instead of losing the tail.
+                $rows[count($rows) - 1][1] .= ' ' . $line;
             }
         }
 

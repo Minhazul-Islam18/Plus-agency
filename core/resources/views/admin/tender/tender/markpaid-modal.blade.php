@@ -44,12 +44,19 @@
         'city' => $purchase->city, 'amount' => $mpAmount . ' ' . $purchase->currency_code,
         'name' => $mpFull,
     ];
-    // Gateways with free-text instructions have no row template; show the
-    // buyer's own details so the section is never empty.
-    if (!$mpRows) {
-        $mpRows = collect(['first', 'last', 'phone', 'country', 'city', 'amount'])
-            ->map(fn ($k) => [$mpEn[$k], ''])->all();
+    // Bank transfers publish OUR account details, which must be shown exactly as
+    // written — never swapped for the buyer's data. Only money-transfer style
+    // templates (Western Union, MoneyGram…) describe the buyer's own transfer.
+    $mpBankWords = ['bank', 'banque', 'iban', 'swift', 'bic', 'rib', 'account', 'compte', 'virement', 'wire'];
+    $mpIsBank = $mpGateway && collect($mpBankWords)->contains(fn ($w) => mb_strpos(mb_strtolower($mpGateway->name), $w) !== false);
+    foreach ($mpRows ?: [] as [$rl]) {
+        foreach ($mpBankWords as $w) {
+            if (mb_strpos(mb_strtolower($rl), $w) !== false) {
+                $mpIsBank = true;
+            }
+        }
     }
+    $mpHasText = $mpGateway && !empty(trim(strip_tags((string) $mpGateway->instructions)));
 
     // Initials badge for the method pill: "Western Union" → WU, "Bank" → BA.
     $mpWords = preg_split('/\s+/u', trim($mpMethod)) ?: [];
@@ -143,15 +150,18 @@
                         </div>
                     </div>
 
-                    @if ($mpRows)
+                    @if ($mpRows || $mpHasText)
                         <div class="vp-card vp-card-wide mb-3">
                             <div class="vp-card-head vp-card-head-lg"><i class="far fa-user"></i> Receiver Information</div>
+                            @if ($mpRows)
                             <div class="vp-rows">
                                 @foreach ($mpRows as [$rLabel, $rValue])
                                     @php
-                                        $rKey   = $mpField($rLabel);
-                                        $rValue = filled($mpBuyer[$rKey] ?? null) ? $mpBuyer[$rKey] : $rValue;
-                                        $rLabel = $mpEn[$rKey] ?? $rLabel;
+                                        if (!$mpIsBank) {
+                                            $rKey   = $mpField($rLabel);
+                                            $rValue = filled($mpBuyer[$rKey] ?? null) ? $mpBuyer[$rKey] : $rValue;
+                                            $rLabel = $mpEn[$rKey] ?? $rLabel;
+                                        }
                                     @endphp
                                     <div class="vp-row">
                                         <span class="vp-row-k"><i class="fas {{ $mpIcon($rLabel) }}"></i><span>{{ $rLabel }}</span></span>
@@ -159,6 +169,9 @@
                                     </div>
                                 @endforeach
                             </div>
+                            @else
+                                <div class="vp-instr">{!! clean(replaceBaseUrl($mpGateway->readOnlyInstructions())) !!}</div>
+                            @endif
                         </div>
                     @endif
 

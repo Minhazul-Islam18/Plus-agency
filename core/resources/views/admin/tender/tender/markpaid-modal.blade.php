@@ -14,7 +14,42 @@
     $mpMethod  = convertUtf8($purchase->payment_method) ?: '-';
     $mpAmount  = number_format(collect(json_decode($purchase->purchased_modules, true) ?: [])->sum('cost'), 2);
     $mpRows    = $mpGateway ? $mpGateway->instructionRows() : null;
-    $mpHasText = $mpGateway && !empty(trim(strip_tags((string) $mpGateway->instructions)));
+    // The gateway's rows are a template ("Prénom du bénéficiaire: Aly") written
+    // in whatever language the admin used. Known fields get an English label
+    // and, where the order already records it, the buyer's own value.
+    $mpFull   = trim($purchase->first_name . ' ' . $purchase->last_name);
+    $mpField  = function (string $label): ?string {
+        $l = mb_strtolower($label);
+        $has = fn (array $ws) => collect($ws)->contains(fn ($w) => mb_strpos($l, $w) !== false);
+        return match (true) {
+            $has(['prénom', 'prenom', 'first', 'given'])               => 'first',
+            $has(['famille', 'last', 'surname', 'family'])             => 'last',
+            $has(['phone', 'téléphone', 'telephone', 'mobile', 'tel']) => 'phone',
+            $has(['country', 'pays'])                                  => 'country',
+            $has(['city', 'ville'])                                    => 'city',
+            $has(['amount', 'montant'])                                => 'amount',
+            $has(['réception', 'reception', 'retrait', 'withdraw'])    => 'mode',
+            $has(['nom', 'name'])                                      => 'name',
+            default                                                    => null,
+        };
+    };
+    $mpEn = [
+        'first' => 'First name', 'last' => 'Last name', 'phone' => 'Phone number',
+        'country' => 'Destination country', 'city' => 'Destination city',
+        'amount' => 'Transfer amount', 'mode' => 'Receiving mode', 'name' => 'Name',
+    ];
+    $mpBuyer = [
+        'first' => $purchase->first_name, 'last' => $purchase->last_name,
+        'phone' => $purchase->phone_number, 'country' => $purchase->country,
+        'city' => $purchase->city, 'amount' => $mpAmount . ' ' . $purchase->currency_code,
+        'name' => $mpFull,
+    ];
+    // Gateways with free-text instructions have no row template; show the
+    // buyer's own details so the section is never empty.
+    if (!$mpRows) {
+        $mpRows = collect(['first', 'last', 'phone', 'country', 'city', 'amount'])
+            ->map(fn ($k) => [$mpEn[$k], ''])->all();
+    }
 
     // Initials badge for the method pill: "Western Union" → WU, "Bank" → BA.
     $mpWords = preg_split('/\s+/u', trim($mpMethod)) ?: [];
@@ -110,20 +145,20 @@
 
                     @if ($mpRows)
                         <div class="vp-card vp-card-wide mb-3">
-                            <div class="vp-card-head vp-card-head-lg"><i class="far fa-user"></i> Recipient information</div>
+                            <div class="vp-card-head vp-card-head-lg"><i class="far fa-user"></i> Receiver Information</div>
                             <div class="vp-rows">
                                 @foreach ($mpRows as [$rLabel, $rValue])
+                                    @php
+                                        $rKey   = $mpField($rLabel);
+                                        $rValue = filled($mpBuyer[$rKey] ?? null) ? $mpBuyer[$rKey] : $rValue;
+                                        $rLabel = $mpEn[$rKey] ?? $rLabel;
+                                    @endphp
                                     <div class="vp-row">
                                         <span class="vp-row-k"><i class="fas {{ $mpIcon($rLabel) }}"></i><span>{{ $rLabel }}</span></span>
-                                        <span class="vp-row-v">{{ $rValue }}</span>
+                                        <span class="vp-row-v">{{ filled($rValue) ? $rValue : '–' }}</span>
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
-                    @elseif ($mpHasText)
-                        <div class="vp-card vp-card-wide mb-3">
-                            <div class="vp-card-head vp-card-head-lg"><i class="far fa-file-alt"></i> Payment instructions the buyer saw</div>
-                            <div class="vp-instr">{!! clean(replaceBaseUrl($mpGateway->instructions)) !!}</div>
                         </div>
                     @endif
 

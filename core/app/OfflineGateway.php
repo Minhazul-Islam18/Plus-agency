@@ -13,6 +13,42 @@ class OfflineGateway extends Model
     }
 
     /**
+     * Instructions with form controls flattened to plain text. The editor can
+     * hold pasted <select>/<input> markup; in the admin panel the recipient
+     * details are display-only, so a dropdown becomes its selected option
+     * (or first option) and inputs become their value.
+     */
+    public function readOnlyInstructions(): string
+    {
+        $html = trim((string) $this->instructions);
+        if ($html === '') {
+            return '';
+        }
+
+        $html = preg_replace_callback('~<select\b[^>]*>(.*?)</select>~is', static function ($m) {
+            preg_match_all('~<option\b([^>]*)>(.*?)</option>~is', $m[1], $opts, PREG_SET_ORDER);
+            $pick = null;
+            foreach ($opts as $o) {
+                $text = trim(strip_tags($o[2]));
+                if ($text === '') {
+                    continue;
+                }
+                if (stripos($o[1], 'selected') !== false) {
+                    return e($text);
+                }
+                $pick = $pick ?? $text;
+            }
+            return e((string) $pick);
+        }, $html);
+
+        $html = preg_replace_callback('~<input\b[^>]*>~i', static function ($m) {
+            return preg_match('~\b(?:value|placeholder)\s*=\s*(["\'])(.*?)\1~is', $m[0], $v) ? e($v[2]) : '';
+        }, $html);
+
+        return preg_replace('~<(textarea|button)\b[^>]*>(.*?)</\1>~is', '$2', $html);
+    }
+
+    /**
      * Instructions as label/value rows, for the admin "recipient information"
      * panel. Understands two shapes admins actually type into the editor:
      * a two-column table, or one "Label: value" per line/paragraph. Returns
@@ -21,7 +57,7 @@ class OfflineGateway extends Model
      */
     public function instructionRows(): ?array
     {
-        $html = trim((string) $this->instructions);
+        $html = $this->readOnlyInstructions();
         if ($html === '') {
             return null;
         }
@@ -34,7 +70,7 @@ class OfflineGateway extends Model
                 if (preg_match_all('~<t[hd]\b[^>]*>(.*?)</t[hd]>~is', $tr, $cells) && count($cells[1]) >= 2) {
                     $label = rtrim($clean($cells[1][0]), " :：");
                     $value = $clean($cells[1][1]);
-                    if ($label !== '' && $value !== '') {
+                    if ($label !== '') {
                         $rows[] = [$label, $value];
                     }
                 }

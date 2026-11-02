@@ -240,8 +240,16 @@
                     @endif
                     @if (!empty($purchase->validation_note))
                         <div class="row">
-                            <div class="col-lg-5"><strong>Validation Note:</strong></div>
-                            <div class="col-lg-7">{{ $purchase->validation_note }}</div>
+                            <div class="col-lg-5"><strong>Validation Message:</strong></div>
+                            <div class="col-lg-7">
+                                <a href="#vnote{{ $purchase->id }}" class="js-vnote" data-toggle="collapse" role="button"
+                                    aria-expanded="false" aria-controls="vnote{{ $purchase->id }}" style="font-size:12px;">
+                                    <span class="vn-show">View Validation Message</span><span class="vn-hide d-none">Hide Validation Message</span>
+                                </a>
+                                <div class="collapse" id="vnote{{ $purchase->id }}">
+                                    <div class="border rounded p-2 mt-1" style="max-height:160px;overflow:auto;white-space:pre-line;word-break:break-word;">{{ $purchase->validation_note }}</div>
+                                </div>
+                            </div>
                         </div>
                         <hr>
                     @endif

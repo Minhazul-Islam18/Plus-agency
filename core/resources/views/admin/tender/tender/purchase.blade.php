@@ -609,6 +609,13 @@
                 $(document).on('click', '.js-purchase-details-retry', function() {
                     load($(this).data('id'));
                 });
+                // "View / Hide Validation Message" label follows the collapse state.
+                $(document).on('show.bs.collapse hide.bs.collapse', '[id^="vnote"]', function(e) {
+                    var open = e.type === 'show';
+                    var $a = $('.js-vnote[href="#' + this.id + '"]');
+                    $a.find('.vn-show').toggleClass('d-none', open);
+                    $a.find('.vn-hide').toggleClass('d-none', !open);
+                });
                 // Drop the previous order's content so the next open never flashes it.
                 $modal.on('hidden.bs.modal', function() {
                     if (xhr) { xhr.abort(); }

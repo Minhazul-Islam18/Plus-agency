@@ -1301,6 +1301,7 @@ class TenderController extends Controller
                 'expires_at'     => now()->addHours(24)->format('d M Y, H:i'),
                 'max_downloads'  => $maxDownloads,
                 'website_title'  => $bs->website_title,
+                'validation_note' => $purchase->validation_note,
                 'templateType'   => 'tender_download_link',
                 'type'           => 'tenderDownloadLink',
                 'attachment'     => $invoicePath,

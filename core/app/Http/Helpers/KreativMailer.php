@@ -73,6 +73,18 @@ class KreativMailer {
         if (array_key_exists('rejection_reason', $data)) {
             $body = str_replace('{rejection_reason}', e($data['rejection_reason']), $body);
         }
+        // Admin's approval message. Templates are editable and may not carry the
+        // {validation_note} token, so when it is missing the note is appended —
+        // the buyer always sees what the admin wrote.
+        if (!empty($data['validation_note'])) {
+            $noteHtml = '<div style="margin:16px 0;padding:12px 16px;border-left:4px solid #0d6efd;background:#f3f6fb;color:#222;">'
+                . '<strong>Message from our team</strong><br>' . nl2br(e($data['validation_note'])) . '</div>';
+            $body = strpos($body, '{validation_note}') !== false
+                ? str_replace('{validation_note}', $noteHtml, $body)
+                : $body . $noteHtml;
+        } else {
+            $body = str_replace('{validation_note}', '', $body);
+        }
         if (array_key_exists('resume_url', $data)) {
             $body = preg_replace("/{resume_url}/", $data['resume_url'], $body);
         }
